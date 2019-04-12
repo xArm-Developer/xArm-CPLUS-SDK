@@ -41,10 +41,15 @@ int main(int argc, char **argv) {
     {300,  0,   300, -3.14, 0.5, 0.3}
   };
 
-  for (int i = 0; i < 5; i++) {
-    ret = arm_cmd->move_lineb(pose[i], 50, 100, 0, 0);
-    printf("move_lineb, ret = %d\n", ret);
-  }
+
+  ret = arm_cmd->move_line(pose[0], 50, 100, 0);
+  printf("move_line, ret = %d\n", ret);
+
+  ret = arm_cmd->move_circle(pose[1], pose[2], 50, 100, 0, 50);
+  printf("move_circle, ret = %d\n", ret);
+
+  ret = arm_cmd->move_circle(pose[3], pose[4], 50, 100, 0, 100);
+  printf("move_circle, ret = %d\n", ret);
 
   arm_cmd->close();
 }

@@ -1,7 +1,7 @@
 ## 介绍:
 
 ​	xArm机械臂C++ API接口及使用示例
-	
+​	
 
 ### 示例使用方法
 
@@ -92,20 +92,34 @@
 
   
 
-* 运行示例：gpio测试哦（使用TCP连接）
+* 运行示例：tool gpio测试（使用TCP连接）
 
   ```
-  $ ./build/example9_gpio 192.168.1.xxx
+  $ ./build/example9_tgpio 192.168.1.xxx
   ```
 
   读取和设置数字io电平
 
   读取模拟io的数值
 
+* 运行示例：运动控制（使用TCP连接，三点画圆）
+
+  ```
+  $ ./build/example10_control_tcp_motion_circle 192.168.1.xxx
+  ```
+
+* 运行示例：controler gpio测试（使用TCP连接）
+
+  ```
+  $ ./build/example11_cgpio 192.168.1.xxx
+  ```
+
+  设置/读取controler gpio
+
 ## 更新日志
 
 ​	V0.1 (2018-08-14)
-		1. 支持有TCP和485两种控制接口
+​		1. 支持有TCP和485两种控制接口
 
 ​	V0.2 (2018-09-10)
 
@@ -113,7 +127,21 @@
 
 ​		2.新增servoj的运动指令功能
 
+​	V0.3 (xx-xx-xx)
+
+​		1.新增工具gpio控制接口
+
+​		2.新增力控功能、示教灵敏度设置、碰撞检测、碰撞检测灵敏度设置
+
+​		3.新增设置重力方向
+
+​		4.新增三点画圆运动
+
+​	V0.4 (2019-04-10)
+
+​		1.新增控制器gpio控制接口
+
 ## E-mail
 
 ​	jimy.zhang@ufactory.cc
-	jimy92@163.com
+​	jimy92@163.com

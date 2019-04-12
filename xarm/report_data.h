@@ -11,14 +11,14 @@
 
 
 class ReportDataDevelop {
-public:
+ public:
   ReportDataDevelop(void);
   ~ReportDataDevelop(void);
 
-  int flush_data(u8 *rx_data);
+  int flush_data(unsigned char *rx_data);
   void print_data(void);
 
-private:
+ private:
   int runing_;
   int mode_;
   int cmdnum_;
@@ -31,14 +31,14 @@ private:
 
 
 class ReportDataNorm {
-public:
+ public:
   ReportDataNorm(void);
   ~ReportDataNorm(void);
 
-  int flush_data(u8 *rx_data);
+  int flush_data(unsigned char *rx_data);
   void print_data(void);
 
-private:
+ private:
   int runing_;
   int mode_;
   int cmdnum_;
@@ -54,20 +54,21 @@ private:
   float tcp_load_[4];
   int collis_sens_;
   int teach_sens_;
+  float gravity_dir_[3];
   int total_num_;
 };
 
 
 
 class ReportDataRich {
-public:
+ public:
   ReportDataRich(void);
   ~ReportDataRich(void);
 
-  int flush_data(u8 *rx_data);
+  int flush_data(unsigned char *rx_data);
   void print_data(void);
 
-private:
+ private:
   int runing_;
   int mode_;
   int cmdnum_;
@@ -83,6 +84,7 @@ private:
   float tcp_load_[4];
   int collis_sens_;
   int teach_sens_;
+  float gravity_dir_[3];
   int total_num_;
 
   int arm_type_;
@@ -91,7 +93,7 @@ private:
   int slave_id_;
   int motor_tid_;
   int motor_fid_;
-  u8 versions_[30];
+  unsigned char versions_[30];
   float trs_jerk_;
   float trs_accmin_;
   float trs_accmax_;

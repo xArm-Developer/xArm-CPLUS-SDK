@@ -18,11 +18,11 @@ void connect_changed_callback(bool connected, bool reported) {
     printf("connected: %d, reported: %d\n", connected, reported);
 }
 
-void state_changed_callback(u8 state) {
+void state_changed_callback(int state) {
     printf("state: %d\n", state);
 }
 
-void mode_changed_callback(u8 mode) {
+void mode_changed_callback(int mode) {
     printf("mode: %d\n", mode);
 }
 
@@ -30,7 +30,7 @@ void mtable_mtbrake_changed_callback(int mtable, int mtbrake) {
     printf("mtable: %d, mtbrake: %d\n", mtable, mtbrake);
 }
 
-void error_warn_changed_callback(u8 err, u8 warn) {
+void error_warn_changed_callback(int err, int warn) {
     printf("err: %d, warn: %d\n", err, warn);
 }
 

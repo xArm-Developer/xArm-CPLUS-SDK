@@ -7,7 +7,9 @@ EXAMPLE5 = example5_control_485_motion
 EXAMPLE6 = example6_test_fetch_instruction
 EXAMPLE7 = example7_test_gripper
 EXAMPLE8 = example8_control_tcp_motion
-EXAMPLE9 = example9_gpio
+EXAMPLE9 = example9_tgpio
+EXAMPLE10 = example10_control_tcp_motion_circle
+EXAMPLE11 = example11_cgpio
 
 SRC_DIR	= ./xarm/
 SRC_IDIR = ./
@@ -43,6 +45,8 @@ EXAMPLE6_O = $(EXAMPLE_DIR)$(EXAMPLE6)
 EXAMPLE7_O = $(EXAMPLE_DIR)$(EXAMPLE7)
 EXAMPLE8_O = $(EXAMPLE_DIR)$(EXAMPLE8)
 EXAMPLE9_O = $(EXAMPLE_DIR)$(EXAMPLE9)
+EXAMPLE10_O = $(EXAMPLE_DIR)$(EXAMPLE10)
+EXAMPLE11_O = $(EXAMPLE_DIR)$(EXAMPLE11)
 
 ALL_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(ALL_O))))
 EXAMPLE1_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE1_O))))
@@ -54,8 +58,10 @@ EXAMPLE6_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE6_O
 EXAMPLE7_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE7_O))))
 EXAMPLE8_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE8_O))))
 EXAMPLE9_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE9_O))))
+EXAMPLE10_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE10_O))))
+EXAMPLE11_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE11_O))))
 
-all: $(EXAMPLE1) $(EXAMPLE2) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5) $(EXAMPLE6) $(EXAMPLE7) $(EXAMPLE8) $(EXAMPLE9)
+all: $(EXAMPLE1) $(EXAMPLE2) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5) $(EXAMPLE6) $(EXAMPLE7) $(EXAMPLE8) $(EXAMPLE9) $(EXAMPLE10) $(EXAMPLE11)
 
 $(EXAMPLE1): $(ALL_OBJ) $(EXAMPLE1_OBJ)
 	mkdir -p $(dir $@)
@@ -90,6 +96,14 @@ $(EXAMPLE8): $(ALL_OBJ) $(EXAMPLE8_OBJ)
 	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 
 $(EXAMPLE9): $(ALL_OBJ) $(EXAMPLE9_OBJ)
+	mkdir -p $(dir $@)
+	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
+
+$(EXAMPLE10): $(ALL_OBJ) $(EXAMPLE10_OBJ)
+	mkdir -p $(dir $@)
+	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
+
+$(EXAMPLE11): $(ALL_OBJ) $(EXAMPLE11_OBJ)
 	mkdir -p $(dir $@)
 	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 

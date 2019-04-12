@@ -24,13 +24,13 @@ ReportDataDevelop::ReportDataDevelop(void) {
 
 ReportDataDevelop::~ReportDataDevelop(void) {}
 
-int ReportDataDevelop::flush_data(u8 *rx_data) {
-  u8 *data_fp = &rx_data[4];
+int ReportDataDevelop::flush_data(unsigned char *rx_data) {
+  unsigned char *data_fp = &rx_data[4];
   int sizeof_data = bin8_to_32(rx_data);
-  if (sizeof_data < 87) return -1;
+  if (sizeof_data < 87) { return -1; }
 
   total_num_ = bin8_to_32(data_fp);
-  if (total_num_ != 87) return -2;
+  if (total_num_ != 87) { return -2; }
 
   runing_ = data_fp[4] & 0x0F;
   mode_ = data_fp[4] >> 4;
@@ -75,8 +75,8 @@ ReportDataNorm::ReportDataNorm(void) {
 
 ReportDataNorm::~ReportDataNorm(void) {}
 
-int ReportDataNorm::flush_data(u8 *rx_data) {
-  u8 *data_fp = &rx_data[4];
+int ReportDataNorm::flush_data(unsigned char *rx_data) {
+  unsigned char *data_fp = &rx_data[4];
   int sizeof_data = bin8_to_32(rx_data);
   if (sizeof_data < 133) {
     printf("sizeof_data = %d\n", sizeof_data);
@@ -84,7 +84,7 @@ int ReportDataNorm::flush_data(u8 *rx_data) {
   }
 
   total_num_ = bin8_to_32(data_fp);
-  if (total_num_ != 133) return -2;
+  if (total_num_ != 133) { return -2; }
 
   runing_ = data_fp[4] & 0x0F;
   mode_ = data_fp[4] >> 4;
@@ -101,7 +101,7 @@ int ReportDataNorm::flush_data(u8 *rx_data) {
   hex_to_nfp32(&data_fp[115], tcp_load_, 4);
   collis_sens_ = data_fp[131];
   teach_sens_ = data_fp[132];
-
+  hex_to_nfp32(&data_fp[133], gravity_dir_, 3);
   return 0;
 }
 
@@ -123,6 +123,7 @@ void ReportDataNorm::print_data(void) {
   print_nvect("tap_load= ", tcp_load_, 4);
   printf("coll_sen= %d\n", collis_sens_);
   printf("teac_sen= %d\n", teach_sens_);
+  print_nvect("gravity_dir_= ", gravity_dir_, 3);
 }
 
 
@@ -149,8 +150,8 @@ ReportDataRich::ReportDataRich(void) {
 
 ReportDataRich::~ReportDataRich(void) {}
 
-int ReportDataRich::flush_data(u8 *rx_data) {
-  u8 *data_fp = &rx_data[4];
+int ReportDataRich::flush_data(unsigned char *rx_data) {
+  unsigned char *data_fp = &rx_data[4];
   int sizeof_data = bin8_to_32(rx_data);
   if (sizeof_data < 233) {
     printf("sizeof_data = %d\n", sizeof_data);
@@ -158,7 +159,7 @@ int ReportDataRich::flush_data(u8 *rx_data) {
   }
 
   total_num_ = bin8_to_32(data_fp);
-  if (total_num_ != 233) return -2;
+  if (total_num_ != 233) { return -2; }
 
   runing_ = data_fp[4] & 0x0F;
   mode_ = data_fp[4] >> 4;
@@ -175,34 +176,35 @@ int ReportDataRich::flush_data(u8 *rx_data) {
   hex_to_nfp32(&data_fp[115], tcp_load_, 4);
   collis_sens_ = data_fp[131];
   teach_sens_ = data_fp[132];
+  hex_to_nfp32(&data_fp[133], gravity_dir_, 3);
 
-  arm_type_ = data_fp[133];
-  axis_num_ = data_fp[134];
-  master_id_ = data_fp[135];
-  slave_id_ = data_fp[136];
-  motor_tid_ = data_fp[137];
-  motor_fid_ = data_fp[138];
-  memcpy(versions_, &data_fp[139], 30);
+  arm_type_ = data_fp[145];
+  axis_num_ = data_fp[146];
+  master_id_ = data_fp[147];
+  slave_id_ = data_fp[148];
+  motor_tid_ = data_fp[149];
+  motor_fid_ = data_fp[150];
+  memcpy(versions_, &data_fp[151], 30);
 
-  hex_to_nfp32(&data_fp[169], trs_msg_, 5);
+  hex_to_nfp32(&data_fp[181], trs_msg_, 5);
   trs_jerk_ = trs_msg_[0];
   trs_accmin_ = trs_msg_[1];
   trs_accmax_ = trs_msg_[2];
   trs_velomin_ = trs_msg_[3];
   trs_velomax_ = trs_msg_[4];
 
-  hex_to_nfp32(&data_fp[189], p2p_msg_, 5);
+  hex_to_nfp32(&data_fp[201], p2p_msg_, 5);
   p2p_jerk_ = p2p_msg_[0];
   p2p_accmin_ = p2p_msg_[1];
   p2p_accmax_ = p2p_msg_[2];
   p2p_velomin_ = p2p_msg_[3];
   p2p_velomax_ = p2p_msg_[4];
 
-  hex_to_nfp32(&data_fp[209], rot_msg_, 2);
+  hex_to_nfp32(&data_fp[221], rot_msg_, 2);
   rot_jerk_ = rot_msg_[0];
   rot_accmax_ = rot_msg_[1];
 
-  for (int i = 0; i < 17; i++) sv3msg_[i] = data_fp[217 + i];
+  for (int i = 0; i < 17; i++) { sv3msg_[i] = data_fp[229 + i]; }
 
   return 0;
 }
@@ -225,6 +227,7 @@ void ReportDataRich::print_data(void) {
   print_nvect("tap_load= ", tcp_load_, 4);
   printf("coll_sen= %d\n", collis_sens_);
   printf("teac_sen= %d\n", teach_sens_);
+  print_nvect("gravity_dir_= ", gravity_dir_, 3);
 
   printf("xarm_type = %d(axis%d)\n", arm_type_, axis_num_);
   printf("xarm_msid = 0x%X 0x%X\n", master_id_, slave_id_);

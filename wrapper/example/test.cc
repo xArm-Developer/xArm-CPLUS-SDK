@@ -36,12 +36,12 @@ int main(int argc, char **argv) {
   // arm->move_gohome(true);
   // printf("move gohome: %lld\n", get_system_time());
 
-  float pos[6];
-  float angles[7];
-  u8 version[40];
-  u8 state;
-  u16 cmdnum;
-  u8 err_warn[2];
+  // float pos[6];
+  // float angles[7];
+  // unsigned char version[40];
+  // int state;
+  // int cmdnum;
+  // int err_warn[2];
 
   while (1) {
     usleep(100000);

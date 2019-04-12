@@ -17,11 +17,11 @@ int main(int argc, char **argv) {
   char *server_ip = argv[1];
   // UxbusCmd *arm_cmd = connect_rs485_control(server_ip);
   UxbusCmd *arm_cmd = connect_tcp_control(server_ip);
-  if (arm_cmd == NULL) return 0;
+  if (arm_cmd == NULL) { return 0; }
 
   int ret;
-  u8 value_u8[2];
-  fp32 value_fp32;
+  int temp_value[2];
+  float value_fp32;
 
   ret = arm_cmd->clean_err();
   printf("clean_err, ret = %d\n", ret);
@@ -31,15 +31,15 @@ int main(int argc, char **argv) {
   ret = arm_cmd->gripper_get_pos(&value_fp32);
   printf("gripper_get_pos = [%f], ret = %d\n", value_fp32, ret);
 
-  ret = arm_cmd->gripper_get_errcode(value_u8);
-  printf("gripper_get_errcode = [%d %d], ret = %d\n", value_u8[0], value_u8[1],
+  ret = arm_cmd->gripper_get_errcode(temp_value);
+  printf("gripper_get_errcode = [%d %d], ret = %d\n", temp_value[0], temp_value[1],
          ret);
 
   ret = arm_cmd->gripper_clean_err();
   printf("gripper_clean_err, ret = %d\n", ret);
 
-  ret = arm_cmd->gripper_get_errcode(value_u8);
-  printf("gripper_get_errcode = [%d %d], ret = %d\n", value_u8[0], value_u8[1],
+  ret = arm_cmd->gripper_get_errcode(temp_value);
+  printf("gripper_get_errcode = [%d %d], ret = %d\n", temp_value[0], temp_value[1],
          ret);
 
   ret = arm_cmd->gripper_set_en(1);
@@ -59,5 +59,5 @@ int main(int argc, char **argv) {
   printf("gripper_get_pos = [%f], ret = %d\n", value_fp32, ret);
 
   arm_cmd->close();
-  while (1) sleep(1);
+  while (1) { sleep(1); }
 }

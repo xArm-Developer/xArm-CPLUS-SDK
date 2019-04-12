@@ -1,5 +1,4 @@
 /*
-* \file uarm/timer.h
 # Software License Agreement (MIT License)
 #
 # Copyright (c) 2018, UFACTORY, Inc.

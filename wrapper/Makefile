@@ -6,6 +6,9 @@ EXAMPLE2 = test_get
 EXAMPLE3 = test_set
 EXAMPLE4 = test_move_line
 EXAMPLE5 = test_move_joint
+EXAMPLE6 = test_get_tgpio_digital
+EXAMPLE7 = test_get_tgpio_analog
+EXAMPLE8 = test_set_tgpio_digital
 
 SRC_DIR	= ../xarm/
 SRC_IDIR = ../
@@ -31,7 +34,7 @@ ALL_O += $(DEBUG_DIR)debug_print.o
 ALL_O += $(LINUX_DIR)network.o $(LINUX_DIR)thread.o
 ALL_O += $(PORT_DIR)serial.o $(PORT_DIR)socket.o
 ALL_O += $(INSTRUCTION_DIR)uxbus_cmd.o $(INSTRUCTION_DIR)uxbus_cmd_ser.o $(INSTRUCTION_DIR)uxbus_cmd_tcp.o
-ALL_O += $(WRAPPER_DIR)xarm_api.o $(WRAPPER_DIR)xarm_api.o $(WRAPPER_DIR)events.o $(WRAPPER_DIR)gpio.o $(WRAPPER_DIR)config.o
+ALL_O += $(WRAPPER_DIR)xarm_api.o $(WRAPPER_DIR)xarm_api.o
 
 EXAMPLE0_O = $(EXAMPLE_DIR)$(EXAMPLE0)
 EXAMPLE1_O = $(EXAMPLE_DIR)$(EXAMPLE1)
@@ -39,6 +42,9 @@ EXAMPLE2_O = $(EXAMPLE_DIR)$(EXAMPLE2)
 EXAMPLE3_O = $(EXAMPLE_DIR)$(EXAMPLE3)
 EXAMPLE4_O = $(EXAMPLE_DIR)$(EXAMPLE4)
 EXAMPLE5_O = $(EXAMPLE_DIR)$(EXAMPLE5)
+EXAMPLE6_O = $(EXAMPLE_DIR)$(EXAMPLE6)
+EXAMPLE7_O = $(EXAMPLE_DIR)$(EXAMPLE7)
+EXAMPLE8_O = $(EXAMPLE_DIR)$(EXAMPLE8)
 
 ALL_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(ALL_O))))
 
@@ -48,8 +54,11 @@ EXAMPLE2_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE2_O
 EXAMPLE3_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE3_O))))
 EXAMPLE4_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE4_O))))
 EXAMPLE5_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE5_O))))
+EXAMPLE6_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE6_O))))
+EXAMPLE7_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE7_O))))
+EXAMPLE8_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE8_O))))
 
-all: $(EXAMPLE0) $(EXAMPLE1) $(EXAMPLE2) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5)
+all: $(EXAMPLE0) $(EXAMPLE1) $(EXAMPLE2) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5) $(EXAMPLE6) $(EXAMPLE7) $(EXAMPLE8)
 
 $(EXAMPLE0): $(ALL_OBJ) $(EXAMPLE0_OBJ)
 	mkdir -p $(dir $@)
@@ -72,6 +81,18 @@ $(EXAMPLE4): $(ALL_OBJ) $(EXAMPLE4_OBJ)
 	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 
 $(EXAMPLE5): $(ALL_OBJ) $(EXAMPLE5_OBJ)
+	mkdir -p $(dir $@)
+	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
+
+$(EXAMPLE6): $(ALL_OBJ) $(EXAMPLE6_OBJ)
+	mkdir -p $(dir $@)
+	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
+
+$(EXAMPLE7): $(ALL_OBJ) $(EXAMPLE7_OBJ)
+	mkdir -p $(dir $@)
+	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
+
+$(EXAMPLE8): $(ALL_OBJ) $(EXAMPLE8_OBJ)
 	mkdir -p $(dir $@)
 	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 

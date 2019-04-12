@@ -20,19 +20,19 @@ int main(int argc, char **argv) {
   sleep_milliseconds(1000);
 
   int ret;
-  u8 version[40];
+  unsigned char version[40];
   ret = arm->get_version(version);
   printf("ret=%d, version: %s\n", ret, version);
 
-  u8 state;
+  int state;
   ret = arm->get_state(&state);
   printf("ret=%d, state: %d, mode: %d\n", ret, state, arm->mode);
 
-  u16 cmdnum;
+  int cmdnum;
   ret = arm->get_cmdnum(&cmdnum);
   printf("ret=%d, cmdnum: %d\n", ret, cmdnum);
 
-  u8 err_warn[2];
+  int err_warn[2];
   ret = arm->get_err_warn_code(err_warn);
   printf("ret=%d, err: %d, warn: %d\n", ret, err_warn[0], err_warn[1]);
 

@@ -16,19 +16,19 @@ int main(int argc, char **argv) {
   }
   char *server_ip = argv[1];
   SocketPort *arm_report = connext_tcp_report_devl(server_ip);
-  if (arm_report == NULL) return 0;
+  if (arm_report == NULL) { return 0; }
 
   int rxcnt = 0;
   ReportDataDevelop *devl_data = new ReportDataDevelop();
 
-  u8 rx_data[1280];
+  unsigned char rx_data[1280];
   int ret;
   int err_num = 0;
   while (1) {
     usleep(1000);
 
     ret = arm_report->read_frame(rx_data);
-    if (ret != 0) continue;
+    if (ret != 0) { continue; }
     ret = devl_data->flush_data(rx_data);
 
     if (ret == 0) {

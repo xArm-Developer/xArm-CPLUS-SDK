@@ -1,41 +1,47 @@
 BUILDDIR = build
-EXAMPLE1 = example1_report_norm
-EXAMPLE2 = example2_report_rich
-EXAMPLE3 = example3_report_develop
-EXAMPLE4 = example4_control_tcp_motion
-EXAMPLE5 = example5_control_485_motion
-EXAMPLE6 = example6_test_fetch_instruction
-EXAMPLE7 = example7_test_gripper
-EXAMPLE8 = example8_control_tcp_motion
-EXAMPLE9 = example9_tgpio
-EXAMPLE10 = example10_control_tcp_motion_circle
-EXAMPLE11 = example11_cgpio
 
-SRC_DIR	= ./xarm/
-SRC_IDIR = ./
+EXAMPLE0 = test
+EXAMPLE1 = test_events
+EXAMPLE2 = test_get
+EXAMPLE3 = test_set
+EXAMPLE4 = test_move_line
+EXAMPLE5 = test_move_joint
+EXAMPLE6 = test_get_tgpio_digital
+EXAMPLE7 = test_get_tgpio_analog
+EXAMPLE8 = test_set_tgpio_digital
+EXAMPLE9 = test_set_gripper
+EXAMPLE10 = test_cgpio
 
-EXAMPLE_DIR	= ./example/
-COMMON_DIR = $(SRC_DIR)common/
-DEBUG_DIR = $(SRC_DIR)debug/
-INSTRUCTION_DIR = $(SRC_DIR)instruction/
-LINUX_DIR	= $(SRC_DIR)linux/
-PORT_DIR = $(SRC_DIR)port/
+INC_DIR = ./include/
+SRC_DIR = ./src/
+EXAMPLE_DIR = ./example/
+
+SRC_XARM_DIR = $(SRC_DIR)xarm/
+SRC_XARM_CORE_DIR = $(SRC_XARM_DIR)core/
+SRC_XARM_WRAPPER_DIR = $(SRC_XARM_DIR)wrapper/
+
+SRC_XARM_CORE_COMMON_DIR = $(SRC_XARM_CORE_DIR)common/
+SRC_XARM_CORE_DEBUG_DIR = $(SRC_XARM_CORE_DIR)debug/
+SRC_XARM_CORE_INSTRUCTION_DIR = $(SRC_XARM_CORE_DIR)instruction/
+SRC_XARM_CORE_LINUX_DIR = $(SRC_XARM_CORE_DIR)linux/
+SRC_XARM_CORE_PORT_DIR = $(SRC_XARM_CORE_DIR)port/
 
 
-INCDIRS = -I$(SRC_IDIR)
+INCDIRS = -I$(INC_DIR)
 
 CCC = g++
 C_DEFS = -DSOFT_VERSION=$(SOFT_VERSION)
-CFLAGS = -Wall -g -s $(C_DEFS) $(INCDIRS) $(LIBDIRS)
+CFLAGS = -std=c++0x -Wall -g -s $(C_DEFS) $(INCDIRS) $(LIBDIRS)
 LIBS += -lm -lpthread
 
-ALL_O  = $(SRC_DIR)connect.o $(SRC_DIR)report_data.o
-ALL_O += $(COMMON_DIR)crc16.o $(COMMON_DIR)queue_memcpy.o
-ALL_O += $(DEBUG_DIR)debug_print.o
-ALL_O += $(LINUX_DIR)network.o $(LINUX_DIR)thread.o
-ALL_O += $(PORT_DIR)serial.o $(PORT_DIR)socket.o
-ALL_O += $(INSTRUCTION_DIR)uxbus_cmd.o $(INSTRUCTION_DIR)uxbus_cmd_ser.o $(INSTRUCTION_DIR)uxbus_cmd_tcp.o
+ALL_O = $(SRC_XARM_CORE_COMMON_DIR)crc16.o $(SRC_XARM_CORE_COMMON_DIR)queue_memcpy.o
+ALL_O += $(SRC_XARM_CORE_DEBUG_DIR)debug_print.o
+ALL_O += $(SRC_XARM_CORE_LINUX_DIR)network.o $(SRC_XARM_CORE_LINUX_DIR)thread.o
+ALL_O += $(SRC_XARM_CORE_PORT_DIR)serial.o $(SRC_XARM_CORE_PORT_DIR)socket.o
+ALL_O += $(SRC_XARM_CORE_INSTRUCTION_DIR)uxbus_cmd.o $(SRC_XARM_CORE_INSTRUCTION_DIR)uxbus_cmd_ser.o $(SRC_XARM_CORE_INSTRUCTION_DIR)uxbus_cmd_tcp.o
+ALL_O += $(SRC_XARM_WRAPPER_DIR)xarm_api.o $(SRC_XARM_WRAPPER_DIR)xarm_api.o
 
+EXAMPLE0_O = $(EXAMPLE_DIR)$(EXAMPLE0)
 EXAMPLE1_O = $(EXAMPLE_DIR)$(EXAMPLE1)
 EXAMPLE2_O = $(EXAMPLE_DIR)$(EXAMPLE2)
 EXAMPLE3_O = $(EXAMPLE_DIR)$(EXAMPLE3)
@@ -46,9 +52,10 @@ EXAMPLE7_O = $(EXAMPLE_DIR)$(EXAMPLE7)
 EXAMPLE8_O = $(EXAMPLE_DIR)$(EXAMPLE8)
 EXAMPLE9_O = $(EXAMPLE_DIR)$(EXAMPLE9)
 EXAMPLE10_O = $(EXAMPLE_DIR)$(EXAMPLE10)
-EXAMPLE11_O = $(EXAMPLE_DIR)$(EXAMPLE11)
 
 ALL_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(ALL_O))))
+
+EXAMPLE0_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE0_O))))
 EXAMPLE1_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE1_O))))
 EXAMPLE2_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE2_O))))
 EXAMPLE3_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE3_O))))
@@ -59,9 +66,12 @@ EXAMPLE7_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE7_O
 EXAMPLE8_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE8_O))))
 EXAMPLE9_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE9_O))))
 EXAMPLE10_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE10_O))))
-EXAMPLE11_OBJ = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(EXAMPLE11_O))))
 
-all: $(EXAMPLE1) $(EXAMPLE2) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5) $(EXAMPLE6) $(EXAMPLE7) $(EXAMPLE8) $(EXAMPLE9) $(EXAMPLE10) $(EXAMPLE11)
+all: $(EXAMPLE0) $(EXAMPLE1) $(EXAMPLE2) $(EXAMPLE3) $(EXAMPLE4) $(EXAMPLE5) $(EXAMPLE6) $(EXAMPLE7) $(EXAMPLE8) $(EXAMPLE9) $(EXAMPLE10)
+
+$(EXAMPLE0): $(ALL_OBJ) $(EXAMPLE0_OBJ)
+	mkdir -p $(dir $@)
+	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 
 $(EXAMPLE1): $(ALL_OBJ) $(EXAMPLE1_OBJ)
 	mkdir -p $(dir $@)
@@ -103,9 +113,6 @@ $(EXAMPLE10): $(ALL_OBJ) $(EXAMPLE10_OBJ)
 	mkdir -p $(dir $@)
 	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 
-$(EXAMPLE11): $(ALL_OBJ) $(EXAMPLE11_OBJ)
-	mkdir -p $(dir $@)
-	$(CCC) -o $(CFLAGS) $^ -o $(BUILDDIR)/$@ $(LIBS) -Wl,-Map,$(BUILDDIR)/$@.map
 
 $(BUILDDIR)/%.o: %.cc
 	mkdir -p $(dir $@)
@@ -113,4 +120,5 @@ $(BUILDDIR)/%.o: %.cc
 
 clean:
 	rm -rf ./build
+	rm -rf ./xarm
 

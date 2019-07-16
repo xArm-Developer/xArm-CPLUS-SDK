@@ -584,7 +584,9 @@ int XArmAPI::connect(const std::string &port) {
         printf("can not connect to port/ip: %s\n", port_.data());
         return -1;
     }
-    std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
+    printf("port: %s\n", port_.data());
+    // std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
+    std::regex pattern("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
     if (port_ == "localhost" || std::regex_match(port_, pattern)) {
         is_tcp_ = true;
         stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 128);
@@ -1436,13 +1438,13 @@ int XArmAPI::clean_gripper_error(void) {
     return (ret2 == 0 and err != 0) ? err : ret;
 }
 
-int XArmAPI::get_tgpio_digital(int *io1, int *io2) {
+int XArmAPI::get_tgpio_digital(int *io0, int *io1) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
-        ret = cmd_tcp_->tgpio_get_digital(io1, io2);
+        ret = cmd_tcp_->tgpio_get_digital(io0, io1);
     } else {
-        ret = cmd_ser_->tgpio_get_digital(io1, io2);
+        ret = cmd_ser_->tgpio_get_digital(io0, io1);
     }
     return ret;
 }

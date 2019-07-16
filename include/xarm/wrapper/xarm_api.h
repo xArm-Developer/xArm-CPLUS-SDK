@@ -581,21 +581,21 @@ public:
 
     /*
     * Get the digital value of the Tool GPIO
-    * @param io1_value: the digital value of Tool GPIO1
-    * @param io2_value: the digital value of Tool GPIO2
+    * @param io0_value: the digital value of Tool GPIO-0
+    * @param io1_value: the digital value of Tool GPIO-1
     */
-    int get_tgpio_digital(int *io1_value, int *io2_value);
+    int get_tgpio_digital(int *io0_value, int *io1_value);
 
     /*
     * Set the digital value of the specified Tool GPIO
-    * @param ionum: ionum, 1 or 2
+    * @param ionum: ionum, 0 or 1
     * @param value: the digital value of the specified io
     */
     int set_tgpio_digital(int ionum, int value);
 
     /*
     * Get the analog value of the specified Tool GPIO
-    * @param ionum: ionum, 1 or 2
+    * @param ionum: ionum, 0 or 1
     * @param value: the analog value of the specified tool io
     */
     int get_tgpio_analog(int ionum, fp32 *value);

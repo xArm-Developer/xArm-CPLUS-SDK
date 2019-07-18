@@ -1381,31 +1381,45 @@ int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
 
         long long start_time = get_system_time();
         int count = 0;
+        int count2 = 0;
 
         while (get_system_time() - start_time < timeout * 1000) {
             ret2 = get_gripper_position(&pos_tmp);
             if (ret2 == 0) {
                 cur_pos = pos_tmp;
                 if (fabs(pos - cur_pos) < 1) {
+                    last_pos = cur_pos;
                     break;
                 }
                 if (is_add) {
                     if (cur_pos <= last_pos) {
                         count += 1;
-                    } else {
+                    } else if (cur_pos <= pos) {
                         last_pos = cur_pos;
                         count = 0;
+                        count2 = 0;
+                    } else {
+                        count2 += 1;
+                        if (count2 >= 10) {
+                            break;
+                        }
                     }
                 } else {
                     if (cur_pos >= last_pos) {
                         count += 1;
-                    } else {
+                    } else if (cur_pos >= pos) {
                         last_pos = cur_pos;
                         count = 0;
+                        count2 = 0;
+                    } else {
+                        count2 += 1;
+                        if (count2 >= 10) {
+                            break;
+                        }
                     }
 
                 }
-                if (count >= 15) {
+                if (count >= 5) {
                     printf("gripper target: %f, current: %f\n", pos, cur_pos);
                     break;
                 }
@@ -1414,7 +1428,7 @@ int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
                 ret = ret2;
                 break;
             }
-            sleep_milliseconds(100);
+            sleep_milliseconds(200);
         }
         return ret;
     }

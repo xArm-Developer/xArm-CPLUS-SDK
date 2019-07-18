@@ -123,29 +123,29 @@ private:
     std::vector<void(*)(int)> cmdnum_changed_callbacks_;
 
 public:
-    int state;
-    int mode;
-    int cmd_num;
-    fp32 *joints_torque; // fp32[7]{servo-1, ..., servo-7}
-    bool *motor_brake_states; // bool[8]{servo-1, ..., servo-7, reversed}
-    bool *motor_enable_states; // bool[8]{servo-1, ..., servo-7, reversed}
-    int error_code;
-    int warn_code;
-    fp32 *tcp_load; // fp32[4]{weight, x, y, z}
-    int collision_sensitivity;
-    int teach_sensitivity;
-    int device_type;
-    int axis;
+    int state; // state
+    int mode; // mode
+    int cmd_num; // cmd cache count
+    fp32 *joints_torque; // joints torque, fp32[7]{servo-1, ..., servo-7}
+    bool *motor_brake_states; // motor brake states, bool[8]{servo-1, ..., servo-7, reversed}
+    bool *motor_enable_states; // motor enable states, bool[8]{servo-1, ..., servo-7, reversed}
+    int error_code; // error code
+    int warn_code; // warn code
+    fp32 *tcp_load; // tcp load, fp32[4]{weight, x, y, z}
+    int collision_sensitivity; // collision sensitivity
+    int teach_sensitivity; // teach sensitivity
+    int device_type; // device type
+    int axis; // robot axis
     int master_id;
     int slave_id;
     int motor_tid;
     int motor_fid;
-    unsigned char version[30];
-    unsigned char sn[40];
-    int *version_number;
-    fp32 tcp_jerk;
-    fp32 rot_jerk;
-    fp32 max_rot_acc;
+    unsigned char version[30]; // version
+    unsigned char sn[40]; // sn
+    int *version_number; // version numbre
+    fp32 tcp_jerk; // tcp jerk
+    fp32 rot_jerk; // rot jerk
+    fp32 max_rot_acc; // max rot acc
     fp32 *tcp_speed_limit; // fp32[2]{min, max}
     fp32 *tcp_acc_limit; // fp32[2]{min, max}
     fp32 last_used_tcp_speed;
@@ -318,13 +318,13 @@ public:
 
     /*
     * Set the sensitivity of collision
-    * @param sensitivity: sensitivity value, 0~255
+    * @param sensitivity: sensitivity value, 0~5
     */
     int set_collision_sensitivity(int sensitivity);
 
     /*
     * Set the sensitivity of drag and teach
-    * @param sensitivity: sensitivity value, 0~255
+    * @param sensitivity: sensitivity value, 1~5
     */
     int set_teach_sensitivity(int sensitivity);
 
@@ -569,8 +569,8 @@ public:
     int set_gripper_speed(fp32 speed);
 
     /*
-    * Get the gripper position
-    * @param err_wan: used to store the results obtained
+    * Get the gripper error code
+    * @param err: used to store the results obtained
     */
     int get_gripper_err_code(int *err);
 
@@ -600,18 +600,71 @@ public:
     */
     int get_tgpio_analog(int ionum, fp32 *value);
 
+    /*
+    * Get the digital value of the specified Controller GPIO
+    * @param digitals: the values of the controller GPIO
+    */
     int get_cgpio_digital(int *digitals);
 
+    /*
+    * Get the analog value of the specified Controller GPIO
+    * @param ionum: ionum, 0 or 1
+    * @param value: the analog value of the specified controller io
+    */
     int get_cgpio_analog(int ionum, fp32 *value);
 
+    /*
+    * Set the digital value of the specified Controller GPIO
+    * @param ionum: ionum, 0 ~ 7
+    * @param value: the digital value of the specified io
+    */
     int set_cgpio_digital(int ionum, int value);
 
+    /*
+    * Set the analog value of the specified Controller GPIO
+    * @param ionum: ionum, 0 or 1
+    * @param value: the analog value of the specified io
+    */
     int set_cgpio_analog(int ionum, int value);
 
+    /*
+    * Set the digital input functional mode of the Controller GPIO
+    * @param ionum: ionum, 0 ~ 7
+    * @param fun: functional mode
+        0: general input
+        1: external emergency stop
+        2: reversed, protection reset
+        3: reversed, reduced mode
+        4: reversed, operating mode
+        5: reversed, three-state switching signal
+        11: offline task
+        12: teaching mode
+    */
     int set_cgpio_digital_input_function(int ionum, int fun);
 
+    /*
+    * Set the digital output functional mode of the specified Controller GPIO
+    * @param ionum: ionum, 0 ~ 7
+    * @param fun: functional mode
+        0: general output
+        1: emergency stop
+        2: in motion
+        11: has error
+        12: has warn
+        13: in collision
+        14: in teaching
+        15: in offline task
+    */
     int set_cgpio_digital_output_function(int ionum, int fun);
 
+    /*
+    * Get the state of the Controller GPIO
+    * @param state:
+    * @param digit_io:
+    * @param analog:
+    * @param input_conf:
+    * @param output_conf:
+    */
     int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf);
 
     /*

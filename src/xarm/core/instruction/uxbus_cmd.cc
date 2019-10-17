@@ -92,6 +92,17 @@ int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
   return ret;
 }
 
+int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
+  unsigned char hexdata[num * 4] = {0};
+
+  nint32_to_hex(datas, hexdata, num);
+  int ret = send_xbus(funcode, hexdata, num * 4);
+  if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+  ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
+
+  return ret;
+}
+
 int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
   unsigned char datas[num * 4] = {0};
 
@@ -138,8 +149,69 @@ int UxbusCmd::get_robot_sn(unsigned char rx_data[40]) {
   return get_nu8(UXBUS_RG::GET_ROBOT_SN, rx_data, 40);
 }
 
+int UxbusCmd::check_verification(int *rx_data) {
+  return get_nu8(UXBUS_RG::CHECK_VERIFY, rx_data, 1);
+}
+
 int UxbusCmd::shutdown_system(int value) {
   return set_nu8(UXBUS_RG::SHUTDOWN_SYSTEM, &value, 1);
+}
+
+int UxbusCmd::set_record_traj(int value) {
+  int txdata[1] = {value};
+  return set_nu8(UXBUS_RG::SET_TRAJ_RECORD, txdata, 1);
+}
+
+int UxbusCmd::playback_traj(int times) {
+  int txdata[1] = {times};
+  return set_nint32(UXBUS_RG::PLAY_TRAJ, txdata, 1);
+}
+
+int UxbusCmd::save_traj(unsigned char filename[81]) {
+  return set_nu8(UXBUS_RG::SAVE_TRAJ, (int *)filename, 81);
+}
+
+int UxbusCmd::load_traj(unsigned char filename[81]) {
+  return set_nu8(UXBUS_RG::LOAD_TRAJ, (int *)filename, 81);
+}
+
+int UxbusCmd::get_traj_rw_status(int *rx_data) {
+  return get_nu8(UXBUS_RG::GET_TRAJ_RW_STATUS, rx_data, 1);
+}
+
+int UxbusCmd::set_reduced_mode(int on_off) {
+  int txdata[1] = {on_off};
+  return set_nu8(UXBUS_RG::SET_REDUCED_MODE, txdata, 1);
+}
+
+int UxbusCmd::set_reduced_linespeed(float lspd_mm) {
+  float txdata[1] = {lspd_mm};
+  return set_nfp32(UXBUS_RG::SET_REDUCED_TRSV, txdata, 1);
+}
+
+int UxbusCmd::set_reduced_jointspeed(float jspd_rad) {
+  float txdata[1] = {jspd_rad};
+  return set_nfp32(UXBUS_RG::SET_REDUCED_P2PV, txdata, 1);
+}
+
+int UxbusCmd::get_reduced_mode(int *rx_data) {
+  return get_nu8(UXBUS_RG::GET_REDUCED_MODE, rx_data, 1);
+}
+
+int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed) {
+  unsigned char rx_data[21] = {0};
+  int ret = get_nu8(UXBUS_RG::GET_REDUCED_STATE, rx_data, 21);
+  print_hex("rx:", rx_data, 21);
+
+  *on = rx_data[0];
+  bin8_to_ns16(&rx_data[1], xyz_list, 6);
+  *tcp_speed = hex_to_fp32(&rx_data[13]);
+  *joint_speed = hex_to_fp32(&rx_data[17]);
+  return ret;
+}
+
+int UxbusCmd::set_xyz_limits(int xyz_list[6]) {
+  return set_nint32(UXBUS_RG::SET_LIMIT_XYZ, xyz_list, 6);
 }
 
 int UxbusCmd::motion_en(int id, int value) {
@@ -232,6 +304,25 @@ int UxbusCmd::move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvt
   txdata[8] = mvacc;
   txdata[9] = mvtime;
   return set_nfp32(UXBUS_RG::MOVE_SERVOJ, txdata, 10);
+}
+
+int UxbusCmd::set_servot(float jnt_taus[7]) {
+  float txdata[7] = {0};
+  for (int i = 0; i < 7; i++) { txdata[i] = jnt_taus[i]; }
+  return set_nfp32(UXBUS_RG::SET_SERVOT, txdata, 7);
+}
+
+int UxbusCmd::get_joint_tau(float jnt_taus[7]) {
+  return get_nfp32(UXBUS_RG::GET_JOINT_TAU, jnt_taus, 7);
+}
+
+int UxbusCmd::set_safe_level(int level) {
+  int txdata[1] = {level};
+  return set_nu8(UXBUS_RG::SET_SAFE_LEVEL, txdata, 1);
+}
+
+int UxbusCmd::get_safe_level(int *level) {
+  return get_nu8(UXBUS_RG::GET_SAFE_LEVEL, level, 1);
 }
 
 int UxbusCmd::sleep_instruction(float sltime) {

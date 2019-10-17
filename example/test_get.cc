@@ -56,5 +56,34 @@ int main(int argc, char **argv) {
   print_nvect("pose: ", arm->position, 6);
   print_nvect("angles: ", arm->angles, 7);
 
+  unsigned char v[3];
+
+  ret = arm->get_servo_version(v);
+  printf("ret=%d, servo_version=%d.%d.%d\n", ret, v[0], v[1], v[2]);
+
+  ret = arm->get_tgpio_version(v);
+  printf("ret=%d, tgpio_version=%d.%d.%d\n", ret, v[0], v[1], v[2]);
+
+  ret = arm->get_gripper_version(v);
+  printf("ret=%d, gripper_version=%d.%d.%d\n", ret, v[0], v[1], v[2]);
+
+  int suctioncup_state;
+  ret = arm->get_suction_cup_state(&suctioncup_state);
+  printf("ret=%d, suction_cup_state=%d\n", ret, suctioncup_state);
+
+  ret = arm->set_suction_cup(true);
+  printf("ret=%d, set_suction_cup\n", ret);
+
+  ret = arm->get_suction_cup_state(&suctioncup_state);
+  printf("ret=%d, suction_cup_state=%d\n", ret, suctioncup_state);
+
+  int on;
+  float tcp_speed;
+  float joint_speed;
+  int xyz_list[6];
+  ret = arm->get_reduced_states(&on, xyz_list, &tcp_speed, &joint_speed);
+  printf("state: %d, tcp_speed: %f, joint_speed: %f\n", on, tcp_speed, joint_speed);
+  print_nvect("xyz: ", xyz_list, 6);
+
   return 0;
 }

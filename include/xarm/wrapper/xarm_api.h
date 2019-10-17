@@ -44,6 +44,7 @@ public:
     * @param check_cmdnum_limit: reversed
     * @param check_robot_sn: reversed
     * @param check_is_ready: reversed
+    * @param check_is_pause: reversed
     */
     XArmAPI(const std::string &port="",
         bool is_radian=DEFAULT_IS_RADIAN,
@@ -52,7 +53,8 @@ public:
         bool check_joint_limit=true,
         bool check_cmdnum_limit=true,
         bool check_robot_sn=false,
-        bool check_is_ready=true);
+        bool check_is_ready=true,
+        bool check_is_pause=true);
     ~XArmAPI(void);
 private:
     void init(void);
@@ -79,6 +81,7 @@ private:
     bool check_cmdnum_limit_;
     bool check_robot_sn_;
     bool check_is_ready_;
+    bool check_is_pause_;
     pthread_t report_thread_;
     bool is_ready_;
     bool is_stop_;
@@ -90,6 +93,8 @@ private:
     int major_version_number_;
     int minor_version_number_;
     int revision_version_number_;
+
+    long long sleep_finish_time_;
 
     int mt_brake_;
     int mt_able_;
@@ -667,6 +672,20 @@ public:
     */
     int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf);
 
+    int set_reduced_mode(bool on);
+    int set_reduced_max_tcp_speed(float speed);
+    int set_reduced_max_joint_speed(float speed);
+    int get_reduced_mode(int *mode);
+    int get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed);
+    int set_reduced_tcp_boundary(int boundary[6]);
+
+    int start_record_trajectory(void);
+    int stop_record_trajectory(unsigned char* filename=NULL);
+    int save_record_trajectory(unsigned char* filename, float timeout=10);
+    int load_trajectory(unsigned char* filename, float timeout=10);
+    int playback_trajectory(int times=1, unsigned char* filename=NULL, bool wait=false);
+    int get_trajectory_rw_status(int *status);
+
     /*
     * Register the report location callback
     */
@@ -743,6 +762,13 @@ public:
     * @param callback: NULL means to release all callbacks for the same event
     */
     int release_cmdnum_changed_callback(void(*callback)(int cmdnum)=NULL);
+
+    int get_suction_cup_state(int *val);
+    int set_suction_cup(bool on, bool wait=true, float timeout=3);
+
+    int get_gripper_version(unsigned char versions[3]);
+    int get_servo_version(unsigned char versions[3], int servo_id=1);
+    int get_tgpio_version(unsigned char versions[3]);
 };
 
 #endif

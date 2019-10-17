@@ -35,11 +35,13 @@ XArmAPI::XArmAPI(
     bool check_joint_limit,
     bool check_cmdnum_limit,
     bool check_robot_sn,
-    bool check_is_ready)
-:port_(port), default_is_radian(is_radian),
-check_tcp_limit_(check_tcp_limit), check_joint_limit_(check_joint_limit),
+    bool check_is_ready,
+    bool check_is_pause)
+:port_(port), check_joint_limit_(check_joint_limit),
 check_cmdnum_limit_(check_cmdnum_limit), check_robot_sn_(check_robot_sn),
-check_is_ready_(check_is_ready) {
+check_is_ready_(check_is_ready), check_is_pause_(check_is_pause) {
+    default_is_radian = is_radian;
+    check_tcp_limit_ = check_tcp_limit;
     init();
     if (!do_not_open) {
         connect();
@@ -51,7 +53,7 @@ XArmAPI::~XArmAPI() {
 }
 
 void XArmAPI::init(void) {
-    report_thread_ = NULL;
+    // report_thread_ = NULL;
     cmd_tcp_ = NULL;
     cmd_ser_ = NULL;
     stream_tcp_ = NULL;
@@ -81,23 +83,25 @@ void XArmAPI::init(void) {
     max_joint_acc_ = 20.0;   // rad/s^2
     joint_jerk_ = 20.0;      // rad/s^2
 
+    sleep_finish_time_ = get_system_time();
+
     angles = new fp32[7]{0, 0, 0, 0, 0, 0, 0};
     last_used_angles = new fp32[7]{0, 0, 0, 0, 0, 0, 0};
     tcp_offset = new fp32[6]{0, 0, 0, 0, 0, 0};
     if (default_is_radian) {
         joint_speed_limit = new fp32[2]{min_joint_speed_, max_joint_speed_};
         joint_acc_limit = new fp32[2]{min_joint_acc_, max_joint_acc_};
-        last_used_joint_speed = 0.3490658503988659; // rad/s (20°/s);
-        last_used_joint_acc = 8.726646259971648;    // rad/s^2 (500°/s^2);
+        last_used_joint_speed = (float)0.3490658503988659; // rad/s (20°/s);
+        last_used_joint_acc = (float)8.726646259971648;    // rad/s^2 (500°/s^2);
         position = new fp32[6]{201.5, 0, 140.5, 3.1415926, 0, 0};
         last_used_position = new fp32[6]{201.5, 0, 140.5, 3.1415926, 0, 0};
     } else {
-        joint_speed_limit = new fp32[2]{min_joint_speed_ * RAD_DEGREE, max_joint_speed_ * RAD_DEGREE};
-        joint_acc_limit = new fp32[2]{min_joint_acc_ * RAD_DEGREE, max_joint_acc_ * RAD_DEGREE};
-        last_used_joint_speed = 0.3490658503988659 * RAD_DEGREE; // rad/s (20°/s);
-        last_used_joint_acc = 8.726646259971648 * RAD_DEGREE;    // rad/s^2 (500°/s^2);
-        position = new fp32[6]{201.5, 0, 140.5, 3.1415926 * RAD_DEGREE, 0, 0};
-        last_used_position = new fp32[6]{201.5, 0, 140.5, 3.1415926 * RAD_DEGREE, 0, 0};
+        joint_speed_limit = new fp32[2]{(fp32)(min_joint_speed_ * RAD_DEGREE), (fp32)(max_joint_speed_ * RAD_DEGREE)};
+        joint_acc_limit = new fp32[2]{(fp32)(min_joint_acc_ * RAD_DEGREE), (fp32)(max_joint_acc_ * RAD_DEGREE)};
+        last_used_joint_speed = (fp32)(0.3490658503988659 * RAD_DEGREE); // rad/s (20°/s);
+        last_used_joint_acc = (fp32)(8.726646259971648 * RAD_DEGREE);    // rad/s^2 (500°/s^2);
+        position = new fp32[6]{201.5, 0, 140.5, (fp32)(3.1415926 * RAD_DEGREE), 0, 0};
+        last_used_position = new fp32[6]{201.5, 0, 140.5, (fp32)(3.1415926 * RAD_DEGREE), 0, 0};
     }
 
     state = 4;
@@ -762,7 +766,7 @@ int XArmAPI::motion_enable(bool enable, int servo_id) {
         ret = cmd_ser_->motion_en(servo_id, int(enable));
     }
     get_state(&state);
-    if (state == 3 || state == 4) {
+    if (state == 4) {
         if (is_ready_) {
             printf("[motion_enable], xArm is not ready to move\n");
         }
@@ -785,8 +789,8 @@ int XArmAPI::set_state(int state_) {
         ret = cmd_ser_->set_state(state_);
     }
     get_state(&state);
-    if (state == 3 || state == 4) {
-        is_sync_ = false;
+    if (state == 4) {
+        // is_sync_ = false;
         if (is_ready_) {
             printf("[set_state], xArm is not ready to move\n");
         }
@@ -841,7 +845,7 @@ int XArmAPI::clean_error(void) {
         ret = cmd_ser_->clean_err();
     }
     get_state(&state);
-    if (state == 3 || state == 4) {
+    if (state == 4) {
         if (is_ready_) {
             printf("[clean_error], xArm is not ready to move\n");
         }
@@ -874,6 +878,12 @@ int XArmAPI::set_pause_time(fp32 sltime) {
     } else {
         ret = cmd_ser_->sleep_instruction(sltime);
     }
+    if (get_system_time() >= sleep_finish_time_) {
+        sleep_finish_time_ = get_system_time() + sltime * 1000;
+    }
+    else {
+        sleep_finish_time_ += sltime * 1000;
+    }
     return ret;
 }
 
@@ -883,7 +893,19 @@ void XArmAPI::wait_stop(fp32 timeout) {
     long long start_time = get_system_time();
     int count = 0;
     while (get_system_time() - start_time < timeout * 1000 && !is_stop_) {
-        if (state != 1) {
+        if (state == 4) {
+            return;
+        }
+        if (get_system_time() < sleep_finish_time_) {
+            sleep_milliseconds(50);
+            count = 0;
+            continue;
+        }
+        if (state == 3) {
+            sleep_milliseconds(50);
+            continue;
+        }
+        else if (state != 1) {
             count += 1;
         }
         else {
@@ -1086,11 +1108,13 @@ void XArmAPI::emergency_stop(void) {
         set_state(4);
         sleep_milliseconds(100);
     }
-    motion_enable(true, 8);
-    while ((state == 0 || state == 3 || state == 4) && get_system_time() - start_time < 3000) {
-        set_state(0);
-        sleep_milliseconds(100);
-    }
+    is_stop_ = true;
+    sleep_finish_time_ = 0;
+    // motion_enable(true, 8);
+    // while ((state == 0 || state == 3 || state == 4) && get_system_time() - start_time < 3000) {
+    //     set_state(0);
+    //     sleep_milliseconds(100);
+    // }
 }
 
 int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7]) {
@@ -1591,6 +1615,236 @@ int XArmAPI::get_cgpio_state(int *state_, int *digit_io, fp32 *analog, int *inpu
     return ret;
 }
 
+int XArmAPI::set_reduced_mode(bool on) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_reduced_mode(int(on));
+    } else {
+        ret = cmd_ser_->set_reduced_mode(int(on));
+    }
+    return ret;
+}
+
+int XArmAPI::set_reduced_max_tcp_speed(float speed) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_reduced_linespeed(speed);
+    } else {
+        ret = cmd_ser_->set_reduced_linespeed(speed);
+    }
+    return ret;
+}
+
+int XArmAPI::set_reduced_max_joint_speed(float speed) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_reduced_jointspeed(speed);
+    } else {
+        ret = cmd_ser_->set_reduced_jointspeed(speed);
+    }
+    return ret;
+}
+
+int XArmAPI::get_reduced_mode(int *mode) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->get_reduced_mode(mode);
+    } else {
+        ret = cmd_ser_->get_reduced_mode(mode);
+    }
+    return ret;
+}
+
+int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->get_reduced_states(on, xyz_list, tcp_speed, joint_speed);
+    } else {
+        ret = cmd_ser_->get_reduced_states(on, xyz_list, tcp_speed, joint_speed);
+    }
+    if (!default_is_radian) {
+        *joint_speed *= RAD_DEGREE;
+    }
+    return ret;
+}
+
+int XArmAPI::set_reduced_tcp_boundary(int boundary[6]) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_xyz_limits(boundary);
+    } else {
+        ret = cmd_ser_->set_xyz_limits(boundary);
+    }
+    return ret;
+}
+
+int XArmAPI::start_record_trajectory(void) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_record_traj(1);
+    } else {
+        ret = cmd_ser_->set_record_traj(1);
+    }
+    return ret;
+}
+
+int XArmAPI::stop_record_trajectory(unsigned char* filename) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_record_traj(0);
+    } else {
+        ret = cmd_ser_->set_record_traj(0);
+    }
+    if (ret == 0 && filename != NULL) {
+        int ret2 = save_record_trajectory(filename, 10);
+        return ret2;
+    }
+    return ret;
+}
+
+int XArmAPI::save_record_trajectory(unsigned char* filename, float timeout) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->save_traj(filename);
+    } else {
+        ret = cmd_ser_->save_traj(filename);
+    }
+    if (ret == 0) {
+        int ret2 = 0;
+        int status = 0;
+        long long start_time = get_system_time();
+        while (get_system_time() - start_time < timeout * 1000) {
+            ret2 = get_trajectory_rw_status(&status);
+            if (ret2 == 0) {
+                if (status == TRAJ_STATE::IDLE) {
+                    return UXBUS_STATE::TRAJ_RW_FAILED;
+                }
+                else if (status == TRAJ_STATE::SAVE_SUCCESS) {
+                    return 0;
+                }
+                else if (status == TRAJ_STATE::SAVE_FAIL) {
+                    return UXBUS_STATE::TRAJ_RW_FAILED;
+                }
+            }
+            sleep_milliseconds(100);
+        }
+        return UXBUS_STATE::TRAJ_RW_TOUT;
+    }
+    return ret;
+}
+
+int XArmAPI::load_trajectory(unsigned char* filename, float timeout) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->load_traj(filename);
+    } else {
+        ret = cmd_ser_->load_traj(filename);
+    }
+    if (ret == 0) {
+        int ret2 = 0;
+        int status = 0;
+        long long start_time = get_system_time();
+        while (get_system_time() - start_time < timeout * 1000) {
+            ret2 = get_trajectory_rw_status(&status);
+            if (ret2 == 0) {
+                if (status == TRAJ_STATE::IDLE) {
+                    return UXBUS_STATE::TRAJ_RW_FAILED;
+                }
+                else if (status == TRAJ_STATE::LOAD_SUCCESS) {
+                    return 0;
+                }
+                else if (status == TRAJ_STATE::LOAD_FAIL) {
+                    return UXBUS_STATE::TRAJ_RW_FAILED;
+                }
+            }
+            sleep_milliseconds(100);
+        }
+        return UXBUS_STATE::TRAJ_RW_TOUT;
+    }
+    return ret;
+}
+
+int XArmAPI::playback_trajectory(int times, unsigned char* filename, bool wait) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (filename != NULL) {
+        ret = load_trajectory(filename, 10);
+        if (ret != 0) {
+            return ret;
+        }
+    }
+    if (state == 4) return UXBUS_STATE::NOT_READY;
+    if (is_tcp_) {
+        ret = cmd_tcp_->playback_traj(times);
+    } else {
+        ret = cmd_ser_->playback_traj(times);
+    }
+    if (ret == 0 && wait) {
+        long long start_time = get_system_time();
+        while (state != 1) {
+            if (state == 4) return UXBUS_STATE::NOT_READY;
+            if (get_system_time() - start_time > 5000) return UXBUS_STATE::TRAJ_PLAYBACK_TOUT;
+            sleep_milliseconds(100);
+        }
+        int max_count = int((get_system_time() - start_time) * 100);
+        max_count = max_count > 10 ? max_count : 10;
+        start_time = get_system_time();
+        while (mode != 11) {
+            if (state == 1) {
+                start_time = get_system_time();
+                sleep_milliseconds(100);
+                continue;
+            }
+            if (state == 4) {
+                return UXBUS_STATE::NOT_READY;
+            }
+            if (get_system_time() - start_time > 5000) {
+                return UXBUS_STATE::TRAJ_PLAYBACK_TOUT;
+            }
+            sleep_milliseconds(100);
+        }
+        sleep_milliseconds(100);
+        int count = 0;
+        while (state != 4) {
+            if (state == 2) {
+                if (times == 1) break;
+                count += 1;
+            }
+            else {
+                count = 0;
+            }
+            if (count > max_count) break;
+            sleep_milliseconds(100);
+        }
+        if (state != 4) {
+            set_mode(0);
+            set_state(0);
+        }
+    }
+    return ret;
+}
+
+int XArmAPI::get_trajectory_rw_status(int *status) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->get_traj_rw_status(status);
+    } else {
+        ret = cmd_ser_->get_traj_rw_status(status);
+    }
+    return ret;
+}
+
 template<typename callable_vector, typename callable>
 inline int XArmAPI::_register_event_callback(callable_vector&& callbacks, callable&& callback) {
     if (callback == NULL) return -1;
@@ -1670,5 +1924,114 @@ int XArmAPI::release_error_warn_changed_callback(void(*callback)(int, int)) {
 
 int XArmAPI::release_cmdnum_changed_callback(void(*callback)(int)) {
     return _release_event_callback(cmdnum_changed_callbacks_, callback);
+}
+
+int XArmAPI::get_suction_cup_state(int *val) {
+    int io1;
+    return get_tgpio_digital(val, &io1);
+}
+
+int XArmAPI::set_suction_cup(bool on, bool wait, float timeout) {
+    int code1, code2;
+    if (on) {
+        code1 = set_tgpio_digital(0, 1);
+        code2 = set_tgpio_digital(1, 0);
+    }
+    else {
+        code1 = set_tgpio_digital(0, 0);
+        code2 = set_tgpio_digital(1, 1);
+    }
+    int code = code1 == 0 ? code2 : code1;
+    if (code == 0 && wait) {
+        long long start_time = get_system_time();
+        int val, ret;
+        code = UXBUS_STATE::SUCTION_CUP_TOUT;
+        while (get_system_time() - start_time < timeout * 1000) {
+            ret = get_suction_cup_state(&val);
+            if (ret == UXBUS_STATE::ERR_CODE) {
+                code = UXBUS_STATE::ERR_CODE;
+                break;
+            }
+            if (ret == 0) {
+                if (on && val == 1) {
+                    code = 0;
+                    break;
+                }
+                if (!on && val == 0) {
+                    code = 0;
+                    break;
+                }
+            }
+            sleep_milliseconds(200);
+        }
+    }
+
+    return code;
+}
+
+int XArmAPI::get_gripper_version(unsigned char versions[3]) {
+    int ret1, ret2, ret3;
+    unsigned char val1[5], val2[5], val3[5];
+    int code;
+    versions[0] = 0;
+    versions[1] = 0;
+    versions[2] = 0;
+    if (is_tcp_) {
+        ret1 = cmd_tcp_->gripper_modbus_r16s(0x0801, 1, val1);
+        ret2 = cmd_tcp_->gripper_modbus_r16s(0x0802, 1, val2);
+        ret3 = cmd_tcp_->gripper_modbus_r16s(0x0803, 1, val3);
+    } else {
+        ret1 = cmd_ser_->gripper_modbus_r16s(0x0801, 1, val1);
+        ret2 = cmd_ser_->gripper_modbus_r16s(0x0802, 1, val2);
+        ret3 = cmd_ser_->gripper_modbus_r16s(0x0803, 1, val3);
+    }
+    if (ret1 == 0) {versions[0] = (unsigned char)bin8_to_16(&val1[4]);} else {code = ret1;}
+    if (ret2 == 0) {versions[1] = (unsigned char)bin8_to_16(&val2[4]);} else {code = ret2;}
+    if (ret3 == 0) {versions[2] = (unsigned char)bin8_to_16(&val3[4]);} else {code = ret3;}
+    return code;
+}
+
+int XArmAPI::get_servo_version(unsigned char versions[3], int servo_id) {
+    int ret1, ret2, ret3;
+    float val1, val2, val3;
+    int code;
+    versions[0] = 0;
+    versions[1] = 0;
+    versions[2] = 0;
+    if (is_tcp_) {
+        ret1 = cmd_tcp_->servo_addr_r16(servo_id, 0x0801, &val1);
+        ret2 = cmd_tcp_->servo_addr_r16(servo_id, 0x0802, &val2);
+        ret3 = cmd_tcp_->servo_addr_r16(servo_id, 0x0803, &val3);
+    } else {
+        ret1 = cmd_ser_->servo_addr_r16(servo_id, 0x0801, &val1);
+        ret2 = cmd_ser_->servo_addr_r16(servo_id, 0x0802, &val2);
+        ret3 = cmd_ser_->servo_addr_r16(servo_id, 0x0803, &val3);
+    }
+    if (ret1 == 0) {versions[0] = (unsigned char)val1;} else {code = ret1;}
+    if (ret2 == 0) {versions[1] = (unsigned char)val2;} else {code = ret2;}
+    if (ret3 == 0) {versions[2] = (unsigned char)val3;} else {code = ret3;}
+    return code;
+}
+
+int XArmAPI::get_tgpio_version(unsigned char versions[3]) {
+    int ret1, ret2, ret3;
+    float val1, val2, val3;
+    int code;
+    versions[0] = 0;
+    versions[1] = 0;
+    versions[2] = 0;
+    if (is_tcp_) {
+        ret1 = cmd_tcp_->tgpio_addr_r16(0x0801, &val1);
+        ret2 = cmd_tcp_->tgpio_addr_r16(0x0802, &val2);
+        ret3 = cmd_tcp_->tgpio_addr_r16(0x0803, &val3);
+    } else {
+        ret1 = cmd_ser_->tgpio_addr_r16(0x0801, &val1);
+        ret2 = cmd_ser_->tgpio_addr_r16(0x0802, &val2);
+        ret3 = cmd_ser_->tgpio_addr_r16(0x0803, &val3);
+    }
+    if (ret1 == 0) {versions[0] = (unsigned char)val1;} else {code = ret1;}
+    if (ret2 == 0) {versions[1] = (unsigned char)val2;} else {code = ret2;}
+    if (ret3 == 0) {versions[2] = (unsigned char)val3;} else {code = ret3;}
+    return code;
 }
 

@@ -23,17 +23,17 @@ int main(int argc, char **argv) {
   if (arm->error_code != 0) arm->clean_error();
 
   int ret;
-  printf("set IO1 high level\n");
   ret = arm->set_tgpio_digital(0, 1);
+  printf("set IO1 high level, ret=%d\n", ret);
   sleep_milliseconds(2000);
-  printf("set IO2 high level\n");
   ret = arm->set_tgpio_digital(1, 1);
+  printf("set IO2 high level, ret=%d\n", ret);
   sleep_milliseconds(2000);
-  printf("set IO1 low level\n");
   ret = arm->set_tgpio_digital(0, 0);
+  printf("set IO1 low level, ret=%d\n", ret);
   sleep_milliseconds(2000);
-  printf("set IO2 low level\n");
   ret = arm->set_tgpio_digital(1, 0);
+  printf("set IO2 low level, ret=%d\n", ret);
   sleep_milliseconds(2000);
 
   return 0;

@@ -16,7 +16,19 @@ class UxbusCmd {
 
   int get_version(unsigned char rx_data[40]);
   int get_robot_sn(unsigned char rx_data[40]);
+  int check_verification(int *rx_data);
   int shutdown_system(int value);
+  int set_record_traj(int value);
+  int save_traj(unsigned char filename[81]);
+  int load_traj(unsigned char filename[81]);
+  int playback_traj(int times);
+  int get_traj_rw_status(int *rx_data);
+  int set_reduced_mode(int on_off);
+  int set_reduced_linespeed(float lspd_mm);
+  int set_reduced_jointspeed(float jspd_rad);
+  int get_reduced_mode(int *rx_data);
+  int get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed);
+  int set_xyz_limits(int xyz_list[6]);
   int motion_en(int id, int value);
   int set_state(int value);
   int get_state(int *rx_data);
@@ -32,6 +44,10 @@ class UxbusCmd {
   int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
   int move_gohome(float mvvelo, float mvacc, float mvtime);
   int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
+  int set_servot(float jnt_taus[7]);
+  int get_joint_tau(float jnt_taus[7]);
+  int set_safe_level(int level);
+  int get_safe_level(int *level);
   int sleep_instruction(float sltime);
   int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent);
   int set_tcp_jerk(float jerk);
@@ -116,6 +132,7 @@ class UxbusCmd {
   int set_nu16(int funcode, int *datas, int num);
   int get_nu16(int funcode, int *rx_data, int num);
   int set_nfp32(int funcode, float *datas, int num);
+  int set_nint32(int funcode, int *datas, int num);
   int get_nfp32(int funcode, float *rx_data, int num);
   int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
   int is_nfp32(int funcode, float datas[], int txn, int *value);

@@ -25,7 +25,6 @@ int main(int argc, char **argv) {
   int ret;
 
   float io1, io2;
-  float last_analogs[2] = {-1, -1};
   while (arm->is_connected() && arm->error_code != 19 && arm->error_code != 28) {
     ret = arm->get_tgpio_analog(0, &io1);
     printf("ret: %d, analog(io1): %f\n", ret, io1);

@@ -28,10 +28,10 @@ int main(int argc, char **argv) {
   while (arm->is_connected() && arm->error_code != 28 && arm->error_code != 19) {
     ret = arm->get_tgpio_digital(&io1, &io2);
     if (last_digitals[0] == 1 && io1 != last_digitals[0]) {
-      printf("IO1 output high level\n");
+      printf("IO1 output high level, ret=%d\n", ret);
     }
     if (last_digitals[1] == 1 && io2 != last_digitals[1]) {
-      printf("IO2 output high level\n");
+      printf("IO2 output high level, ret=%d\n", ret);
     }
     last_digitals[0] = io1;
     last_digitals[1] = io2;

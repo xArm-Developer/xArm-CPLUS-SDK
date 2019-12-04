@@ -57,6 +57,9 @@ int main(int argc, char **argv) {
     arm->register_cmdnum_changed_callback(cmdnum_changed_callback);
 
     arm->connect();
+    arm->motion_enable(true);
+    arm->set_mode(0);
+    arm->set_state(0);
     sleep_milliseconds(100000);
 
     printf("release events\n");
@@ -69,4 +72,5 @@ int main(int argc, char **argv) {
     arm->release_cmdnum_changed_callback(cmdnum_changed_callback);
 
     sleep_milliseconds(30000);
+    return 0;
 }

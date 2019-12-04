@@ -42,7 +42,8 @@ check_cmdnum_limit_(check_cmdnum_limit), check_robot_sn_(check_robot_sn),
 check_is_ready_(check_is_ready), check_is_pause_(check_is_pause) {
     default_is_radian = is_radian;
     check_tcp_limit_ = check_tcp_limit;
-    init();
+    _init();
+    printf("SDK_VERSION: %s\n", SDK_VERSION);
     if (!do_not_open) {
         connect();
     }
@@ -52,8 +53,7 @@ XArmAPI::~XArmAPI() {
     disconnect();
 }
 
-void XArmAPI::init(void) {
-    // report_thread_ = NULL;
+void XArmAPI::_init(void) {
     cmd_tcp_ = NULL;
     cmd_ser_ = NULL;
     stream_tcp_ = NULL;
@@ -81,7 +81,7 @@ void XArmAPI::init(void) {
     max_joint_speed_ = 4.0;  // rad/s
     min_joint_acc_ = 0.01;   // rad/s^2
     max_joint_acc_ = 20.0;   // rad/s^2
-    joint_jerk_ = 20.0;      // rad/s^2
+    count_ = -1;
 
     sleep_finish_time_ = get_system_time();
 
@@ -122,6 +122,7 @@ void XArmAPI::init(void) {
     motor_tid = 0;
     motor_fid = 0;
     tcp_jerk = 1000;        // mm/s^3
+    joint_jerk = default_is_radian ? 20 : (fp32)(20 * RAD_DEGREE); // 20 rad/s^3
     rot_jerk = 2.3;
     max_rot_acc = 2.7;
     tcp_speed_limit = new fp32[2]{min_tcp_speed_, max_tcp_speed_};
@@ -129,6 +130,10 @@ void XArmAPI::init(void) {
     last_used_tcp_speed = 100;  // mm/s
     last_used_tcp_acc = 2000;   // mm/s^2
     gravity_direction = new fp32[3]{0, 0, -1};
+    realtime_tcp_speed = 0;
+    realtime_joint_speeds = new fp32[7]{0, 0, 0, 0, 0, 0, 0};
+    world_offset = new fp32[6]{0, 0, 0, 0, 0, 0};
+    temperatures = new fp32[7]{0, 0, 0, 0, 0, 0};
 }
 
 bool XArmAPI::has_err_warn(void) {
@@ -203,27 +208,40 @@ inline void XArmAPI::_report_cmdnum_changed_callback(void) {
     }
 }
 
+inline void XArmAPI::_report_temperature_changed_callback(void) {
+    for (u32 i = 0; i < temperature_changed_callbacks_.size(); i++) {
+        timer.AsyncWait(0, temperature_changed_callbacks_[i], temperatures);
+    }
+}
+
+inline void XArmAPI::_report_count_changed_callback(void) {
+    for (u32 i = 0; i < count_changed_callbacks_.size(); i++) {
+        timer.AsyncWait(0, count_changed_callbacks_[i], count_);
+    }
+}
+
 void XArmAPI::_update_old(unsigned char *rx_data) {
     unsigned char *data_fp = &rx_data[4];
     int sizeof_data = bin8_to_32(rx_data);
     if (sizeof_data >= 87) {
         int state_ = state;
         state = data_fp[4];
+        if (state != 3) {
+            std::unique_lock<std::mutex> locker(mutex_);
+            cond_.notify_all();
+            locker.unlock();
+        }
         if (state != state_) _report_state_changed_callback();
-        if (state == 4 || state == 3) {
-            if (is_ready_ && sizeof_data < 187) {
-                printf("[report], xArm is not ready to move");
-            }
-            if (sizeof_data < 187) {
-                is_ready_ = false;
-            }
+        if (state == 4) {
+            // if (is_ready_ && sizeof_data < 187) {
+            //     printf("[report], xArm is not ready to move");
+            // }
+            if (sizeof_data < 187) { is_ready_ = false; }
         } else {
-            if (!is_ready_ && sizeof_data < 187) {
-                printf("[report], xArm is ready to move");
-            }
-            if (sizeof_data < 187) {
-                is_ready_ = true;
-            }
+            // if (!is_ready_ && sizeof_data < 187) {
+            //     printf("[report], xArm is ready to move");
+            // }
+            if (sizeof_data < 187) { is_ready_ = true; }
         }
 
         int brake = mt_brake_;
@@ -246,21 +264,21 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
                     ready = false;
                 }
             }
-            if (state == 4 || state == 3 || !ready) {
-                if (is_ready_) {
-                    printf("[report], xArm is not ready to move\n");
-                }
+            if (state == 4 || !ready) {
+                // if (is_ready_) {
+                //     printf("[report], xArm is not ready to move\n");
+                // }
                 is_ready_ = false;
             } else {
-                if (!is_ready_) {
-                    printf("[report], xArm is ready to move\n");
-                }
+                // if (!is_ready_) {
+                //     printf("[report], xArm is ready to move\n");
+                // }
                 is_ready_ = true;
             }
         }
-        // else {
-        //     is_ready_ = false;
-        // }
+        else {
+            is_ready_ = false;
+        }
         is_first_report_ = false;
 
         int err = error_code;
@@ -324,7 +342,7 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
         tcp_acc_limit[1] = max_tcp_acc_;
 
         hex_to_nfp32(&data_fp[143], p2p_msg_, 5);
-        joint_jerk_ = p2p_msg_[0];
+        joint_jerk = default_is_radian ? p2p_msg_[0] : (fp32)(p2p_msg_[0] * RAD_DEGREE);
         min_joint_acc_ = p2p_msg_[1];
         max_joint_acc_ = p2p_msg_[2];
         min_joint_speed_ = p2p_msg_[3];
@@ -349,7 +367,7 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
     }
 }
 
-void XArmAPI::update(unsigned char *rx_data) {
+void XArmAPI::_update(unsigned char *rx_data) {
     if (is_old_protocol_) {
         _update_old(rx_data);
         return;
@@ -359,21 +377,22 @@ void XArmAPI::update(unsigned char *rx_data) {
     if (sizeof_data >= 87) {
         int state_ = state;
         state = data_fp[4] & 0x0F;
+        if (state != 3) {
+            std::unique_lock<std::mutex> locker(mutex_);
+            cond_.notify_all();
+            locker.unlock();
+        }
         if (state != state_) _report_state_changed_callback();
-        if (state == 4 || state == 3) {
-            if (is_ready_ && sizeof_data < 133) {
-                printf("[report], xArm is not ready to move");
-            }
-            if (sizeof_data < 133) {
-                is_ready_ = false;
-            }
+        if (state == 4) {
+            // if (is_ready_ && sizeof_data < 133) {
+            //     printf("[report], xArm is not ready to move");
+            // }
+            if (sizeof_data < 133) { is_ready_ = false; }
         } else {
-            if (!is_ready_ && sizeof_data < 133) {
-                printf("[report], xArm is ready to move");
-            }
-            if (sizeof_data < 133) {
-                is_ready_ = true;
-            }
+            // if (!is_ready_ && sizeof_data < 133) {
+            //     printf("[report], xArm is ready to move");
+            // }
+            if (sizeof_data < 133) { is_ready_ = true; }
         }
         int mode_ = mode;
         mode = data_fp[4] >> 4;
@@ -413,17 +432,20 @@ void XArmAPI::update(unsigned char *rx_data) {
                     ready = false;
                 }
             }
-            if (state == 4 || state == 3 || !ready) {
-                if (is_ready_) {
-                    printf("[report], xArm is not ready to move\n");
-                }
+            if (state == 4 || !ready) {
+                // if (is_ready_) {
+                //     printf("[report], xArm is not ready to move\n");
+                // }
                 is_ready_ = false;
             } else {
-                if (!is_ready_) {
-                    printf("[report], xArm is ready to move\n");
-                }
+                // if (!is_ready_) {
+                //     printf("[report], xArm is ready to move\n");
+                // }
                 is_ready_ = true;
             }
+        }
+        else {
+            is_ready_ = false;
         }
         is_first_report_ = false;
 
@@ -479,7 +501,7 @@ void XArmAPI::update(unsigned char *rx_data) {
         tcp_acc_limit[1] = max_tcp_acc_;
 
         hex_to_nfp32(&data_fp[201], p2p_msg_, 5);
-        joint_jerk_ = p2p_msg_[0];
+        joint_jerk = default_is_radian ? p2p_msg_[0] : (fp32)(p2p_msg_[0] * RAD_DEGREE);
         min_joint_acc_ = p2p_msg_[1];
         max_joint_acc_ = p2p_msg_[2];
         min_joint_speed_ = p2p_msg_[3];
@@ -501,28 +523,71 @@ void XArmAPI::update(unsigned char *rx_data) {
         max_rot_acc = rot_msg_[1];
 
         for (u32 i = 0; i < 17; i++) sv3msg_[i] = data_fp[229 + i];
+
+        if (sizeof_data >= 252) {
+            bool isChange = false;
+            for (u32 i = 0; i < 7; i++) {
+                if (temperatures[i] != data_fp[245+i]) {
+                    isChange = true;
+                }
+            }
+            if (isChange) {
+                _report_temperature_changed_callback();
+            }
+        }
+        if (sizeof_data >= 284) {
+            fp32 speeds[8];
+            hex_to_nfp32(&data_fp[252], speeds, 8);
+            realtime_tcp_speed = speeds[0];
+            realtime_joint_speeds = &speeds[1];
+        }
+        if (sizeof_data >= 288) {
+            int cnt = bin8_to_32(&data_fp[284]);
+            if (count_ != -1 && count_ != cnt) {
+                count_ = cnt;
+                _report_count_changed_callback();
+            }
+            count_ = cnt;
+        }
+        if (sizeof_data >= 312) {
+            hex_to_nfp32(&data_fp[288], world_offset, 6);
+            for (u32 i = 0; i < 6; i++) {
+                world_offset[i] = default_is_radian || i < 3 ? world_offset[i] : world_offset[i] * RAD_DEGREE;
+            }
+        }
     }
 }
 
-void XArmAPI::recv_report_data(void) {
+void XArmAPI::_recv_report_data(void) {
     unsigned char rx_data[1280];
     int ret;
-    while (1) {
+    int fail_count = 0;
+    while (is_connected()) {
         sleep_milliseconds(1);
+        if (fail_count > 5) break;
+        if (stream_tcp_report_->is_ok() != 0) {
+            fail_count += 1;
+            stream_tcp_report_->close_port();
+            stream_tcp_report_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_REPORT_RICH, 3, 512);
+            sleep_milliseconds(10);
+            continue;
+        }
         ret = stream_tcp_report_->read_frame(rx_data);
+        fail_count = 0;
         if (ret != 0) continue;
-        update(rx_data);
+        _update(rx_data);
     }
+    report_thread_.join();
 }
 
-static void *report_thread_handle_(void *arg) {
+static void report_thread_handle_(void *arg) {
     XArmAPI *my_this = (XArmAPI *)arg;
-    my_this->recv_report_data();
-    pthread_exit(0);
+    my_this->_recv_report_data();
+    // pthread_exit(0);
 }
 
 void XArmAPI::_check_version(void) {
-    int count = 10;
+    int count = 5;
     unsigned char version_[40];
     int ret = -1;
     while ((ret < 0 || ret > 2) && count > 0) {
@@ -580,7 +645,58 @@ void XArmAPI::_check_version(void) {
     }
 }
 
+void XArmAPI::_check_is_pause(void) {
+    if (check_is_pause_ && state == 3) {
+        std::unique_lock<std::mutex> locker(mutex_);
+        cond_.wait(locker, [this] { return state != 3 || !is_connected(); });
+        locker.unlock();
+    }
+}
+
+bool XArmAPI::version_is_ge(int major, int minor, int revision) {
+    if (major_version_number_ == 0 && minor_version_number_ == 0 && revision_version_number_ == 0) {
+        unsigned char version_[40];
+        get_version(version_);
+        std::string v((const char *)version_);
+        std::regex pattern(".*[vV](\\d+)[.](\\d+)[.](\\d+)");
+        std::smatch result;
+        if (std::regex_match(v, result, pattern)) {
+            auto it = result.begin();
+            sscanf(std::string(*++it).data(), "%d", &major_version_number_);
+            sscanf(std::string(*++it).data(), "%d", &minor_version_number_);
+            sscanf(std::string(*++it).data(), "%d", &revision_version_number_);
+        } else {
+            std::vector<std::string> tmpList = split(v, "-");
+            int size = tmpList.size();
+            if (size >= 3) {
+                int year = atoi(tmpList[size - 3].c_str());
+                int month = atoi(tmpList[size - 2].c_str());
+                if (year < 2019) is_old_protocol_ = true;
+                else if (year == 2019) {
+                    is_old_protocol_ = month >= 2 ? false : true;
+                } else {
+                    is_old_protocol_ = false;
+                }
+            }
+            if (is_old_protocol_) {
+                major_version_number_ = 0;
+                minor_version_number_ = 0;
+                revision_version_number_ = 1;
+            } else {
+                major_version_number_ = 0;
+                minor_version_number_ = 1;
+                revision_version_number_ = 0;
+            }
+        }
+        version_number[0] = major_version_number_;
+        version_number[1] = minor_version_number_;
+        version_number[2] = revision_version_number_;
+    }
+    return major_version_number_ > major || (major_version_number_ == major && minor_version_number_ > minor) || (major_version_number_ == major && minor_version_number_ == minor && revision_version_number_ >= revision);
+}
+
 int XArmAPI::connect(const std::string &port) {
+    if (is_connected()) return 0;
     if (port != "" && port != port_) {
         port_ = port;
     }
@@ -588,31 +704,33 @@ int XArmAPI::connect(const std::string &port) {
         printf("can not connect to port/ip: %s\n", port_.data());
         return -1;
     }
-    printf("port: %s\n", port_.data());
     // std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
     std::regex pattern("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+    is_ready_ = true;
     if (port_ == "localhost" || std::regex_match(port_, pattern)) {
         is_tcp_ = true;
         stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 128);
         if (stream_tcp_->is_ok() != 0) {
-            printf("Error: Tcp Control connection failed\n");
+            printf("Error: Tcp control connection failed\n");
             return -2;
         }
         cmd_tcp_ = new UxbusCmdTcp((SocketPort *)stream_tcp_);
+        printf("Tcp control connection successful\n");
 
         sleep_milliseconds(200);
         _check_version();
 
-        printf("Tcp Control connection successful\n");
         stream_tcp_report_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_REPORT_RICH, 3, 512);
         if (stream_tcp_report_->is_ok() != 0) {
             _report_connect_changed_callback();
-            printf("Error: Tcp Report Rich connection failed\n");
+            printf("Error: Tcp report connection failed\n");
             return -3;
         }
         _report_connect_changed_callback();
-        printf("Tcp Report Rich connection successful\n");
-        report_thread_ = thread_init(report_thread_handle_, this);
+        printf("Tcp report connection successful\n");
+        // report_thread_ = thread_init(report_thread_handle_, this);
+        report_thread_ = std::thread(report_thread_handle_, this);
+		report_thread_.detach();
 
         // stream_tcp_report_ = new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_NORM, 3, 512);
         // stream_tcp_report_ = new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_RICH, 3, 512);
@@ -638,6 +756,7 @@ void XArmAPI::disconnect(void) {
     if (stream_tcp_report_ != NULL) {
         stream_tcp_report_->close_port();
     }
+    is_ready_ = false;
 }
 
 int XArmAPI::get_version(unsigned char version_[40]) {
@@ -887,43 +1006,41 @@ int XArmAPI::set_pause_time(fp32 sltime) {
     return ret;
 }
 
-void XArmAPI::wait_stop(fp32 timeout) {
-    fp32 base_angles[7];
-    memcpy(base_angles, angles, 7 * sizeof(fp32));
+void XArmAPI::_wait_stop(fp32 timeout) {
+    is_stop_ = false;        
+    // fp32 base_angles[7];
+    // memcpy(base_angles, angles, 7 * sizeof(fp32));
     long long start_time = get_system_time();
     int count = 0;
-    while (get_system_time() - start_time < timeout * 1000 && !is_stop_) {
+    while ((timeout <= 0 || (get_system_time() - start_time < timeout * 1000)) && !is_stop_ && is_connected() && !has_error()) {
         if (state == 4) {
+            sleep_finish_time_ = 0;
             return;
         }
         if (get_system_time() < sleep_finish_time_) {
-            sleep_milliseconds(50);
+            sleep_milliseconds(20);
             count = 0;
             continue;
         }
         if (state == 3) {
-            sleep_milliseconds(50);
+            sleep_milliseconds(20);
             continue;
         }
-        else if (state != 1) {
+        if (state != 1) {
             count += 1;
         }
         else {
-            for (u32 i = 0; i < 7; i++) {
-                if (angles[i] != base_angles[i]) {
-                    count = -1;
-                }
-                base_angles[i] = angles[i];
-            }
-            count += 1;
+            count = 0;
         }
         if (count >= 10)
             return;
         sleep_milliseconds(50);
     }
+    is_stop_ = true;
 }
 
 int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
@@ -948,9 +1065,7 @@ int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 
         }
     }
     if (wait && (ret == 0 || ret == UXBUS_STATE::WAR_CODE)) {
-        is_stop_ = false;
-        wait_stop(timeout);
-        is_stop_ = true;
+        _wait_stop(timeout);
     }
 
     return ret;
@@ -964,8 +1079,35 @@ int XArmAPI::set_position(fp32 pose[6], bool wait, fp32 timeout) {
     return set_position(pose, -1, 0, 0, 0, wait, timeout);
 }
 
+int XArmAPI::set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
+    _check_is_pause();
+    if (!is_connected()) return -1;
+    int ret = 0;
+    last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
+    last_used_tcp_acc = acc > 0 ? acc : last_used_tcp_acc;
+    fp32 mvpose[6];
+    for (u32 i = 0; i < 6; i++) {
+        mvpose[i] = default_is_radian || i < 3 ? pose[i] : pose[i] / RAD_DEGREE;
+    }
+    if (is_tcp_) {
+        ret = cmd_tcp_->move_line_tool(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
+    } else {
+        ret = cmd_ser_->move_line_tool(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
+    }
+    if (wait && (ret == 0 || ret == UXBUS_STATE::WAR_CODE)) {
+        _wait_stop(timeout);
+    }
+
+    return ret;
+}
+
+int XArmAPI::set_tool_position(fp32 pose[6], bool wait, fp32 timeout) {
+    return set_tool_position(pose, 0, 0, 0, wait, timeout);
+}
+
 
 int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     last_used_joint_speed = speed > 0 ? speed : last_used_joint_speed;
@@ -985,9 +1127,7 @@ int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bo
         ret = cmd_ser_->move_joint(mvjoint, speed_, acc_, mvtime);
     }
     if (wait && (ret == 0 || ret == UXBUS_STATE::WAR_CODE)) {
-        is_stop_ = false;
-        wait_stop(timeout);
-        is_stop_ = true;
+        _wait_stop(timeout);
     }
 
     return ret;
@@ -1028,6 +1168,7 @@ int XArmAPI::set_servo_angle_j(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime) 
 }
 
 int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
@@ -1045,15 +1186,14 @@ int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed,
     }
 
     if (wait && (ret == 0 || ret == UXBUS_STATE::WAR_CODE)) {
-        is_stop_ = false;
-        wait_stop(timeout);
-        is_stop_ = true;
+        _wait_stop(timeout);
     }
 
     return ret;
 }
 
 int XArmAPI::move_gohome(fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     fp32 speed_ = default_is_radian ? speed : speed / RAD_DEGREE;
@@ -1066,9 +1206,7 @@ int XArmAPI::move_gohome(fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 time
         ret = cmd_ser_->move_gohome(speed_, acc_, mvtime);
     }
     if (wait && (ret == 0 || ret == UXBUS_STATE::WAR_CODE)) {
-        is_stop_ = false;
-        wait_stop(timeout);
-        is_stop_ = true;
+        _wait_stop(timeout);
     }
 
     return ret;
@@ -1186,6 +1324,7 @@ int XArmAPI::is_joint_limit(fp32 source_angles[7], int *limit) {
 }
 
 int XArmAPI::set_collision_sensitivity(int sensitivity) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
@@ -1197,6 +1336,7 @@ int XArmAPI::set_collision_sensitivity(int sensitivity) {
 }
 
 int XArmAPI::set_teach_sensitivity(int sensitivity) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
@@ -1208,6 +1348,7 @@ int XArmAPI::set_teach_sensitivity(int sensitivity) {
 }
 
 int XArmAPI::set_gravity_direction(fp32 gravity_dir[3]) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
@@ -1241,6 +1382,7 @@ int XArmAPI::save_conf(void) {
 }
 
 int XArmAPI::set_tcp_offset(fp32 pose_offset[6]) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     fp32 offset[6];
@@ -1256,6 +1398,7 @@ int XArmAPI::set_tcp_offset(fp32 pose_offset[6]) {
 }
 
 int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
+    _check_is_pause();
     if (!is_connected()) return -1;
     int ret = 0;
     float _gravity[3];
@@ -1641,9 +1784,9 @@ int XArmAPI::set_reduced_max_joint_speed(float speed) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
-        ret = cmd_tcp_->set_reduced_jointspeed(speed);
+        ret = cmd_tcp_->set_reduced_jointspeed(default_is_radian ? speed : speed / RAD_DEGREE);
     } else {
-        ret = cmd_ser_->set_reduced_jointspeed(speed);
+        ret = cmd_ser_->set_reduced_jointspeed(default_is_radian ? speed : speed / RAD_DEGREE);
     }
     return ret;
 }
@@ -1659,16 +1802,23 @@ int XArmAPI::get_reduced_mode(int *mode) {
     return ret;
 }
 
-int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed) {
+int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14], int *fense_is_on, int *collision_rebound_is_on) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
-        ret = cmd_tcp_->get_reduced_states(on, xyz_list, tcp_speed, joint_speed);
+        ret = cmd_tcp_->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fense_is_on, collision_rebound_is_on, version_is_ge() ? 79 : 21);
     } else {
-        ret = cmd_ser_->get_reduced_states(on, xyz_list, tcp_speed, joint_speed);
+        ret = cmd_ser_->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fense_is_on, collision_rebound_is_on, version_is_ge() ? 79 : 21);
     }
     if (!default_is_radian) {
         *joint_speed *= RAD_DEGREE;
+    }
+    if (version_is_ge()) {
+        if (jrange != NULL && !default_is_radian) {
+            for (u32 i = 0; i < 14; i++) {
+                jrange[i] *= RAD_DEGREE;
+            }
+        }
     }
     return ret;
 }
@@ -1684,6 +1834,59 @@ int XArmAPI::set_reduced_tcp_boundary(int boundary[6]) {
     return ret;
 }
 
+int XArmAPI::set_reduced_joint_range(float jrange[14]) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    float joint_range[14];
+    for (u32 i = 0; i < 14; i++) {
+        joint_range[i] = default_is_radian ? jrange[i] : jrange[i] / RAD_DEGREE;
+    }
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_reduced_jrange(joint_range);
+    } else {
+        ret = cmd_ser_->set_reduced_jrange(joint_range);
+    }
+    return ret;
+}
+
+int XArmAPI::set_fense_mode(bool on) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_fense_on(int(on));
+    } else {
+        ret = cmd_ser_->set_fense_on(int(on));
+    }
+    return ret;
+}
+
+int XArmAPI::set_collision_rebound(bool on) {
+    if (!is_connected()) return -1;
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_collis_reb(int(on));
+    } else {
+        ret = cmd_ser_->set_collis_reb(int(on));
+    }
+    return ret;
+}
+
+int XArmAPI::set_world_offset(float pose_offset[6]) {
+    _check_is_pause();
+    if (!is_connected()) return -1;
+    int ret = 0;
+    fp32 offset[6];
+    for (u32 i = 0; i < 6; i++) {
+        offset[i] = default_is_radian || i < 3  ? pose_offset[i] : pose_offset[i] / RAD_DEGREE;
+    }
+    if (is_tcp_) {
+        ret = cmd_tcp_->set_world_offset(offset);
+    } else {
+        ret = cmd_ser_->set_world_offset(offset);
+    }
+    return ret;
+}
+
 int XArmAPI::start_record_trajectory(void) {
     if (!is_connected()) return -1;
     int ret = 0;
@@ -1695,7 +1898,7 @@ int XArmAPI::start_record_trajectory(void) {
     return ret;
 }
 
-int XArmAPI::stop_record_trajectory(unsigned char* filename) {
+int XArmAPI::stop_record_trajectory(char* filename) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
@@ -1710,7 +1913,7 @@ int XArmAPI::stop_record_trajectory(unsigned char* filename) {
     return ret;
 }
 
-int XArmAPI::save_record_trajectory(unsigned char* filename, float timeout) {
+int XArmAPI::save_record_trajectory(char* filename, float timeout) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
@@ -1742,7 +1945,7 @@ int XArmAPI::save_record_trajectory(unsigned char* filename, float timeout) {
     return ret;
 }
 
-int XArmAPI::load_trajectory(unsigned char* filename, float timeout) {
+int XArmAPI::load_trajectory(char* filename, float timeout) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (is_tcp_) {
@@ -1774,7 +1977,7 @@ int XArmAPI::load_trajectory(unsigned char* filename, float timeout) {
     return ret;
 }
 
-int XArmAPI::playback_trajectory(int times, unsigned char* filename, bool wait) {
+int XArmAPI::playback_trajectory(int times, char* filename, bool wait, int double_speed) {
     if (!is_connected()) return -1;
     int ret = 0;
     if (filename != NULL) {
@@ -1785,9 +1988,9 @@ int XArmAPI::playback_trajectory(int times, unsigned char* filename, bool wait) 
     }
     if (state == 4) return UXBUS_STATE::NOT_READY;
     if (is_tcp_) {
-        ret = cmd_tcp_->playback_traj(times);
+        ret = cmd_tcp_->playback_traj(times, double_speed);
     } else {
-        ret = cmd_ser_->playback_traj(times);
+        ret = cmd_ser_->playback_traj(times, double_speed);
     }
     if (ret == 0 && wait) {
         long long start_time = get_system_time();
@@ -1898,6 +2101,14 @@ int XArmAPI::register_cmdnum_changed_callback(void(*callback)(int)) {
     return _register_event_callback(cmdnum_changed_callbacks_, callback);
 }
 
+int XArmAPI::register_temperature_changed_callback(void(*callback)(const fp32 *temps)) {
+    return _register_event_callback(temperature_changed_callbacks_, callback);
+}
+
+int XArmAPI::register_count_changed_callback(void(*callback)(int cmdnum)) {
+    return _register_event_callback(count_changed_callbacks_, callback);
+}
+
 int XArmAPI::release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles)) {
     return _release_event_callback(report_location_callbacks_, callback);
 }
@@ -1926,7 +2137,14 @@ int XArmAPI::release_cmdnum_changed_callback(void(*callback)(int)) {
     return _release_event_callback(cmdnum_changed_callbacks_, callback);
 }
 
-int XArmAPI::get_suction_cup_state(int *val) {
+int XArmAPI::release_temperature_changed_callback(void(*callback)(const fp32 *temps)) {
+    return _release_event_callback(temperature_changed_callbacks_, callback);
+}
+int XArmAPI::release_count_changed_callback(void(*callback)(int)) {
+    return _release_event_callback(count_changed_callbacks_, callback);
+}
+
+int XArmAPI::get_suction_cup(int *val) {
     int io1;
     return get_tgpio_digital(val, &io1);
 }
@@ -1947,7 +2165,7 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout) {
         int val, ret;
         code = UXBUS_STATE::SUCTION_CUP_TOUT;
         while (get_system_time() - start_time < timeout * 1000) {
-            ret = get_suction_cup_state(&val);
+            ret = get_suction_cup(&val);
             if (ret == UXBUS_STATE::ERR_CODE) {
                 code = UXBUS_STATE::ERR_CODE;
                 break;
@@ -1962,7 +2180,7 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout) {
                     break;
                 }
             }
-            sleep_milliseconds(200);
+            sleep_milliseconds(100);
         }
     }
 
@@ -1985,9 +2203,9 @@ int XArmAPI::get_gripper_version(unsigned char versions[3]) {
         ret2 = cmd_ser_->gripper_modbus_r16s(0x0802, 1, val2);
         ret3 = cmd_ser_->gripper_modbus_r16s(0x0803, 1, val3);
     }
-    if (ret1 == 0) {versions[0] = (unsigned char)bin8_to_16(&val1[4]);} else {code = ret1;}
-    if (ret2 == 0) {versions[1] = (unsigned char)bin8_to_16(&val2[4]);} else {code = ret2;}
-    if (ret3 == 0) {versions[2] = (unsigned char)bin8_to_16(&val3[4]);} else {code = ret3;}
+    if (ret1 == 0) { versions[0] = (unsigned char)bin8_to_16(&val1[4]);} else {code = ret1; }
+    if (ret2 == 0) { versions[1] = (unsigned char)bin8_to_16(&val2[4]);} else {code = ret2; }
+    if (ret3 == 0) { versions[2] = (unsigned char)bin8_to_16(&val3[4]);} else {code = ret3; }
     return code;
 }
 
@@ -2007,9 +2225,9 @@ int XArmAPI::get_servo_version(unsigned char versions[3], int servo_id) {
         ret2 = cmd_ser_->servo_addr_r16(servo_id, 0x0802, &val2);
         ret3 = cmd_ser_->servo_addr_r16(servo_id, 0x0803, &val3);
     }
-    if (ret1 == 0) {versions[0] = (unsigned char)val1;} else {code = ret1;}
-    if (ret2 == 0) {versions[1] = (unsigned char)val2;} else {code = ret2;}
-    if (ret3 == 0) {versions[2] = (unsigned char)val3;} else {code = ret3;}
+    if (ret1 == 0) { versions[0] = (unsigned char)val1;} else {code = ret1; }
+    if (ret2 == 0) { versions[1] = (unsigned char)val2;} else {code = ret2; }
+    if (ret3 == 0) { versions[2] = (unsigned char)val3;} else {code = ret3; }
     return code;
 }
 
@@ -2029,9 +2247,38 @@ int XArmAPI::get_tgpio_version(unsigned char versions[3]) {
         ret2 = cmd_ser_->tgpio_addr_r16(0x0802, &val2);
         ret3 = cmd_ser_->tgpio_addr_r16(0x0803, &val3);
     }
-    if (ret1 == 0) {versions[0] = (unsigned char)val1;} else {code = ret1;}
-    if (ret2 == 0) {versions[1] = (unsigned char)val2;} else {code = ret2;}
-    if (ret3 == 0) {versions[2] = (unsigned char)val3;} else {code = ret3;}
+    if (ret1 == 0) { versions[0] = (unsigned char)val1;} else {code = ret1; }
+    if (ret2 == 0) { versions[1] = (unsigned char)val2;} else {code = ret2; }
+    if (ret3 == 0) { versions[2] = (unsigned char)val3;} else {code = ret3; }
     return code;
 }
 
+int XArmAPI::reload_dynamics(void) {
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->reload_dynamics();
+    } else {
+        ret = cmd_tcp_->reload_dynamics();
+    }
+    return ret;
+}
+
+int XArmAPI::set_counter_reset(void) {
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->cnter_reset();
+    } else {
+        ret = cmd_tcp_->cnter_reset();
+    }
+    return ret;
+}
+
+int XArmAPI::set_counter_increase(void) {
+    int ret = 0;
+    if (is_tcp_) {
+        ret = cmd_tcp_->cnter_plus();
+    } else {
+        ret = cmd_tcp_->cnter_plus();
+    }
+    return ret;
+}

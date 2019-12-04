@@ -15,6 +15,7 @@ class UXBUS_RG {
   static const unsigned char GET_VERSION = 1;
   static const unsigned char GET_ROBOT_SN = 2;
   static const unsigned char CHECK_VERIFY = 3;
+  static const unsigned char RELOAD_DYNAMICS = 4;
   static const unsigned char SHUTDOWN_SYSTEM = 10;
 
   static const unsigned char MOTION_EN = 11;
@@ -33,6 +34,7 @@ class UXBUS_RG {
   static const unsigned char MOVE_HOME = 25;
   static const unsigned char SLEEP_INSTT = 26;
   static const unsigned char MOVE_CIRCLE = 27;
+  static const unsigned char MOVE_LINE_TOOL = 28;
   static const unsigned char MOVE_SERVOJ = 29;
 
   static const unsigned char SET_TCP_JERK = 31;
@@ -66,11 +68,21 @@ class UXBUS_RG {
   static const unsigned char SET_SAFE_LEVEL = 56;
   static const unsigned char GET_SAFE_LEVEL = 57;
 
+  static const unsigned char SET_REDUCED_JRANGE = 58;
+  static const unsigned char SET_FENSE_ON = 59;
+  static const unsigned char SET_COLLIS_REB = 60;
+
   static const unsigned char SET_TRAJ_RECORD = 61;
   static const unsigned char SAVE_TRAJ = 62;
   static const unsigned char LOAD_TRAJ = 63;
   static const unsigned char PLAY_TRAJ = 64;
   static const unsigned char GET_TRAJ_RW_STATUS = 65;
+
+  static const unsigned char SET_TIMER = 71;
+  static const unsigned char CANCEL_TIMER = 72;
+  static const unsigned char SET_WORLD_OFFSET = 73;
+  static const unsigned char CNTER_RESET = 74;
+  static const unsigned char CNTER_PLUS = 75;
 
   static const unsigned char SERVO_W16B = 101;
   static const unsigned char SERVO_R16B = 102;
@@ -95,6 +107,8 @@ class UXBUS_RG {
   static const unsigned char CGPIO_SET_IN_FUN = 137;
   static const unsigned char CGPIO_SET_OUT_FUN = 138;
   static const unsigned char CGPIO_GET_STATE = 139;
+
+  static const unsigned char GET_HD_TYPES = 141;
 };
 
 class UXBUS_STATE {

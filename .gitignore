@@ -1,3 +1,6 @@
 *.o
 build/
 .vscode/
+*.map
+Makefile-bak
+Makefile-new

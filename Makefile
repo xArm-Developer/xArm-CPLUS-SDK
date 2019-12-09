@@ -37,7 +37,7 @@ all: xarm test
 
 xarm:
 	mkdir -p $(BUILD_LIB_DIR)
-	$(CXX) $(SOURCES) $(C_FLAGS) $(LIBS) -o $(BUILD_LIB_DIR)/$(LIB_NAME)
+	$(CXX) $(SRC_XARM) $(C_FLAGS) $(LIBS) -o $(BUILD_LIB_DIR)/$(LIB_NAME)
 
 test:
 	for file in $(SRC_EXAMPLE); do \

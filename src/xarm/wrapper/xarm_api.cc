@@ -1473,7 +1473,7 @@ int XArmAPI::set_gripper_enable(bool enable) {
     }
     int err;
     int ret2 = get_gripper_err_code(&err);
-    return (ret2 == 0 and err != 0) ? err : ret;
+    return (ret2 == 0 && err != 0) ? err : ret;
 }
 
 int XArmAPI::set_gripper_mode(int mode) {
@@ -1486,7 +1486,7 @@ int XArmAPI::set_gripper_mode(int mode) {
     }
     int err;
     int ret2 = get_gripper_err_code(&err);
-    return (ret2 == 0 and err != 0) ? err : ret;
+    return (ret2 == 0 && err != 0) ? err : ret;
 }
 
 int XArmAPI::set_gripper_speed(fp32 speed) {
@@ -1499,7 +1499,7 @@ int XArmAPI::set_gripper_speed(fp32 speed) {
     }
     int err;
     int ret2 = get_gripper_err_code(&err);
-    return (ret2 == 0 and err != 0) ? err : ret;
+    return (ret2 == 0 && err != 0) ? err : ret;
 }
 
 int XArmAPI::get_gripper_position(fp32 *pos) {
@@ -1512,7 +1512,7 @@ int XArmAPI::get_gripper_position(fp32 *pos) {
     }
     int err;
     int ret2 = get_gripper_err_code(&err);
-    return (ret2 == 0 and err != 0) ? err : ret;
+    return (ret2 == 0 && err != 0) ? err : ret;
 }
 
 int XArmAPI::get_gripper_err_code(int *err) {
@@ -1602,7 +1602,7 @@ int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
     else {
         int err;
         int ret2 = get_gripper_err_code(&err);
-        return (ret2 == 0 and err != 0) ? err : ret;
+        return (ret2 == 0 && err != 0) ? err : ret;
     }
 }
 
@@ -1616,7 +1616,7 @@ int XArmAPI::clean_gripper_error(void) {
     }
     int err;
     int ret2 = get_gripper_err_code(&err);
-    return (ret2 == 0 and err != 0) ? err : ret;
+    return (ret2 == 0 && err != 0) ? err : ret;
 }
 
 int XArmAPI::get_tgpio_digital(int *io0, int *io1) {

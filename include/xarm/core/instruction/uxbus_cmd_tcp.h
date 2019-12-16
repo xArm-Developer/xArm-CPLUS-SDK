@@ -20,6 +20,7 @@ public:
 	int send_xbus(int funcode, unsigned char *datas, int num);
 	void close(void);
 
+<<<<<<< HEAD
 private:
 	SocketPort *arm_port_;
 	int bus_flag_;
@@ -28,6 +29,16 @@ private:
 	int TX2_PROT_HEAT_ = 1;        // tcp heat prot
 	int TX2_BUS_FLAG_MIN_ = 1;     // cmd Serial number Starting value
 	int TX2_BUS_FLAG_MAX_ = 5000;  // cmd Serial number Max value
+=======
+ private:
+  SocketPort *arm_port_;
+  int bus_flag_;
+  int prot_flag_;
+  int TX2_PROT_CON_ = 2;         // tcp cmd prot
+  int TX2_PROT_HEAT_ = 1;        // tcp heat prot
+  int TX2_BUS_FLAG_MIN_ = 1;     // the min cmd num
+  int TX2_BUS_FLAG_MAX_ = 5000;  // the max cmd num
+>>>>>>> 8938a8b8cf725ef7c1f7de74dd74e1823e75c245
 };
 
 #endif

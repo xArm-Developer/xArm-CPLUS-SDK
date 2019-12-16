@@ -32,6 +32,7 @@ inline long long get_system_time()
 
 inline std::vector<std::string> split(const std::string &str, const std::string &pattern)
 {
+<<<<<<< HEAD
 	std::vector<std::string> resVec;
 
 	if ("" == str)
@@ -53,6 +54,29 @@ inline std::vector<std::string> split(const std::string &str, const std::string 
 	}
 
 	return resVec;
+=======
+    std::vector<std::string> resVec;
+
+    if ("" == str)
+    {
+        return resVec;
+    }
+
+	std::string strs = str + pattern;
+
+    size_t pos = strs.find(pattern);
+    size_t size = strs.size();
+
+    while (pos != std::string::npos)
+    {
+        std::string x = strs.substr(0, pos);
+        resVec.push_back(x);
+        strs = strs.substr(pos + 1, size);
+        pos = strs.find(pattern);
+    }
+
+    return resVec;
+>>>>>>> 8938a8b8cf725ef7c1f7de74dd74e1823e75c245
 }
 
 #endif

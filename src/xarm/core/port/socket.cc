@@ -19,6 +19,7 @@
 #include "xarm/core/linux/thread.h"
 
 void SocketPort::recv_proc(void) {
+<<<<<<< HEAD
 	int num;
 	// unsigned char recv_data[que_maxlen_];
 	unsigned char *recv_data = new unsigned char[que_maxlen_];
@@ -37,6 +38,27 @@ void SocketPort::recv_proc(void) {
 		rx_que_->push(recv_data);
 	}
 	thread_id_.join();
+=======
+  int num;
+  // unsigned char recv_data[que_maxlen_];
+  unsigned char *recv_data = new unsigned char[que_maxlen_];
+  while (state_ == 0) {
+    //bzero(recv_data, que_maxlen_); // Çå¿ÕÊý×é
+	memset(recv_data, 0, que_maxlen_);
+    // num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
+	num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 1, 0);
+    if (num <= 0) {
+      // close(fp_);
+	  close_port();
+      printf("SocketPort::recv_proc exit, %d\n", fp_);
+      // pthread_exit(0);
+    }
+    bin32_to_8(num, &recv_data[0]);
+    rx_que_->push(recv_data);
+  }
+  delete recv_data;
+  thread_id_.join();
+>>>>>>> 8938a8b8cf725ef7c1f7de74dd74e1823e75c245
 }
 
 static void recv_proc_(void *arg) {

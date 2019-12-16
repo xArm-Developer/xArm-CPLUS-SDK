@@ -45,23 +45,14 @@ void SerialPort::recv_proc(void) {
 	usleep(1000); // 1000us
 #endif
   }
+  thread_id_.join();
 }
 
-#ifdef _WIN32
-static unsigned __stdcall recv_proc_(void *arg) {
+static void recv_proc_(void *arg) {
 	SerialPort *my_this = (SerialPort *)arg;
 
 	my_this->recv_proc();
-	ExitThread(4);
 }
-#else
-static void *recv_proc_(void *arg) {
-	SerialPort *my_this = (SerialPort *)arg;
-
-	my_this->recv_proc();
-	pthread_exit(0)
-}
-#endif
 
 SerialPort::SerialPort(const char *port, int baud, int que_num,
                        int que_maxlen) {
@@ -80,12 +71,8 @@ SerialPort::SerialPort(const char *port, int baud, int que_num,
   UXBUS_PROT_FROMID_ = 0x55;
   UXBUS_PROT_TOID_ = 0xAA;
   flush();
-  //thread_id_ = thread_init(recv_proc_, this);
-#ifdef WIN32
-  m_handle = thread_init(recv_proc_, this);
-#else
-  thread_id_ = thread_init(recv_proc_, this);
-#endif
+  thread_id_ = std::thread(recv_proc_, this);
+  thread_id_.detach();
 }
 
 SerialPort::~SerialPort(void) {
@@ -286,7 +273,8 @@ int SerialPort::init_serial(const char *port, int baud) {
 	try{
 		ser.setPort(port);
 		ser.setBaudrate(baud);
-		ser.setTimeout(serial::Timeout::simpleTimeout(1000));
+		serial::Timeout timeout = serial::Timeout::simpleTimeout(1000);
+		ser.setTimeout(timeout);
 		ser.open();
 		return 0;
 	}

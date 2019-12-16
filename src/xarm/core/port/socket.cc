@@ -38,6 +38,7 @@ void SocketPort::recv_proc(void) {
     bin32_to_8(num, &recv_data[0]);
     rx_que_->push(recv_data);
   }
+  thread_id_.join();
 }
 
 static void recv_proc_(void *arg) {

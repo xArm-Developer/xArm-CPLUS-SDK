@@ -515,7 +515,7 @@ int UxbusCmd::gripper_addr_r16(int addr, float *value) {
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   return send_pend(UXBUS_RG::TGPIO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
-  *value = bin8_to_32(rx_data);
+  *value = (float)bin8_to_32(rx_data);
   return ret;
 }
 
@@ -538,16 +538,16 @@ int UxbusCmd::gripper_addr_r32(int addr, float *value) {
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   ret = send_pend(UXBUS_RG::TGPIO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
-  *value = bin8_to_32(rx_data);
+  *value = (float)bin8_to_32(rx_data);
   return ret;
 }
 
 int UxbusCmd::gripper_set_en(int value) {
-  return gripper_addr_w16(SERVO3_RG::CON_EN, value);
+  return gripper_addr_w16(SERVO3_RG::CON_EN, (float)value);
 }
 
 int UxbusCmd::gripper_set_mode(int value) {
-  return gripper_addr_w16(SERVO3_RG::CON_MODE, value);
+  return gripper_addr_w16(SERVO3_RG::CON_MODE, (float)value);
 }
 
 int UxbusCmd::gripper_set_zero() {
@@ -596,7 +596,7 @@ int UxbusCmd::tgpio_addr_r16(int addr, float *value) {
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   ret = send_pend(UXBUS_RG::TGPIO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
-  *value = bin8_to_32(rx_data);
+  *value = (float)bin8_to_32(rx_data);
   return ret;
 }
 int UxbusCmd::tgpio_addr_w32(int addr, float value) {
@@ -618,7 +618,7 @@ int UxbusCmd::tgpio_addr_r32(int addr, float *value) {
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   return send_pend(UXBUS_RG::TGPIO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
-  *value = bin8_to_32(rx_data);
+  *value = (float)bin8_to_32(rx_data);
   return ret;
 }
 
@@ -645,13 +645,13 @@ int UxbusCmd::tgpio_set_digital(int ionum, int value) {
     } else {
       return -1;
     }
-  return tgpio_addr_w16(SERVO3_RG::DIGITAL_OUT, tmp);
+  return tgpio_addr_w16(SERVO3_RG::DIGITAL_OUT, (float)tmp);
 }
 
 int UxbusCmd::tgpio_get_analog1(float * value) {
   float tmp;
   int ret = tgpio_addr_r16(SERVO3_RG::ANALOG_IO1, &tmp);
-  *value = tmp * 3.3 / 4096.0;
+  *value = (float)(tmp * 3.3 / 4096.0);
   return ret;
 }
 
@@ -659,7 +659,7 @@ int UxbusCmd::tgpio_get_analog2(float * value) {
   float tmp;
   int ret = tgpio_addr_r16(SERVO3_RG::ANALOG_IO2, &tmp);
   // printf("tmp = %f\n", tmp);
-  *value = tmp * 3.3 / 4096.0;
+  *value = (float)(tmp * 3.3 / 4096.0);
   return ret;
 }
 
@@ -720,7 +720,7 @@ int UxbusCmd::gripper_modbus_set_zero(void) {
 int UxbusCmd::gripper_modbus_get_pos(float *pulse) {
   unsigned char rx_data[254];
   int ret = gripper_modbus_r16s(SERVO3_RG::CURR_POS, 2, rx_data);
-  *pulse = bin8_to_32(&rx_data[4]);
+  *pulse = (float)bin8_to_32(&rx_data[4]);
   return ret;
 }
 
@@ -736,7 +736,7 @@ int UxbusCmd::gripper_modbus_set_pos(float pulse) {
 
 int UxbusCmd::gripper_modbus_set_posspd(float speed) {
   unsigned char txdata[2];
-  bin16_to_8(speed, &txdata[0]);
+  bin16_to_8((int)speed, &txdata[0]);
   float value = hex_to_fp32(txdata);
   return gripper_modbus_w16s(SERVO3_RG::POS_SPD, value, 1);
 }
@@ -782,7 +782,7 @@ int UxbusCmd::servo_addr_r16(int id, int addr, float *value) {
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   ret = send_pend(UXBUS_RG::SERVO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
-  *value = bin8_to_32(rx_data);
+  *value = (float)bin8_to_32(rx_data);
   return ret;
 }
 
@@ -805,7 +805,7 @@ int UxbusCmd::servo_addr_r32(int id, int addr, float *value) {
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   ret = send_pend(UXBUS_RG::SERVO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
-  *value = bin8_to_32(rx_data);
+  *value = (float)bin8_to_32(rx_data);
   return ret;
 }
 
@@ -820,13 +820,13 @@ int UxbusCmd::cgpio_get_auxdigit(int *value) {
 int UxbusCmd::cgpio_get_analog1(float *value) {
   int tmp;
   int ret = get_nu16(UXBUS_RG::CGPIO_GET_ANALOG1, &tmp, 1);
-  *value = tmp * 10.0 / 4096.0;
+  *value = (float)(tmp * 10.0 / 4096.0);
   return ret;
 }
 int UxbusCmd::cgpio_get_analog2(float *value) {
   int tmp;
   int ret = get_nu16(UXBUS_RG::CGPIO_GET_ANALOG2, &tmp, 1);
-  *value = tmp * 10.0 / 4096.0;
+  *value = (float)(tmp * 10.0 / 4096.0);
   return ret;
 }
 /**
@@ -848,11 +848,11 @@ int UxbusCmd::cgpio_set_auxdigit(int ionum, int value) {
   return set_nu16(UXBUS_RG::CGPIO_SET_DIGIT, &tmp, 1);
 }
 int UxbusCmd::cgpio_set_analog1(int value) {
-  value = (value / 10.0 * 4096.0);
+  value = (int)(value / 10.0 * 4096.0);
   return set_nu16(UXBUS_RG::CGPIO_SET_ANALOG1, &value, 1);
 }
 int UxbusCmd::cgpio_set_analog2(int value) {
-  value = (value / 10.0 * 4096.0);
+  value = (int)(value / 10.0 * 4096.0);
   return set_nu16(UXBUS_RG::CGPIO_SET_ANALOG2, &value, 1);
 }
 
@@ -890,7 +890,7 @@ int UxbusCmd::cgpio_get_state(int *state, int *digit_io, float *analog, int *inp
   state[1] = rx_data[1];
   for (int i = 0; i < 4; i++) {
     digit_io[i] = bin8_to_16(&rx_data[2 + i * 2]);
-    analog[i] = bin8_to_16(&rx_data[10 + i * 2]) / 4096.0 * 10.0;
+    analog[i] = (float)(bin8_to_16(&rx_data[10 + i * 2]) / 4096.0 * 10.0);
   }
   for (int i = 0; i < 8; i++) {
     input_conf[i] = rx_data[18 + i];

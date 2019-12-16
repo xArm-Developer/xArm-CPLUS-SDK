@@ -7,12 +7,8 @@
 #ifndef CORE_PORT_SERIAL_H_
 #define CORE_PORT_SERIAL_H_
 
-//#include <pthread.h>
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
+#include <iostream>
+#include <thread>
 
 #include "serial/serial.h"
 #include "xarm/core/common/data_type.h"
@@ -35,12 +31,7 @@ class SerialPort {
  private:
   int fp_;
   int state_;
-  //pthread_t thread_id_;
-#ifdef WIN32
-  HANDLE m_handle;
-#else
-  pthread_t thread_id_;
-#endif
+  std::thread thread_id_;
 
   QueueMemcpy *rx_que_;
   int init_serial(const char *port, int baud);

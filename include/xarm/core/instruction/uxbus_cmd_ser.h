@@ -8,7 +8,7 @@
 #define CORE_INSTRUCTION_UXBUS_CMD_SER_H_
 
 #include "xarm/core/instruction/uxbus_cmd.h"
-#include "xarm/core/port/serial.h"
+#include "xarm/core/port/ser.h"
 
 class UxbusCmdSer : public UxbusCmd {
  public:

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\0002-get_property.cc">
+    <ClCompile Include="..\..\example\1001-move_line.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

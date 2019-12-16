@@ -4,6 +4,8 @@
  *
  * Author: Jimy Zhang <jimy92@163.com>
  ============================================================================*/
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdarg.h>
 #include "xarm/core/debug/debug_print.h"
 #include "xarm/core/common/data_type.h"

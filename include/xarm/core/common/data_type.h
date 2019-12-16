@@ -59,7 +59,7 @@ inline void fp32_to_hex(double dataf, unsigned char datahex[4]) {
     float dataf;
     unsigned char datahex[4];
   } fp32hex;
-  fp32hex.dataf = dataf;
+  fp32hex.dataf = (float) dataf;
   datahex[0] = fp32hex.datahex[0];
   datahex[1] = fp32hex.datahex[1];
   datahex[2] = fp32hex.datahex[2];

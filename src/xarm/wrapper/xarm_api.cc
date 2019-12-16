@@ -6,10 +6,11 @@
 #
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
 */
+#define _CRT_SECURE_NO_WARNINGS
 #include <regex>
 #include <iostream>
 #include <string>
-#include <unistd.h>
+// #include <unistd.h>
 #include <string.h>
 #include "xarm/wrapper/xarm_api.h"
 
@@ -93,8 +94,8 @@ void XArmAPI::_init(void) {
         joint_acc_limit = new fp32[2]{min_joint_acc_, max_joint_acc_};
         last_used_joint_speed = (float)0.3490658503988659; // rad/s (20°/s);
         last_used_joint_acc = (float)8.726646259971648;    // rad/s^2 (500°/s^2);
-        position = new fp32[6]{201.5, 0, 140.5, 3.1415926, 0, 0};
-        last_used_position = new fp32[6]{201.5, 0, 140.5, 3.1415926, 0, 0};
+        position = new fp32[6]{201.5, 0, 140.5, (fp32)3.1415926, 0, 0};
+        last_used_position = new fp32[6]{201.5, 0, 140.5, (fp32)3.1415926, 0, 0};
     } else {
         joint_speed_limit = new fp32[2]{(fp32)(min_joint_speed_ * RAD_DEGREE), (fp32)(max_joint_speed_ * RAD_DEGREE)};
         joint_acc_limit = new fp32[2]{(fp32)(min_joint_acc_ * RAD_DEGREE), (fp32)(max_joint_acc_ * RAD_DEGREE)};

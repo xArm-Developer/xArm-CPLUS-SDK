@@ -27,9 +27,11 @@ void SocketPort::recv_proc(void) {
   while (state_ == 0) {
     //bzero(recv_data, que_maxlen_); // Çå¿ÕÊý×é
 	memset(recv_data, 0, que_maxlen_);
-    num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
+    // num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
+	num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 1, 0);
     if (num <= 0) {
-      close(fp_);
+      // close(fp_);
+	  close_port();
       printf("SocketPort::recv_proc exit, %d\n", fp_);
       // pthread_exit(0);
     }
@@ -88,7 +90,11 @@ int SocketPort::write_frame(unsigned char *data, int len) {
 }
 
 void SocketPort::close_port(void) {
+  #ifdef _WIN32
+  closesocket(fp_);
+  #else
   close(fp_);
+  #endif
   state_ = -1;
   delete rx_que_;
 }

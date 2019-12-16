@@ -4,6 +4,7 @@
  *
  * Author: Jimy Zhang <jimy92@163.com>
  ============================================================================*/
+// #define _WINSOCK_DEPRECATED_NO_WARNINGS
 //#include <arpa/inet.h>
 #include <errno.h>
 //#include <net/if.h>
@@ -18,7 +19,8 @@
 #ifdef _WIN32
 //#include <windows.h>
 //#include <winsock.h>
-// #include <winsock2.h>
+#include <winsock2.h>
+#pragma comment(lib, "ws2_32.lib")
 #include <cstring>
 #include<ws2tcpip.h>
 #else
@@ -47,7 +49,10 @@
 #ifdef _WIN32
 
 int socket_init(char *local_ip, int port, int is_server) {
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	WORD sockVersion = MAKEWORD(2, 2);
+	WSADATA data;
+	PERRNO(WSAStartup(sockVersion, &data), DB_FLG, "ESAStartup");
+	int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	PERRNO(sockfd, DB_FLG, "error: socket");
 
 	int on = 1;
@@ -63,6 +68,7 @@ int socket_init(char *local_ip, int port, int is_server) {
 	ret = setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE, (char *)&keepAlive,
 		sizeof(keepAlive));
 	PERRNO(ret, DB_FLG, "error: setsockopt");
+	/*
 	ret = setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE, (char *)&keepIdle,
 		sizeof(keepIdle));
 	PERRNO(ret, DB_FLG, "error: setsockopt");
@@ -72,6 +78,7 @@ int socket_init(char *local_ip, int port, int is_server) {
 	ret = setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT, (char *)&keepCount,
 		sizeof(keepCount));
 	PERRNO(ret, DB_FLG, "error: setsockopt");
+	*/
 	ret = setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
 		sizeof(struct timeval));
 	PERRNO(ret, DB_FLG, "error: setsockopt");
@@ -80,7 +87,8 @@ int socket_init(char *local_ip, int port, int is_server) {
 		struct sockaddr_in local_addr;
 		local_addr.sin_family = AF_INET;
 		local_addr.sin_port = htons(port);
-		local_addr.sin_addr.s_addr = inet_addr(local_ip);
+		// local_addr.sin_addr.s_addr = inet_addr(local_ip);
+		inet_pton(AF_INET, local_ip, (void *)&local_addr.sin_addr.S_un.S_addr);
 		ret = bind(sockfd, (struct sockaddr *)&local_addr, sizeof(local_addr));
 		PERRNO(ret, DB_FLG, "error: bind");
 

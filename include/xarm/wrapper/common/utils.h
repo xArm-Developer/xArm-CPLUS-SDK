@@ -38,8 +38,8 @@ inline std::vector<std::string> split(const std::string &str, const std::string 
     {
         return resVec;
     }
-    //方便截取最后一段数据
-    std::string strs = str + pattern;
+
+	std::string strs = str + pattern;
 
     size_t pos = strs.find(pattern);
     size_t size = strs.size();

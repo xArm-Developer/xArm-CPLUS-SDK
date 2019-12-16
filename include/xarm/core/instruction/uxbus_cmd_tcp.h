@@ -26,8 +26,8 @@ class UxbusCmdTcp : public UxbusCmd {
   int prot_flag_;
   int TX2_PROT_CON_ = 2;         // tcp cmd prot
   int TX2_PROT_HEAT_ = 1;        // tcp heat prot
-  int TX2_BUS_FLAG_MIN_ = 1;     // cmd序号 起始值
-  int TX2_BUS_FLAG_MAX_ = 5000;  // cmd序号 最大值
+  int TX2_BUS_FLAG_MIN_ = 1;     // the min cmd num
+  int TX2_BUS_FLAG_MAX_ = 5000;  // the max cmd num
 };
 
 #endif

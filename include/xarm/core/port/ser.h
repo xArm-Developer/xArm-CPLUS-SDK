@@ -36,7 +36,6 @@ class SerialPort {
   QueueMemcpy *rx_que_;
   int init_serial(const char *port, int baud);
   int read_char(unsigned char *ch);
-  int read_str(unsigned char *data, char eol, int len);
   int write_char(unsigned char ch);
   void parse_put(unsigned char *data, int len);
 

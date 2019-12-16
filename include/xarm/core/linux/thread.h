@@ -29,13 +29,12 @@
 
 
 #ifdef WIN32
- //typedef unsigned __stdcall *(*fun_point_t)(void *);
+//typedef unsigned __stdcall *(*fun_point_t)(void *);
 typedef unsigned __stdcall fun_point_t(void*);
 void thread_delete(HANDLE m_handle);
 HANDLE thread_init(fun_point_t fun_point, void *arg);
 #else
 typedef void *(*fun_point_t)(void *);
-
 void thread_delete(pthread_t id);
 pthread_t thread_init(fun_point_t fun_point, void *arg);
 #endif

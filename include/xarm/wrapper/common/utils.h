@@ -17,42 +17,42 @@
 
 inline void sleep_milliseconds(unsigned long milliseconds) {
 #ifdef _WIN32
-    Sleep(milliseconds); // 100 ms
+	Sleep(milliseconds); // 100 ms
 #else
-    usleep(milliseconds * 1000); // 100 ms
+	usleep(milliseconds * 1000); // 100 ms
 #endif
 }
 
 inline long long get_system_time()
 {
-    struct timeb t;
-    ftime(&t);
-    return 1000 * t.time + t.millitm;
+	struct timeb t;
+	ftime(&t);
+	return 1000 * t.time + t.millitm;
 }
 
 inline std::vector<std::string> split(const std::string &str, const std::string &pattern)
 {
-    std::vector<std::string> resVec;
+	std::vector<std::string> resVec;
 
-    if ("" == str)
-    {
-        return resVec;
-    }
-    //方便截取最后一段数据
-    std::string strs = str + pattern;
+	if ("" == str)
+	{
+		return resVec;
+	}
+	//方便截取最后一段数据
+	std::string strs = str + pattern;
 
-    size_t pos = strs.find(pattern);
-    size_t size = strs.size();
+	size_t pos = strs.find(pattern);
+	size_t size = strs.size();
 
-    while (pos != std::string::npos)
-    {
-        std::string x = strs.substr(0, pos);
-        resVec.push_back(x);
-        strs = strs.substr(pos + 1, size);
-        pos = strs.find(pattern);
-    }
+	while (pos != std::string::npos)
+	{
+		std::string x = strs.substr(0, pos);
+		resVec.push_back(x);
+		strs = strs.substr(pos + 1, size);
+		pos = strs.find(pattern);
+	}
 
-    return resVec;
+	return resVec;
 }
 
 #endif

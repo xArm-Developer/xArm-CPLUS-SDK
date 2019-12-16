@@ -19,24 +19,24 @@
 #include "xarm/core/common/queue_memcpy.h"
 
 class SocketPort {
- public:
-  SocketPort(char *server_ip, int server_port, int que_num, int que_maxlen);
-  ~SocketPort(void);
-  int is_ok(void);
-  void flush(void);
-  void recv_proc(void);
-  int write_frame(unsigned char *data, int len);
-  int read_frame(unsigned char *data);
-  void close_port(void);
-  int que_maxlen_;
+public:
+	SocketPort(char *server_ip, int server_port, int que_num, int que_maxlen);
+	~SocketPort(void);
+	int is_ok(void);
+	void flush(void);
+	void recv_proc(void);
+	int write_frame(unsigned char *data, int len);
+	int read_frame(unsigned char *data);
+	void close_port(void);
+	int que_maxlen_;
 
- private:
-  int fp_;
-  int state_;
-  int que_num_;
-  QueueMemcpy *rx_que_;
-  //pthread_t thread_id_;
-    std::thread thread_id_;
+private:
+	int fp_;
+	int state_;
+	int que_num_;
+	QueueMemcpy *rx_que_;
+	//pthread_t thread_id_;
+	std::thread thread_id_;
 };
 
 #endif

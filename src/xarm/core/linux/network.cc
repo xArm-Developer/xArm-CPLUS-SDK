@@ -4,21 +4,14 @@
  *
  * Author: Jimy Zhang <jimy92@163.com>
  ============================================================================*/
-// #define _WINSOCK_DEPRECATED_NO_WARNINGS
-//#include <arpa/inet.h>
+ // #define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <errno.h>
-//#include <net/if.h>
-//#include <netinet/tcp.h>
 #include <stdio.h>
 #include <string.h>
-//#include <sys/ioctl.h>
-//#include <unistd.h>
-
 #include <iostream>
 
 #ifdef _WIN32
-//#include <windows.h>
-//#include <winsock.h>
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <cstring>
@@ -103,7 +96,7 @@ int socket_connect_server(int *socket, char server_ip[], int server_port) {
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(server_port);
 	//inet_aton(server_ip, &server_addr.sin_addr);
-	inet_pton(AF_INET,server_ip, &server_addr.sin_addr);
+	inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
 	//InetPton(AF_INET, server_ip, &server_addr.sin_addr);
 	int ret =
 		connect(*socket, (struct sockaddr *)&server_addr, sizeof(server_addr));

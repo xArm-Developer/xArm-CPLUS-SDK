@@ -10,38 +10,38 @@
 #include "xarm/wrapper/xarm_api.h"
 
 int main(int argc, char **argv) {
-    if (argc < 2) {
-        printf("Please enter IP address\n");
-        return 0;
-    }
-    std::string port(argv[1]);
+	if (argc < 2) {
+		printf("Please enter IP address\n");
+		return 0;
+	}
+	std::string port(argv[1]);
 
-    XArmAPI *arm = new XArmAPI(port);
-    sleep_milliseconds(500);
-    if (arm->error_code != 0) arm->clean_error();
-    if (arm->warn_code != 0) arm->clean_warn();
-    arm->motion_enable(true);
-    arm->set_mode(0);
-    arm->set_state(0);
-    sleep_milliseconds(500);
+	XArmAPI *arm = new XArmAPI(port);
+	sleep_milliseconds(500);
+	if (arm->error_code != 0) arm->clean_error();
+	if (arm->warn_code != 0) arm->clean_warn();
+	arm->motion_enable(true);
+	arm->set_mode(0);
+	arm->set_state(0);
+	sleep_milliseconds(500);
 
-    printf("=========================================\n");
+	printf("=========================================\n");
 
-    int ret;
-    arm->reset(true);
-    fp32 poses[6][6] = {
-        {300, 0, 200, 180, 0, 0},
-        {300, 200, 200, 180, 0, 0},
-        {500, 200, 200, 180, 0, 0},
-        {500, -200, 200, 180, 0, 0},
-        {300, -200, 200, 180, 0, 0},
-        {300, 0, 200, 180, 0, 0},
-    };
-    for (int i = 0; i < 6; i++) {
-        ret = arm->set_position(poses[i], true);
-        printf("set_position, ret=%d\n", ret);
-    }
+	int ret;
+	arm->reset(true);
+	fp32 poses[6][6] = {
+		{300, 0, 200, 180, 0, 0},
+		{300, 200, 200, 180, 0, 0},
+		{500, 200, 200, 180, 0, 0},
+		{500, -200, 200, 180, 0, 0},
+		{300, -200, 200, 180, 0, 0},
+		{300, 0, 200, 180, 0, 0},
+	};
+	for (int i = 0; i < 6; i++) {
+		ret = arm->set_position(poses[i], true);
+		printf("set_position, ret=%d\n", ret);
+	}
 
-    arm->reset(true);
-    return 0;
+	arm->reset(true);
+	return 0;
 }

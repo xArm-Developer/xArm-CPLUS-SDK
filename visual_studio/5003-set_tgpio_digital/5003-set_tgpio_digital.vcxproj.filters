@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\0002-get_property.cc">
+    <ClCompile Include="5003-set_tgpio_digital.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

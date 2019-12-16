@@ -4,7 +4,13 @@
  *
  * Author: Jimy Zhang <jimy92@163.com>
  ============================================================================*/
+//#include <unistd.h>
+#ifdef _WIN32
+#include <windows.h>
+#include<io.h>
+#else
 #include <unistd.h>
+#endif
 #include "xarm/core/instruction/uxbus_cmd_tcp.h"
 #include "xarm/core/debug/debug_print.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
@@ -48,7 +54,9 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret_data) {
   int i;
   int ret;
-  unsigned char rx_data[arm_port_->que_maxlen_] = {0};
+  // unsigned char rx_data[arm_port_->que_maxlen_] = {0};
+  unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen_];
+
   int times = timeout;
   while (times) {
     times -= 1;
@@ -61,17 +69,26 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
         n = rx_data[9] - 2;
       }
       for (i = 0; i < n; i++) { ret_data[i] = rx_data[i + 8 + 4]; }
+	  delete rx_data;
       // print_hex(" 3", rx_data, num + 8 + 4);
       return ret;
     }
-    usleep(1000);
+    //usleep(1000);
+#ifdef _WIN32
+	Sleep(1); // 1 ms
+#else
+	usleep(1000); // 1000us
+#endif
   }
+  delete rx_data;
   return UXBUS_STATE::ERR_TOUT;
 }
 
 int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {
   int len = num + 7;
-  unsigned char send_data[len];
+  // unsigned char send_data[len];
+  unsigned char *send_data = new unsigned char[len];
+
   bin16_to_8(bus_flag_, &send_data[0]);
   bin16_to_8(prot_flag_, &send_data[2]);
   bin16_to_8(num + 1, &send_data[4]);
@@ -81,6 +98,7 @@ int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {
   arm_port_->flush();
   // print_hex("send:", send_data, num + 7);
   int ret = arm_port_->write_frame(send_data, len);
+  delete send_data;
   if (ret != len) { return -1; }
 
   bus_flag_ += 1;

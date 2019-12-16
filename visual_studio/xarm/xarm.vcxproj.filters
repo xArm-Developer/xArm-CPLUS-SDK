@@ -69,6 +69,18 @@
     <ClInclude Include="..\..\include\xarm\wrapper\xarm_api.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\serial\serial.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\serial\v8stdint.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\serial\impl\unix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\serial\impl\win.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="xarm.rc">
@@ -107,6 +119,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_api.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\impl\unix.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\impl\win.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_linux.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_osx.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_win.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\serial.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

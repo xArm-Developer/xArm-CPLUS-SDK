@@ -5,8 +5,16 @@
  * Author: Jimy Zhang <jimy92@163.com>
  ============================================================================*/
 #include <string.h>
+//#include <sys/socket.h>
+//#include <unistd.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <winsock.h>
+#else
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
 
 #include "xarm/core/port/socket.h"
 #include "xarm/core/linux/network.h"
@@ -14,26 +22,28 @@
 
 void SocketPort::recv_proc(void) {
   int num;
-  unsigned char recv_data[que_maxlen_];
+  // unsigned char recv_data[que_maxlen_];
+  unsigned char *recv_data = new unsigned char[que_maxlen_];
   while (state_ == 0) {
-    bzero(recv_data, que_maxlen_);
+    //bzero(recv_data, que_maxlen_); // Çå¿ÕÊý×é
+	memset(recv_data, 0, que_maxlen_);
     num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
     if (num <= 0) {
       close(fp_);
       printf("SocketPort::recv_proc exit, %d\n", fp_);
-      pthread_exit(0);
+      // pthread_exit(0);
     }
     bin32_to_8(num, &recv_data[0]);
     rx_que_->push(recv_data);
   }
 }
 
-static void *recv_proc_(void *arg) {
+static void recv_proc_(void *arg) {
   SocketPort *my_this = (SocketPort *)arg;
 
   my_this->recv_proc();
 
-  pthread_exit(0);
+  // pthread_exit(0);
 }
 
 SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
@@ -50,7 +60,8 @@ SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
 
   state_ = 0;
   flush();
-  thread_id_ = thread_init(recv_proc_, this);
+  thread_id_ = std::thread(recv_proc_, this);
+  thread_id_.detach();
 }
 
 SocketPort::~SocketPort(void) {

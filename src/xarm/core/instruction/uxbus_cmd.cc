@@ -29,11 +29,13 @@ void UxbusCmd::close(void) {}
  *******************************************************/
 
 int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
-  unsigned char send_data[num];
+  //unsigned char send_data[num];
+  unsigned char *send_data = new unsigned char[num];
   for (int i = 0; i < num; i++)
   { send_data[i] = (unsigned char)datas[i]; }
 
   int ret = send_xbus(funcode, send_data, num);
+  delete send_data;
   if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 
@@ -41,12 +43,14 @@ int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
 }
 
 int UxbusCmd::get_nu8(int funcode, int *rx_data, int num) {
-  unsigned char secv_data[num];
-  int ret = get_nu8(funcode, secv_data, num);
+  // unsigned char secv_data[num];
+  unsigned char *send_data = new unsigned char[num];
+  int ret = get_nu8(funcode, send_data, num);
 
   for (int i = 0; i < num; i++) {
-    rx_data[i] = secv_data[i];
+    rx_data[i] = send_data[i];
   }
+  delete send_data;
   return ret;
 }
 
@@ -58,34 +62,42 @@ int UxbusCmd::get_nu8(int funcode, unsigned char *rx_data, int num) {
 
 int UxbusCmd::set_nu16(int funcode, int *datas, int num) {
 
-  unsigned char send_data[num * 2];
+  //unsigned char send_data[num * 2];
+	unsigned char *send_data = new unsigned char[num * 2];
   for (int i = 0; i < num; i++) {
     bin16_to_8(datas[i], &send_data[i * 2]);
   }
   int ret = send_xbus(funcode, send_data, num * 2);
+  delete send_data;
   if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 
   return ret;
 }
 int UxbusCmd::get_nu16(int funcode, int *rx_data, int num) {
-  unsigned char datas[num * 2];
+  //unsigned char datas[num * 2];
+  unsigned char *datas = new unsigned char[num * 2];
   int ret = send_xbus(funcode, 0, 0);
-  if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
+  if (ret != 0) {
+	delete datas;
+	return UXBUS_STATE::ERR_NOTTCP;
+  }
 
   ret = send_pend(funcode, num * 2, UXBUS_CONF::GET_TIMEOUT, datas);
   for (int i = 0; i < num; i++) {
     rx_data[i] = bin8_to_16(&datas[i * 2]);
   }
+  delete datas;
 
   return ret;
 }
 
 int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
-  unsigned char hexdata[num * 4] = {0};
-
+ // unsigned char hexdata[num * 4] = {0};
+  unsigned char *hexdata = new unsigned char[num * 4];
   nfp32_to_hex(datas, hexdata, num);
   int ret = send_xbus(funcode, hexdata, num * 4);
+  delete hexdata;
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 
@@ -93,10 +105,11 @@ int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
 }
 
 int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
-  unsigned char hexdata[num * 4] = {0};
-
+  //unsigned char hexdata[num * 4] = {0};  \\??
+  unsigned char *hexdata = new unsigned char[num * 4];
   nint32_to_hex(datas, hexdata, num);
   int ret = send_xbus(funcode, hexdata, num * 4);
+  delete hexdata;
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 
@@ -104,13 +117,16 @@ int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
 }
 
 int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
-  unsigned char datas[num * 4] = {0};
-
+  //unsigned char datas[num * 4] = {0};
+  unsigned char *datas = new unsigned char[num * 4];
   int ret = send_xbus(funcode, 0, 0);
-  if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+  if (0 != ret) { 
+	delete datas; 
+	return UXBUS_STATE::ERR_NOTTCP;
+  }
   ret = send_pend(funcode, num * 4, UXBUS_CONF::GET_TIMEOUT, datas);
   hex_to_nfp32(datas, rx_data, num);
-
+  delete datas;
   return ret;
 }
 
@@ -127,13 +143,18 @@ int UxbusCmd::swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data,
 }
 
 int UxbusCmd::is_nfp32(int funcode, float datas[], int txn, int *value) {
-  unsigned char hexdata[txn * 4] = {0};
+  //unsigned char hexdata[txn * 4] = {0};
+  unsigned char *hexdata = new unsigned char[txn * 4];
 
   nfp32_to_hex(datas, hexdata, txn);
   int ret = send_xbus(funcode, hexdata, txn * 4);
-  if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+  if (0 != ret) {
+	delete hexdata; 
+	return UXBUS_STATE::ERR_NOTTCP;
+  }
   ret = send_pend(funcode, 1, UXBUS_CONF::GET_TIMEOUT, hexdata);
   *value = hexdata[0];
+  delete hexdata;
 
   return ret;
 }
@@ -204,7 +225,8 @@ int UxbusCmd::get_reduced_mode(int *rx_data) {
 }
 
 int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14], int *fense_is_on, int *collision_rebound_is_on, int length) {
-  unsigned char rx_data[length] = {0};
+  //unsigned char rx_data[length] = {0};
+  unsigned char *rx_data = new unsigned char[length];
   int ret = get_nu8(UXBUS_RG::GET_REDUCED_STATE, rx_data, length);
   *on = rx_data[0];
   bin8_to_ns16(&rx_data[1], xyz_list, 6);
@@ -215,6 +237,7 @@ int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, flo
     if (fense_is_on != NULL) { *fense_is_on = rx_data[77]; }
     if (collision_rebound_is_on != NULL) { *collision_rebound_is_on = rx_data[78]; }
   }
+  delete rx_data;
   return ret;
 }
 
@@ -644,10 +667,12 @@ int UxbusCmd::tgpio_get_analog2(float * value) {
  * tgpio modbus
  *******************************************************/
 int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data) {
-  unsigned char txdata[len_t + 1];
+  //unsigned char txdata[len_t + 1];
+  unsigned char *txdata = new unsigned char[len_t + 1];
   txdata[0] = UXBUS_CONF::TGPIO_ID;
   for (int i = 0; i < len_t; i++) { txdata[i+1] = modbus_t[i]; }
   int ret = send_xbus(UXBUS_RG::TGPIO_MODBUS, txdata, len_t + 1);
+  delete txdata;
   if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
   ret = send_pend(UXBUS_RG::TGPIO_MODBUS, -1, UXBUS_CONF::GET_TIMEOUT, rx_data);

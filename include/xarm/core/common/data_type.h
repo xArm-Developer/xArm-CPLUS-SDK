@@ -8,7 +8,7 @@
 #define CORE_COMMON_DATA_TYPE_H_
 
 #include <stdio.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 
 
 inline void bin64_to_8(long long a, unsigned char* b) {

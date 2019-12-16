@@ -7,8 +7,14 @@
 #ifndef CORE_PORT_SERIAL_H_
 #define CORE_PORT_SERIAL_H_
 
+//#include <pthread.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <pthread.h>
+#endif
 
+#include "serial/serial.h"
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/common/queue_memcpy.h"
 
@@ -16,6 +22,7 @@ class SerialPort {
  public:
   SerialPort(const char *port, int baud, int que_num, int que_maxlen);
   ~SerialPort(void);
+  serial::Serial ser;
   int is_ok(void);
   void flush(void);
   void recv_proc(void);
@@ -28,7 +35,13 @@ class SerialPort {
  private:
   int fp_;
   int state_;
+  //pthread_t thread_id_;
+#ifdef WIN32
+  HANDLE m_handle;
+#else
   pthread_t thread_id_;
+#endif
+
   QueueMemcpy *rx_que_;
   int init_serial(const char *port, int baud);
   int read_char(unsigned char *ch);

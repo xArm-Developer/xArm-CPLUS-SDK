@@ -25,7 +25,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -38,7 +38,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -71,6 +71,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>E:\Vinman\UFACTORY\xArm-CPLUS-SDK\include;$(IncludePath)</IncludePath>
     <SourcePath>E:\Vinman\UFACTORY\xArm-CPLUS-SDK\src;$(SourcePath)</SourcePath>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,6 +117,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\serial\impl\unix.h" />
+    <ClInclude Include="..\..\include\serial\impl\win.h" />
+    <ClInclude Include="..\..\include\serial\serial.h" />
+    <ClInclude Include="..\..\include\serial\v8stdint.h" />
     <ClInclude Include="..\..\include\xarm\core\common\crc16.h" />
     <ClInclude Include="..\..\include\xarm\core\common\data_type.h" />
     <ClInclude Include="..\..\include\xarm\core\common\queue_memcpy.h" />
@@ -136,6 +144,12 @@
     <ResourceCompile Include="xarm.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_linux.cc" />
+    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_osx.cc" />
+    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_win.cc" />
+    <ClCompile Include="..\..\src\serial\impl\unix.cc" />
+    <ClCompile Include="..\..\src\serial\impl\win.cc" />
+    <ClCompile Include="..\..\src\serial\serial.cc" />
     <ClCompile Include="..\..\src\xarm\core\common\crc16.cc" />
     <ClCompile Include="..\..\src\xarm\core\common\queue_memcpy.cc" />
     <ClCompile Include="..\..\src\xarm\core\debug\debug_print.cc" />

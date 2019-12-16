@@ -8,11 +8,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/shm.h>
-#include <sys/time.h>
+//#include <sys/shm.h>
+//#include <sys/time.h>
 #include <sys/types.h>
+//#include <termios.h>
+//#include <unistd.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <sys/timeb.h>
+#else
+#include <sys/shm.h>
+#include <unistd.h>
 #include <termios.h>
 #include <unistd.h>
+#endif
 
 #include "xarm/core/port/serial.h"
 #include "xarm/core/common/crc16.h"
@@ -28,17 +38,30 @@ void SerialPort::recv_proc(void) {
       parse_put(&ch, 1);
       continue;
     }
-    usleep(1000);
+    //usleep(1000);
+#ifdef _WIN32
+	Sleep(1); // 1 ms
+#else
+	usleep(1000); // 1000us
+#endif
   }
 }
 
-static void *recv_proc_(void *arg) {
-  SerialPort *my_this = (SerialPort *)arg;
+#ifdef _WIN32
+static unsigned __stdcall recv_proc_(void *arg) {
+	SerialPort *my_this = (SerialPort *)arg;
 
-  my_this->recv_proc();
-
-  pthread_exit(0);
+	my_this->recv_proc();
+	ExitThread(4);
 }
+#else
+static void *recv_proc_(void *arg) {
+	SerialPort *my_this = (SerialPort *)arg;
+
+	my_this->recv_proc();
+	pthread_exit(0)
+}
+#endif
 
 SerialPort::SerialPort(const char *port, int baud, int que_num,
                        int que_maxlen) {
@@ -57,7 +80,12 @@ SerialPort::SerialPort(const char *port, int baud, int que_num,
   UXBUS_PROT_FROMID_ = 0x55;
   UXBUS_PROT_TOID_ = 0xAA;
   flush();
+  //thread_id_ = thread_init(recv_proc_, this);
+#ifdef WIN32
+  m_handle = thread_init(recv_proc_, this);
+#else
   thread_id_ = thread_init(recv_proc_, this);
+#endif
 }
 
 SerialPort::~SerialPort(void) {
@@ -73,7 +101,17 @@ void SerialPort::flush(void) {
   rx_state_ = UXBUS_START_FROMID;
 }
 
-int SerialPort::read_char(unsigned char *ch) { return (read(fp_, ch, 1) == 1) ? 0 : -1; }
+int SerialPort::read_char(unsigned char *ch) { 
+	//return (read(fp_, ch, 1) == 1) ? 0 : -1;
+	try {
+		ser.read();
+		return 0;
+	}
+	catch (...) {
+		return -1;
+	}
+	
+}
 
 int SerialPort::read_frame(unsigned char *data) {
   if (state_ != 0) { return -1; }
@@ -85,17 +123,36 @@ int SerialPort::read_frame(unsigned char *data) {
 }
 
 int SerialPort::write_char(unsigned char ch) {
-  return ((write(fp_, &ch, 1) == 1) ? 0 : -1);
+  //return ((write(fp_, &ch, 1) == 1) ? 0 : -1);
+	try {
+		ser.write(std::to_string(ch));
+		return 0;
+	}
+	catch (...) {
+		return -1;
+	}
 }
 
 int SerialPort::write_frame(unsigned char *data, int len) {
-  if (write(fp_, data, len) != len) { return -1; }
-  return 0;
+  //if (write(fp_, data, len) != len) { return -1; }
+  //return 0;
+	try {
+
+		std::string str_data = (char *)data;
+		int size = ser.write(str_data);
+		if (size != len) { return -1; }
+		return 0;
+	}
+	catch (...) {
+		return -1;
+	}
+
 }
 
 void SerialPort::close_port(void) {
   state_ = -1;
-  close(fp_);
+  //close(fp_);
+  ser.close();
   delete rx_que_;
 }
 
@@ -168,7 +225,7 @@ void SerialPort::parse_put(unsigned char *data, int len) {
 }
 
 int SerialPort::init_serial(const char *port, int baud) {
-  speed_t speed;
+ /* speed_t speed;
   struct termios options;
 
   fp_ = open((const char *)port, O_RDWR | O_NOCTTY);
@@ -225,4 +282,16 @@ int SerialPort::init_serial(const char *port, int baud) {
   options.c_cc[VMIN] = 10;
   tcsetattr(fp_, TCSANOW, &options);
   return 0;
+  */
+	try{
+		ser.setPort(port);
+		ser.setBaudrate(baud);
+		ser.setTimeout(serial::Timeout::simpleTimeout(1000));
+		ser.open();
+		return 0;
+	}
+	catch (...) {
+		return -1;
+
+	}
 }

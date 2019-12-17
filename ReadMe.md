@@ -2,7 +2,7 @@
 
 
 ## Overview
-- The current version supports Linux and windows, but the source code has changed.
+- The current version supports Linux and windows, but the source code structure has changed.
 
 ## Caution
 - During use, people should stay away from the robot arm to avoid accidental injury or damage to other items by the robot arm.
@@ -11,6 +11,19 @@
 - Protect the arm before unlocking the motor.
 
 
+## Update Summary
+
+- > ### 1.3.1
+  - Support windows platform
+
+- > ### 1.3.0
+
+  - Added several attributes
+  - Support tool coordinate system movement
+  - Support joint range limitation, collision rebound setting
+  - Support user coordinate system setting
+  - Support the status of the air pump
+  - Added counter interface
 
 ## Linux
 
@@ -108,9 +121,9 @@
   	$(ProjectDir)..\..\src
   ```
 
-  ![image-20191217153415733](ReadMe_images/image-20191217153415733.png)
+  ![image-20191217153415733](doc/img/image-20191217153415733.png)
 
-  ![image-20191217152542587](ReadMe_images/image-20191217152542587.png)
+  ![image-20191217152542587](doc/img/image-20191217152542587.png)
 
   
 
@@ -121,9 +134,9 @@
 Example project dependencies and xarm projects so references must be added to run.
   ```
   
-  ![image-20191217154258804](ReadMe_images/image-20191217154258804.png)
+  ![image-20191217154258804](doc/img/image-20191217154258804.png)
   
-  ![image-20191217154111439](ReadMe_images/image-20191217154111439.png)
+  ![image-20191217154111439](doc/img/image-20191217154111439.png)
 
 
 
@@ -136,7 +149,7 @@ Example project dependencies and xarm projects so references must be added to ru
   .exe path like this C:\Users\ufactory\Desktop\xArm-CPLUS-SDK\visual_studio\x64\Debug\0002-get_property.exe
   ```
 
-  ![image-20191217155932743](ReadMe_images/image-20191217155932743.png)
+  ![image-20191217155932743](doc/img/image-20191217155932743.png)
 
   
 
@@ -145,11 +158,11 @@ Example project dependencies and xarm projects so references must be added to ru
   ```
   You can use cmd run project.
   ```
-  
-![image-20191217160911893](ReadMe_images/image-20191217160911893.png)
-  
 
-  
+  ![image-20191217160911893](doc/img/image-20191217160911893.png)
+
+
+
 - New project
 
   ```
@@ -209,16 +222,4 @@ Example project dependencies and xarm projects so references must be added to ru
 
 - #### [API Document](doc/xarm_cplus_api.md)
 - #### [API Code Document](doc/xarm_api_code.md)
-
-
-
-## Update Summary
-
-- > ### 1.3.0
-  - Added several attributes
-  - Support tool coordinate system movement
-  - Support joint range limitation, collision rebound setting
-  - Support user coordinate system setting
-  - Support the status of the air pump
-  - Added counter interface
 

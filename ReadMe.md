@@ -1,8 +1,8 @@
 # xArm-C++-SDK
-----------
+
 
 ## Overview
-- Only support Linux
+- The current version supports Linux and windows, but the source code has changed.
 
 ## Caution
 - During use, people should stay away from the robot arm to avoid accidental injury or damage to other items by the robot arm.
@@ -10,15 +10,23 @@
 - Before you exercise, please make sure you don't encounter obstacles.
 - Protect the arm before unlocking the motor.
 
-### Install
 
-Get the code:
 
-```bash
-git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
-```
+## Linux
 
-#### Linux
+- Get the code:
+
+  ```
+  git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
+  ```
+
+- Change directory
+
+  ```
+  cd ./xArm-CPLUS-SDK/
+  ```
+
+
 - Build library:
   ```bash
   make xarm
@@ -60,21 +68,90 @@ git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
     ./build/example/0002-get_property 192.168.1.221
     ```
 
-## Doc
-- #### [API Document](doc/xarm_cplus_api.md)
-- #### [API Code Document](doc/xarm_api_code.md)
 
-## Update Summary
 
-- > ### 1.3.0
-  - Added several attributes
-  - Support tool coordinate system movement
-  - Support joint range limitation, collision rebound setting
-  - Support user coordinate system setting
-  - Support the status of the air pump
-  - Added counter interface
+
+## Windows
+
+- Running environment
+
+  ```
+  It is recommended to run the project with visual studio 2015.Make sure your visual studio 2015 has a visual C++ development environment installed before running.
+  ```
+  
+- Get the code:
+
+  ```
+  git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
+  ```
+
+- Change directory
+
+  ```
+  Change your directory xArm-CPLUS-SDK/visual_studio
+  ```
+
+- Open project
+
+  ```
+  If you changed your directory, you can see a visual_studio.sln file. Click this file you will open the project.
+  ```
+
+
+- Check the project properties
+
+  ```
+  Open the xarm property pages and make sure your project configuration is the same as the following screenshot configuration.
+  
+  VC++ Directories path 
+  	$(ProjectDir)..\..\include
+  	$(ProjectDir)..\..\src
+  ```
+
+  ![image-20191217153415733](ReadMe_images/image-20191217153415733.png)
+
+  ![image-20191217152542587](ReadMe_images/image-20191217152542587.png)
+
+  
+
+  ```
+  Open the example property pages and make sure your project configuration is the same as the following screenshot configuration.
+  Example project dependencies and xarm projects so references must be added to run.
+```
+  
+![image-20191217154258804](ReadMe_images/image-20191217154258804.png)
+  
+  ![image-20191217154111439](ReadMe_images/image-20191217154111439.png)
+
+
+- Build project
+
+  ```
+  Right click example project and build the projiect.If the example project bulid successful you will get a .exe file in you project path.
+  .exe path like this C:\Users\ufactory\Desktop\xArm-CPLUS-SDK\visual_studio\x64\Debug\0002-get_property.exe
+  ```
+
+  ![image-20191217155932743](ReadMe_images/image-20191217155932743.png)
+
+- Run project
+
+  ```
+  You can use cmd run projiect.
+  0002-get_property.exe 192.168.1.226
+```
+  
+  ![image-20191217160911893](ReadMe_images/image-20191217160911893.png)
+  
+- New project
+
+  ```
+  If you want to create a new project, you need to pay attention to the dependent path of your new project. You must make sure that the configuration of the project you create is the same as that of the example project.
+  ```
+
+  
 
 ## [Example](example/)
+
 - ##### [0001-event_register](example/0001-event_register.cc)
 
 - ##### [0002-get_property](example/0002-get_property.cc)
@@ -117,3 +194,21 @@ git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
 
 - ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
 
+
+
+## Doc
+
+- #### [API Document](doc/xarm_cplus_api.md)
+- #### [API Code Document](doc/xarm_api_code.md)
+
+
+
+## Update Summary
+
+- > ### 1.3.0
+  - Added several attributes
+  - Support tool coordinate system movement
+  - Support joint range limitation, collision rebound setting
+  - Support user coordinate system setting
+  - Support the status of the air pump
+  - Added counter interface

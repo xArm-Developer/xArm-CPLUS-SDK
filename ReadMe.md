@@ -14,6 +14,7 @@
 ## Update Summary
 
 - > ### 1.3.1
+
   - Support windows platform
 
 - > ### 1.3.0
@@ -113,7 +114,7 @@
 
 - Check the xarm project properties
 
-  ```
+  ```markdown
   Open the xarm property pages and make sure your project configuration is the same as the following screenshot configuration.
   
   VC++ Directories path 
@@ -128,22 +129,19 @@
   
 
 - Check the example project properties
-  
-  ```
+
+  ```markdown
   Open the example property pages and make sure your project configuration is the same as the following screenshot configuration.
-Example project dependencies and xarm projects so references must be added to run.
+  Example project dependencies and xarm projects so references must be added to run.
   ```
-  
   ![image-20191217154258804](doc/img/image-20191217154258804.png)
-  
+
   ![image-20191217154111439](doc/img/image-20191217154111439.png)
-
-
 
 
 - Build project
 
-  ```
+  ```markdown
   Right click example project and build the projiect.If the example project bulid successful you will get a .exe file in you project path.
   
   .exe path like this C:\Users\ufactory\Desktop\xArm-CPLUS-SDK\visual_studio\x64\Debug\0002-get_property.exe
@@ -151,21 +149,18 @@ Example project dependencies and xarm projects so references must be added to ru
 
   ![image-20191217155932743](doc/img/image-20191217155932743.png)
 
-  
 
 - Run project
 
-  ```
-  You can use cmd run project.
+  ```markdown
+  You can use cmd run project.  
   ```
 
   ![image-20191217160911893](doc/img/image-20191217160911893.png)
 
-
-
 - New project
 
-  ```
+  ```markdown
   If you want to create a new project, you need to pay attention to the dependent path of your new project. 
   You must make sure that the configuration of the project you create is the same as that of the example project.
   ```

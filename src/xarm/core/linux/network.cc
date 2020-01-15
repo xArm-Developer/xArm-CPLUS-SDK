@@ -24,6 +24,13 @@
 #include <sys/ioctl.h>
 #endif
 
+#ifdef _WIN32
+#ifndef inet_pton
+extern "C" {
+	WINSOCK_API_LINKAGE  INT WSAAPI inet_pton(INT Family, PCSTR pszAddrString, PVOID pAddrBuf);
+}
+#endif
+#endif
 
 #include "xarm/core/linux/network.h"
 

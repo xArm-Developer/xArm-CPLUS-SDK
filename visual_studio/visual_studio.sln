@@ -47,6 +47,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6001-set_reduced_mode", "60
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6002-set_fense_mode", "6002-set_fense_mode\6002-set_fense_mode.vcxproj", "{D8B9FC61-C667-4E89-B284-D6068E53A747}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7001-servo_j", "7001-servo_j\7001-servo_j.vcxproj", "{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7002-servo_cartesian", "7002-servo_cartesian\7002-servo_cartesian.vcxproj", "{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -231,6 +235,22 @@ Global
 		{D8B9FC61-C667-4E89-B284-D6068E53A747}.Release|x64.Build.0 = Release|x64
 		{D8B9FC61-C667-4E89-B284-D6068E53A747}.Release|x86.ActiveCfg = Release|Win32
 		{D8B9FC61-C667-4E89-B284-D6068E53A747}.Release|x86.Build.0 = Release|Win32
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Debug|x64.ActiveCfg = Debug|x64
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Debug|x64.Build.0 = Debug|x64
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Debug|x86.ActiveCfg = Debug|Win32
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Debug|x86.Build.0 = Debug|Win32
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Release|x64.ActiveCfg = Release|x64
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Release|x64.Build.0 = Release|x64
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Release|x86.ActiveCfg = Release|Win32
+		{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}.Release|x86.Build.0 = Release|Win32
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Debug|x64.ActiveCfg = Debug|x64
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Debug|x64.Build.0 = Debug|x64
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Debug|x86.ActiveCfg = Debug|Win32
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Debug|x86.Build.0 = Debug|Win32
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Release|x64.ActiveCfg = Release|x64
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Release|x64.Build.0 = Release|x64
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Release|x86.ActiveCfg = Release|Win32
+		{4C35323A-5690-4D0E-8CA6-466EEB08C3A4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

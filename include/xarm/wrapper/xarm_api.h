@@ -30,7 +30,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.3.1"
+#define SDK_VERSION "1.4.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -375,7 +375,7 @@ public:
 	int set_servo_angle(int servo_id, fp32 angle, bool wait = false, fp32 timeout = NO_TIMEOUT);
 
 	/*
-	* Serbo_j motion
+	* Servo_j motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
 	* @param angles: angles, like [servo-1, ..., servo-7]
 		if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
 		if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees
@@ -389,6 +389,18 @@ public:
 	* return: see the API code documentation for details.
 	*/
 	int set_servo_angle_j(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0);
+
+	/*
+	* Servo cartesian motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
+	* @param pose: position, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
+		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
+	* @param speed: reserved, move speed (mm/s)
+	* @param mvacc: reserved, move acceleration (mm/s^2)
+	* @param mvtime: reserved, 0
+	* return: see the API code documentation for details.
+	*/
+	int set_servo_cartesian(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0);
 
 	/*
 	* The motion calculates the trajectory of the space circle according to the three-point coordinates.

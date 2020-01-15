@@ -383,6 +383,15 @@ int UxbusCmd::move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvt
 	return set_nfp32(UXBUS_RG::MOVE_SERVOJ, txdata, 10);
 }
 
+int UxbusCmd::move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime) {
+	float txdata[9] = { 0 };
+	for (int i = 0; i < 6; i++) { txdata[i] = mvpose[i]; }
+	txdata[6] = mvvelo;
+	txdata[7] = mvacc;
+	txdata[8] = mvtime;
+	return set_nfp32(UXBUS_RG::MOVE_SERVO_CART, txdata, 9);
+}
+
 int UxbusCmd::set_servot(float jnt_taus[7]) {
 	float txdata[7] = { 0 };
 	for (int i = 0; i < 7; i++) { txdata[i] = jnt_taus[i]; }
@@ -878,19 +887,19 @@ int UxbusCmd::cgpio_set_outfun(int num, int fun) {
 }
 
 /**
- *　获取controler gpio的所有状态信息
+ *　get controler gpio all state infomation
  * @method UxbusCmd::cgpio_get_state
  * @param  state                     [description]
- * @param  digit_io                  [数字输入功能io状态
-									  数字输入配置io状态
-									  数字输出功能io状态
-									  数字输出配置io状态]
- * @param  analog                    [模拟输入1
-									  模拟输入2
-									  模拟输出1
-									  模拟输出2]
- * @param  input_conf                [８个输入gpio的功能配置表]
- * @param  output_conf               [８个输出gpio的功能配置表]
+ * @param  digit_io                  [digital input functional gpio state,
+									  digital input configuring gpio state,
+									  digital output functional gpio state,
+									  digital output configuring gpio state]
+ * @param  analog                    [analog-1 input value,
+									  analog-2 input value,
+									  analog-1 output value,
+									  analog-2 output value]
+ * @param  input_conf                [digital input functional info]
+ * @param  output_conf               [digital output functional info]
  * @return                           [description]
  */
 

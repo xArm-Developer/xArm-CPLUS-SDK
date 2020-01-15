@@ -585,6 +585,20 @@ Set the servo angle, execute only the last instruction, need to be set to servo 
 :return: see the API code documentation for details.
 ```
 
+__int set_servo_cartesian(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0)__
+```
+Servo cartesian motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
+
+:param pose: position, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
+	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+	if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
+:param speed: reserved, move speed (mm/s)
+:param mvacc: reserved, move acceleration (mm/s^2)
+:param mvtime: reserved, 0
+    
+:return: see the API code documentation for details.
+```
+
 __int move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT)__
 ```
 The motion calculates the trajectory of the space circle according to the three-point coordinates.

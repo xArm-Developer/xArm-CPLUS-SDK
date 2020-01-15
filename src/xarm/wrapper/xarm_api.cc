@@ -606,7 +606,7 @@ void XArmAPI::_check_version(void) {
 		count -= 1;
 	}
 	std::string v((const char *)version_);
-	std::regex pattern(".*[vV](\\d+)[.](\\d+)[.](\\d+)");
+	std::regex pattern(".*[vV](\\d+)[.](\\d+)[.](\\d+).*");
 	std::smatch result;
 	if (std::regex_match(v, result, pattern)) {
 		auto it = result.begin();
@@ -1190,11 +1190,8 @@ int XArmAPI::set_servo_angle(int servo_id, fp32 angle, bool wait, fp32 timeout) 
 int XArmAPI::set_servo_angle_j(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime) {
 	if (!is_connected()) return -1;
 	int ret = 0;
-	// last_used_joint_speed = speed > 0 ? speed : last_used_joint_speed;
-	// last_used_joint_acc = acc > 0 ? acc : last_used_joint_acc;
-	fp32 mvjoint[6];
+	fp32 mvjoint[7];
 	for (u32 i = 0; i < 7; i++) {
-		// last_used_angles[i] = angs[i];
 		mvjoint[i] = (float)(default_is_radian ? angs[i] : angs[i] / RAD_DEGREE);
 	}
 
@@ -1203,6 +1200,24 @@ int XArmAPI::set_servo_angle_j(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime) 
 	}
 	else {
 		ret = cmd_ser_->move_servoj(mvjoint, last_used_joint_speed, last_used_joint_acc, mvtime);
+	}
+
+	return ret;
+}
+
+int XArmAPI::set_servo_cartesian(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime) {
+	if (!is_connected()) return -1;
+	int ret = 0;
+	fp32 mvpose[6];
+	for (u32 i = 0; i < 6; i++) {
+		mvpose[i] = (float)(i < 3 || default_is_radian ? pose[i] : pose[i] / RAD_DEGREE);
+	}
+
+	if (is_tcp_) {
+		ret = cmd_tcp_->move_servo_cartesian(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
+	}
+	else {
+		ret = cmd_ser_->move_servo_cartesian(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
 	}
 
 	return ret;

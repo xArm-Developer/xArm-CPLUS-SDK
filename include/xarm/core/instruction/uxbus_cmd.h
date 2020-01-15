@@ -54,6 +54,7 @@ public:
 	int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime);
 	int move_gohome(float mvvelo, float mvacc, float mvtime);
 	int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
+	int move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime);
 	int set_servot(float jnt_taus[7]);
 	int get_joint_tau(float jnt_taus[7]);
 	int set_safe_level(int level);

@@ -19,34 +19,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DEE3D7EF-64E9-4614-8E4B-C78464A758E5}</ProjectGuid>
-    <RootNamespace>xarm</RootNamespace>
+    <ProjectGuid>{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}</ProjectGuid>
+    <RootNamespace>My7001servo_j</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
-    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
-    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,32 +68,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\Vinman\UFACTORY\xArm-CPLUS-SDK\include;$(IncludePath)</IncludePath>
-    <SourcePath>E:\Vinman\UFACTORY\xArm-CPLUS-SDK\src;$(SourcePath)</SourcePath>
-    <TargetExt>.lib</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(ProjectDir)..\..\src;$(SourcePath)</SourcePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(ProjectDir)..\..\src;$(SourcePath)</SourcePath>
-    <TargetExt>.dll</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(ProjectDir)..\..\src;$(SourcePath)</SourcePath>
-    <TargetExt>.dll</TargetExt>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <CompileAs>Default</CompileAs>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,8 +82,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4267;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <CompileAs>Default</CompileAs>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,50 +112,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\serial\impl\unix.h" />
-    <ClInclude Include="..\..\include\serial\impl\win.h" />
-    <ClInclude Include="..\..\include\serial\serial.h" />
-    <ClInclude Include="..\..\include\serial\v8stdint.h" />
-    <ClInclude Include="..\..\include\xarm\core\common\crc16.h" />
-    <ClInclude Include="..\..\include\xarm\core\common\data_type.h" />
-    <ClInclude Include="..\..\include\xarm\core\common\queue_memcpy.h" />
-    <ClInclude Include="..\..\include\xarm\core\debug\debug_print.h" />
-    <ClInclude Include="..\..\include\xarm\core\instruction\servo3_config.h" />
-    <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd.h" />
-    <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_config.h" />
-    <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_ser.h" />
-    <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_tcp.h" />
-    <ClInclude Include="..\..\include\xarm\core\linux\network.h" />
-    <ClInclude Include="..\..\include\xarm\core\linux\thread.h" />
-    <ClInclude Include="..\..\include\xarm\core\port\ser.h" />
-    <ClInclude Include="..\..\include\xarm\core\port\socket.h" />
-    <ClInclude Include="..\..\include\xarm\core\xarm_config.h" />
-    <ClInclude Include="..\..\include\xarm\wrapper\common\timer.h" />
-    <ClInclude Include="..\..\include\xarm\wrapper\common\utils.h" />
-    <ClInclude Include="..\..\include\xarm\wrapper\xarm_api.h" />
-    <ClInclude Include="resource.h" />
+    <ClCompile Include="..\..\example\7001-servo_j.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="xarm.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_linux.cc" />
-    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_osx.cc" />
-    <ClCompile Include="..\..\src\serial\impl\list_ports\list_ports_win.cc" />
-    <ClCompile Include="..\..\src\serial\impl\unix.cc" />
-    <ClCompile Include="..\..\src\serial\impl\win.cc" />
-    <ClCompile Include="..\..\src\serial\serial.cc" />
-    <ClCompile Include="..\..\src\xarm\core\common\crc16.cc" />
-    <ClCompile Include="..\..\src\xarm\core\common\queue_memcpy.cc" />
-    <ClCompile Include="..\..\src\xarm\core\debug\debug_print.cc" />
-    <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd.cc" />
-    <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd_ser.cc" />
-    <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd_tcp.cc" />
-    <ClCompile Include="..\..\src\xarm\core\linux\network.cc" />
-    <ClCompile Include="..\..\src\xarm\core\linux\thread.cc" />
-    <ClCompile Include="..\..\src\xarm\core\port\ser.cc" />
-    <ClCompile Include="..\..\src\xarm\core\port\socket.cc" />
-    <ClCompile Include="..\..\src\xarm\wrapper\xarm_api.cc" />
+    <ProjectReference Include="..\xarm\xarm.vcxproj">
+      <Project>{dee3d7ef-64e9-4614-8e4b-c78464a758e5}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

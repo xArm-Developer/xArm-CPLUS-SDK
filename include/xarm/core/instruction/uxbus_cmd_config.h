@@ -36,6 +36,7 @@ public:
 	static const unsigned char MOVE_CIRCLE = 27;
 	static const unsigned char MOVE_LINE_TOOL = 28;
 	static const unsigned char MOVE_SERVOJ = 29;
+	static const unsigned char MOVE_SERVO_CART = 30;
 
 	static const unsigned char SET_TCP_JERK = 31;
 	static const unsigned char SET_TCP_MAXACC = 32;

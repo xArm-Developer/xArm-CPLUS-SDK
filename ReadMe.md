@@ -13,9 +13,10 @@
 
 ## Update Summary
 
-- > ### 1.3.1
+- > ### 1.4.0
 
   - Support windows platform
+  - Support servo cartesian interface
 
 - > ### 1.3.0
 
@@ -211,7 +212,8 @@
 
 - ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
 
-
+- ##### [7002-servo_j](example/7001-servo_j.cc)
+- ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
 
 ## Doc
 

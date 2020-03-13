@@ -16,6 +16,7 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <cstring>
 #include<ws2tcpip.h>
+#include<MSTCPiP.h>
 #else
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -68,6 +69,20 @@ int socket_init(char *local_ip, int port, int is_server) {
 	ret = setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE, (char *)&keepAlive,
 		sizeof(keepAlive));
 	PERRNO(ret, DB_FLG, "error: setsockopt");
+
+	tcp_keepalive alive_in;
+	tcp_keepalive alive_out;
+	alive_in.keepalivetime = 1000;  // 1s
+	alive_in.keepaliveinterval = 1000; //1s
+	alive_in.onoff = TRUE;
+	unsigned long ulBytesReturn = 0;
+	ret = WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, &alive_in, sizeof(alive_in),
+		&alive_out, sizeof(alive_out), &ulBytesReturn, NULL, NULL);
+	if (ret == SOCKET_ERROR)
+	{
+		PERRNO(ret, DB_FLG, "WSAIoctl failed");
+		// TRACE(L"setsockopt failed: %d\n", WSAGetLastError());
+	}
 	/*
 	ret = setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE, (char *)&keepIdle,
 		sizeof(keepIdle));

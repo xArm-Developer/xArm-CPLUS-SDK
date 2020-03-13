@@ -1033,10 +1033,10 @@ int XArmAPI::set_pause_time(fp32 sltime) {
 		ret = cmd_ser_->sleep_instruction(sltime);
 	}
 	if (get_system_time() >= sleep_finish_time_) {
-		sleep_finish_time_ = (long long)(get_system_time() + sltime * 1000);
+		sleep_finish_time_ = get_system_time() + (long long)(sltime * 1000);
 	}
 	else {
-		sleep_finish_time_ += (long long)(sltime * 1000);
+		sleep_finish_time_ = sleep_finish_time_ + (long long)(sltime * 1000);
 	}
 	return ret;
 }
@@ -1049,8 +1049,7 @@ void XArmAPI::_wait_stop(fp32 timeout) {
 	int count = 0;
 	while ((timeout <= 0 || (get_system_time() - start_time < timeout * 1000)) && !is_stop_ && is_connected() && !has_error()) {
 		if (state == 4) {
-			sleep_finish_time_ = 0;
-			return;
+			break;
 		}
 		if (get_system_time() < sleep_finish_time_) {
 			sleep_milliseconds(20);
@@ -1068,9 +1067,10 @@ void XArmAPI::_wait_stop(fp32 timeout) {
 			count = 0;
 		}
 		if (count >= 10)
-			return;
+			break;
 		sleep_milliseconds(50);
 	}
+	sleep_finish_time_ = 0;
 	is_stop_ = true;
 }
 

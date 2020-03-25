@@ -587,7 +587,10 @@ void XArmAPI::_recv_report_data(void) {
 		if (ret != 0) continue;
 		_update(rx_data);
 	}
-	report_thread_.join();
+	try {
+		report_thread_.join();
+	} catch (...) {
+	}
 }
 
 static void report_thread_handle_(void *arg) {

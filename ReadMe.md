@@ -211,8 +211,9 @@
 - ##### [7002-servo_j](example/7001-servo_j.cc)
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
 
-## Doc
 
+## Doc
 - #### [API Document](doc/xarm_cplus_api.md)
+
 - #### [API Code Document](doc/xarm_api_code.md)
 

@@ -211,9 +211,6 @@
 - ##### [7002-servo_j](example/7001-servo_j.cc)
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
 
-- ##### [thirdparty-set_robotiq_gripper](example/thirdparty-set_robotiq_gripper.cc)
-- ##### [thirdparty-set_yinshi_gripper](example/thirdparty-set_yinshi_gripper.cc)
-
 ## Doc
 
 - #### [API Document](doc/xarm_cplus_api.md)

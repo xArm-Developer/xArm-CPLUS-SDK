@@ -9,6 +9,7 @@
 #ifndef WRAPPER_COMMON_TIMER_H_
 #define WRAPPER_COMMON_TIMER_H_
 
+#include <iostream>
 #include <functional>
 #include <chrono>
 #include <thread>
@@ -16,6 +17,8 @@
 #include <memory>
 #include <mutex>
 #include <condition_variable>
+#include <vector>
+#include <queue>
 
 class Timer {
 public:
@@ -95,6 +98,108 @@ private:
 	std::atomic<bool> try_to_expire_;
 	std::mutex mutex_;
 	std::condition_variable expired_cond_;
+};
+
+class ThreadPool {
+public:
+	ThreadPool(int max_thread_count = 10) : max_thread_count_(max_thread_count), total_thread_count_(0), free_thread_count_(0) {};
+	~ThreadPool() {
+		stop();
+	};
+
+	static void thread_handle(void *arg) {
+		ThreadPool *pool = (ThreadPool *)arg;
+		pool->_thread_process();
+	};
+
+	void _thread_process(void) {
+		std::unique_lock<std::mutex> locker(mutex_);
+		total_thread_count_ += 1;
+		free_thread_count_ += 1;
+		int thread_inx = total_thread_count_;
+		locker.unlock();
+
+		// std::cout << "callback thread start, thread_index=" << thread_inx << ", thread_id=" << std::this_thread::get_id() << std::endl;
+		while (!stoped_) {
+			std::function<void()> task;
+			locker.lock();
+			task_cond_.wait(locker, [this] {
+				return stoped_ || !task_que_.empty();
+			});
+			if (stoped_ && task_que_.empty()) {
+				locker.unlock();
+				break;
+			}
+			free_thread_count_ -= 1;
+			task = std::move(task_que_.front());
+			task_que_.pop();
+			locker.unlock();
+			task();
+			locker.lock();
+			free_thread_count_ += 1;
+			locker.unlock();
+		}
+		locker.lock();
+		total_thread_count_ -= 1;
+		free_thread_count_ -= 1;
+		locker.unlock();
+		// std::cout << "callback thread finished, thread_index=" << thread_inx << ", thread_id=" << std::this_thread::get_id() << std::endl;
+	};
+
+	void stop() {
+		stoped_.store(true);
+		task_cond_.notify_all();
+		for (std::thread& thread : pool_) {
+			try {
+				if (thread.joinable()) thread.join();
+			}
+			catch (...) {}
+		}
+	};
+
+	void set_max_thread_count(int max_thread_count) {
+		max_thread_count_ = max_thread_count;
+	};
+
+	template<typename callable, class... arguments>
+	void dispatch(callable&& f, arguments&&... args) {
+		std::function<typename std::result_of<callable(arguments...)>::type()> task
+		(std::bind(std::forward<callable>(f), std::forward<arguments>(args)...));
+		{
+			std::lock_guard<std::mutex> lock{ mutex_ };
+			task_que_.emplace([task]() {
+				task();
+			});
+			_thread_check();
+			task_cond_.notify_one();
+		}
+	}
+
+	template<typename callable, class... arguments>
+	void commit(callable&& f, arguments&&... args) {
+		std::function<typename std::result_of<callable(arguments...)>::type()> task
+		(std::bind(std::forward<callable>(f), std::forward<arguments>(args)...));
+		task();
+	}
+
+private:
+	void _thread_check(void) {
+		if (free_thread_count_ == 0 && (max_thread_count_ < 0 || total_thread_count_ < max_thread_count_)) {
+			pool_.emplace_back(std::thread(thread_handle, this));
+		}
+	}
+
+private:
+	using Task = std::function<void()>;
+	std::queue<Task> task_que_;
+	std::vector<std::thread> pool_;
+	std::mutex mutex_;
+	std::condition_variable task_cond_;
+
+	int max_thread_count_;
+	int total_thread_count_;
+	int free_thread_count_;
+	std::atomic<bool> stoped_;
 };
 
 #endif // WRAPPER_COMMON_TIMER_H_

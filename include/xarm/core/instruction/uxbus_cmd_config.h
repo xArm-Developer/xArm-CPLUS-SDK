@@ -85,6 +85,11 @@ public:
 	static const unsigned char CNTER_RESET = 74;
 	static const unsigned char CNTER_PLUS = 75;
 
+	static const unsigned char CAL_POSE_OFFSET = 76;
+  static const unsigned char GET_TCP_POSE_AA = 91;
+  static const unsigned char MOVE_LINE_AA = 92;
+  static const unsigned char MOVE_SERVO_CART_AA = 93;
+
 	static const unsigned char SERVO_W16B = 101;
 	static const unsigned char SERVO_R16B = 102;
 	static const unsigned char SERVO_W32B = 103;
@@ -92,6 +97,7 @@ public:
 	static const unsigned char SERVO_ZERO = 105;
 	static const unsigned char SERVO_DBMSG = 106;
 
+	static const unsigned char TGPIO_MB_TIOUT = 123;
 	static const unsigned char TGPIO_MODBUS = 124;
 	static const unsigned char TGPIO_ERR = 125;
 	static const unsigned char TGPIO_W16B = 127;
@@ -110,6 +116,11 @@ public:
 	static const unsigned char CGPIO_GET_STATE = 139;
 
 	static const unsigned char GET_HD_TYPES = 141;
+	static const unsigned char DELAYED_CGPIO_SET = 142;
+	static const unsigned char DELAYED_TGPIO_SET = 143;
+	static const unsigned char POSITION_CGPIO_SET = 144;
+	static const unsigned char POSITION_TGPIO_SET = 145;
+	static const unsigned char SET_IO_STOP_RESET = 146;
 };
 
 class UXBUS_STATE {

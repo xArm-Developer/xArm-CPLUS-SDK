@@ -13,19 +13,15 @@
 
 ## Update Summary
 
-- > ### 1.4.0
+- > ### 1.5.0
+  - The new parameter of `set_servo_cartisian` interface is used to support servo cartisian movement of tool coordinate system
+  - Support delayed trigger digital IO
+  - Support position detection trigger digital IO
+  - Support configure the stop state to automatically reset IO signal
+  - Support motion commands based on axis angle
+  - Support to calculate the offset between two points
+  - Support for blocky code conversion and operation of xArmStudio1.5.0
 
-  - Support windows platform
-  - Support servo cartesian interface
-
-- > ### 1.3.0
-
-  - Added several attributes
-  - Support tool coordinate system movement
-  - Support joint range limitation, collision rebound setting
-  - Support user coordinate system setting
-  - Support the status of the air pump
-  - Added counter interface
 
 ## Linux
 
@@ -214,6 +210,9 @@
 
 - ##### [7002-servo_j](example/7001-servo_j.cc)
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
+
+- ##### [thirdparty-set_robotiq_gripper](example/thirdparty-set_robotiq_gripper.cc)
+- ##### [thirdparty-set_yinshi_gripper](example/thirdparty-set_yinshi_gripper.cc)
 
 ## Doc
 

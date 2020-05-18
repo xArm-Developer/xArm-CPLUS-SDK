@@ -9,19 +9,25 @@ __XArmAPI(const std::string &port="",
         bool check_joint_limit=true,
         bool check_cmdnum_limit=true,
         bool check_robot_sn=false,
-        bool check_is_ready=true)__
+        bool check_is_ready=false,
+        bool check_is_pause=true,
+        int max_callback_thread_count=10)__
 
 ```c++
 :param port: ip-address(such as "192.168.1.185")
-	Note: this parameter is required if parameter do_not_open is False
-:param is_radian: set the default unit is radians or not, default is False
+	Note: this parameter is required if parameter do_not_open is false
+:param is_radian: set the default unit is radians or not, default is false
 :param do_not_open: do not open, default is False, if true, you need to manually call the connect interface.
-:param check_tcp_limit:Whether checking tcp limit, default is True
-:param check_joint_limit: Whether checking joint limit, default is True
-:param check_cmdnum_limit: Whether checking command num limit, default is True
-:param check_robot_sn: Whether checking robot sn, default is False
-:param check_is_ready: check robot is ready to move or not, default is true
+:param check_tcp_limit: reversed, whether checking tcp limit, default is true
+:param check_joint_limit: reversed, whether checking joint limit, default is true
+:param check_cmdnum_limit: reversed, whether checking command num limit, default is true
+:param check_robot_sn: whether checking robot sn, default is false
+:param check_is_ready: reversed, check robot is ready to move or not, default is true
 :param check_is_pause: check robot is pause or not, default is true
+:param max_callback_thread_count: max callback thread count, default is -1
+	Note: greater than 0 means the maximum number of threads that can be used to process callbacks
+	Note: equal to 0 means no thread is used to process the callback
+	Note: less than 0 means no limit on the number of threads used for callback
 ```
 
 ## Property
@@ -268,6 +274,13 @@ __fp32 temperatures[7]__
 Motor temperature, only available if version > 1.2.11
 
 :return: fp32[7]{motor-1-temperature, ..., motor-7-temperature}
+```
+
+__unsigned char gpio_reset_config[2]__
+```
+The gpio reset enable config, only available if version > 1.5.0
+
+:return: unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
 ```
 
 __bool default_is_radian__
@@ -585,7 +598,7 @@ Set the servo angle, execute only the last instruction, need to be set to servo 
 :return: see the API code documentation for details.
 ```
 
-__int set_servo_cartesian(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0)__
+__int set_servo_cartesian(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0,  bool is_tool_coord = false)__
 ```
 Servo cartesian motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
 
@@ -595,6 +608,7 @@ Servo cartesian motion, execute only the last instruction, need to be set to ser
 :param speed: reserved, move speed (mm/s)
 :param mvacc: reserved, move acceleration (mm/s^2)
 :param mvtime: reserved, 0
+:param is_tool_coord: is tool coordinate or not
     
 :return: see the API code documentation for details.
 ```
@@ -827,12 +841,13 @@ Get the digital value of the Tool GPIO
 :return: see the API code documentation for details.
 ```
 
-__int set_tgpio_digital(int ionum, int value)__
+__int set_tgpio_digital(int ionum, int value, float delay_sec=0)__
 ```
 Set the digital value of the specified Tool GPIO
 
 :param ionum: ionum, 0 or 1
 :param value: the digital value of the specified io
+:param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
 :return: see the API code documentation for details.
 ```
 
@@ -862,12 +877,13 @@ Get the analog value of the specified Controller GPIO
 :return: see the API code documentation for details.
 ```
 
-__int set_cgpio_digital(int ionum, int value)__
+__int set_cgpio_digital(int ionum, int value, float delay_sec=0)__
 ```
 Set the digital value of the specified Controller GPIO
 
 :param ionum: ionum, 0 ~ 7
 :param value: the digital value of the specified io
+:param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
 :return: see the API code documentation for details.
 ```
 
@@ -1053,6 +1069,8 @@ Release the value of counter changed callback
 ```
 
 __int get_suction_cup(int *val)__
+__int get_vacuum_gripper(int *val)__
+
 ```
 Get suction cup state
 
@@ -1062,13 +1080,15 @@ Get suction cup state
 :return: see the API code documentation for details.
 ```
 
-__int set_suction_cup(bool on, bool wait=false, float timeout=3)__
+__int set_suction_cup(bool on, bool wait=false, float timeout=3, float delay_sec=0)__
+__int set_vacuum_gripper(bool on, bool wait=false, float timeout=3, float delay_sec=0)__
 ```
 Set suction cup
 
 :param on: open suction cup or not
 :param wait: wait or not, default is false
-:timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
+:param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
+:param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
 
 :return: see the API code documentation for details.
 ```
@@ -1181,6 +1201,8 @@ Set the joint range of the reduced mode
 ```
 
 __int set_fense_mode(bool on)__
+__int set_fence_mode(bool on)__
+
 ```
 Turn on/off safety mode
 
@@ -1290,3 +1312,110 @@ Set counter plus 1
 
 :return: see the API code documentation for details.
 ```
+
+__int set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r)__
+```
+Set the digital value of the specified Tool GPIO when the robot has reached the specified xyz position
+
+:param ionum: 0 or 1 
+:param value: value
+:param xyz: position xyz, as [x, y, z]
+:param tol_r: fault tolerance radius
+
+:return: see the API code documentation for details.
+```
+
+__int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r)__
+```
+Set the digital value of the specified Controller GPIO when the robot has reached the specified xyz position
+
+:param ionum: 0 ~ 7
+:param value: value
+:param xyz: position xyz, as [x, y, z]
+:param tol_r: fault tolerance radius
+
+:return: see the API code documentation for details.
+```
+
+__int config_tgpio_reset_when_stop(bool on_off)__
+```
+Config the Tool GPIO reset the digital output when the robot is in stop state
+
+:param on_off: true/false
+
+:return: see the API code documentation for details.
+```
+
+__int config_cgpio_reset_when_stop(bool on_off)__
+```
+Config the Controller GPIO reset the digital output when the robot is in stop state
+
+:param on_off: true/false
+
+:return: see the API code documentation for details.
+```
+
+__int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT)__
+__int set_position_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT)__
+```
+Set the pose represented by the axis angle pose
+
+:param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
+	Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
+	Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
+:param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
+:param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
+:param mvtime: reserved, 0
+:param is_tool_coord: is tool coordinate or not
+:param relative: relative move or not
+:param wait: whether to wait for the arm to complete, default is False
+:param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+
+:return: see the API code documentation for details.
+```
+
+__int set_servo_cartesian_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, bool is_tool_coord = false, bool relative = false)__
+__int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false)__
+```
+Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))
+	Note: only available if firmware_version >= 1.4.7
+
+:param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
+	Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
+	Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
+:param speed: reserved, move speed (mm/s)
+:param mvacc: reserved, move acceleration (mm/s^2)
+:param is_tool_coord: is tool coordinate or not
+:param relative: relative move or not
+
+:return: see the API code documentation for details.
+```
+
+__int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in = 0, int orient_type_out = 0)__
+```
+Calculate the pose offset of two given points
+
+:param pose1: position, like [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
+	Note: if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
+	Note: if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
+:param pose2: position, like [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
+	Note: if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
+	Note: if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
+:param offset: the offset between pose1 and pose2
+:param orient_type_in: input attitude notation, 0 is RPY (default), 1 is axis angle
+:param orient_type_out: notation of output attitude, 0 is RPY (default), 1 is axis angle
+
+:return: see the API code documentation for details.
+```
+
+__int get_position_aa(fp32 pose[6])__
+```
+Get the pose represented by the axis angle pose
+
+:param pose: the pose represented by the axis angle pose of xArm, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
+	Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
+	Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
+
+:return: see the API code documentation for details.
+```
+

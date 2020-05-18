@@ -41,10 +41,6 @@ void SerialPort::recv_proc(void) {
 		usleep(1000); // 1000us
 #endif
 	}
-	try {
-		thread_id_.join();
-	} catch (...) {
-	}
 }
 
 static void recv_proc_(void *arg) {

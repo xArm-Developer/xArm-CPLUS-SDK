@@ -24,7 +24,7 @@ void SocketPort::recv_proc(void) {
 	// unsigned char recv_data[que_maxlen_];
 	unsigned char *recv_data = new unsigned char[que_maxlen_];
 	while (state_ == 0) {
-	//bzero(recv_data, que_maxlen_); // �������
+	//bzero(recv_data, que_maxlen_);
 	memset(recv_data, 0, que_maxlen_);
 	// num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
 	num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 1, 0);
@@ -38,10 +38,6 @@ void SocketPort::recv_proc(void) {
 	rx_que_->push(recv_data);
 	}
 	delete recv_data;
-	try {
-		thread_id_.join();
-	} catch (...) {
-	}
 }
 
 static void recv_proc_(void *arg) {

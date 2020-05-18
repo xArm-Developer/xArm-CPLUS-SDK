@@ -30,7 +30,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.4.2"
+#define SDK_VERSION "1.5.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -42,12 +42,16 @@ public:
 	*   Note: this parameter is required if parameter do_not_open is False
 	* @param is_radian: set the default unit is radians or not, default is False
 	* @param do_not_open: do not open, default is False, if true, you need to manually call the connect interface.
-	* @param check_tcp_limit: reversed
-	* @param check_joint_limit: reversed
-	* @param check_cmdnum_limit: reversed
-	* @param check_robot_sn: reversed
-	* @param check_is_ready: check robot is ready to move or not, default is true
+	* @param check_tcp_limit: reversed, whether checking tcp limit, default is true
+	* @param check_joint_limit: reversed, whether checking joint limit, default is true
+	* @param check_cmdnum_limit: reversed, whether checking command num limit, default is true
+	* @param check_robot_sn: whether checking robot sn, default is false
+	* @param check_is_ready: reversed, check robot is ready to move or not, default is true
 	* @param check_is_pause: check robot is pause or not, default is true
+	* @param max_callback_thread_count: max callback thread count, default is -1
+	*   Note: greater than 0 means the maximum number of threads that can be used to process callbacks
+	*   Note: equal to 0 means no thread is used to process the callback
+	*   Note: less than 0 means no limit on the number of threads used for callback
 	*/
 	XArmAPI(const std::string &port = "",
 		bool is_radian = DEFAULT_IS_RADIAN,
@@ -57,7 +61,8 @@ public:
 		bool check_cmdnum_limit = true,
 		bool check_robot_sn = false,
 		bool check_is_ready = true,
-		bool check_is_pause = true);
+		bool check_is_pause = true,
+		int max_callback_thread_count = -1);
 	~XArmAPI(void);
 
 public:
@@ -106,9 +111,11 @@ public:
 
 	fp32 *world_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
 	fp32 *temperatures;
+	unsigned char *gpio_reset_config; // unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
 
 	bool default_is_radian;
-
+	
+	UxbusCmd *core;
 public:
 	/*
 	* xArm has error/warn or not, only available in socket way
@@ -398,9 +405,10 @@ public:
 	* @param speed: reserved, move speed (mm/s)
 	* @param mvacc: reserved, move acceleration (mm/s^2)
 	* @param mvtime: reserved, 0
+	* @param is_tool_coord: is tool coordinate or not
 	* return: see the API code documentation for details.
 	*/
-	int set_servo_cartesian(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0);
+	int set_servo_cartesian(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false);
 
 	/*
 	* The motion calculates the trajectory of the space circle according to the three-point coordinates.
@@ -605,9 +613,10 @@ public:
 	* Set the digital value of the specified Tool GPIO
 	* @param ionum: ionum, 0 or 1
 	* @param value: the digital value of the specified io
+	* @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
 	* return: see the API code documentation for details.
 	*/
-	int set_tgpio_digital(int ionum, int value);
+	int set_tgpio_digital(int ionum, int value, float delay_sec=0);
 
 	/*
 	* Get the analog value of the specified Tool GPIO
@@ -615,7 +624,7 @@ public:
 	* @param value: the analog value of the specified tool io
 	* return: see the API code documentation for details.
 	*/
-	int get_tgpio_analog(int ionum, fp32 *value);
+	int get_tgpio_analog(int ionum, float *value);
 
 	/*
 	* Get the digital value of the specified Controller GPIO
@@ -636,9 +645,10 @@ public:
 	* Set the digital value of the specified Controller GPIO
 	* @param ionum: ionum, 0 ~ 7
 	* @param value: the digital value of the specified io
+	* @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
 	* return: see the API code documentation for details.
 	*/
-	int set_cgpio_digital(int ionum, int value);
+	int set_cgpio_digital(int ionum, int value, float delay_sec=0);
 
 	/*
 	* Set the analog value of the specified Controller GPIO
@@ -813,15 +823,18 @@ public:
 	* return: see the API code documentation for details.
 	*/
 	int get_suction_cup(int *val);
+	int get_vacuum_gripper(int *val) { return get_suction_cup(val); }
 
 	/*
 	* Set suction cup
 	* @param on: open suction cup or not
 	* @param wait: wait or not, default is false
-	* @timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
+	* @param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
+	* @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
 	* return: see the API code documentation for details.
 	*/
-	int set_suction_cup(bool on, bool wait = false, float timeout = 3);
+	int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0);
+	int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0) { return set_suction_cup(on, wait, timeout, delay_sec); }
 
 	/*
 	* Get gripper version, only for debug
@@ -924,6 +937,7 @@ public:
 	* return: see the API code documentation for details.
 	*/
 	int set_fense_mode(bool on);
+	int set_fence_mode(bool on) { return set_fense_mode(on); };
 
 	/*
 	* Turn on/off collision rebound
@@ -983,7 +997,7 @@ public:
 		if filename is None, you need to manually call the `load_trajectory` to load the trajectory.
 	* @param wait: whether to wait for the arm to complete, default is False.
 	* @param double_speed: double speed, only support 1/2/4, default is 1, only available if version > 1.2.11
-	return: see the API code documentation for details.
+	* return: see the API code documentation for details.
 	*/
 	int playback_trajectory(int times = 1, char* filename = NULL, bool wait = false, int double_speed = 1);
 
@@ -1013,6 +1027,96 @@ public:
 	*/
 	int set_counter_increase(void);
 
+	/*
+	* Set the digital value of the specified Tool GPIO when the robot has reached the specified xyz position           
+	* @param ionum: 0 or 1
+	* @param value: value
+	* @param xyz: position xyz, as [x, y, z]
+	* @param tol_r: fault tolerance radius
+	* return: see the API code documentation for details.
+	*/
+	int set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
+
+	/*
+	* Set the digital value of the specified Controller GPIO when the robot has reached the specified xyz position                      
+	* @param ionum: 0 ~ 7
+	* @param value: value
+	* @param xyz: position xyz, as [x, y, z]
+	* @param tol_r: fault tolerance radius
+	* return: see the API code documentation for details.
+	*/
+	int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
+
+	/*
+	* Config the Tool GPIO reset the digital output when the robot is in stop state                      
+	* @param on_off: true/false
+	* return: see the API code documentation for details.
+	*/
+	int config_tgpio_reset_when_stop(bool on_off);
+
+	/*
+	* Config the Controller GPIO reset the digital output when the robot is in stop state                      
+	* @param on_off: true/false
+	* return: see the API code documentation for details.
+	*/
+	int config_cgpio_reset_when_stop(bool on_off);
+
+	/*
+	* Set the pose represented by the axis angle pose
+	* @param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
+		if default_is_radian is true, the value of rx/ry/rz should be in radians
+		if default_is_radian is false, The value of rx/ry/rz should be in degrees
+	* @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
+	* @param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
+	* @param mvtime: reserved, 0
+	* @param is_tool_coord: is tool coordinate or not
+	* @param relative: relative move or not
+	* @param wait: whether to wait for the arm to complete, default is False
+	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+	* return: see the API code documentation for details.
+	*/
+	int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int set_position_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
+
+	/*
+	* Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))
+		only available if firmware_version >= 1.4.7
+	* @param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
+		if default_is_radian is true, the value of rx/ry/rz should be in radians
+		if default_is_radian is false, The value of rx/ry/rz should be in degrees
+	* @param speed: reserved, move speed (mm/s)
+	* @param mvacc: reserved, move acceleration (mm/s^2)
+	* @param is_tool_coord: is tool coordinate or not
+	* @param relative: relative move or not
+	* return: see the API code documentation for details.
+	*/
+	int set_servo_cartesian_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, bool is_tool_coord = false, bool relative = false);
+	int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false);
+
+	/*
+	* Calculate the pose offset of two given points
+	* @param pose1: position, like [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
+		if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
+		if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
+	* @param pose2: position, like [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
+		if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
+		if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
+	* @param offset: the offset between pose1 and pose2
+	* @param orient_type_in: input attitude notation, 0 is RPY (default), 1 is axis angle
+	* @param orient_type_out: notation of output attitude, 0 is RPY (default), 1 is axis angle
+	* return: see the API code documentation for details.
+	*/
+	int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in = 0, int orient_type_out = 0);
+
+	/*
+	* Get the pose represented by the axis angle pose
+	* @param pose: the pose represented by the axis angle pose of xArm, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
+		if default_is_radian is true, the value of rx/ry/rz should be in radians
+		if default_is_radian is false, The value of rx/ry/rz should be in degrees
+	* return: see the API code documentation for details.
+	*/
+	int get_position_aa(fp32 pose[6]);
+
 private:
 	void _init(void);
 	void _check_version(void);
@@ -1025,6 +1129,8 @@ private:
 	inline int _register_event_callback(callable_vector&& callbacks, callable&& f);
 	template<typename callable_vector, typename callable>
 	inline int _release_event_callback(callable_vector&& callbacks, callable&& f);
+	template<typename callable_vector, class... arguments>
+	inline void _report_callback(callable_vector&& callbacks, arguments&&... args);
 	inline void _report_location_callback(void);
 	inline void _report_connect_changed_callback(void);
 	inline void _report_state_changed_callback(void);
@@ -1043,6 +1149,7 @@ private:
 	bool check_robot_sn_;
 	bool check_is_ready_;
 	bool check_is_pause_;
+	bool callback_in_thread_;
 	// pthread_t report_thread_;
 	std::thread report_thread_;
 	std::mutex mutex_;
@@ -1076,12 +1183,10 @@ private:
 	fp32 rot_msg_[2];
 	int count_;
 
-	UxbusCmdTcp *cmd_tcp_;
-	UxbusCmdSer *cmd_ser_;
 	SocketPort *stream_tcp_;
 	SocketPort *stream_tcp_report_;
 	SerialPort *stream_ser_;
-	Timer timer;
+	ThreadPool pool;
 
 	std::vector<void(*)(const fp32*, const fp32*)> report_location_callbacks_;
 	std::vector<void(*)(bool, bool)> connect_changed_callbacks_;

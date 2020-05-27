@@ -116,7 +116,7 @@ public:
 		std::unique_lock<std::mutex> locker(mutex_);
 		total_thread_count_ += 1;
 		free_thread_count_ += 1;
-		int thread_inx = total_thread_count_;
+		// int thread_inx = total_thread_count_;
 		locker.unlock();
 
 		// std::cout << "callback thread start, thread_index=" << thread_inx << ", thread_id=" << std::this_thread::get_id() << std::endl;

@@ -46,7 +46,7 @@ int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
 	int ret = send_xbus(funcode, send_data, num);
 	delete send_data;
 	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
-	ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
+	ret = send_pend(funcode, 0, funcode == UXBUS_RG::MOTION_EN ? UXBUS_CONF::SET_TIMEOUT * 2 : UXBUS_CONF::SET_TIMEOUT, NULL);
 
 	return ret;
 }
@@ -169,9 +169,7 @@ int UxbusCmd::is_nfp32(int funcode, float datas[], int txn, int *value) {
 	return ret;
 }
 
-int UxbusCmd::set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional) {
-	// unsigned char hexdata[num * 4] = {0};
-	int len = sizeof(additional) / sizeof(additional[0]);
+int UxbusCmd::set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional, int len) {
 	unsigned char *hexdata = new unsigned char[num * 4 + len];
 	nfp32_to_hex(datas, hexdata, num);
 	for (int i = 0; i < len; i++) { hexdata[num * 4 + i] = additional[i]; }
@@ -1019,7 +1017,7 @@ int UxbusCmd::move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvt
 	txdata[7] = mvacc;
 	txdata[8] = mvtime;
 	char additional[2] = { (char)mvcoord, (char)relative };
-	return set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional);
+	return set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional, 2);
 }
 
 int UxbusCmd::move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord, int relative) {
@@ -1029,7 +1027,7 @@ int UxbusCmd::move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int
 	txdata[7] = mvacc;
 	txdata[8] = (char)tool_coord;
 	char additional[1] = { (char)relative };
-	return set_nfp32_with_bytes(UXBUS_RG::MOVE_SERVO_CART_AA, txdata, 9, additional);
+	return set_nfp32_with_bytes(UXBUS_RG::MOVE_SERVO_CART_AA, txdata, 9, additional, 1);
 }
 
 int UxbusCmd::tgpio_delay_set_digital(int ionum, int value, float delay_sec) {

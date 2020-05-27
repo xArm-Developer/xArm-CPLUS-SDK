@@ -13,6 +13,10 @@
 
 ## Update Summary
 
+- > ### 1.5.1
+
+  - Fix wrong data length of `set_position_aa` and `set_servo_cartisian_aa` interface
+  - Fix timeout of `motion_enable` interface
 - > ### 1.5.0
   - The new parameter of `set_servo_cartisian` interface is used to support servo cartisian movement of tool coordinate system
   - Support delayed trigger digital IO
@@ -182,6 +186,8 @@
 
 - #####  [1007-counter](example/1007-counter.cc)
 
+- [__1008-move_line_aa__](example/1008-move_line_aa.cc)
+
 - ##### [2001-move_joint](example/2001-move_joint.cc)
 
 - ##### [3001-move_circle](example/3001-move_circle.cc)
@@ -209,7 +215,10 @@
 - ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
 
 - ##### [7002-servo_j](example/7001-servo_j.cc)
+
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
+
+- [__7003-servo_cartesian_aa__](example/7003-servo_cartesian_aa.cc)
 
 
 ## Doc

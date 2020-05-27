@@ -86,9 +86,9 @@ public:
 	static const unsigned char CNTER_PLUS = 75;
 
 	static const unsigned char CAL_POSE_OFFSET = 76;
-  static const unsigned char GET_TCP_POSE_AA = 91;
-  static const unsigned char MOVE_LINE_AA = 92;
-  static const unsigned char MOVE_SERVO_CART_AA = 93;
+	static const unsigned char GET_TCP_POSE_AA = 91;
+	static const unsigned char MOVE_LINE_AA = 92;
+	static const unsigned char MOVE_SERVO_CART_AA = 93;
 
 	static const unsigned char SERVO_W16B = 101;
 	static const unsigned char SERVO_R16B = 102;

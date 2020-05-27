@@ -30,7 +30,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.5.0"
+#define SDK_VERSION "1.5.1"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -114,7 +114,7 @@ public:
 	unsigned char *gpio_reset_config; // unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
 
 	bool default_is_radian;
-	
+
 	UxbusCmd *core;
 public:
 	/*
@@ -1028,7 +1028,7 @@ public:
 	int set_counter_increase(void);
 
 	/*
-	* Set the digital value of the specified Tool GPIO when the robot has reached the specified xyz position           
+	* Set the digital value of the specified Tool GPIO when the robot has reached the specified xyz position
 	* @param ionum: 0 or 1
 	* @param value: value
 	* @param xyz: position xyz, as [x, y, z]
@@ -1038,7 +1038,7 @@ public:
 	int set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
 
 	/*
-	* Set the digital value of the specified Controller GPIO when the robot has reached the specified xyz position                      
+	* Set the digital value of the specified Controller GPIO when the robot has reached the specified xyz position
 	* @param ionum: 0 ~ 7
 	* @param value: value
 	* @param xyz: position xyz, as [x, y, z]
@@ -1048,14 +1048,14 @@ public:
 	int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
 
 	/*
-	* Config the Tool GPIO reset the digital output when the robot is in stop state                      
+	* Config the Tool GPIO reset the digital output when the robot is in stop state
 	* @param on_off: true/false
 	* return: see the API code documentation for details.
 	*/
 	int config_tgpio_reset_when_stop(bool on_off);
 
 	/*
-	* Config the Controller GPIO reset the digital output when the robot is in stop state                      
+	* Config the Controller GPIO reset the digital output when the robot is in stop state
 	* @param on_off: true/false
 	* return: see the API code documentation for details.
 	*/

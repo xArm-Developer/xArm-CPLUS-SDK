@@ -36,6 +36,7 @@ void UxbusCmd::close(void) {}
  *******************************************************/
 
 int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	//unsigned char send_data[num];
 	unsigned char *send_data = new unsigned char[num];
 	for (int i = 0; i < num; i++)
@@ -47,7 +48,6 @@ int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
 	delete send_data;
 	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
 	ret = send_pend(funcode, 0, funcode == UXBUS_RG::MOTION_EN ? UXBUS_CONF::SET_TIMEOUT * 2 : UXBUS_CONF::SET_TIMEOUT, NULL);
-
 	return ret;
 }
 
@@ -64,13 +64,14 @@ int UxbusCmd::get_nu8(int funcode, int *rx_data, int num) {
 }
 
 int UxbusCmd::get_nu8(int funcode, unsigned char *rx_data, int num) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	int ret = send_xbus(funcode, 0, 0);
 	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(funcode, num, UXBUS_CONF::GET_TIMEOUT, rx_data);
 }
 
 int UxbusCmd::set_nu16(int funcode, int *datas, int num) {
-
+	std::lock_guard<std::mutex> locker(mutex_);
 	//unsigned char send_data[num * 2];
 	unsigned char *send_data = new unsigned char[num * 2];
 	for (int i = 0; i < num; i++) {
@@ -84,6 +85,7 @@ int UxbusCmd::set_nu16(int funcode, int *datas, int num) {
 	return ret;
 }
 int UxbusCmd::get_nu16(int funcode, int *rx_data, int num) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	//unsigned char datas[num * 2];
 	unsigned char *datas = new unsigned char[num * 2];
 	int ret = send_xbus(funcode, 0, 0);
@@ -102,6 +104,7 @@ int UxbusCmd::get_nu16(int funcode, int *rx_data, int num) {
 }
 
 int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	// unsigned char hexdata[num * 4] = {0};
 	unsigned char *hexdata = new unsigned char[num * 4];
 	nfp32_to_hex(datas, hexdata, num);
@@ -114,6 +117,7 @@ int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
 }
 
 int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	//unsigned char hexdata[num * 4] = {0};  \\??
 	unsigned char *hexdata = new unsigned char[num * 4];
 	nint32_to_hex(datas, hexdata, num);
@@ -126,6 +130,7 @@ int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
 }
 
 int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	//unsigned char datas[num * 4] = {0};
 	unsigned char *datas = new unsigned char[num * 4];
 	int ret = send_xbus(funcode, 0, 0);
@@ -140,6 +145,7 @@ int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
 }
 
 int UxbusCmd::swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	// unsigned char hexdata[128] = { 0 };
 	unsigned char *hexdata = new unsigned char[128];
 
@@ -153,6 +159,7 @@ int UxbusCmd::swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data,
 }
 
 int UxbusCmd::is_nfp32(int funcode, float datas[], int txn, int *value) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	//unsigned char hexdata[txn * 4] = {0};
 	unsigned char *hexdata = new unsigned char[txn * 4];
 
@@ -170,6 +177,7 @@ int UxbusCmd::is_nfp32(int funcode, float datas[], int txn, int *value) {
 }
 
 int UxbusCmd::set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional, int len) {
+	std::lock_guard<std::mutex> locker(mutex_);
 	unsigned char *hexdata = new unsigned char[num * 4 + len];
 	nfp32_to_hex(datas, hexdata, num);
 	for (int i = 0; i < len; i++) { hexdata[num * 4 + i] = additional[i]; }

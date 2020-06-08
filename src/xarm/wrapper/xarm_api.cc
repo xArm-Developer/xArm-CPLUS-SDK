@@ -16,6 +16,13 @@
 
 using namespace std;
 
+static int BAUDRATES[14] = { 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 1500000, 2000000, 2500000 };
+
+static int get_baud_inx(int baud) {
+	for (int i = 0; i < 14; i++) { if (BAUDRATES[i] == baud) return i; }
+	return -1;
+}
+
 static bool compare_version(int v1[3], int v2[3]) {
 	for (int i = 0; i < 3; i++) {
 		if (v1[i] > v2[i]) {
@@ -140,6 +147,7 @@ void XArmAPI::_init(void) {
 	world_offset = new fp32[6]{ 0, 0, 0, 0, 0, 0 };
 	temperatures = new fp32[7]{ 0, 0, 0, 0, 0, 0 };
 	gpio_reset_config = new unsigned char[2]{0, 0};
+	modbus_baud_ = -1;
 }
 
 bool XArmAPI::has_err_warn(void) {
@@ -287,6 +295,9 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 		warn_code = data_fp[8];
 		if (error_code != err || warn_code != warn) _report_error_warn_changed_callback();
 
+		if ((error_code >= 10 && error_code <= 17) || error_code == 19 || error_code == 28) {
+			modbus_baud_ = -1;
+		}
 
 		hex_to_nfp32(&data_fp[9], angles, 7);
 		for (int i = 0; i < 7; i++) {
@@ -427,6 +438,10 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		warn_code = data_fp[90];
 		if (error_code != err || warn_code != warn) _report_error_warn_changed_callback();
 
+		if ((error_code >= 10 && error_code <= 17) || error_code == 19 || error_code == 28) {
+			modbus_baud_ = -1;
+		}
+
 		hex_to_nfp32(&data_fp[91], tcp_offset, 6);
 		for (int i = 0; i < 6; i++) {
 			tcp_offset[i] = (float)(default_is_radian || i < 3 ? tcp_offset[i] : tcp_offset[i] * RAD_DEGREE);
@@ -537,9 +552,8 @@ void XArmAPI::_recv_report_data(void) {
 		if (fail_count > 5) break;
 		if (stream_tcp_report_->is_ok() != 0) {
 			fail_count += 1;
-			stream_tcp_report_->close_port();
 			stream_tcp_report_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_REPORT_RICH, 3, 512);
-			sleep_milliseconds(10);
+			sleep_milliseconds(500);
 			continue;
 		}
 		ret = stream_tcp_report_->read_frame(rx_data);
@@ -977,7 +991,7 @@ int XArmAPI::set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, 
 		mvpose[i] = (float)(default_is_radian || i < 3 ? pose[i] : pose[i] / RAD_DEGREE);
 	}
 	int ret = core->move_line_tool(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
-	
+
 	if (wait && (ret == 0 || ret == UXBUS_STATE::WAR_CODE)) {
 		_wait_stop(timeout);
 	}
@@ -1245,6 +1259,7 @@ int XArmAPI::set_joint_maxacc(fp32 acc) {
 
 int XArmAPI::set_gripper_enable(bool enable) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_en(int(enable));
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1253,6 +1268,7 @@ int XArmAPI::set_gripper_enable(bool enable) {
 
 int XArmAPI::set_gripper_mode(int mode) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_mode(mode);
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1261,6 +1277,7 @@ int XArmAPI::set_gripper_mode(int mode) {
 
 int XArmAPI::set_gripper_speed(fp32 speed) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_posspd(speed);
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1269,6 +1286,7 @@ int XArmAPI::set_gripper_speed(fp32 speed) {
 
 int XArmAPI::get_gripper_position(fp32 *pos) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_get_pos(pos);
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1277,11 +1295,13 @@ int XArmAPI::get_gripper_position(fp32 *pos) {
 
 int XArmAPI::get_gripper_err_code(int *err) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	return core->gripper_modbus_get_errcode(err);
 }
 
 int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	float last_pos = 0, pos_tmp, cur_pos;;
 	bool is_add = true;
 	int ret = core->gripper_modbus_set_pos(pos);
@@ -1362,6 +1382,7 @@ int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
 
 int XArmAPI::clean_gripper_error(void) {
 	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(2000000)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_clean_err();
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1944,4 +1965,264 @@ int XArmAPI::get_position_aa(fp32 pose[6]) {
 		}
 	}
 	return ret;
+}
+
+int XArmAPI::_get_modbus_baudrate(int *baud_inx) {
+	if (!is_connected()) return -1;
+	float val;
+	int ret = core->tgpio_addr_r16(SERVO3_RG::MODBUS_BAUDRATE & 0x0FFF, &val);
+	*baud_inx = (int)val;
+	if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
+		if (error_code != 19 && error_code != 28) {
+			int err_warn[2] = { 0 };
+			get_err_warn_code(err_warn);
+		}
+		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
+	}
+	return ret;
+}
+
+bool XArmAPI::_checkset_modbus_baud(int baudrate) {
+	if (modbus_baud_ == baudrate)
+		return true;
+	int baud_inx = get_baud_inx(baudrate);
+	if (baud_inx == -1) return false;
+	int cur_baud_inx;
+	int ret = _get_modbus_baudrate(&cur_baud_inx);
+	if (ret == 0) {
+		if (cur_baud_inx != baud_inx) {
+			core->tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
+			core->tgpio_addr_w16(0x1a0b, (float)baud_inx);
+			core->tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
+			int err_warn[2] = { 0 };
+			get_err_warn_code(err_warn);
+			if (error_code == 19 || error_code == 28) {
+				clean_error();
+				sleep_milliseconds(600);
+			}
+			ret = _get_modbus_baudrate(&cur_baud_inx);
+		}
+		if (ret == 0 && cur_baud_inx < 14) modbus_baud_ = BAUDRATES[cur_baud_inx];
+	}
+	return modbus_baud_ == baudrate;
+}
+
+int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_data[7]) {
+	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(115200)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
+	unsigned char *send_data = new unsigned char[7 + length];
+	send_data[0] = 0x09;
+	send_data[1] = 0x10;
+	send_data[2] = 0x03;
+	send_data[3] = 0xE8;
+	send_data[4] = 0x00;
+	send_data[5] = 0x03;
+	send_data[6] = (unsigned char)length;
+	for (int i = 0; i < length; i++)
+	{
+		send_data[7+i] = params[i];
+	}
+	int ret = core->tgpio_set_modbus(send_data, length + 7, ret_data);
+	delete send_data;
+	if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
+		if (error_code != 19 && error_code != 28) {
+			int err_warn[2] = { 0 };
+			get_err_warn_code(err_warn);
+		}
+		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
+	}
+	return ret;
+}
+int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers) {
+	if (!is_connected()) return -1;
+	if (!_checkset_modbus_baud(115200)) return UXBUS_STATE::MODBUS_BAUD_NOT_CORRECT;
+	unsigned char *send_data = new unsigned char[6];
+	send_data[0] = 0x09;
+	send_data[1] = 0x03;
+	send_data[2] = 0x07;
+	send_data[3] = 0xD0;
+	send_data[4] = 0x00;
+	send_data[5] = number_of_registers;
+	unsigned char rx_data[10] = { 0 };
+	int ret = core->tgpio_set_modbus(send_data, 6, rx_data);
+	delete send_data;
+	if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
+		if (error_code != 19 && error_code != 28) {
+			int err_warn[2] = { 0 };
+			get_err_warn_code(err_warn);
+		}
+		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
+	}
+	for (int i = 0; i < 9; i++) { ret_data[i] = rx_data[i + 1]; }
+	ret = (rx_data[0] != UXBUS_CONF::TGPIO_ID || rx_data[1] != 9) ? UXBUS_STATE::ERR_CODE : ret;
+	if (ret == 0) {
+		if (number_of_registers >= 0x01) {
+			robotiq_status.gOBJ = (ret_data[3] & 0xC0) >> 6;
+			robotiq_status.gSTA = (ret_data[3] & 0x30) >> 4;
+			robotiq_status.gGTO = (ret_data[3] & 0x08) >> 3;
+			robotiq_status.gACT = ret_data[3] & 0x01;
+		}
+		if (number_of_registers >= 0x02) {
+			robotiq_status.kFLT = (ret_data[5] & 0xF0) >> 4;
+			robotiq_status.gFLT = ret_data[5] & 0x0F;
+			robotiq_status.gPR = ret_data[6];
+		}
+		if (number_of_registers >= 0x03) {
+			robotiq_status.gPO = ret_data[7];
+			robotiq_status.gCU = ret_data[8];
+		}
+	}
+	return ret;
+}
+
+int XArmAPI::_robotiq_wait_activation_completed(fp32 timeout) {
+	if (!is_connected()) return -1;
+	int failed_cnt = 0;
+	long long expired = get_system_time() + (long long)(timeout * 1000);
+	int code = UXBUS_STATE::ROBOTIQ_WAIT_TIMEOUT;
+	unsigned char rx_data[9] = { 0 };
+	while (timeout <= 0 || get_system_time() < expired) {
+		int code2 = robotiq_get_status(rx_data);
+		failed_cnt = code2 == 0 ? 0 : failed_cnt + 1;
+		if (code2 == 0) {
+			code = (robotiq_status.gFLT != 0 && !(robotiq_status.gFLT == 5 && robotiq_status.gSTA == 1)) ? UXBUS_STATE::ROBOTIQ_HAS_FAULT : robotiq_status.gSTA == 3 ? 0 : code;
+		}
+		else {
+			code = failed_cnt > 10 ? UXBUS_STATE::ROBOTIQ_GET_FAILED : code;
+		}
+		if (code != UXBUS_STATE::ROBOTIQ_WAIT_TIMEOUT) break;
+		sleep_milliseconds(50);
+	}
+	return code;
+}
+
+int XArmAPI::_robotiq_wait_motion_completed(fp32 timeout, bool check_detected) {
+	if (!is_connected()) return -1;
+	int failed_cnt = 0;
+	long long expired = get_system_time() + (long long)(timeout * 1000);
+	int code = UXBUS_STATE::ROBOTIQ_WAIT_TIMEOUT;
+	unsigned char rx_data[9] = { 0 };
+	while (timeout <= 0 || get_system_time() < expired) {
+		int code2 = robotiq_get_status(rx_data);
+		failed_cnt = code2 == 0 ? 0 : failed_cnt + 1;
+		if (code2 == 0) {
+			code = (robotiq_status.gFLT != 0 && !(robotiq_status.gFLT == 5 && robotiq_status.gSTA == 1)) ? UXBUS_STATE::ROBOTIQ_HAS_FAULT :
+				((check_detected && (robotiq_status.gOBJ == 1 || robotiq_status.gOBJ == 2)) || (robotiq_status.gOBJ == 1 || robotiq_status.gOBJ == 2 || robotiq_status.gOBJ == 3)) ? 0 : code;
+		}
+		else {
+			code = failed_cnt > 10 ? UXBUS_STATE::ROBOTIQ_GET_FAILED : code;
+		}
+		if (code != UXBUS_STATE::ROBOTIQ_WAIT_TIMEOUT) break;
+		sleep_milliseconds(50);
+	}
+	return code;
+}
+
+int XArmAPI::robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers) {
+	if (!is_connected()) return -1;
+	return _robotiq_get(ret_data, number_of_registers);
+}
+
+int XArmAPI::robotiq_reset(unsigned char ret_data[6]) {
+	if (!is_connected()) return -1;
+	unsigned char params[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	unsigned char rx_data[7] = { 0 };
+	int ret = _robotiq_set(params, 6, rx_data);
+	if (ret_data != NULL) {
+		for (int i = 0; i < 6; i++) { ret_data[i] = rx_data[i + 1]; }
+	}
+	ret = (rx_data[0] != UXBUS_CONF::TGPIO_ID || rx_data[1] != 9) ? UXBUS_STATE::ERR_CODE : ret;
+	return ret;
+}
+
+int XArmAPI::robotiq_set_activate(bool wait, fp32 timeout, unsigned char ret_data[6]) {
+	if (!is_connected()) return -1;
+	unsigned char params[6] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	unsigned char rx_data[7] = { 0 };
+	int ret = _robotiq_set(params, 6, rx_data);
+	if (ret_data != NULL) {
+		for (int i = 0; i < 6; i++) { ret_data[i] = rx_data[i + 1]; }
+	}
+	ret = (rx_data[0] != UXBUS_CONF::TGPIO_ID || rx_data[1] != 9) ? UXBUS_STATE::ERR_CODE : ret;
+	if (wait && ret == 0) {
+		ret = _robotiq_wait_activation_completed(timeout);
+	}
+	return ret;
+}
+
+int XArmAPI::robotiq_set_activate(bool wait, unsigned char ret_data[6]) {
+	return robotiq_set_activate(wait, 3, ret_data);
+}
+int XArmAPI::robotiq_set_activate(unsigned char ret_data[6]) {
+	return robotiq_set_activate(true, ret_data);
+}
+
+int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char speed, unsigned char force, bool wait, fp32 timeout, bool check_detected, unsigned char ret_data[6]) {
+	if (!is_connected()) return -1;
+	unsigned char params[6] = { 0x09, 0x00, 0x00, pos, speed, force };
+	unsigned char rx_data[7] = { 0 };
+	int ret = _robotiq_set(params, 6, rx_data);
+	if (ret_data != NULL) {
+		for (int i = 0; i < 6; i++) { ret_data[i] = rx_data[i + 1]; }
+	}
+	ret = (rx_data[0] != UXBUS_CONF::TGPIO_ID || rx_data[1] != 9) ? UXBUS_STATE::ERR_CODE : ret;
+	if (wait && ret == 0) {
+		ret = _robotiq_wait_motion_completed(timeout);
+	}
+	return ret;
+}
+
+int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, fp32 timeout, bool check_detected, unsigned char ret_data[6]) {
+	return robotiq_set_position(pos, 0xFF, 0xFF, wait, timeout, check_detected, ret_data);
+}
+
+int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, fp32 timeout, unsigned char ret_data[6]) {
+	return robotiq_set_position(pos, wait, timeout, false, ret_data);
+}
+int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, unsigned char ret_data[6]) {
+	return robotiq_set_position(pos, wait, 5, ret_data);
+}
+
+int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char ret_data[6]) {
+	return robotiq_set_position(pos, true, ret_data);
+}
+
+int XArmAPI::robotiq_open(unsigned char speed, unsigned char force, bool wait, fp32 timeout, bool check_detected, unsigned char ret_data[6]) {
+	return robotiq_set_position(0x00, speed, force, wait, timeout, check_detected, ret_data);
+}
+
+int XArmAPI::robotiq_open(bool wait, fp32 timeout, bool check_detected, unsigned char ret_data[6]) {
+	return robotiq_set_position(0x00, wait, timeout, check_detected, ret_data);
+}
+
+int XArmAPI::robotiq_open(bool wait, fp32 timeout, unsigned char ret_data[6]) {
+	return robotiq_open(wait, timeout, false, ret_data);
+}
+
+int XArmAPI::robotiq_open(bool wait, unsigned char ret_data[6]) {
+	return robotiq_open(wait, 5, ret_data);
+}
+
+int XArmAPI::robotiq_open(unsigned char ret_data[6]) {
+	return robotiq_open(true, ret_data);
+}
+
+int XArmAPI::robotiq_close(unsigned char speed, unsigned char force, bool wait, fp32 timeout, bool check_detected, unsigned char ret_data[6]) {
+	return robotiq_set_position(0xFF, speed, force, wait, timeout, check_detected, ret_data);
+}
+
+int XArmAPI::robotiq_close(bool wait, fp32 timeout, bool check_detected, unsigned char ret_data[6]) {
+	return robotiq_set_position(0xFF, wait, timeout, check_detected, ret_data);
+}
+
+int XArmAPI::robotiq_close(bool wait, fp32 timeout, unsigned char ret_data[6]) {
+	return robotiq_close(wait, timeout, false, ret_data);
+}
+
+int XArmAPI::robotiq_close(bool wait, unsigned char ret_data[6]) {
+	return robotiq_close(wait, 5, ret_data);
+}
+
+int XArmAPI::robotiq_close(unsigned char ret_data[6]) {
+	return robotiq_close(true, ret_data);
 }

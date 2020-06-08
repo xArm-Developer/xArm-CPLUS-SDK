@@ -7,6 +7,7 @@
 #ifndef CORE_INSTRUCTION_UXBUS_CMD_H_
 #define CORE_INSTRUCTION_UXBUS_CMD_H_
 
+#include <mutex>
 #include "xarm/core/common/data_type.h"
 
 class UxbusCmd {
@@ -161,6 +162,9 @@ private:
 	int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
 	int is_nfp32(int funcode, float datas[], int txn, int *value);
 	int set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional, int n);
+
+private:
+	std::mutex mutex_;
 };
 
 #endif

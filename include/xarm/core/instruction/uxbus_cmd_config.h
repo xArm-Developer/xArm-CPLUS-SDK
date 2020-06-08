@@ -147,10 +147,15 @@ public:
 	static const int ERR_NOTTCP = 8;
 	static const int ERR_OTHER = 11;
 	static const int ERR_PARAM = 12;
+	static const int MODBUS_BAUD_NOT_CORRECT = 21;
 	static const int TRAJ_RW_FAILED = 31;
 	static const int TRAJ_RW_TOUT = 32;
 	static const int TRAJ_PLAYBACK_TOUT = 33;
 	static const int SUCTION_CUP_TOUT = 41;
+	static const int ROBOTIQ_ERR_LENG = 101;
+	static const int ROBOTIQ_HAS_FAULT = 102;
+	static const int ROBOTIQ_GET_FAILED = 103;
+	static const int ROBOTIQ_WAIT_TIMEOUT = 104;
 };
 
 class TRAJ_STATE {

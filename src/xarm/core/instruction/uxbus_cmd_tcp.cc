@@ -75,28 +75,33 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 
 int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret_data) {
 	int i;
-	int ret;
+	int ret = UXBUS_STATE::ERR_TOUT;
+	int ret2;
 	// unsigned char rx_data[arm_port_->que_maxlen_] = {0};
 	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen_];
-	long long start_time = get_system_time();
-	while (get_system_time() - start_time < timeout) {
-		ret = arm_port_->read_frame(rx_data);
-		if (ret != -1) {
+	long long expired = get_system_time() + (long long)timeout;
+	while (get_system_time() < expired) {
+		ret2 = arm_port_->read_frame(rx_data);
+		if (ret2 != -1) {
 			// print_hex("recv:", rx_data, arm_port_->que_maxlen_);
 			ret = check_xbus_prot(rx_data, funcode);
-			int n = num;
-			if (num == -1) {
-				n = rx_data[9] - 2;
+			if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
+				int n = num;
+				if (num == -1) {
+					n = rx_data[9] - 2;
+				}
+				for (i = 0; i < n; i++) { ret_data[i] = rx_data[i + 8 + 4]; }
+				// print_hex(" 3", rx_data, num + 8 + 4);
+				break;
 			}
-			for (i = 0; i < n; i++) { ret_data[i] = rx_data[i + 8 + 4]; }
-			delete rx_data;
-			// print_hex(" 3", rx_data, num + 8 + 4);
-			return ret;
+			else if (ret != UXBUS_STATE::ERR_NUM) {
+				break;
+			}
 		}
 		sleep_milliseconds(1);
 	}
 	delete rx_data;
-	return UXBUS_STATE::ERR_TOUT;
+	return ret;
 }
 
 int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {

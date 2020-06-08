@@ -55,6 +55,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "1008-move_line_aa", "1008-m
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7003-servo_cartesian_aa", "7003-servo_cartesian_aa\7003-servo_cartesian_aa.vcxproj", "{36339303-398D-47F1-80DE-136C608D0D32}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thirdparty-set_robotiq_gripper", "thirdparty-set_robotiq_gripper\thirdparty-set_robotiq_gripper.vcxproj", "{FE74F561-17F7-447E-9ABE-8DCBFACE014B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -271,6 +273,14 @@ Global
 		{36339303-398D-47F1-80DE-136C608D0D32}.Release|x64.Build.0 = Release|x64
 		{36339303-398D-47F1-80DE-136C608D0D32}.Release|x86.ActiveCfg = Release|Win32
 		{36339303-398D-47F1-80DE-136C608D0D32}.Release|x86.Build.0 = Release|Win32
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Debug|x64.ActiveCfg = Debug|x64
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Debug|x64.Build.0 = Debug|x64
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Debug|x86.ActiveCfg = Debug|Win32
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Debug|x86.Build.0 = Debug|Win32
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Release|x64.ActiveCfg = Release|x64
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Release|x64.Build.0 = Release|x64
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Release|x86.ActiveCfg = Release|Win32
+		{FE74F561-17F7-447E-9ABE-8DCBFACE014B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

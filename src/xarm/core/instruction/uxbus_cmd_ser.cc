@@ -5,6 +5,7 @@
  * Author: Jimy Zhang <jimy92@163.com>
  ============================================================================*/
  //#include <unistd.h>
+#include <sys/timeb.h>
 #ifdef _WIN32
 #include <windows.h>
 #include<io.h>
@@ -15,6 +16,21 @@
 #include "xarm/core/common/crc16.h"
 #include "xarm/core/debug/debug_print.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
+
+inline void sleep_milliseconds(unsigned long milliseconds) {
+#ifdef _WIN32
+	Sleep(milliseconds); // 100 ms
+#else
+	usleep(milliseconds * 1000); // 100 ms
+#endif
+}
+
+inline long long get_system_time()
+{
+	struct timeb t;
+	ftime(&t);
+	return 1000 * t.time + t.millitm;
+}
 
 UxbusCmdSer::UxbusCmdSer(SerialPort *arm_port) { arm_port_ = arm_port; }
 UxbusCmdSer::~UxbusCmdSer(void) {}
@@ -39,9 +55,8 @@ int UxbusCmdSer::send_pend(int funcode, int num, int timeout, unsigned char *ret
 	int ret;
 	// unsigned char rx_data[arm_port_->que_maxlen_] = {0};
 	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen_];
-	int times = timeout;
-	while (times) {
-		times -= 1;
+	long long expired = get_system_time() + (long long)timeout;
+	while (get_system_time() < expired) {
 		ret = arm_port_->read_frame(rx_data);
 		if (ret != -1) {
 			ret = check_xbus_prot(rx_data, funcode);
@@ -49,12 +64,7 @@ int UxbusCmdSer::send_pend(int funcode, int num, int timeout, unsigned char *ret
 			delete rx_data;
 			return ret;
 		}
-		//usleep(1000);
-#ifdef _WIN32
-		Sleep(1); // 1 ms
-#else
-		usleep(1000); // 1000us
-#endif
+		sleep_milliseconds(1);
 	}
 	delete rx_data;
 	return UXBUS_STATE::ERR_TOUT;

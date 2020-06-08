@@ -24,20 +24,22 @@ void SocketPort::recv_proc(void) {
 	// unsigned char recv_data[que_maxlen_];
 	unsigned char *recv_data = new unsigned char[que_maxlen_];
 	while (state_ == 0) {
-	//bzero(recv_data, que_maxlen_);
-	memset(recv_data, 0, que_maxlen_);
-	// num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
-	num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 1, 0);
-	if (num <= 0) {
-		// close(fp_);
-		close_port();
-		printf("SocketPort::recv_proc exit, %d\n", fp_);
-		// pthread_exit(0);
-	}
-	bin32_to_8(num, &recv_data[0]);
-	rx_que_->push(recv_data);
+		//bzero(recv_data, que_maxlen_);
+		memset(recv_data, 0, que_maxlen_);
+		// num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
+		num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 1, 0);
+		if (num <= 0) {
+			// close(fp_);
+			close_port();
+			printf("SocketPort::recv_proc exit, %d\n", fp_);
+			// pthread_exit(0);
+			break;
+		}
+		bin32_to_8(num, &recv_data[0]);
+		rx_que_->push(recv_data);
 	}
 	delete recv_data;
+	delete rx_que_;
 }
 
 static void recv_proc_(void *arg) {
@@ -68,7 +70,7 @@ SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
 
 SocketPort::~SocketPort(void) {
 	state_ = -1;
-	delete rx_que_;
+	close_port();
 }
 
 int SocketPort::is_ok(void) { return state_; }
@@ -96,5 +98,4 @@ void SocketPort::close_port(void) {
 	close(fp_);
 #endif
 	state_ = -1;
-	delete rx_que_;
 }

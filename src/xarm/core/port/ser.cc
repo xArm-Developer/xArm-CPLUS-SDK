@@ -41,6 +41,7 @@ void SerialPort::recv_proc(void) {
 		usleep(1000); // 1000us
 #endif
 	}
+	delete rx_que_;
 }
 
 static void recv_proc_(void *arg) {
@@ -76,7 +77,7 @@ SerialPort::SerialPort(const char *port, int baud, int que_num,
 
 SerialPort::~SerialPort(void) {
 	state_ = -1;
-	delete rx_que_;
+	close_port();
 }
 
 int SerialPort::is_ok(void) { return state_; }
@@ -138,8 +139,9 @@ int SerialPort::write_frame(unsigned char *data, int len) {
 void SerialPort::close_port(void) {
 	state_ = -1;
 	//close(fp_);
-	ser.close();
-	delete rx_que_;
+	try {
+		ser.close();
+	} catch(...) {}
 }
 
 void SerialPort::parse_put(unsigned char *data, int len) {

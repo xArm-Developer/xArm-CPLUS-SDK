@@ -1419,3 +1419,97 @@ Get the pose represented by the axis angle pose
 :return: see the API code documentation for details.
 ```
 
+__int robotiq_reset(unsigned char ret_data[6] = NULL)__
+```
+Reset the robotiq gripper (clear previous activation if any)
+
+:param ret_data: the response from robotiq
+
+:return: see the API code documentation for details.
+```
+
+__int robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_activate(bool wait = true, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_activate(unsigned char ret_data[6] = NULL)__
+```
+If not already activated. Activate the robotiq gripper
+
+:param wait: whether to wait for the robotiq activate complete, default is true
+:param timeout: maximum waiting time(unit: second), default is 3, only available if wait=true
+:param ret_data: the response from robotiq
+
+:return: see the API code documentation for details.
+```
+
+__int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL)__
+```
+Go to the position with determined speed and force.
+
+:param pos: position of the gripper. Integer between 0 and 255. 0 being the open position and 255 being the close position.
+:param speed: gripper speed between 0 and 255
+:param force: gripper force between 0 and 255
+:param wait: whether to wait for the robotion motion complete, default is true
+:param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+:param check_detected: check object detected or not, default is false, only available if wait=true
+:param ret_data: the response from robotiq
+
+:return: see the API code documentation for details.
+```
+
+__int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_open(bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
+__int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL)__
+__int robotiq_open(unsigned char ret_data[6] = NULL)__
+```
+Open the robotiq gripper
+
+:param speed: gripper speed between 0 and 255
+:param force: gripper force between 0 and 255
+:param wait: whether to wait for the robotion motion complete, default is true
+:param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+:param check_detected: check object detected or not, default is false, only available if wait=true
+:param ret_data: the response from robotiq
+
+:return: see the API code documentation for details.
+```
+
+__int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_close(bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
+__int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL)__
+__int robotiq_close(unsigned char ret_data[6] = NULL)__
+```
+Close the robotiq gripper
+
+:param speed: gripper speed between 0 and 255
+:param force: gripper force between 0 and 255
+:param wait: whether to wait for the robotion motion complete, default is true
+:param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+:param check_detected: check object detected or not, default is false, only available if wait=true
+:param ret_data: the response from robotiq
+
+:return: see the API code documentation for details.
+```
+
+__int robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers = 3)__
+```
+Reading the status of robotiq gripper
+
+:param ret_data: the response from robotiq
+:param number_of_registers: number of registers, 1/2/3, default is 3
+	number_of_registers=1: reading the content of register 0x07D0
+	number_of_registers=2: reading the content of register 0x07D0/0x07D1
+	number_of_registers=3: reading the content of register 0x07D0/0x07D1/0x07D2
+		
+	Note:
+		register 0x07D0: Register GRIPPER STATUS
+		register 0x07D1: Register FAULT STATUS and register POSITION REQUEST ECHO
+		register 0x07D2: Register POSITION and register CURRENT
+
+:return: see the API code documentation for details.
+```

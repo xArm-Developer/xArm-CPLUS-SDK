@@ -24,29 +24,35 @@ int main(int argc, char **argv) {
 
 	printf("=========================================\n");
 	int ret;
+	unsigned char ret_data[6] = { 0 };
 
-	ret = arm->core->set_modbus_timeout(5);
-	printf("set_modbus_timeout, ret=%d\n", ret);
-	ret = arm->core->set_modbus_baudrate(115200);
-	printf("set_modbus_baudrate, ret=%d\n", ret);
-	sleep_milliseconds(1000);
-
-	unsigned char recv_data[254] = {0};
-	unsigned char modbus_data_1[13] = { 0x09, 0x10, 0x03, 0xE8, 0x00, 0x03, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	ret = arm->core->tgpio_set_modbus(modbus_data_1, 13, recv_data);
-	printf("tgpio_set_modbus, ret=%d\n", ret);
-	printf("recv_data:");
-	for (int i = 0; i < 254; ++i) { printf("%c ", recv_data[i]); }
+	ret = arm->robotiq_reset(ret_data);
+	printf("robotiq_reset, ret=%d, ret_data=", ret);
+	for (int i = 0; i < 6; ++i) { printf("%d ", ret_data[i]); }
 	printf("\n");
 
-	sleep_milliseconds(1000);
-
-	unsigned char modbus_data_2[13] = { 0x09, 0x10, 0x03, 0xE8, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	ret = arm->core->tgpio_set_modbus(modbus_data_2, 13, recv_data);
-	printf("tgpio_set_modbus, ret=%d\n", ret);
-	printf("recv_data:");
-	for (int i = 0; i < 254; ++i) { printf("%c ", recv_data[i]); }
+	ret = arm->robotiq_set_activate(true, ret_data);
+	printf("robotiq_set_activate, ret=%d, ret_data=", ret);
+	for (int i = 0; i < 6; ++i) { printf("%d ", ret_data[i]); }
 	printf("\n");
+
+	unsigned char robotiq_status[9];
+	ret = arm->robotiq_get_status(robotiq_status);
+	printf("robotiq_get_status, ret=%d, ret_data=", ret);
+	for (int i = 0; i < 9; ++i) { printf("%d ", robotiq_status[i]); }
+	printf("\n");
+
+	while (arm->is_connected()) {
+		ret = arm->robotiq_close(true, ret_data);
+		printf("robotiq_close, ret=%d, ret_data=", ret);
+		for (int i = 0; i < 6; ++i) { printf("%d ", ret_data[i]); }
+		printf("\n");
+
+		ret = arm->robotiq_open(true, ret_data);
+		printf("robotiq_open, ret=%d, ret_data=", ret);
+		for (int i = 0; i < 6; ++i) { printf("%d ", ret_data[i]); }
+		printf("\n");
+	}
 
 	return 0;
 }

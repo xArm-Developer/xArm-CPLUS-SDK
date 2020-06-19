@@ -9,10 +9,10 @@
 #include "xarm/core/instruction/uxbus_cmd_config.h"
 #include "xarm/core/debug/debug_print.h"
 
-static int BAUDRATES[14] = { 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 1500000, 2000000, 2500000 };
+static int BAUDRATES[13] = { 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 1500000, 2000000, 2500000 };
 
 static int get_baud_inx(int baud) {
-	for (int i = 0; i < 14; i++) { if (BAUDRATES[i] == baud) return i; }
+	for (int i = 0; i < 13; i++) { if (BAUDRATES[i] == baud) return i; }
 	return -1;
 }
 
@@ -36,14 +36,10 @@ void UxbusCmd::close(void) {}
  *******************************************************/
 
 int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
-	std::lock_guard<std::mutex> locker(mutex_);
-	//unsigned char send_data[num];
 	unsigned char *send_data = new unsigned char[num];
-	for (int i = 0; i < num; i++)
-	{
-		send_data[i] = (unsigned char)datas[i];
-	}
+	for (int i = 0; i < num; i++) { send_data[i] = (unsigned char)datas[i]; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
 	int ret = send_xbus(funcode, send_data, num);
 	delete send_data;
 	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
@@ -52,13 +48,9 @@ int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
 }
 
 int UxbusCmd::get_nu8(int funcode, int *rx_data, int num) {
-	// unsigned char secv_data[num];
 	unsigned char *send_data = new unsigned char[num];
 	int ret = get_nu8(funcode, send_data, num);
-
-	for (int i = 0; i < num; i++) {
-		rx_data[i] = send_data[i];
-	}
+	for (int i = 0; i < num; i++) { rx_data[i] = send_data[i]; }
 	delete send_data;
 	return ret;
 }
@@ -71,73 +63,55 @@ int UxbusCmd::get_nu8(int funcode, unsigned char *rx_data, int num) {
 }
 
 int UxbusCmd::set_nu16(int funcode, int *datas, int num) {
-	std::lock_guard<std::mutex> locker(mutex_);
-	//unsigned char send_data[num * 2];
 	unsigned char *send_data = new unsigned char[num * 2];
-	for (int i = 0; i < num; i++) {
-		bin16_to_8(datas[i], &send_data[i * 2]);
-	}
+	for (int i = 0; i < num; i++) { bin16_to_8(datas[i], &send_data[i * 2]); }
+
+	std::lock_guard<std::mutex> locker(mutex_);
 	int ret = send_xbus(funcode, send_data, num * 2);
 	delete send_data;
 	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
-	ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
-
-	return ret;
+	return send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
+
 int UxbusCmd::get_nu16(int funcode, int *rx_data, int num) {
 	std::lock_guard<std::mutex> locker(mutex_);
-	//unsigned char datas[num * 2];
-	unsigned char *datas = new unsigned char[num * 2];
 	int ret = send_xbus(funcode, 0, 0);
-	if (ret != 0) {
-		delete datas;
-		return UXBUS_STATE::ERR_NOTTCP;
-	}
-
+	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *datas = new unsigned char[num * 2];
 	ret = send_pend(funcode, num * 2, UXBUS_CONF::GET_TIMEOUT, datas);
-	for (int i = 0; i < num; i++) {
-		rx_data[i] = bin8_to_16(&datas[i * 2]);
-	}
+	for (int i = 0; i < num; i++) { rx_data[i] = bin8_to_16(&datas[i * 2]); }
 	delete datas;
-
 	return ret;
 }
 
 int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
+	unsigned char *send_data = new unsigned char[num * 4];
+	nfp32_to_hex(datas, send_data, num);
+
 	std::lock_guard<std::mutex> locker(mutex_);
-	// unsigned char hexdata[num * 4] = {0};
-	unsigned char *hexdata = new unsigned char[num * 4];
-	nfp32_to_hex(datas, hexdata, num);
-	int ret = send_xbus(funcode, hexdata, num * 4);
-	delete hexdata;
+	int ret = send_xbus(funcode, send_data, num * 4);
+	delete send_data;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
-
 	return ret;
 }
 
 int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
-	std::lock_guard<std::mutex> locker(mutex_);
-	//unsigned char hexdata[num * 4] = {0};  \\??
-	unsigned char *hexdata = new unsigned char[num * 4];
-	nint32_to_hex(datas, hexdata, num);
-	int ret = send_xbus(funcode, hexdata, num * 4);
-	delete hexdata;
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
-	ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
+	unsigned char *send_data = new unsigned char[num * 4];
+	nint32_to_hex(datas, send_data, num);
 
-	return ret;
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(funcode, send_data, num * 4);
+	delete send_data;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	return send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
 	std::lock_guard<std::mutex> locker(mutex_);
-	//unsigned char datas[num * 4] = {0};
-	unsigned char *datas = new unsigned char[num * 4];
 	int ret = send_xbus(funcode, 0, 0);
-	if (0 != ret) {
-		delete datas;
-		return UXBUS_STATE::ERR_NOTTCP;
-	}
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *datas = new unsigned char[num * 4];
 	ret = send_pend(funcode, num * 4, UXBUS_CONF::GET_TIMEOUT, datas);
 	hex_to_nfp32(datas, rx_data, num);
 	delete datas;
@@ -145,47 +119,45 @@ int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
 }
 
 int UxbusCmd::swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn) {
-	std::lock_guard<std::mutex> locker(mutex_);
-	// unsigned char hexdata[128] = { 0 };
-	unsigned char *hexdata = new unsigned char[128];
+	unsigned char *send_data = new unsigned char[128];
+	nfp32_to_hex(tx_datas, send_data, txn);
 
-	nfp32_to_hex(tx_datas, hexdata, txn);
-	int ret = send_xbus(funcode, hexdata, txn * 4);
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(funcode, send_data, txn * 4);
+	delete send_data;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
-	ret = send_pend(funcode, rxn * 4, UXBUS_CONF::GET_TIMEOUT, hexdata);
-	hex_to_nfp32(hexdata, rx_data, rxn);
-
+	unsigned char *datas = new unsigned char[128];
+	ret = send_pend(funcode, rxn * 4, UXBUS_CONF::GET_TIMEOUT, datas);
+	hex_to_nfp32(datas, rx_data, rxn);
+	delete datas;
 	return ret;
 }
 
-int UxbusCmd::is_nfp32(int funcode, float datas[], int txn, int *value) {
+int UxbusCmd::is_nfp32(int funcode, float tx_datas[], int txn, int *value) {
+	unsigned char *send_data = new unsigned char[txn * 4];
+	nfp32_to_hex(tx_datas, send_data, txn);
+
 	std::lock_guard<std::mutex> locker(mutex_);
-	//unsigned char hexdata[txn * 4] = {0};
-	unsigned char *hexdata = new unsigned char[txn * 4];
-
-	nfp32_to_hex(datas, hexdata, txn);
-	int ret = send_xbus(funcode, hexdata, txn * 4);
-	if (0 != ret) {
-		delete hexdata;
-		return UXBUS_STATE::ERR_NOTTCP;
-	}
-	ret = send_pend(funcode, 1, UXBUS_CONF::GET_TIMEOUT, hexdata);
-	*value = hexdata[0];
-	delete hexdata;
-
+	int ret = send_xbus(funcode, send_data, txn * 4);
+	delete send_data;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[txn * 4];
+	ret = send_pend(funcode, 1, UXBUS_CONF::GET_TIMEOUT, rx_data);
+	*value = rx_data[0];
+	delete rx_data;
 	return ret;
 }
 
-int UxbusCmd::set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional, int len) {
+int UxbusCmd::set_nfp32_with_bytes(int funcode, float *tx_datas, int num, char *additional, int len) {
+	unsigned char *send_data = new unsigned char[num * 4 + len];
+	nfp32_to_hex(tx_datas, send_data, num);
+	for (int i = 0; i < len; i++) { send_data[num * 4 + i] = additional[i]; }
+
 	std::lock_guard<std::mutex> locker(mutex_);
-	unsigned char *hexdata = new unsigned char[num * 4 + len];
-	nfp32_to_hex(datas, hexdata, num);
-	for (int i = 0; i < len; i++) { hexdata[num * 4 + i] = additional[i]; }
-	int ret = send_xbus(funcode, hexdata, num * 4 + len);
-	delete hexdata;
+	int ret = send_xbus(funcode, send_data, num * 4 + len);
+	delete send_data;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	ret = send_pend(funcode, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
-
 	return ret;
 }
 
@@ -255,7 +227,6 @@ int UxbusCmd::get_reduced_mode(int *rx_data) {
 }
 
 int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14], int *fense_is_on, int *collision_rebound_is_on, int length) {
-	//unsigned char rx_data[length] = {0};
 	unsigned char *rx_data = new unsigned char[length];
 	int ret = get_nu8(UXBUS_RG::GET_REDUCED_STATE, rx_data, length);
 	*on = rx_data[0];
@@ -536,54 +507,60 @@ int UxbusCmd::is_tcp_limit(float pose[6], int *value) {
  * gripper
  *******************************************************/
 int UxbusCmd::gripper_addr_w16(int addr, float value) {
-	// unsigned char txdata[7];
 	unsigned char *txdata = new unsigned char[7];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_W16B, txdata, 7);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_W16B, txdata, 7);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::TGPIO_W16B, 0, UXBUS_CONF::GET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::gripper_addr_r16(int addr, float *value) {
-	// unsigned char txdata[3], rx_data[4];
 	unsigned char *txdata = new unsigned char[3];
-	unsigned char *rx_data = new unsigned char[4];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
 	bin16_to_8(addr, &txdata[1]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_R16B, txdata, 3);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-	return send_pend(UXBUS_RG::TGPIO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_R16B, txdata, 3);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
+	ret = send_pend(UXBUS_RG::TGPIO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
 	*value = (float)bin8_to_32(rx_data);
+	delete rx_data;
 	return ret;
 }
 
 int UxbusCmd::gripper_addr_w32(int addr, float value) {
-	// unsigned char txdata[7];
 	unsigned char *txdata = new unsigned char[7];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_W32B, txdata, 7);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_W32B, txdata, 7);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::TGPIO_W32B, 0, UXBUS_CONF::GET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::gripper_addr_r32(int addr, float *value) {
-	// unsigned char txdata[3], rx_data[4];
 	unsigned char *txdata = new unsigned char[3];
-	unsigned char *rx_data = new unsigned char[4];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
 	bin16_to_8(addr, &txdata[1]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_R32B, txdata, 3);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_R32B, txdata, 3);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
 	ret = send_pend(UXBUS_RG::TGPIO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
 	*value = (float)bin8_to_32(rx_data);
+	delete rx_data;
 	return ret;
 }
 
@@ -623,53 +600,59 @@ int UxbusCmd::gripper_clean_err() {
  * tool gpio
  *******************************************************/
 int UxbusCmd::tgpio_addr_w16(int addr, float value) {
-	// unsigned char txdata[7];
 	unsigned char *txdata = new unsigned char[7];
 	txdata[0] = UXBUS_CONF::TGPIO_ID;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_W16B, txdata, 7);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_W16B, txdata, 7);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::TGPIO_W16B, 0, UXBUS_CONF::GET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::tgpio_addr_r16(int addr, float *value) {
-	// unsigned char txdata[3], rx_data[4];
 	unsigned char *txdata = new unsigned char[3];
-	unsigned char *rx_data = new unsigned char[4];
 	txdata[0] = UXBUS_CONF::TGPIO_ID;
 	bin16_to_8(addr, &txdata[1]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_R16B, txdata, 3);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_R16B, txdata, 3);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
 	ret = send_pend(UXBUS_RG::TGPIO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
 	*value = (float)bin8_to_32(rx_data);
+	delete rx_data;
 	return ret;
 }
 int UxbusCmd::tgpio_addr_w32(int addr, float value) {
-	// unsigned char txdata[7];
 	unsigned char *txdata = new unsigned char[7];
 	txdata[0] = UXBUS_CONF::TGPIO_ID;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_W32B, txdata, 7);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_W32B, txdata, 7);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::TGPIO_W32B, 0, UXBUS_CONF::GET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::tgpio_addr_r32(int addr, float *value) {
-	// unsigned char txdata[3], rx_data[4];
 	unsigned char *txdata = new unsigned char[3];
-	unsigned char *rx_data = new unsigned char[4];
 	txdata[0] = UXBUS_CONF::TGPIO_ID;
 	bin16_to_8(addr, &txdata[1]);
-	int ret = send_xbus(UXBUS_RG::TGPIO_R32B, txdata, 3);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-	return send_pend(UXBUS_RG::TGPIO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::TGPIO_R32B, txdata, 3);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
+	ret = send_pend(UXBUS_RG::TGPIO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
 	*value = (float)bin8_to_32(rx_data);
+	delete rx_data;
 	return ret;
 }
 
@@ -686,17 +669,11 @@ int UxbusCmd::tgpio_set_digital(int ionum, int value) {
 	int tmp = 0;
 	if (ionum == 1) {
 		tmp = tmp | 0x0100;
-		if (value)
-		{
-			tmp = tmp | 0x0001;
-		}
+		if (value) { tmp = tmp | 0x0001; }
 	}
 	else if (ionum == 2) {
 		tmp = tmp | 0x0200;
-		if (value)
-		{
-			tmp = tmp | 0x0002;
-		}
+		if (value) { tmp = tmp | 0x0002; }
 	}
 	else {
 		return -1;
@@ -735,8 +712,8 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 	if (ret == 0) {
 		int baud_i = (int)val;
 		if (baud_i != baud_inx) {
-			tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_i);
-			tgpio_addr_w16(0x1a0b, (float)baud_i);
+			tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
+			tgpio_addr_w16(0x1a0b, (float)baud_inx);
 			return tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
 		}
 	}
@@ -744,10 +721,11 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 }
 
 int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data) {
-	//unsigned char txdata[len_t + 1];
 	unsigned char *txdata = new unsigned char[len_t + 1];
 	txdata[0] = UXBUS_CONF::TGPIO_ID;
 	for (int i = 0; i < len_t; i++) { txdata[i + 1] = modbus_t[i]; }
+
+	std::lock_guard<std::mutex> locker(mutex_);
 	int ret = send_xbus(UXBUS_RG::TGPIO_MODBUS, txdata, len_t + 1);
 	delete txdata;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
@@ -757,7 +735,6 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
 }
 
 int UxbusCmd::gripper_modbus_w16s(int addr, float value, int len) {
-	// unsigned char txdata[9], rx_data[254];
 	unsigned char *txdata = new unsigned char[9];
 	unsigned char *rx_data = new unsigned char[254];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
@@ -766,32 +743,36 @@ int UxbusCmd::gripper_modbus_w16s(int addr, float value, int len) {
 	bin16_to_8(len, &txdata[4]);
 	txdata[6] = len * 2;
 	fp32_to_hex(value, &txdata[7]);
-	return tgpio_set_modbus(txdata, len * 2 + 7, rx_data);
+	int ret = tgpio_set_modbus(txdata, len * 2 + 7, rx_data);
+	delete txdata;
+	delete rx_data;
+	return ret;
 }
 
 int UxbusCmd::gripper_modbus_r16s(int addr, int len, unsigned char *rx_data) {
-	// unsigned char txdata[6];
 	unsigned char *txdata = new unsigned char[6];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
 	txdata[1] = 0x03;
 	bin16_to_8(addr, &txdata[2]);
 	bin16_to_8(len, &txdata[4]);
-	return tgpio_set_modbus(txdata, 6, rx_data);
+	int ret = tgpio_set_modbus(txdata, 6, rx_data);
+	delete txdata;
+	return ret;
 }
 
 int UxbusCmd::gripper_modbus_set_en(int value) {
-	// unsigned char txdata[2] = { 0 };
 	unsigned char *txdata = new unsigned char[2];
 	bin16_to_8(value, &txdata[0]);
 	float _value = hex_to_fp32(txdata);
+	delete txdata;
 	return gripper_modbus_w16s(SERVO3_RG::CON_EN, _value, 1);
 }
 
 int UxbusCmd::gripper_modbus_set_mode(int value) {
-	// unsigned char txdata[2];
 	unsigned char *txdata = new unsigned char[2];
 	bin16_to_8(value, &txdata[0]);
 	float _value = hex_to_fp32(txdata);
+	delete txdata;
 	return gripper_modbus_w16s(SERVO3_RG::CON_MODE, _value, 1);
 }
 
@@ -800,37 +781,37 @@ int UxbusCmd::gripper_modbus_set_zero(void) {
 }
 
 int UxbusCmd::gripper_modbus_get_pos(float *pulse) {
-	// unsigned char rx_data[254];
 	unsigned char *rx_data = new unsigned char[254];
 	int ret = gripper_modbus_r16s(SERVO3_RG::CURR_POS, 2, rx_data);
 	*pulse = (float)bin8_to_32(&rx_data[4]);
+	delete rx_data;
 	return ret;
 }
 
 int UxbusCmd::gripper_modbus_set_pos(float pulse) {
-	// unsigned char txdata[4];
 	unsigned char *txdata = new unsigned char[4];
 	txdata[0] = ((int)pulse >> 24) & 0xFF;
 	txdata[1] = ((int)pulse >> 16) & 0xFF;
 	txdata[2] = ((int)pulse >> 8) & 0xFF;
 	txdata[3] = (int)pulse & 0xFF;
 	float value = hex_to_fp32(txdata);
+	delete txdata;
 	return gripper_modbus_w16s(SERVO3_RG::TAGET_POS, value, 2);
 }
 
 int UxbusCmd::gripper_modbus_set_posspd(float speed) {
-	// unsigned char txdata[2];
 	unsigned char *txdata = new unsigned char[2];
 	bin16_to_8((int)speed, &txdata[0]);
 	float value = hex_to_fp32(txdata);
+	delete txdata;
 	return gripper_modbus_w16s(SERVO3_RG::POS_SPD, value, 1);
 }
 
 int UxbusCmd::gripper_modbus_get_errcode(int *err) {
-	// unsigned char rx_data[254];
 	unsigned char *rx_data = new unsigned char[254];
 	int ret = gripper_modbus_r16s(SERVO3_RG::ERR_CODE, 1, rx_data);
 	*err = bin8_to_16(&rx_data[4]);
+	delete rx_data;
 	return ret;
 }
 
@@ -850,54 +831,60 @@ int UxbusCmd::servo_get_dbmsg(int rx_data[16]) {
 }
 
 int UxbusCmd::servo_addr_w16(int id, int addr, float value) {
-	// unsigned char txdata[7];
 	unsigned char *txdata = new unsigned char[7];
 	txdata[0] = id;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
-	int ret = send_xbus(UXBUS_RG::SERVO_W16B, txdata, 7);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::SERVO_W16B, txdata, 7);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::SERVO_W16B, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::servo_addr_r16(int id, int addr, float *value) {
-	// unsigned char txdata[3], rx_data[4];
 	unsigned char *txdata = new unsigned char[3];
-	unsigned char *rx_data = new unsigned char[4];
 	txdata[0] = id;
 	bin16_to_8(addr, &txdata[1]);
-	int ret = send_xbus(UXBUS_RG::SERVO_R16B, txdata, 3);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::SERVO_R16B, txdata, 3);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
 	ret = send_pend(UXBUS_RG::SERVO_R16B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
 	*value = (float)bin8_to_32(rx_data);
+	delete rx_data;
 	return ret;
 }
 
 int UxbusCmd::servo_addr_w32(int id, int addr, float value) {
-	// unsigned char txdata[7];
 	unsigned char *txdata = new unsigned char[7];
 	txdata[0] = id;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
-	int ret = send_xbus(UXBUS_RG::SERVO_W32B, txdata, 7);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::SERVO_W32B, txdata, 7);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::SERVO_W32B, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 
 int UxbusCmd::servo_addr_r32(int id, int addr, float *value) {
-	// unsigned char txdata[3], rx_data[4];
 	unsigned char *txdata = new unsigned char[3];
-	unsigned char *rx_data = new unsigned char[4];
 	txdata[0] = id;
 	bin16_to_8(addr, &txdata[1]);
-	int ret = send_xbus(UXBUS_RG::SERVO_R32B, txdata, 3);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::SERVO_R32B, txdata, 3);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
 	ret = send_pend(UXBUS_RG::SERVO_R32B, 4, UXBUS_CONF::GET_TIMEOUT, rx_data);
 	*value = (float)bin8_to_32(rx_data);
+	delete rx_data;
 	return ret;
 }
 
@@ -979,7 +966,6 @@ int UxbusCmd::cgpio_set_outfun(int num, int fun) {
  */
 
 int UxbusCmd::cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf) {
-	// unsigned char rx_data[34] = { 0 };
 	unsigned char *rx_data = new unsigned char[34];
 	int ret = get_nu8(UXBUS_RG::CGPIO_GET_STATE, rx_data, 34);
 
@@ -993,6 +979,7 @@ int UxbusCmd::cgpio_get_state(int *state, int *digit_io, float *analog, int *inp
 		input_conf[i] = rx_data[18 + i];
 		output_conf[i] = rx_data[26 + i];
 	}
+	delete rx_data;
 	return ret;
 }
 
@@ -1004,6 +991,8 @@ int UxbusCmd::get_pose_offset(float pose1[6], float pose2[6], float offset[6], i
 	nfp32_to_hex(txdata, hexdata, 12);
 	hexdata[48] = orient_type_in;
 	hexdata[49] = orient_type_out;
+
+	std::lock_guard<std::mutex> locker(mutex_);
 	int ret = send_xbus(UXBUS_RG::MOVE_LINE_AA, hexdata, 50);
 	delete hexdata;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
@@ -1043,9 +1032,11 @@ int UxbusCmd::tgpio_delay_set_digital(int ionum, int value, float delay_sec) {
 	txdata[0] = ionum;
 	txdata[1] = value;
 	fp32_to_hex(delay_sec, &txdata[2]);
-	int ret = send_xbus(UXBUS_RG::DELAYED_TGPIO_SET, txdata, 6);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::DELAYED_TGPIO_SET, txdata, 6);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::DELAYED_TGPIO_SET, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 
@@ -1054,9 +1045,11 @@ int UxbusCmd::cgpio_delay_set_digital(int ionum, int value, float delay_sec) {
 	txdata[0] = ionum;
 	txdata[1] = value;
 	fp32_to_hex(delay_sec, &txdata[2]);
-	int ret = send_xbus(UXBUS_RG::DELAYED_CGPIO_SET, txdata, 6);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::DELAYED_CGPIO_SET, txdata, 6);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::DELAYED_CGPIO_SET, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 
@@ -1066,9 +1059,11 @@ int UxbusCmd::tgpio_position_set_digital(int ionum, int value, float xyz[3], flo
 	txdata[1] = value;
 	nfp32_to_hex(xyz, &txdata[2], 3);
 	fp32_to_hex(tol_r, &txdata[14]);
-	int ret = send_xbus(UXBUS_RG::POSITION_TGPIO_SET, txdata, 6);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::POSITION_TGPIO_SET, txdata, 6);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::POSITION_TGPIO_SET, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 
@@ -1078,9 +1073,11 @@ int UxbusCmd::cgpio_position_set_digital(int ionum, int value, float xyz[3], flo
 	txdata[1] = value;
 	nfp32_to_hex(xyz, &txdata[2], 3);
 	fp32_to_hex(tol_r, &txdata[14]);
-	int ret = send_xbus(UXBUS_RG::POSITION_CGPIO_SET, txdata, 6);
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::POSITION_CGPIO_SET, txdata, 6);
+	delete txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	return send_pend(UXBUS_RG::POSITION_CGPIO_SET, 0, UXBUS_CONF::SET_TIMEOUT, NULL);
 }
 

@@ -127,16 +127,6 @@ class UXBUS_STATE {
 public:
 	UXBUS_STATE(void) {}
 	~UXBUS_STATE(void) {}
-	static const int NOT_CONNECTED = -1;
-	static const int NOT_READY = -2;
-	static const int API_EXCEPTION = -3;
-	static const int CMD_NOT_EXIST = -4;
-	static const int TCP_LIMIT = -6;
-	static const int JOINT_LIMIT = -7;
-	static const int OUT_OF_RANGE = -8;
-	static const int EMERGENCY_STOP = -9;
-	static const int SERVO_NOT_EXIST = -10;
-	static const int CONVERT_FAILED = -11;
 	static const int ERR_CODE = 1;
 	static const int WAR_CODE = 2;
 	static const int ERR_TOUT = 3;
@@ -147,15 +137,6 @@ public:
 	static const int ERR_NOTTCP = 8;
 	static const int ERR_OTHER = 11;
 	static const int ERR_PARAM = 12;
-	static const int MODBUS_BAUD_NOT_CORRECT = 21;
-	static const int TRAJ_RW_FAILED = 31;
-	static const int TRAJ_RW_TOUT = 32;
-	static const int TRAJ_PLAYBACK_TOUT = 33;
-	static const int SUCTION_CUP_TOUT = 41;
-	static const int ROBOTIQ_ERR_LENG = 101;
-	static const int ROBOTIQ_HAS_FAULT = 102;
-	static const int ROBOTIQ_GET_FAILED = 103;
-	static const int ROBOTIQ_WAIT_TIMEOUT = 104;
 };
 
 class TRAJ_STATE {
@@ -204,6 +185,54 @@ public:
 	static const int START = 0;
 	static const int PAUSE = 3;
 	static const int STOP = 4;
+};
+
+class API_CODE {
+public:
+	API_CODE(void) {}
+	~API_CODE(void) {}
+	static const int NOT_CONNECTED = -1;
+	static const int NOT_READY = -2;
+	static const int API_EXCEPTION = -3;
+	static const int CMD_NOT_EXIST = -4;
+	static const int TCP_LIMIT = -6;
+	static const int JOINT_LIMIT = -7;
+	static const int OUT_OF_RANGE = -8;
+	static const int EMERGENCY_STOP = -9;
+	static const int SERVO_NOT_EXIST = -10;
+	static const int CONVERT_FAILED = -11;
+	static const int NORMAL = 0;
+	static const int ERR_CODE = UXBUS_STATE::ERR_CODE;
+	static const int WAR_CODE = UXBUS_STATE::WAR_CODE;
+	static const int ERR_TOUT = UXBUS_STATE::ERR_TOUT;
+	static const int ERR_LENG = UXBUS_STATE::ERR_LENG;
+	static const int ERR_NUM = UXBUS_STATE::ERR_NUM;
+	static const int ERR_PROT = UXBUS_STATE::ERR_PROT;
+	static const int ERR_FUN = UXBUS_STATE::ERR_FUN;
+	static const int ERR_NOTTCP = UXBUS_STATE::ERR_NOTTCP;
+	static const int ERR_OTHER = UXBUS_STATE::ERR_OTHER;
+	static const int ERR_PARAM = UXBUS_STATE::ERR_PARAM;
+	static const int TGPIO_ID_ERR = 20;
+	static const int MODBUS_BAUD_NOT_CORRECT = 21;
+	static const int MODBUS_ERR_LENG = 22;
+	static const int TRAJ_RW_FAILED = 31;
+	static const int TRAJ_RW_TOUT = 32;
+	static const int TRAJ_PLAYBACK_TOUT = 33;
+	static const int SUCTION_CUP_TOUT = 41;
+	static const int WAIT_FINISH_TIMEOUT = 100;
+	static const int CHECK_FAILED = 101;
+	static const int END_EFFECTOR_HAS_FAULT = 102;
+};
+
+class BIO_STATE {
+public:
+	BIO_STATE(void) {}
+	~BIO_STATE(void) {}
+
+	static const int IS_STOP = 0;
+	static const int IS_MOTION = 1;
+	static const int IS_DETECTED = 2;
+	static const int IS_FAULT = 3;
 };
 
 #endif

@@ -1441,11 +1441,11 @@ If not already activated. Activate the robotiq gripper
 :return: see the API code documentation for details.
 ```
 
-__int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
-__int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5,  unsigned char ret_data[6] = NULL)__
 __int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
 __int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL)__
 __int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL)__
+
 ```
 Go to the position with determined speed and force.
 
@@ -1454,17 +1454,16 @@ Go to the position with determined speed and force.
 :param force: gripper force between 0 and 255
 :param wait: whether to wait for the robotion motion complete, default is true
 :param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-:param check_detected: check object detected or not, default is false, only available if wait=true
 :param ret_data: the response from robotiq
 
 :return: see the API code documentation for details.
 ```
 
-__int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
-__int robotiq_open(bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
 __int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
 __int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL)__
 __int robotiq_open(unsigned char ret_data[6] = NULL)__
+
 ```
 Open the robotiq gripper
 
@@ -1472,17 +1471,16 @@ Open the robotiq gripper
 :param force: gripper force between 0 and 255
 :param wait: whether to wait for the robotion motion complete, default is true
 :param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-:param check_detected: check object detected or not, default is false, only available if wait=true
 :param ret_data: the response from robotiq
 
 :return: see the API code documentation for details.
 ```
 
-__int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
-__int robotiq_close(bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL)__
+__int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
 __int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
 __int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL)__
 __int robotiq_close(unsigned char ret_data[6] = NULL)__
+
 ```
 Close the robotiq gripper
 
@@ -1490,7 +1488,6 @@ Close the robotiq gripper
 :param force: gripper force between 0 and 255
 :param wait: whether to wait for the robotion motion complete, default is true
 :param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-:param check_detected: check object detected or not, default is false, only available if wait=true
 :param ret_data: the response from robotiq
 
 :return: see the API code documentation for details.

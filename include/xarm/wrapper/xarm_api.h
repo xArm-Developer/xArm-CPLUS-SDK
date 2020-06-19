@@ -31,7 +31,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.5.2"
+#define SDK_VERSION "1.5.3"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1138,7 +1138,7 @@ public:
 	* return: see the API code documentation for details.
 	*/
 	int robotiq_reset(unsigned char ret_data[6] = NULL);
-	
+
 	/*
 	* If not already activated. Activate the robotiq gripper
 	* @param wait: whether to wait for the robotiq activate complete, default is true
@@ -1157,12 +1157,10 @@ public:
 	* @param force: gripper force between 0 and 255
 	* @param wait: whether to wait for the robotion motion complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-	* @param check_detected: check object detected or not, default is false, only available if wait=true
 	* @param ret_data: the response from robotiq
 	* return: see the API code documentation for details.
 	*/
-	int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL);
-	int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL);
+	int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
 	int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
 	int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL);
 	int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL);
@@ -1173,32 +1171,28 @@ public:
 	* @param force: gripper force between 0 and 255
 	* @param wait: whether to wait for the robotion motion complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-	* @param check_detected: check object detected or not, default is false, only available if wait=true
 	* @param ret_data: the response from robotiq
 	* return: see the API code documentation for details.
 	*/
-	int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL);
-	int robotiq_open(bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL);
+	int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
 	int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
 	int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL);
 	int robotiq_open(unsigned char ret_data[6] = NULL);
-	
+
 	/*
 	* Close the robotiq gripper
 	* @param speed: gripper speed between 0 and 255
 	* @param force: gripper force between 0 and 255
 	* @param wait: whether to wait for the robotion motion complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-	* @param check_detected: check object detected or not, default is false, only available if wait=true
 	* @param ret_data: the response from robotiq
 	* return: see the API code documentation for details.
 	*/
-	int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL);
-	int robotiq_close(bool wait = true, fp32 timeout = 5, bool check_detected = false, unsigned char ret_data[6] = NULL);
+	int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
 	int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
 	int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL);
 	int robotiq_close(unsigned char ret_data[6] = NULL);
-	
+
 	/*
 	* Reading the status of robotiq gripper
 	* @param ret_data: the response from robotiq
@@ -1206,7 +1200,7 @@ public:
 		number_of_registers=1: reading the content of register 0x07D0
 		number_of_registers=2: reading the content of register 0x07D0/0x07D1
 		number_of_registers=3: reading the content of register 0x07D0/0x07D1/0x07D2
-		
+
 		Note:
 			register 0x07D0: Register GRIPPER STATUS
 			register 0x07D1: Register FAULT STATUS and register POSITION REQUEST ECHO
@@ -1214,6 +1208,19 @@ public:
 	* return: see the API code documentation for details.
 	*/
 	int robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers = 3);
+
+	int set_bio_gripper_enable(bool enable);
+	int set_bio_gripper_speed(int speed);
+	int open_bio_gripper(int speed = 300, bool wait = true, fp32 timeout = 5);
+	int open_bio_gripper(bool wait = true, fp32 timeout = 5);
+	int close_bio_gripper(int speed = 300, bool wait = true, fp32 timeout = 5);
+	int close_bio_gripper(bool wait = true, fp32 timeout = 5);
+	int get_bio_gripper_status(unsigned short *status);
+	int get_bio_gripper_error(unsigned short *err);
+
+	int set_tgpio_modbus_timeout(int timeout);
+	int set_tgpio_modbus_baudrate(int baud);
+	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length);
 private:
 	void _init(void);
 	void _check_version(void);
@@ -1237,12 +1244,17 @@ private:
 	inline void _report_cmdnum_changed_callback(void);
 	inline void _report_temperature_changed_callback(void);
 	inline void _report_count_changed_callback(void);
+	int _check_modbus_code(int ret);
 	int _get_modbus_baudrate(int *baud_inx);
 	bool _checkset_modbus_baud(int baudrate);
 	int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[7]);
 	int _robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers = 0x03);
 	int _robotiq_wait_activation_completed(fp32 timeout = 3);
 	int _robotiq_wait_motion_completed(fp32 timeout = 5, bool check_detected = false);
+
+	int _get_bio_gripper_register(unsigned char *ret_data, unsigned char address = 0x00, int number_of_registers = 1);
+	int _bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data);
+	int _check_bio_gripper_finish(fp32 timeout = 5);
 
 private:
 	std::string port_;
@@ -1287,6 +1299,7 @@ private:
 	int count_;
 
 	int modbus_baud_;
+	int bio_gripper_speed_;
 
 	SocketPort *stream_tcp_;
 	SocketPort *stream_tcp_report_;

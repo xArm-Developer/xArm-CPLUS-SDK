@@ -1211,9 +1211,9 @@ public:
 
 	int set_bio_gripper_enable(bool enable);
 	int set_bio_gripper_speed(int speed);
-	int open_bio_gripper(int speed = 300, bool wait = true, fp32 timeout = 5);
+	int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
 	int open_bio_gripper(bool wait = true, fp32 timeout = 5);
-	int close_bio_gripper(int speed = 300, bool wait = true, fp32 timeout = 5);
+	int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
 	int close_bio_gripper(bool wait = true, fp32 timeout = 5);
 	int get_bio_gripper_status(unsigned short *status);
 	int get_bio_gripper_error(unsigned short *err);
@@ -1244,16 +1244,16 @@ private:
 	inline void _report_cmdnum_changed_callback(void);
 	inline void _report_temperature_changed_callback(void);
 	inline void _report_count_changed_callback(void);
-	int _check_modbus_code(int ret);
+	int _check_modbus_code(int ret, unsigned char *rx_data);
 	int _get_modbus_baudrate(int *baud_inx);
-	bool _checkset_modbus_baud(int baudrate);
-	int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[7]);
+	int _checkset_modbus_baud(int baudrate, bool check = true);
+	int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]);
 	int _robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers = 0x03);
 	int _robotiq_wait_activation_completed(fp32 timeout = 3);
 	int _robotiq_wait_motion_completed(fp32 timeout = 5, bool check_detected = false);
 
 	int _get_bio_gripper_register(unsigned char *ret_data, unsigned char address = 0x00, int number_of_registers = 1);
-	int _bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data);
+	int _bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data, int ret_length);
 	int _check_bio_gripper_finish(fp32 timeout = 5);
 
 private:
@@ -1275,6 +1275,7 @@ private:
 	bool is_old_protocol_;
 	bool is_first_report_;
 	bool is_sync_;
+	bool ignore_error_;
 
 	int major_version_number_;
 	int minor_version_number_;

@@ -148,6 +148,7 @@ void XArmAPI::_init(void) {
 	temperatures = new fp32[7]{ 0, 0, 0, 0, 0, 0 };
 	gpio_reset_config = new unsigned char[2]{0, 0};
 	modbus_baud_ = -1;
+	ignore_error_ = false;
 }
 
 bool XArmAPI::has_err_warn(void) {
@@ -221,6 +222,7 @@ inline void XArmAPI::_report_mtable_mtbrake_changed_callback(void) {
 }
 
 inline void XArmAPI::_report_error_warn_changed_callback(void) {
+	if (ignore_error_) return;
 	_report_callback(error_warn_changed_callbacks_, error_code, warn_code);
 	// for (size_t i = 0; i < error_warn_changed_callbacks_.size(); i++) {
 	// 	if (callback_in_thread_) pool.dispatch(error_warn_changed_callbacks_[i], error_code, warn_code);
@@ -691,7 +693,7 @@ int XArmAPI::connect(const std::string &port) {
 	}
 	if (port_ == "") {
 		printf("can not connect to port/ip: %s\n", port_.data());
-		return -1;
+		return API_CODE::NOT_CONNECTED;
 	}
 	// std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
 	std::regex pattern("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
@@ -750,12 +752,12 @@ void XArmAPI::disconnect(void) {
 }
 
 int XArmAPI::get_version(unsigned char version_[40]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->get_version(version_);
 }
 
 int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_robot_sn(robot_sn);
 	if (ret == 0 || ret == 1 || ret == 2) {
 		memcpy(sn, robot_sn, 40);
@@ -764,12 +766,12 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
 }
 
 int XArmAPI::shutdown_system(int value) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->shutdown_system(value);
 }
 
 int XArmAPI::get_state(int *state_) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_state(state_);
 	if (ret == 0 || ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
 		state = *state_;
@@ -778,7 +780,7 @@ int XArmAPI::get_state(int *state_) {
 }
 
 int XArmAPI::get_cmdnum(int *cmdnum_) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_cmdnum(cmdnum_);
 	if (ret == 0 || ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
 		cmd_num = *cmdnum_;
@@ -787,7 +789,7 @@ int XArmAPI::get_cmdnum(int *cmdnum_) {
 }
 
 int XArmAPI::get_err_warn_code(int err_warn[2]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_err_code(err_warn);
 	if (ret == 0 || ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
 		error_code = err_warn[0];
@@ -797,7 +799,7 @@ int XArmAPI::get_err_warn_code(int err_warn[2]) {
 }
 
 int XArmAPI::get_position(fp32 pose[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_tcp_pose(pose);
 	if (ret >= 0) {
 		for (int i = 0; i < 6; i++) {
@@ -811,7 +813,7 @@ int XArmAPI::get_position(fp32 pose[6]) {
 }
 
 int XArmAPI::get_servo_angle(fp32 angs[7]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_joint_pose(angs);
 	if (ret >= 0) {
 		for (int i = 0; i < 7; i++) {
@@ -825,7 +827,7 @@ int XArmAPI::get_servo_angle(fp32 angs[7]) {
 }
 
 int XArmAPI::motion_enable(bool enable, int servo_id) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->motion_en(servo_id, int(enable));
 	get_state(&state);
 	if (state == 4) {
@@ -844,7 +846,7 @@ int XArmAPI::motion_enable(bool enable, int servo_id) {
 }
 
 int XArmAPI::set_state(int state_) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->set_state(state_);
 	get_state(&state);
 	if (state == 4) {
@@ -864,23 +866,23 @@ int XArmAPI::set_state(int state_) {
 }
 
 int XArmAPI::set_mode(int mode_) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_mode(mode_);
 }
 
 int XArmAPI::set_servo_attach(int servo_id) {
-	// if (!is_connected()) return -1;
+	// if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	// return core->set_brake(servo_id, 0);
 	return motion_enable(true, servo_id);
 }
 
 int XArmAPI::set_servo_detach(int servo_id) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_brake(servo_id, 1);
 }
 
 int XArmAPI::clean_error(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->clean_err();
 	get_state(&state);
 	if (state == 4) {
@@ -899,12 +901,12 @@ int XArmAPI::clean_error(void) {
 }
 
 int XArmAPI::clean_warn(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->clean_war();
 }
 
 int XArmAPI::set_pause_time(fp32 sltime) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->sleep_instruction(sltime);
 	if (get_system_time() >= sleep_finish_time_) {
 		sleep_finish_time_ = get_system_time() + (long long)(sltime * 1000);
@@ -950,7 +952,7 @@ void XArmAPI::_wait_stop(fp32 timeout) {
 
 int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = 0;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
 	last_used_tcp_acc = acc > 0 ? acc : last_used_tcp_acc;
@@ -983,7 +985,7 @@ int XArmAPI::set_position(fp32 pose[6], bool wait, fp32 timeout) {
 
 int XArmAPI::set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
 	last_used_tcp_acc = acc > 0 ? acc : last_used_tcp_acc;
 	fp32 mvpose[6];
@@ -1006,7 +1008,7 @@ int XArmAPI::set_tool_position(fp32 pose[6], bool wait, fp32 timeout) {
 
 int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	last_used_joint_speed = speed > 0 ? speed : last_used_joint_speed;
 	last_used_joint_acc = acc > 0 ? acc : last_used_joint_acc;
 	fp32 mvjoint[7];
@@ -1041,7 +1043,7 @@ int XArmAPI::set_servo_angle(int servo_id, fp32 angle, bool wait, fp32 timeout) 
 }
 
 int XArmAPI::set_servo_angle_j(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 mvjoint[7];
 	for (int i = 0; i < 7; i++) {
 		mvjoint[i] = (float)(default_is_radian ? angs[i] : angs[i] / RAD_DEGREE);
@@ -1050,7 +1052,7 @@ int XArmAPI::set_servo_angle_j(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime) 
 }
 
 int XArmAPI::set_servo_cartesian(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool is_tool_coord) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 mvpose[6];
 	for (int i = 0; i < 6; i++) {
 		mvpose[i] = (float)(i < 3 || default_is_radian ? pose[i] : pose[i] / RAD_DEGREE);
@@ -1061,7 +1063,7 @@ int XArmAPI::set_servo_cartesian(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime
 
 int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
 	last_used_tcp_acc = acc > 0 ? acc : last_used_tcp_acc;
 	fp32 pose_1[6];
@@ -1080,7 +1082,7 @@ int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed,
 
 int XArmAPI::move_gohome(fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 speed_ = (float)(default_is_radian ? speed : speed / RAD_DEGREE);
 	fp32 acc_ = (float)(default_is_radian ? acc : acc / RAD_DEGREE);
 	speed_ = speed_ > 0 ? speed_ : (float)0.8726646259971648; // 50 °/s
@@ -1137,7 +1139,7 @@ void XArmAPI::emergency_stop(void) {
 }
 
 int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 pose[6];
 	for (int i = 0; i < 6; i++) {
 		pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : source_pose[i] / RAD_DEGREE);
@@ -1151,7 +1153,7 @@ int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7]) 
 }
 
 int XArmAPI::get_forward_kinematics(fp32 source_angles[7], fp32 target_pose[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 angs[7];
 	for (int i = 0; i < 7; i++) {
 		angs[i] = (float)(default_is_radian ? source_angles[i] : source_angles[i] / RAD_DEGREE);
@@ -1165,7 +1167,7 @@ int XArmAPI::get_forward_kinematics(fp32 source_angles[7], fp32 target_pose[6]) 
 }
 
 int XArmAPI::is_tcp_limit(fp32 source_pose[6], int *limit) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 pose[6];
 	for (int i = 0; i < 6; i++) {
 		pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : source_pose[i] / RAD_DEGREE);
@@ -1174,7 +1176,7 @@ int XArmAPI::is_tcp_limit(fp32 source_pose[6], int *limit) {
 }
 
 int XArmAPI::is_joint_limit(fp32 source_angles[7], int *limit) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 angs[7];
 	for (int i = 0; i < 7; i++) {
 		angs[i] = (float)(default_is_radian ? source_angles[i] : source_angles[i] / RAD_DEGREE);
@@ -1184,35 +1186,35 @@ int XArmAPI::is_joint_limit(fp32 source_angles[7], int *limit) {
 
 int XArmAPI::set_collision_sensitivity(int sensitivity) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_collis_sens(sensitivity);
 }
 
 int XArmAPI::set_teach_sensitivity(int sensitivity) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_teach_sens(sensitivity);
 }
 
 int XArmAPI::set_gravity_direction(fp32 gravity_dir[3]) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_gravity_dir(gravity_dir);
 }
 
 int XArmAPI::clean_conf(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->clean_conf();
 }
 
 int XArmAPI::save_conf(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->save_conf();
 }
 
 int XArmAPI::set_tcp_offset(fp32 pose_offset[6]) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 offset[6];
 	for (int i = 0; i < 6; i++) {
 		offset[i] = (float)(default_is_radian || i < 3 ? pose_offset[i] : pose_offset[i] / RAD_DEGREE);
@@ -1222,7 +1224,7 @@ int XArmAPI::set_tcp_offset(fp32 pose_offset[6]) {
 
 int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	float _gravity[3];
 	if (compare_version(version_number, new int[3]{ 0, 2, 0 })) {
 		_gravity[0] = center_of_gravity[0];
@@ -1238,28 +1240,28 @@ int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
 }
 
 int XArmAPI::set_tcp_jerk(fp32 jerk) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_tcp_jerk(jerk);
 }
 
 int XArmAPI::set_tcp_maxacc(fp32 acc) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_tcp_maxacc(acc);
 }
 
 int XArmAPI::set_joint_jerk(fp32 jerk) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_joint_jerk(default_is_radian ? jerk : (float)(jerk / RAD_DEGREE));
 }
 
 int XArmAPI::set_joint_maxacc(fp32 acc) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_joint_maxacc(default_is_radian ? acc : (float)(acc / RAD_DEGREE));
 }
 
 int XArmAPI::set_gripper_enable(bool enable) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_en(int(enable));
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1267,8 +1269,8 @@ int XArmAPI::set_gripper_enable(bool enable) {
 }
 
 int XArmAPI::set_gripper_mode(int mode) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_mode(mode);
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1276,8 +1278,8 @@ int XArmAPI::set_gripper_mode(int mode) {
 }
 
 int XArmAPI::set_gripper_speed(fp32 speed) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_posspd(speed);
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1285,8 +1287,8 @@ int XArmAPI::set_gripper_speed(fp32 speed) {
 }
 
 int XArmAPI::get_gripper_position(fp32 *pos) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_get_pos(pos);
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1294,14 +1296,14 @@ int XArmAPI::get_gripper_position(fp32 *pos) {
 }
 
 int XArmAPI::get_gripper_err_code(int *err) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	return core->gripper_modbus_get_errcode(err);
 }
 
 int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	float last_pos = 0, pos_tmp, cur_pos;;
 	bool is_add = true;
 	int ret = core->gripper_modbus_set_pos(pos);
@@ -1381,8 +1383,8 @@ int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
 }
 
 int XArmAPI::clean_gripper_error(void) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_clean_err();
 	int err;
 	int ret2 = get_gripper_err_code(&err);
@@ -1390,12 +1392,12 @@ int XArmAPI::clean_gripper_error(void) {
 }
 
 int XArmAPI::get_tgpio_digital(int *io0, int *io1) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->tgpio_get_digital(io0, io1);
 }
 
 int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum == 0 || ionum == 1);
 	if (delay_sec > 0) {
 		return core->tgpio_delay_set_digital(ionum + 1, value, delay_sec);
@@ -1406,7 +1408,7 @@ int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
 }
 
 int XArmAPI::get_tgpio_analog(int ionum, float *value) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum == 0 || ionum == 1);
 	if (ionum == 0) {
 		return core->tgpio_get_analog1(value);
@@ -1417,7 +1419,7 @@ int XArmAPI::get_tgpio_analog(int ionum, float *value) {
 }
 
 int XArmAPI::get_cgpio_digital(int *digitals) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int tmp;
 	int ret = core->cgpio_get_auxdigit(&tmp);
 	for (int i = 0; i < 8; i++) {
@@ -1427,7 +1429,7 @@ int XArmAPI::get_cgpio_digital(int *digitals) {
 }
 
 int XArmAPI::get_cgpio_analog(int ionum, fp32 *value) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum == 0 || ionum == 1);
 	if (ionum == 0) {
 		return core->cgpio_get_analog1(value);
@@ -1438,7 +1440,7 @@ int XArmAPI::get_cgpio_analog(int ionum, fp32 *value) {
 }
 
 int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum >= 0 && ionum <= 7);
 	if (delay_sec > 0) {
 		return core->cgpio_delay_set_digital(ionum, value, delay_sec);
@@ -1449,7 +1451,7 @@ int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
 }
 
 int XArmAPI::set_cgpio_analog(int ionum, int value) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum == 0 || ionum == 1);
 	if (ionum == 0) {
 		return core->cgpio_set_analog1(value);
@@ -1460,44 +1462,44 @@ int XArmAPI::set_cgpio_analog(int ionum, int value) {
 }
 
 int XArmAPI::set_cgpio_digital_input_function(int ionum, int fun) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum >= 0 && ionum <= 7);
 	return core->cgpio_set_infun(ionum, fun);
 }
 
 int XArmAPI::set_cgpio_digital_output_function(int ionum, int fun) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	assert(ionum >= 0 && ionum <= 7);
 	return core->cgpio_set_outfun(ionum, fun);
 }
 
 int XArmAPI::get_cgpio_state(int *state_, int *digit_io, fp32 *analog, int *input_conf, int *output_conf) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->cgpio_get_state(state_, digit_io, analog, input_conf, output_conf);
 }
 
 int XArmAPI::set_reduced_mode(bool on) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_reduced_mode(int(on));
 }
 
 int XArmAPI::set_reduced_max_tcp_speed(float speed) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_reduced_linespeed(speed);
 }
 
 int XArmAPI::set_reduced_max_joint_speed(float speed) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_reduced_jointspeed(default_is_radian ? speed : (float)(speed / RAD_DEGREE));
 }
 
 int XArmAPI::get_reduced_mode(int *mode) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->get_reduced_mode(mode);
 }
 
 int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14], int *fense_is_on, int *collision_rebound_is_on) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fense_is_on, collision_rebound_is_on, version_is_ge() ? 79 : 21);
 	if (!default_is_radian) {
 		*joint_speed = (float)(*joint_speed * RAD_DEGREE);
@@ -1513,12 +1515,12 @@ int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float 
 }
 
 int XArmAPI::set_reduced_tcp_boundary(int boundary[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_xyz_limits(boundary);
 }
 
 int XArmAPI::set_reduced_joint_range(float jrange[14]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	float joint_range[14];
 	for (int i = 0; i < 14; i++) {
 		joint_range[i] = default_is_radian ? jrange[i] : (float)(jrange[i] / RAD_DEGREE);
@@ -1527,18 +1529,18 @@ int XArmAPI::set_reduced_joint_range(float jrange[14]) {
 }
 
 int XArmAPI::set_fense_mode(bool on) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_fense_on(int(on));
 }
 
 int XArmAPI::set_collision_rebound(bool on) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_collis_reb(int(on));
 }
 
 int XArmAPI::set_world_offset(float pose_offset[6]) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 offset[6];
 	for (int i = 0; i < 6; i++) {
 		offset[i] = default_is_radian || i < 3 ? pose_offset[i] : (float)(pose_offset[i] / RAD_DEGREE);
@@ -1547,12 +1549,12 @@ int XArmAPI::set_world_offset(float pose_offset[6]) {
 }
 
 int XArmAPI::start_record_trajectory(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_record_traj(1);
 }
 
 int XArmAPI::stop_record_trajectory(char* filename) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->set_record_traj(0);
 	if (ret == 0 && filename != NULL) {
 		int ret2 = save_record_trajectory(filename, 10);
@@ -1562,7 +1564,7 @@ int XArmAPI::stop_record_trajectory(char* filename) {
 }
 
 int XArmAPI::save_record_trajectory(char* filename, float timeout) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->save_traj(filename);
 	if (ret == 0) {
 		int ret2 = 0;
@@ -1589,7 +1591,7 @@ int XArmAPI::save_record_trajectory(char* filename, float timeout) {
 }
 
 int XArmAPI::load_trajectory(char* filename, float timeout) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->load_traj(filename);
 	if (ret == 0) {
 		int ret2 = 0;
@@ -1616,7 +1618,7 @@ int XArmAPI::load_trajectory(char* filename, float timeout) {
 }
 
 int XArmAPI::playback_trajectory(int times, char* filename, bool wait, int double_speed) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = 0;
 	if (filename != NULL) {
 		ret = load_trajectory(filename, 10);
@@ -1672,13 +1674,13 @@ int XArmAPI::playback_trajectory(int times, char* filename, bool wait, int doubl
 }
 
 int XArmAPI::get_trajectory_rw_status(int *status) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->get_traj_rw_status(status);
 }
 
 template<typename callable_vector, typename callable>
 inline int XArmAPI::_register_event_callback(callable_vector&& callbacks, callable&& callback) {
-	if (callback == NULL) return -1;
+	if (callback == NULL) return API_CODE::NOT_CONNECTED;
 	for (size_t i = 0; i < callbacks.size(); i++) {
 		if (callbacks[i] == callback) return 1;
 	}
@@ -1778,7 +1780,7 @@ int XArmAPI::get_suction_cup(int *val) {
 }
 
 int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int code1, code2;
 	if (on) {
 		code1 = set_tgpio_digital(0, 1, delay_sec);
@@ -1817,7 +1819,7 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec)
 }
 
 int XArmAPI::get_gripper_version(unsigned char versions[3]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char val1[5], val2[5], val3[5];
 	int code;
 	versions[0] = 0;
@@ -1836,7 +1838,7 @@ int XArmAPI::get_gripper_version(unsigned char versions[3]) {
 }
 
 int XArmAPI::get_servo_version(unsigned char versions[3], int servo_id) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	float val1, val2, val3;
 	int code;
 	versions[0] = 0;
@@ -1855,7 +1857,7 @@ int XArmAPI::get_servo_version(unsigned char versions[3], int servo_id) {
 }
 
 int XArmAPI::get_tgpio_version(unsigned char versions[3]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	float val1, val2, val3;
 	int code;
 	versions[0] = 0;
@@ -1874,43 +1876,43 @@ int XArmAPI::get_tgpio_version(unsigned char versions[3]) {
 }
 
 int XArmAPI::reload_dynamics(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->reload_dynamics();
 }
 
 int XArmAPI::set_counter_reset(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->cnter_reset();
 }
 
 int XArmAPI::set_counter_increase(void) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->cnter_plus();
 }
 
 int XArmAPI::set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->tgpio_position_set_digital(ionum, value, xyz, tol_r);
 }
 
 int XArmAPI::set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->cgpio_position_set_digital(ionum, value, xyz, tol_r);
 }
 
 int XArmAPI::config_tgpio_reset_when_stop(bool on_off) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->config_io_stop_reset(1, int(on_off));
 }
 
 int XArmAPI::config_cgpio_reset_when_stop(bool on_off) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->config_io_stop_reset(0, int(on_off));
 }
 
 int XArmAPI::set_position_aa(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool is_tool_coord, bool relative, bool wait, fp32 timeout) {
 	_check_is_pause();
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
 	last_used_tcp_acc = acc > 0 ? acc : last_used_tcp_acc;
 	fp32 mvpose[6];
@@ -1930,7 +1932,7 @@ int XArmAPI::set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative, bo
 }
 
 int XArmAPI::set_servo_cartesian_aa(fp32 pose[6], fp32 speed, fp32 acc, bool is_tool_coord, bool relative) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 mvpose[6];
 	for (int i = 0; i < 6; i++) {
 		mvpose[i] = (float)(i < 3 || default_is_radian ? pose[i] : pose[i] / RAD_DEGREE);
@@ -1943,7 +1945,7 @@ int XArmAPI::set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord, bool relat
 }
 
 int XArmAPI::get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in, int orient_type_out) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 p1[6], p2[6];
 	for (int i = 0; i < 6; i++) {
 		p1[i] = (float)(default_is_radian || i < 3 ? pose1[i] : pose1[i] / RAD_DEGREE);
@@ -1957,7 +1959,7 @@ int XArmAPI::get_pose_offset(float pose1[6], float pose2[6], float offset[6], in
 }
 
 int XArmAPI::get_position_aa(fp32 pose[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_position_aa(pose);
 	if (ret >= 0) {
 		for (int i = 0; i < 6; i++) {
@@ -1967,10 +1969,10 @@ int XArmAPI::get_position_aa(fp32 pose[6]) {
 	return ret;
 }
 
-int XArmAPI::_check_modbus_code(int ret) {
-	if (!is_connected()) return -1;
-	if (ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
-		if (ret != UXBUS_CONF::TGPIO_ID)
+int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (ret == 0 || ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
+		if (rx_data[0] != UXBUS_CONF::TGPIO_ID)
 			return API_CODE::TGPIO_ID_ERR;
 		if (ret != 0) {
 			if (error_code != 19 && error_code != 28) {
@@ -1984,7 +1986,7 @@ int XArmAPI::_check_modbus_code(int ret) {
 }
 
 int XArmAPI::_get_modbus_baudrate(int *baud_inx) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	float val;
 	int ret = core->tgpio_addr_r16(SERVO3_RG::MODBUS_BAUDRATE & 0x0FFF, &val);
 	*baud_inx = (int)val;
@@ -1998,34 +2000,43 @@ int XArmAPI::_get_modbus_baudrate(int *baud_inx) {
 	return ret;
 }
 
-bool XArmAPI::_checkset_modbus_baud(int baudrate) {
-	if (modbus_baud_ == baudrate)
-		return true;
+int XArmAPI::_checkset_modbus_baud(int baudrate, bool check) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (check && modbus_baud_ == baudrate)
+		return 0;
 	int baud_inx = get_baud_inx(baudrate);
-	if (baud_inx == -1) return false;
+	if (baud_inx == -1) return API_CODE::MODBUS_BAUD_NOT_SUPPORT;
 	int cur_baud_inx;
 	int ret = _get_modbus_baudrate(&cur_baud_inx);
 	if (ret == 0) {
 		if (cur_baud_inx != baud_inx) {
-			core->tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
-			core->tgpio_addr_w16(0x1a0b, (float)baud_inx);
-			core->tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
-			int err_warn[2] = { 0 };
-			get_err_warn_code(err_warn);
-			if (error_code == 19 || error_code == 28) {
-				clean_error();
-				sleep_milliseconds(600);
+			try {
+				ignore_error_ = true;
+				core->tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
+				core->tgpio_addr_w16(0x1a0b, (float)baud_inx);
+				core->tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
+				int err_warn[2] = { 0 };
+				get_err_warn_code(err_warn);
+				if (error_code == 19 || error_code == 28) {
+					clean_error();
+					sleep_milliseconds(600);
+				}
 			}
+			catch (exception e) {
+				ignore_error_ = false;
+				return API_CODE::API_EXCEPTION;
+			}
+			ignore_error_ = false;
 			ret = _get_modbus_baudrate(&cur_baud_inx);
 		}
 		if (ret == 0 && cur_baud_inx < 14) modbus_baud_ = BAUDRATES[cur_baud_inx];
 	}
-	return modbus_baud_ == baudrate;
+	return modbus_baud_ == baudrate ? 0 : API_CODE::MODBUS_BAUD_NOT_CORRECT;
 }
 
-int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_data[7]) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(115200)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(115200) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	unsigned char *send_data = new unsigned char[7 + length];
 	send_data[0] = 0x09;
 	send_data[1] = 0x10;
@@ -2034,25 +2045,14 @@ int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_d
 	send_data[4] = 0x00;
 	send_data[5] = 0x03;
 	send_data[6] = (unsigned char)length;
-	for (int i = 0; i < length; i++)
-	{
-		send_data[7+i] = params[i];
-	}
-	int ret = core->tgpio_set_modbus(send_data, length + 7, ret_data);
+	for (int i = 0; i < length; i++) { send_data[7+i] = params[i]; }
+	int ret = getset_tgpio_modbus_data(send_data, length + 7, ret_data, 6);
 	delete send_data;
-	if (ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
-		if (error_code != 19 && error_code != 28) {
-			int err_warn[2] = { 0 };
-			get_err_warn_code(err_warn);
-		}
-		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
-	}
-	ret = (ret == 0 && (ret_data[0] != UXBUS_CONF::TGPIO_ID || ret_data[1] != 9)) ? API_CODE::ERR_CODE : ret;
 	return ret;
 }
 int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(115200)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(115200) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	unsigned char *send_data = new unsigned char[6];
 	send_data[0] = 0x09;
 	send_data[1] = 0x03;
@@ -2060,18 +2060,8 @@ int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_reg
 	send_data[3] = 0xD0;
 	send_data[4] = 0x00;
 	send_data[5] = number_of_registers;
-	unsigned char rx_data[10] = { 0 };
-	int ret = core->tgpio_set_modbus(send_data, 6, rx_data);
+	int ret = getset_tgpio_modbus_data(send_data, 6, ret_data, 3 + 2 * number_of_registers);
 	delete send_data;
-	if (ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
-		if (error_code != 19 && error_code != 28) {
-			int err_warn[2] = { 0 };
-			get_err_warn_code(err_warn);
-		}
-		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
-	}
-	for (int i = 0; i < 9; i++) { ret_data[i] = rx_data[i + 1]; }
-	ret = (rx_data[0] != UXBUS_CONF::TGPIO_ID || rx_data[1] != 9) ? API_CODE::ERR_CODE : ret;
 	if (ret == 0) {
 		if (number_of_registers >= 0x01) {
 			robotiq_status.gOBJ = (ret_data[3] & 0xC0) >> 6;
@@ -2093,7 +2083,7 @@ int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_reg
 }
 
 int XArmAPI::_robotiq_wait_activation_completed(fp32 timeout) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int failed_cnt = 0;
 	long long expired = get_system_time() + (long long)(timeout * 1000);
 	int code = API_CODE::WAIT_FINISH_TIMEOUT;
@@ -2114,7 +2104,7 @@ int XArmAPI::_robotiq_wait_activation_completed(fp32 timeout) {
 }
 
 int XArmAPI::_robotiq_wait_motion_completed(fp32 timeout, bool check_detected) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int failed_cnt = 0;
 	long long expired = get_system_time() + (long long)(timeout * 1000);
 	int code = API_CODE::WAIT_FINISH_TIMEOUT;
@@ -2136,32 +2126,26 @@ int XArmAPI::_robotiq_wait_motion_completed(fp32 timeout, bool check_detected) {
 }
 
 int XArmAPI::robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return _robotiq_get(ret_data, number_of_registers);
 }
 
 int XArmAPI::robotiq_reset(unsigned char ret_data[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char params[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	unsigned char rx_data[7] = { 0 };
+	unsigned char rx_data[6] = { 0 };
 	int ret = _robotiq_set(params, 6, rx_data);
-	if (ret_data != NULL) {
-		for (int i = 0; i < 6; i++) { ret_data[i] = rx_data[i + 1]; }
-	}
+	if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
 	return ret;
 }
 
 int XArmAPI::robotiq_set_activate(bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char params[6] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	unsigned char rx_data[7] = { 0 };
+	unsigned char rx_data[6] = { 0 };
 	int ret = _robotiq_set(params, 6, rx_data);
-	if (ret_data != NULL) {
-		for (int i = 0; i < 6; i++) { ret_data[i] = rx_data[i + 1]; }
-	}
-	if (wait && ret == 0) {
-		ret = _robotiq_wait_activation_completed(timeout);
-	}
+	if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
+	if (wait && ret == 0) { ret = _robotiq_wait_activation_completed(timeout); }
 	return ret;
 }
 
@@ -2173,16 +2157,12 @@ int XArmAPI::robotiq_set_activate(unsigned char ret_data[6]) {
 }
 
 int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char params[6] = { 0x09, 0x00, 0x00, pos, speed, force };
-	unsigned char rx_data[7] = { 0 };
+	unsigned char rx_data[6] = { 0 };
 	int ret = _robotiq_set(params, 6, rx_data);
-	if (ret_data != NULL) {
-		for (int i = 0; i < 6; i++) { ret_data[i] = rx_data[i + 1]; }
-	}
-	if (wait && ret == 0) {
-		ret = _robotiq_wait_motion_completed(timeout);
-	}
+	if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
+	if (wait && ret == 0) { ret = _robotiq_wait_motion_completed(timeout); }
 	return ret;
 }
 
@@ -2229,29 +2209,21 @@ int XArmAPI::robotiq_close(unsigned char ret_data[6]) {
 	return robotiq_close(true, ret_data);
 }
 
-int XArmAPI::_bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data) {
-	if (!is_connected()) return -1;
-	if (!_checkset_modbus_baud(2000000)) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
-	int ret = core->tgpio_set_modbus(send_data, length, ret_data);
-	if (ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
-		if (error_code != 19 && error_code != 28) {
-			int err_warn[2] = { 0 };
-			get_err_warn_code(err_warn);
-		}
-		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
-	}
-	ret = (ret == 0 && (ret_data[0] != UXBUS_CONF::TGPIO_ID || ret_data[1] != 8)) ? API_CODE::ERR_CODE : ret;
+int XArmAPI::_bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data, int ret_length) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	int ret = getset_tgpio_modbus_data(send_data, length, ret_data, ret_length);
 	return ret;
 }
 
 int XArmAPI::_get_bio_gripper_register(unsigned char *ret_data, unsigned char address, int number_of_registers) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char params[6] = { 0x08, 0x03, 0x0, address, 0x0, (unsigned char)number_of_registers };
-	return _bio_gripper_send_modbus(params, 6, ret_data);
+	return _bio_gripper_send_modbus(params, 6, ret_data, 3 + 2 * number_of_registers);
 }
 
 int XArmAPI::_check_bio_gripper_finish(fp32 timeout) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int failed_cnt = 0;
 	long long expired = get_system_time() + (long long)(timeout * 1000);
 	int code = API_CODE::WAIT_FINISH_TIMEOUT;
@@ -2272,31 +2244,29 @@ int XArmAPI::_check_bio_gripper_finish(fp32 timeout) {
 }
 
 int XArmAPI::set_bio_gripper_enable(bool enable) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char params[6] = { 0x08, 0x06, 0x01, 0x00, 0x00, (unsigned char)enable };
-	unsigned char rx_data[7] = { 0 };
-	return _bio_gripper_send_modbus(params, 6, rx_data);
+	unsigned char rx_data[6] = { 0 };
+	return _bio_gripper_send_modbus(params, 6, rx_data, 6);
 }
 
 int XArmAPI::set_bio_gripper_speed(int speed) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned short tmp = speed;
 	unsigned char params[6] = { 0x08, 0x06, 0x03, 0x03, (unsigned char)(tmp >> 8), (unsigned char)tmp };
-	unsigned char rx_data[7] = { 0 };
-	int ret = _bio_gripper_send_modbus(params, 6, rx_data);
+	unsigned char rx_data[6] = { 0 };
+	int ret = _bio_gripper_send_modbus(params, 6, rx_data, 6);
 	if (ret == 0) { bio_gripper_speed_ = speed; }
 	return ret;
 }
 
 int XArmAPI::open_bio_gripper(int speed, bool wait, fp32 timeout) {
-	if (!is_connected()) return -1;
-	if (speed != bio_gripper_speed_) { set_bio_gripper_speed(speed); }
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (speed > 0 && speed != bio_gripper_speed_) { set_bio_gripper_speed(speed); }
 	unsigned char params[11] = { 0x08, 0x10, 0x07, 0x00, 0x00, 0x02, 0x04, 0x80, 0x00, 0x00, 0x64 };
-	unsigned char rx_data[7] = { 0 };
-	int ret = _bio_gripper_send_modbus(params, 11, rx_data);
-	if (ret == 0 && wait) {
-		ret = _check_bio_gripper_finish(timeout);
-	}
+	unsigned char rx_data[6] = { 0 };
+	int ret = _bio_gripper_send_modbus(params, 11, rx_data, 6);
+	if (ret == 0 && wait) { ret = _check_bio_gripper_finish(timeout); }
 	return ret;
 }
 
@@ -2305,16 +2275,12 @@ int XArmAPI::open_bio_gripper(bool wait, fp32 timeout) {
 }
 
 int XArmAPI::close_bio_gripper(int speed, bool wait, fp32 timeout) {
-	if (!is_connected()) return -1;
-	if (speed != bio_gripper_speed_) {
-		set_bio_gripper_speed(speed);
-	}
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (speed > 0 && speed != bio_gripper_speed_) { set_bio_gripper_speed(speed); }
 	unsigned char params[11] = { 0x08, 0x10, 0x07, 0x00, 0x00, 0x02, 0x04, 0x00, 0x00, 0x00, 0x64 };
-	unsigned char rx_data[7] = { 0 };
-	int ret = _bio_gripper_send_modbus(params, 11, rx_data);
-	if (ret == 0 && wait) {
-		ret = _check_bio_gripper_finish(timeout);
-	}
+	unsigned char rx_data[6] = { 0 };
+	int ret = _bio_gripper_send_modbus(params, 11, rx_data, 6);
+	if (ret == 0 && wait) { ret = _check_bio_gripper_finish(timeout); }
 	return ret;
 }
 
@@ -2323,36 +2289,35 @@ int XArmAPI::close_bio_gripper(bool wait, fp32 timeout) {
 }
 
 int XArmAPI::get_bio_gripper_status(unsigned short *status) {
-	if (!is_connected()) return -1;
-	unsigned char rx_data[6] = { 0 };
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	unsigned char rx_data[5] = { 0 };
 	int ret = _get_bio_gripper_register(rx_data, 0x00);
-	*status = (rx_data[4] << 8) + rx_data[5];
+	*status = (rx_data[3] << 8) + rx_data[4];
 	return ret;
 }
 
 int XArmAPI::get_bio_gripper_error(unsigned short *err) {
-	if (!is_connected()) return -1;
-	unsigned char rx_data[6] = { 0 };
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	unsigned char rx_data[5] = { 0 };
 	int ret = _get_bio_gripper_register(rx_data, 0x0F);
-	*err = (rx_data[4] << 8) + rx_data[5];
+	*err = (rx_data[3] << 8) + rx_data[4];
 	return ret;
 }
 
 int XArmAPI::set_tgpio_modbus_timeout(int timeout) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_modbus_timeout(timeout);
 }
 
 int XArmAPI::set_tgpio_modbus_baudrate(int baud) {
-	if (!is_connected()) return -1;
-	return core->set_modbus_baudrate(baud);
+	return _checkset_modbus_baud(baud, false);
 }
 
 int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length) {
-	if (!is_connected()) return -1;
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char *rx_data = new unsigned char[ret_length + 1];
 	int ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data);
-	ret = _check_modbus_code(ret);
+	ret = _check_modbus_code(ret, rx_data);
 	memcpy(ret_data, rx_data + 1, ret_length);
 	delete rx_data;
 	return ret;

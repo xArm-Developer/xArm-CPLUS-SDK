@@ -213,8 +213,9 @@ public:
 	static const int ERR_OTHER = UXBUS_STATE::ERR_OTHER;
 	static const int ERR_PARAM = UXBUS_STATE::ERR_PARAM;
 	static const int TGPIO_ID_ERR = 20;
-	static const int MODBUS_BAUD_NOT_CORRECT = 21;
-	static const int MODBUS_ERR_LENG = 22;
+	static const int MODBUS_BAUD_NOT_SUPPORT = 21;
+	static const int MODBUS_BAUD_NOT_CORRECT = 22;
+	static const int MODBUS_ERR_LENG = 23;
 	static const int TRAJ_RW_FAILED = 31;
 	static const int TRAJ_RW_TOUT = 32;
 	static const int TRAJ_PLAYBACK_TOUT = 33;

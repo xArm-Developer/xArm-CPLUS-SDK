@@ -37,13 +37,13 @@ int main(int argc, char **argv) {
 	while (arm->is_connected() && arm->state != 4)
 	{
 		for (int i = 1; i <= 100; i++) {
-			fp32 angles[7] = { i, 0, 0, 0, 0, 0, 0 };
+			fp32 angles[7] = { (fp32)i, 0, 0, 0, 0, 0, 0 };
 			ret = arm->set_servo_angle_j(angles);
 			printf("set_servo_angle_j, ret=%d\n", ret);
 			sleep_milliseconds(10);
 		}
 		for (int i = 1; i <= 100; i++) {
-			fp32 angles[7] = { 100-i, 0, 0, 0, 0, 0, 0 };
+			fp32 angles[7] = { (fp32)(100-i), 0, 0, 0, 0, 0, 0 };
 			ret = arm->set_servo_angle_j(angles);
 			printf("set_servo_angle_j, ret=%d\n", ret);
 			sleep_milliseconds(10);

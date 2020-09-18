@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
     std::string port(argv[1]);
 
     XArmAPI *arm = new XArmAPI(port);
+
     arm->motion_enable(true);
     arm->set_mode(0);
     arm->set_state(0);

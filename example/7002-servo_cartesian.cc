@@ -39,13 +39,13 @@ int main(int argc, char **argv) {
 	while (arm->is_connected() && arm->state != 4)
 	{
 		for (int i = 1; i <= 300; i++) {
-			fp32 pose[6] = { 200 + i, 0, 200, 180, 0, 0 };
+			fp32 pose[6] = { (fp32)(200 + i), 0, 200, 180, 0, 0 };
 			ret = arm->set_servo_cartesian(pose);
 			printf("set_servo_cartesian, ret=%d\n", ret);
 			sleep_milliseconds(10);
 		}
 		for (int i = 1; i <= 300; i++) {
-			fp32 pose[6] = { 500 - i, 0, 200, 180, 0, 0 };
+			fp32 pose[6] = { (fp32)(500 - i), 0, 200, 180, 0, 0 };
 			ret = arm->set_servo_cartesian(pose);
 			printf("set_servo_cartesian, ret=%d\n", ret);
 			sleep_milliseconds(10);

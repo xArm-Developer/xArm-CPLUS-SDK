@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     };
     fp32 radius = 0;
     arm->set_counter_reset();
-    arm->set_pause_time(0.2);
+    arm->set_pause_time((fp32)0.2);
     for (int j = 0; j < 10; j++) {
         for (int i = 0; i < 6; i++) {
             ret = arm->set_position(poses[i], radius, false);

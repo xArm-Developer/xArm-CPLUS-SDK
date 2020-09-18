@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	arm->set_state(0);
 	sleep_milliseconds(100);
 
-	fp32 pose[6] = { 0, 0, 0, 0, 0.2, 0 };
+	fp32 pose[6] = { 0, 0, 0, 0, (fp32)0.2, 0 };
 	for (int i = 1; i < 450; i++) {
 		ret = arm->set_servo_cartesian_aa(pose, false, true);
 		printf("set_servo_cartesian_aa, ret=%d\n", ret);

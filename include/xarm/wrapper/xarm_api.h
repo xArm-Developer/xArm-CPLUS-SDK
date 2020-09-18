@@ -31,7 +31,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.5.3"
+#define SDK_VERSION "1.6.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -57,7 +57,7 @@ public:
 	* @param do_not_open: do not open, default is False, if true, you need to manually call the connect interface.
 	* @param check_tcp_limit: reversed, whether checking tcp limit, default is true
 	* @param check_joint_limit: reversed, whether checking joint limit, default is true
-	* @param check_cmdnum_limit: reversed, whether checking command num limit, default is true
+	* @param check_cmdnum_limit: whether checking command num limit, default is true
 	* @param check_robot_sn: whether checking robot sn, default is false
 	* @param check_is_ready: reversed, check robot is ready to move or not, default is true
 	* @param check_is_pause: check robot is pause or not, default is true
@@ -65,6 +65,8 @@ public:
 	*   Note: greater than 0 means the maximum number of threads that can be used to process callbacks
 	*   Note: equal to 0 means no thread is used to process the callback
 	*   Note: less than 0 means no limit on the number of threads used for callback
+	* @param max_cmdnum: max cmdnum, default is 256
+	*	Note: only available in the param `check_cmdnum_limit` is true
 	*/
 	XArmAPI(const std::string &port = "",
 		bool is_radian = DEFAULT_IS_RADIAN,
@@ -75,7 +77,8 @@ public:
 		bool check_robot_sn = false,
 		bool check_is_ready = true,
 		bool check_is_pause = true,
-		int max_callback_thread_count = -1);
+		int max_callback_thread_count = -1,
+		int max_cmdnum = 256);
 	~XArmAPI(void);
 
 public:
@@ -124,6 +127,7 @@ public:
 
 	fp32 *world_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
 	fp32 *temperatures;
+	int count;
 	unsigned char *gpio_reset_config; // unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
 
 	bool default_is_radian;
@@ -131,6 +135,22 @@ public:
 	UxbusCmd *core;
 
 	struct RobotIqStatus robotiq_status;
+
+	fp32 *voltages; // fp32[7]{servo-1, ..., servo-7}
+	fp32 *currents; // fp32[7]{servo-1, ..., servo-7}
+	int is_simulation_robot;  // 0: off, 1: on
+	int is_collision_detection; // 0: off, 1: on
+	int collision_tool_type;
+	fp32 *collision_model_params; // fp32[6]{...}
+	int cgpio_state;
+	int cgpio_code;
+	int *cgpio_input_digitals;  // int[2]{ digital-input-functional-gpio-state, digital-input-configuring-gpio-state }
+	int *cgpio_output_digitals; // int[2]{ digital-output-functional-gpio-state, digital-output-configuring-gpio-state }
+	fp32 *cgpio_intput_anglogs; // fp32[2] {analog-1-input-value, analog-2-input-value}
+	fp32 *cgpio_output_anglogs; // fp32[2] {analog-1-output-value, analog-2-output-value}
+	int *cgpio_input_conf; // fp32[8]{ CI0-conf, ... CI7-conf }
+	int *cgpio_output_conf; // fp32[8]{ CO0-conf, ... CO7-conf }
+
 public:
 	/*
 	* xArm has error/warn or not, only available in socket way
@@ -264,6 +284,7 @@ public:
 		1: servo motion mode
 		2: joint teaching mode
 		3: cartesian teaching mode (invalid)
+		4: simulation mode
 	* return: see the API code documentation for details.
 	*/
 	int set_mode(int mode);
@@ -389,12 +410,14 @@ public:
 	* @param mvtime: reserved, 0
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+	* @param radius: move radius, if radius less than 0, will MoveJoint, else MoveArcJoint
+		The blending radius cannot be greater than the track length.
 	* return: see the API code documentation for details.
 	*/
-	int set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_servo_angle(fp32 angles[7], bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_servo_angle(int servo_id, fp32 angle, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_servo_angle(int servo_id, fp32 angle, bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
+	int set_servo_angle(fp32 angles[7], bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
+	int set_servo_angle(int servo_id, fp32 angle, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
+	int set_servo_angle(int servo_id, fp32 angle, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
 
 	/*
 	* Servo_j motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
@@ -671,7 +694,7 @@ public:
 	* @param value: the analog value of the specified io
 	* return: see the API code documentation for details.
 	*/
-	int set_cgpio_analog(int ionum, int value);
+	int set_cgpio_analog(int ionum, fp32 value);
 
 	/*
 	* Set the digital input functional mode of the Controller GPIO
@@ -1063,6 +1086,16 @@ public:
 	int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
 
 	/*
+	* Set the analog value of the specified Controller GPIO when the robot has reached the specified xyz position
+	* @param ionum: 0 ~ 1
+	* @param value: value, 0~10.0
+	* @param xyz: position xyz, as [x, y, z]
+	* @param tol_r: fault tolerance radius
+	* return: see the API code documentation for details.
+	*/
+	int set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], float tol_r);
+
+	/*
 	* Config the Tool GPIO reset the digital output when the robot is in stop state
 	* @param on_off: true/false
 	* return: see the API code documentation for details.
@@ -1209,24 +1242,188 @@ public:
 	*/
 	int robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers = 3);
 
-	int set_bio_gripper_enable(bool enable);
+	/*
+	* If not already enabled. Enable the bio gripper
+
+	* @param enable: enable or not
+	* @param wait: whether to wait for the bio gripper enable complete, default is True
+	* @param timeout: maximum waiting time(unit: second), default is 3, only available if wait=true
+
+	* return: See the code documentation for details.
+	*/
+	int set_bio_gripper_enable(bool enable, bool wait = true, fp32 timeout = 3);
+
+	/*
+	* Set the speed of the bio gripper
+
+	* @param speed: speed
+
+	* return: See the code documentation for details.
+	*/
 	int set_bio_gripper_speed(int speed);
+
+	/*
+	* Open the bio gripper
+
+	* @param speed: speed value, default is 0 (not set the speed)
+    * @param wait: whether to wait for the bio gripper motion complete, default is True
+    * @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+        
+	* return: See the code documentation for details.
+	*/
 	int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
 	int open_bio_gripper(bool wait = true, fp32 timeout = 5);
+	
+	/*
+	* Close the bio gripper
+
+	* @param speed: speed value, default is 0 (not set the speed)
+	* @param wait: whether to wait for the bio gripper motion complete, default is True
+	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+
+	* return: See the code documentation for details.
+	*/
 	int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
 	int close_bio_gripper(bool wait = true, fp32 timeout = 5);
-	int get_bio_gripper_status(unsigned short *status);
-	int get_bio_gripper_error(unsigned short *err);
+	
+	/*
+	* Get the status of the bio gripper
 
+	* @param status: the result of the bio gripper status value
+		status & 0x03 == 0: stop
+        status & 0x03 == 1: motion
+        status & 0x03 == 2: catch
+        status & 0x03 == 3: error
+        (status >> 2) & 0x03 == 0: not enabled
+        (status >> 2) & 0x03 == 1: enabling
+        (status >> 2) & 0x03 == 2: enabled
+
+	* return: See the code documentation for details.
+	*/
+	int get_bio_gripper_status(int *status);
+
+	/*
+	* Get the error code of the bio gripper
+
+	* @param err: the result of the bio gripper error code
+
+	* return: See the code documentation for details.
+	*/
+	int get_bio_gripper_error(int *err);
+
+	/*
+	* Clean the error code of the bio gripper
+
+	* return: See the code documentation for details.
+	*/
+	int clean_bio_gripper_error(void);
+
+	/*
+	* Set the modbus timeout of the tool gpio
+
+	* @param timeout: timeout, seconds
+
+	* return: See the code documentation for details.
+	*/
 	int set_tgpio_modbus_timeout(int timeout);
+
+	/*
+	* Set the modbus baudrate of the tool gpio
+
+	* @param baud: baudrate, 4800/9600/19200/38400/57600/115200/230400/460800/921600/1000000/1500000/2000000/2500000
+
+	* return: See the code documentation for details.
+	*/
 	int set_tgpio_modbus_baudrate(int baud);
+
+	/*
+	* Get the modbus baudrate of the tool gpio
+
+	* @param baud: the result of baudrate
+
+	* return: See the code documentation for details.
+	*/
+	int get_tgpio_modbus_baudrate(int *baud);
+
+	/*
+	* Send the modbus data to the tool gpio
+
+	* @param modbus_data: send data
+	* @param modbus_length: the length of the modbus_data
+	* @param ret_data: the response data of the modbus
+	* @param ret_length: the length of the response data
+
+	* return: See the code documentation for details.
+	*/
 	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length);
+
+	/*
+	* Set the reported torque or electric current
+
+	* @param tau_or_i:
+		0: torque
+		1: electric current
+
+	* return: See the code documentation for details.
+	*/
+	int set_report_tau_or_i(int tau_or_i = 0);
+	
+	/*
+	* Get the reported torque or electric current
+
+	* @param tau_or_i: the result of the tau_or_i
+
+	* return: See the code documentation for details.
+	*/
+	int get_report_tau_or_i(int *tau_or_i);
+
+	/*
+	* Set whether to enable self-collision detection 
+
+	* @param on: enable or not
+
+	* return: See the code documentation for details.
+	*/
+	int set_self_collision_detection(bool on);
+
+	/*
+	* Set the geometric model of the end effector for self collision detection
+
+	* @param tool_type: the geometric model type
+		0: No end effector, no additional parameters required
+        1: xArm Gripper, no additional parameters required
+        2: xArm Vacuum Gripper, no additional parameters required
+        3: xArm Bio Gripper, no additional parameters required
+        4: Robotiq-2F-85 Gripper, no additional parameters required
+        5: Robotiq-2F-140 Gripper, no additional parameters required
+        21: Cylinder, need additional parameters radius, height
+            arm->set_collision_tool_model(21, 2, radius, height)
+            @param radius: the radius of cylinder, (unit: mm)
+            @param height: the height of cylinder, (unit: mm)
+        22: Cuboid, need additional parameters x, y, z
+            arm->set_collision_tool_model(22, 3, x, y, z)
+            @param x: the length of the cuboid in the x coordinate direction, (unit: mm)
+            @param y: the length of the cuboid in the y coordinate direction, (unit: mm)
+            @param z: the length of the cuboid in the z coordinate direction, (unit: mm)
+        
+	* @param n: the count of the additional parameters
+	* @param ...: additional parameters
+
+	* return: See the code documentation for details.
+	*/
+	int set_collision_tool_model(int tool_type, int n = 0, ...);
+	int set_simulation_robot(bool on);
+
+	int set_timeout(fp32 timeout);
 private:
 	void _init(void);
+	void _sync(void);
 	void _check_version(void);
-	bool version_is_ge(int major = 1, int minor = 2, int revision = 11);
+	bool _version_is_ge(int major = 1, int minor = 2, int revision = 11);
 	void _check_is_pause(void);
-	void _wait_stop(fp32 timeout);
+	int _wait_until_cmdnum_lt_max(void);
+	int _check_code(int code, bool is_move_cmd = false);
+	int _wait_move(fp32 timeout);
 	void _update_old(unsigned char *data);
 	void _update(unsigned char *data);
 	template<typename callable_vector, typename callable>
@@ -1244,7 +1441,7 @@ private:
 	inline void _report_cmdnum_changed_callback(void);
 	inline void _report_temperature_changed_callback(void);
 	inline void _report_count_changed_callback(void);
-	int _check_modbus_code(int ret, unsigned char *rx_data);
+	int _check_modbus_code(int ret, unsigned char *rx_data = NULL);
 	int _get_modbus_baudrate(int *baud_inx);
 	int _checkset_modbus_baud(int baudrate, bool check = true);
 	int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]);
@@ -1252,10 +1449,17 @@ private:
 	int _robotiq_wait_activation_completed(fp32 timeout = 3);
 	int _robotiq_wait_motion_completed(fp32 timeout = 5, bool check_detected = false);
 
-	int _get_bio_gripper_register(unsigned char *ret_data, unsigned char address = 0x00, int number_of_registers = 1);
+	int _get_bio_gripper_register(unsigned char *ret_data, int address = 0x00, int number_of_registers = 1);
 	int _bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data, int ret_length);
-	int _check_bio_gripper_finish(fp32 timeout = 5);
+	int _bio_gripper_wait_motion_completed(fp32 timeout = 5);
+	int _bio_gripper_wait_enable_completed(fp32 timeout = 3);
+	int _set_bio_gripper_position(int pos, int speed = 0, bool wait = true, fp32 timeout = 5);
+	int _set_bio_gripper_position(int pos, bool wait = true, fp32 timeout = 5);
 
+	int _check_gripper_position(fp32 target_pos, fp32 timeout = 10);
+	int _check_gripper_status(fp32 timeout = 10);
+	bool _gripper_is_support_status(void);
+	int _get_gripper_status(int *status);
 private:
 	std::string port_;
 	bool check_tcp_limit_;
@@ -1265,17 +1469,18 @@ private:
 	bool check_is_ready_;
 	bool check_is_pause_;
 	bool callback_in_thread_;
+	int max_cmdnum_;
 	// pthread_t report_thread_;
 	std::thread report_thread_;
 	std::mutex mutex_;
 	std::condition_variable cond_;
 	bool is_ready_;
-	bool is_stop_;
 	bool is_tcp_;
 	bool is_old_protocol_;
 	bool is_first_report_;
 	bool is_sync_;
 	bool ignore_error_;
+	bool ignore_state_;
 
 	int major_version_number_;
 	int minor_version_number_;
@@ -1297,10 +1502,21 @@ private:
 	fp32 trs_msg_[5];
 	fp32 p2p_msg_[5];
 	fp32 rot_msg_[2];
-	int count_;
 
 	int modbus_baud_;
 	int bio_gripper_speed_;
+	bool gripper_is_enabled_;
+	bool bio_gripper_is_enabled_;
+	bool robotiq_is_activated_;
+	int xarm_gripper_error_code_;
+	int bio_gripper_error_code_;
+	int robotiq_error_code_;
+	int gripper_version_numbers_[3];
+
+	long long last_report_time_;
+	long long max_report_interval_;
+
+	fp32 cmd_timeout_;
 
 	SocketPort *stream_tcp_;
 	SocketPort *stream_tcp_report_;

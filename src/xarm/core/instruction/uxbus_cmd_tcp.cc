@@ -1,10 +1,11 @@
-/* Copyright 2017 UFACTORY Inc. All Rights Reserved.
- *
- * Software License Agreement (BSD License)
- *
- * Author: Jimy Zhang <jimy92@163.com>
- ============================================================================*/
- //#include <unistd.h>
+/*
+# Software License Agreement (MIT License)
+#
+# Copyright (c) 2020, UFACTORY, Inc.
+# All rights reserved.
+#
+# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+*/
 #include <sys/timeb.h>
 #ifdef _WIN32
 #include <windows.h>
@@ -67,9 +68,11 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 	if (num != bus_flag) { return UXBUS_STATE::ERR_NUM; }
 	if (prot != TX2_PROT_CON_) { return UXBUS_STATE::ERR_PROT; }
 	if (fun != funcode) { return UXBUS_STATE::ERR_FUN; }
+	state_is_ready = !(state & 0x10);
 	if (state & 0x40) { return UXBUS_STATE::ERR_CODE; }
 	if (state & 0x20) { return UXBUS_STATE::WAR_CODE; }
 	if (sizeof_data != len + 6) { return UXBUS_STATE::ERR_LENG; }
+	// if (state & 0x10) { return UXBUS_STATE::STATE_NOT_READY; }
 	return 0;
 }
 

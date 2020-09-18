@@ -9,11 +9,14 @@
 
 #include <mutex>
 #include "xarm/core/common/data_type.h"
+#include "xarm/core/instruction/uxbus_cmd_config.h"
 
 class UxbusCmd {
 public:
 	UxbusCmd(void);
 	~UxbusCmd(void);
+
+	int set_timeout(float timeout);
 
 	int get_version(unsigned char rx_data[40]);
 	int get_robot_sn(unsigned char rx_data[40]);
@@ -52,6 +55,7 @@ public:
 	int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
 		float mvradii);
 	int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
+	int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii);
 	int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime);
 	int move_gohome(float mvvelo, float mvacc, float mvtime);
 	int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
@@ -128,8 +132,8 @@ public:
 	int cgpio_get_analog1(float *value);
 	int cgpio_get_analog2(float *value);
 	int cgpio_set_auxdigit(int ionum, int value);
-	int cgpio_set_analog1(int value);
-	int cgpio_set_analog2(int value);
+	int cgpio_set_analog1(float value);
+	int cgpio_set_analog2(float value);
 	int cgpio_set_infun(int ionum, int fun);
 	int cgpio_set_outfun(int ionum, int fun);
 	int cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf);
@@ -143,7 +147,15 @@ public:
 	int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
 	int tgpio_position_set_digital(int ionum, int value, float xyz[3], float tol_r);
 	int cgpio_position_set_digital(int ionum, int value, float xyz[3], float tol_r);
+	int cgpio_position_set_analog(int ionum, float value, float xyz[3], float tol_r);
 	int config_io_stop_reset(int io_type, int val);
+
+	int set_report_tau_or_i(int tau_or_i);
+	int get_report_tau_or_i(int *rx_data);
+
+	int set_self_collision_detection(int on_off);
+	int set_collision_tool_model(int tool_type, int n = 0, float *argv = NULL);
+	int set_simulation_robot(int on_off);
 
 	virtual void close(void);
 
@@ -163,8 +175,13 @@ private:
 	int is_nfp32(int funcode, float datas[], int txn, int *value);
 	int set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional, int n);
 
+public:
+	bool state_is_ready;
+
 private:
 	std::mutex mutex_;
+	int GET_TIMEOUT_ = UXBUS_CONF::GET_TIMEOUT;
+	int SET_TIMEOUT_ = UXBUS_CONF::SET_TIMEOUT;
 };
 
 #endif

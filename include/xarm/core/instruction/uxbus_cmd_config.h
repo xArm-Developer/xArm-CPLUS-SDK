@@ -16,6 +16,7 @@ public:
 	static const unsigned char GET_ROBOT_SN = 2;
 	static const unsigned char CHECK_VERIFY = 3;
 	static const unsigned char RELOAD_DYNAMICS = 4;
+	static const unsigned char GET_REPORT_TAU_OR_I = 5;
 	static const unsigned char SHUTDOWN_SYSTEM = 10;
 
 	static const unsigned char MOTION_EN = 11;
@@ -31,6 +32,7 @@ public:
 	static const unsigned char MOVE_LINE = 21;
 	static const unsigned char MOVE_LINEB = 22;
 	static const unsigned char MOVE_JOINT = 23;
+	static const unsigned char MOVE_JOINTB = 24;
 	static const unsigned char MOVE_HOME = 25;
 	static const unsigned char SLEEP_INSTT = 26;
 	static const unsigned char MOVE_CIRCLE = 27;
@@ -79,6 +81,7 @@ public:
 	static const unsigned char PLAY_TRAJ = 64;
 	static const unsigned char GET_TRAJ_RW_STATUS = 65;
 
+	static const unsigned char REPORT_TAU_OR_I = 70;
 	static const unsigned char SET_TIMER = 71;
 	static const unsigned char CANCEL_TIMER = 72;
 	static const unsigned char SET_WORLD_OFFSET = 73;
@@ -86,6 +89,11 @@ public:
 	static const unsigned char CNTER_PLUS = 75;
 
 	static const unsigned char CAL_POSE_OFFSET = 76;
+
+	static const unsigned char SET_SELF_COLLIS_CHECK = 77;
+	static const unsigned char SET_COLLIS_TOOL = 78;
+	static const unsigned char SET_SIMULATION_ROBOT = 79;
+
 	static const unsigned char GET_TCP_POSE_AA = 91;
 	static const unsigned char MOVE_LINE_AA = 92;
 	static const unsigned char MOVE_SERVO_CART_AA = 93;
@@ -121,6 +129,7 @@ public:
 	static const unsigned char POSITION_CGPIO_SET = 144;
 	static const unsigned char POSITION_TGPIO_SET = 145;
 	static const unsigned char SET_IO_STOP_RESET = 146;
+	static const unsigned char POSITION_CGPIO_SET_ANALOG = 147;
 };
 
 class UXBUS_STATE {
@@ -135,6 +144,7 @@ public:
 	static const int ERR_PROT = 6;
 	static const int ERR_FUN = 7;
 	static const int ERR_NOTTCP = 8;
+	static const int STATE_NOT_READY = 9;
 	static const int ERR_OTHER = 11;
 	static const int ERR_PARAM = 12;
 };
@@ -158,8 +168,8 @@ public:
 	UXBUS_CONF(void) {}
 	~UXBUS_CONF(void) {}
 
-	static const int SET_TIMEOUT = 1000;  // ms
-	static const int GET_TIMEOUT = 1000;  // ms
+	static const int SET_TIMEOUT = 2000;  // ms
+	static const int GET_TIMEOUT = 2000;  // ms
 	static const int GRIPPER_ID = 8;
 	static const int TGPIO_ID = 9;
 	static const int MASTER_ID = 0xAA;
@@ -202,6 +212,18 @@ public:
 	static const int SERVO_NOT_EXIST = -10;
 	static const int CONVERT_FAILED = -11;
 	static const int NORMAL = 0;
+
+	static const int HAS_ERROR = UXBUS_STATE::ERR_CODE;
+	static const int HAS_WARN = UXBUS_STATE::WAR_CODE;
+	static const int RES_TIMEOUT = UXBUS_STATE::ERR_TOUT;
+	static const int RES_LENGTH_ERROR = UXBUS_STATE::ERR_LENG;
+	static const int CMD_NUM_ERROR = UXBUS_STATE::ERR_NUM;
+	static const int CMD_PROT_ERROR = UXBUS_STATE::ERR_PROT;
+	static const int FUN_ERROR = UXBUS_STATE::ERR_FUN;
+	static const int NO_TCP = UXBUS_STATE::ERR_NOTTCP;
+	static const int OTHER = UXBUS_STATE::ERR_OTHER;
+	static const int PARAM_ERROR = UXBUS_STATE::ERR_PARAM;
+
 	static const int ERR_CODE = UXBUS_STATE::ERR_CODE;
 	static const int WAR_CODE = UXBUS_STATE::WAR_CODE;
 	static const int ERR_TOUT = UXBUS_STATE::ERR_TOUT;
@@ -210,6 +232,7 @@ public:
 	static const int ERR_PROT = UXBUS_STATE::ERR_PROT;
 	static const int ERR_FUN = UXBUS_STATE::ERR_FUN;
 	static const int ERR_NOTTCP = UXBUS_STATE::ERR_NOTTCP;
+	static const int STATE_NOT_READY = UXBUS_STATE::STATE_NOT_READY;
 	static const int ERR_OTHER = UXBUS_STATE::ERR_OTHER;
 	static const int ERR_PARAM = UXBUS_STATE::ERR_PARAM;
 	static const int TGPIO_ID_ERR = 20;
@@ -223,6 +246,7 @@ public:
 	static const int WAIT_FINISH_TIMEOUT = 100;
 	static const int CHECK_FAILED = 101;
 	static const int END_EFFECTOR_HAS_FAULT = 102;
+	static const int END_EFFECTOR_NOT_ENABLED = 103;
 };
 
 class BIO_STATE {
@@ -234,6 +258,25 @@ public:
 	static const int IS_MOTION = 1;
 	static const int IS_DETECTED = 2;
 	static const int IS_FAULT = 3;
+	static const int IS_NOT_ENABLED = 0;
+	static const int IS_ENABLING = 1;
+	static const int IS_ENABLED = 2;
+};
+
+class COLLISION_TOOL_TYPE {
+public:
+	COLLISION_TOOL_TYPE(void) {}
+	~COLLISION_TOOL_TYPE(void) {}
+
+	static const int NONE = 0;
+	static const int XARM_GRIPPER = 1;
+	static const int XARM_VACUUM_GRIPPER = 2;
+	static const int XARM_BIO_GRIPPER = 3;
+	static const int ROBOTIQ_2F85 = 4;
+	static const int ROBOTIQ_2F140 = 5;
+	static const int USE_PRIMITIVES = 20;
+	static const int CYLINDER = 21;
+	static const int BOX = 22;
 };
 
 #endif

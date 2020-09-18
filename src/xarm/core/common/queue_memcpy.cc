@@ -1,9 +1,11 @@
-/* Copyright 2017 UFACTORY Inc. All Rights Reserved.
- *
- * Software License Agreement (BSD License)
- *
- * Author: Jimy Zhang <jimy92@163.com>
- ============================================================================*/
+/*
+# Software License Agreement (MIT License)
+#
+# Copyright (c) 2020, UFACTORY, Inc.
+# All rights reserved.
+#
+# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+*/
 #include <string.h>
 #include "xarm/core/common/queue_memcpy.h"
 

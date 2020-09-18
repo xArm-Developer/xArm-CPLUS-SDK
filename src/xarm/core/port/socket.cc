@@ -1,9 +1,11 @@
-/* Copyright 2017 UFACTORY Inc. All Rights Reserved.
- *
- * Software License Agreement (BSD License)
- *
- * Author: Jimy Zhang <jimy92@163.com>
- ============================================================================*/
+/*
+# Software License Agreement (MIT License)
+#
+# Copyright (c) 2020, UFACTORY, Inc.
+# All rights reserved.
+#
+# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+*/
 #include <string.h>
 
 #ifdef _WIN32
@@ -19,7 +21,8 @@
 #include "xarm/core/linux/thread.h"
 
 void SocketPort::recv_proc(void) {
-
+	int ret;
+	int failed_cnt = 0;
 	int num;
 	// unsigned char recv_data[que_maxlen_];
 	unsigned char *recv_data = new unsigned char[que_maxlen_];
@@ -27,16 +30,28 @@ void SocketPort::recv_proc(void) {
 		//bzero(recv_data, que_maxlen_);
 		memset(recv_data, 0, que_maxlen_);
 		// num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
-		num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 1, 0);
+		num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 4, 0);
 		if (num <= 0) {
 			// close(fp_);
 			close_port();
-			printf("SocketPort::recv_proc exit, %d\n", fp_);
+			printf("socket read failed, exit, %d\n", fp_);
 			// pthread_exit(0);
 			break;
 		}
 		bin32_to_8(num, &recv_data[0]);
-		rx_que_->push(recv_data);
+		ret = rx_que_->push(recv_data);
+		failed_cnt = 0;
+		while (ret != 0 && state_ == 0 && failed_cnt < 1500)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
+			ret = rx_que_->push(recv_data);
+			failed_cnt += 1;
+		}
+		if (ret != 0) {
+			close_port();
+			printf("socket push data failed, exit, %d\n", fp_);
+			break;
+		};
 	}
 	delete recv_data;
 	delete rx_que_;

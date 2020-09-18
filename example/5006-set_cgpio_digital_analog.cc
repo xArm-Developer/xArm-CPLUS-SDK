@@ -35,9 +35,9 @@ int main(int argc, char **argv) {
     }
     sleep_milliseconds(2000);
     
-    ret = arm->set_cgpio_analog(0, 2.6);
+    ret = arm->set_cgpio_analog(0, (fp32)2.6);
     printf("set_cgpio_analog, ret=%d, io=0, val=2.6\n", ret);
-    ret = arm->set_cgpio_analog(1, 3.6);
+    ret = arm->set_cgpio_analog(1, (fp32)3.6);
     printf("set_cgpio_analog, ret=%d, io=1, val=3.6\n", ret);
 
     sleep_milliseconds(2000);

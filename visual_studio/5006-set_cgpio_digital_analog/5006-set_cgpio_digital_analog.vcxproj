@@ -117,7 +117,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="5006-set_cgpio_digital_analog.cc" />
+    <ClCompile Include="..\..\example\5006-set_cgpio_digital_analog.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

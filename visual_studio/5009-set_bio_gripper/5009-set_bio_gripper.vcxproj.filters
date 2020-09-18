@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\8001-set_bio_gripper.cc">
+    <ClCompile Include="..\..\example\5009-set_bio_gripper.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

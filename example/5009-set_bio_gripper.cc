@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
 
 	printf("=========================================\n");
 	int ret;
-	unsigned char ret_data[6] = { 0 };
 
 	ret = arm->set_bio_gripper_enable(true);
 	printf("set_bio_gripper_enable, ret=%d\n", ret);

@@ -36,6 +36,7 @@ UxbusCmdSer::UxbusCmdSer(SerialPort *arm_port) { arm_port_ = arm_port; }
 UxbusCmdSer::~UxbusCmdSer(void) {}
 
 int UxbusCmdSer::check_xbus_prot(unsigned char *datas, int funcode) {
+	state_is_ready = !(datas[3] & 0x10);
 	if (datas[3] & 0x40)
 	{
 		return UXBUS_STATE::ERR_CODE;

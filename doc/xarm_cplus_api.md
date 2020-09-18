@@ -20,7 +20,7 @@ __XArmAPI(const std::string &port="",
 :param do_not_open: do not open, default is False, if true, you need to manually call the connect interface.
 :param check_tcp_limit: reversed, whether checking tcp limit, default is true
 :param check_joint_limit: reversed, whether checking joint limit, default is true
-:param check_cmdnum_limit: reversed, whether checking command num limit, default is true
+:param check_cmdnum_limit: whether checking command num limit, default is true
 :param check_robot_sn: whether checking robot sn, default is false
 :param check_is_ready: reversed, check robot is ready to move or not, default is true
 :param check_is_pause: check robot is pause or not, default is true
@@ -28,6 +28,8 @@ __XArmAPI(const std::string &port="",
 	Note: greater than 0 means the maximum number of threads that can be used to process callbacks
 	Note: equal to 0 means no thread is used to process the callback
 	Note: less than 0 means no limit on the number of threads used for callback
+:param max_cmdnum: max cmdnum, default is 256
+    Note: only available in the param `check_cmdnum_limit` is true
 ```
 
 ## Property
@@ -269,7 +271,14 @@ Note:
 :return: fp32[6]{x_offset(mm), y_offset(mm), z_offset(mm), roll_offset(° or rad), pitch_offset(° or rad), yaw_offset(° or rad)}
 ```
 
+__int count__
+
+```
+Counter value
+```
+
 __fp32 temperatures[7]__
+
 ```
 Motor temperature, only available if version > 1.2.11
 
@@ -287,6 +296,41 @@ __bool default_is_radian__
 ```
 The default unit is radians or not
 ```
+
+__fp32 voltages[7]__
+
+```
+Servos voltage
+        
+:return: fp32[7]{servo-1-voltage, ..., servo-7-voltage}
+```
+
+__fp32 currents[7]__
+
+```
+Servos electric current
+
+:return: fp32[7]{servo-1-current, ..., servo-7-current}
+```
+
+__int is_collision_detection__
+
+```
+self collision detection or not 
+```
+
+__int collision_tool_type__
+
+```
+self collision tool type
+```
+
+__fp32 collision_model_params[6]__
+
+```
+self collision model params
+```
+
 
 
 ## Method
@@ -555,10 +599,10 @@ Movement relative to the tool coordinate system
 :return: see the API code documentation for details.
 ```
 
-__int set_servo_angle(fp32 angles[7], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT)__
-__int set_servo_angle(fp32 angles[7], bool wait=false, fp32 timeout=NO_TIMEOUT)__
-__int set_servo_angle(int servo_id, fp32 angle, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT)__
-__int set_servo_angle(int servo_id, fp32 angle, bool wait=false, fp32 timeout=NO_TIMEOUT)__
+__int set_servo_angle(fp32 angles[7], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, fp32 radius = -1)__
+__int set_servo_angle(fp32 angles[7], bool wait=false, fp32 timeout=NO_TIMEOUT, fp32 radius = -1)__
+__int set_servo_angle(int servo_id, fp32 angle, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, fp32 radius = -1)__
+__int set_servo_angle(int servo_id, fp32 angle, bool wait=false, fp32 timeout=NO_TIMEOUT, fp32 radius = -1)__
 ```
 Set the servo angle
 
@@ -576,6 +620,8 @@ Set the servo angle
 :param mvtime: reserved, 0
 :param wait: whether to wait for the arm to complete, default is False
 :param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+:param radius: move radius, if radius less than 0, will MoveJoint, else MoveArcJoint
+	The blending radius cannot be greater than the track length.
 
 :return: see the API code documentation for details.
 ```
@@ -887,7 +933,8 @@ Set the digital value of the specified Controller GPIO
 :return: see the API code documentation for details.
 ```
 
-__int set_cgpio_analog(int ionum, int value)__
+__int set_cgpio_analog(int ionum, float value)__
+
 ```
 Set the analog value of the specified Controller GPIO
 
@@ -1337,7 +1384,21 @@ Set the digital value of the specified Controller GPIO when the robot has reache
 :return: see the API code documentation for details.
 ```
 
+__int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r)__
+
+```
+Set the analog value of the specified Controller GPIO when the robot has reached the specified xyz position
+
+:param ionum: 0 ~ 1
+:param value: value, 0~10.0
+:param xyz: position xyz, as [x, y, z]
+:param tol_r: fault tolerance radius
+
+:return: see the API code documentation for details.
+```
+
 __int config_tgpio_reset_when_stop(bool on_off)__
+
 ```
 Config the Tool GPIO reset the digital output when the robot is in stop state
 
@@ -1510,3 +1571,192 @@ Reading the status of robotiq gripper
 
 :return: see the API code documentation for details.
 ```
+
+__int set_bio_gripper_enable(bool enable, bool wait = true, fp32 timeout = 3)__
+
+```
+If not already enabled. Enable the bio gripper
+
+:param enable: enable or not
+:param wait: whether to wait for the bio gripper enable complete, default is True
+:param timeout: maximum waiting time(unit: second), default is 3, only available if wait=true
+
+:return: See the code documentation for details.
+```
+
+__int set_bio_gripper_speed(int speed)__
+
+```
+Set the speed of the bio gripper
+
+:param speed: speed
+
+:return: See the code documentation for details.
+```
+
+__int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5)__
+
+__int open_bio_gripper(bool wait = true, fp32 timeout = 5)__
+
+```
+Open the bio gripper
+
+:param speed: speed value, default is 0 (not set the speed)
+:param wait: whether to wait for the bio gripper motion complete, default is True
+:param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+        
+:return: See the code documentation for details.
+```
+
+__int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5)__
+
+__int close_bio_gripper(bool wait = true, fp32 timeout = 5)__
+
+```
+Close the bio gripper
+
+:param speed: speed value, default is 0 (not set the speed)
+:param wait: whether to wait for the bio gripper motion complete, default is True
+:param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+
+:return: See the code documentation for details.
+```
+
+__int get_bio_gripper_status(int *status)__
+
+```
+Get the status of the bio gripper
+
+:param status: the result of the bio gripper status value
+	status & 0x03 == 0: stop
+    status & 0x03 == 1: motion
+    status & 0x03 == 2: catch
+    status & 0x03 == 3: error
+    (status >> 2) & 0x03 == 0: not enabled
+    (status >> 2) & 0x03 == 1: enabling
+    (status >> 2) & 0x03 == 2: enabled
+
+return: See the code documentation for details.
+```
+
+__int get_bio_gripper_error(int *err)__
+
+```
+Get the error code of the bio gripper
+
+:param err: the result of the bio gripper error code
+
+:return: See the code documentation for details.
+```
+
+__int clean_bio_gripper_error(void)__
+
+```
+Clean the error code of the bio gripper
+
+:return: See the code documentation for details.
+```
+
+__int set_tgpio_modbus_timeout(int timeout)__
+
+```
+Set the modbus timeout of the tool gpio
+
+:param timeout: timeout, seconds
+
+:return: See the code documentation for details.
+```
+
+__int set_tgpio_modbus_baudrate(int baud)__
+
+```
+Set the modbus baudrate of the tool gpio
+
+:param baud: baudrate, 4800/9600/19200/38400/57600/115200/230400/460800/921600/1000000/1500000/2000000/2500000
+
+return: See the code documentation for details.
+```
+
+__int get_tgpio_modbus_baudrate(int *baud)__
+
+```
+Get the modbus baudrate of the tool gpio
+
+:param baud: the result of baudrate
+
+:return: See the code documentation for details.
+```
+
+__int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length)__
+
+```
+Send the modbus data to the tool gpio
+
+:param modbus_data: send data
+:param modbus_length: the length of the modbus_data
+:param ret_data: the response data of the modbus
+:param ret_length: the length of the response data
+
+:return: See the code documentation for details.
+```
+
+__int set_report_tau_or_i(int tau_or_i = 0)__
+
+```
+Set the reported torque or electric current
+
+:param tau_or_i:
+	0: torque
+	1: electric current
+
+return: See the code documentation for details.
+```
+
+__int get_report_tau_or_i(int *tau_or_i)__
+
+```
+Get the reported torque or electric current
+
+:param tau_or_i: the result of the tau_or_i
+
+:return: See the code documentation for details.
+```
+
+__int set_self_collision_detection(bool on)__
+
+```
+Set whether to enable self-collision detection 
+
+:param on: enable or not
+
+:return: See the code documentation for details.
+```
+
+__int set_collision_tool_model(int tool_type, int n = 0, ...)__
+
+```
+Set the geometric model of the end effector for self collision detection
+
+:param tool_type: the geometric model type
+	0: No end effector, no additional parameters required
+    1: xArm Gripper, no additional parameters required
+    2: xArm Vacuum Gripper, no additional parameters required
+    3: xArm Bio Gripper, no additional parameters required
+    4: Robotiq-2F-85 Gripper, no additional parameters required
+    5: Robotiq-2F-140 Gripper, no additional parameters required
+    21: Cylinder, need additional parameters radius, height
+        arm->set_collision_tool_model(21, 2, radius, height)
+        :param radius: the radius of cylinder, (unit: mm)
+        :param height: the height of cylinder, (unit: mm)
+    22: Cuboid, need additional parameters x, y, z
+        arm->set_collision_tool_model(22, 3, x, y, z)
+        :param x: the length of the cuboid in the x coordinate direction, (unit: mm)
+        :param y: the length of the cuboid in the y coordinate direction, (unit: mm)
+        :param z: the length of the cuboid in the z coordinate direction, (unit: mm)
+        
+:param n: the count of the additional parameters
+:param ...: additional parameters
+
+:return: See the code documentation for details.
+```
+

@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\example\thirdparty-set_robotiq_gripper.cc">
-      <Filter>资源文件</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\1007-counter.cc">
+    <ClCompile Include="..\..\example\5000-set_tgpio_modbus.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

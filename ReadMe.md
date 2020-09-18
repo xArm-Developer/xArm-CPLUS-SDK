@@ -10,13 +10,18 @@
 - Before you exercise, please make sure you don't encounter obstacles.
 - Protect the arm before unlocking the motor.
 
-
 ## Update Summary
 
-- > ### 1.5.1
+- > ### 1.6.0
 
-  - Fix wrong data length of `set_position_aa` and `set_servo_cartisian_aa` interface
-  - Fix timeout of `motion_enable` interface
+  - Support the xArm BIO gripper, Robotiq 2F-85 gripper and Robotiq 2F-140 gripper
+  - Support position detection trigger the controller analog IO
+  - Support self-collision model parameter setting
+  - Support Modbus communication of end tools
+  - Supports TCP timeout for setting instructions
+  - Support joint motion with circular interpolation
+  - Optimize logic, enhance API security, Fix several bugs
+
 - > ### 1.5.0
   - The new parameter of `set_servo_cartisian` interface is used to support servo cartisian movement of tool coordinate system
   - Support delayed trigger digital IO
@@ -196,6 +201,8 @@
 
 - ##### [3003-playback_trajectory](example/3003-playback_trajectory.cc)
 
+- ###### [5000-set_tgpio_modbus](example/5000-set_tgpio_modbus.cc)
+
 - ##### [5001-get_tgpio_digital](example/5001-get_tgpio_digital.cc)
 
 - ##### [5002-get_tgpio_analog](example/5002-get_tgpio_analog.cc)
@@ -210,6 +217,8 @@
 
 - ##### [5008-get_cgpio_state](example/5008-get_cgpio_state.cc)
 
+- ##### [5009-set_bio_gripper](example/5009-set_bio_gripper.cc)
+
 - ##### [6001-set_reduced_mode](example/6001-set_reduced_mode.cc)
 
 - ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
@@ -218,7 +227,11 @@
 
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
 
-- [__7003-servo_cartesian_aa__](example/7003-servo_cartesian_aa.cc)
+- ##### [7003-servo_cartesian_aa](example/7003-servo_cartesian_aa.cc)
+
+- ##### [thirdparty-set_robotiq_gripper](example/thirdparty-set_robotiq_gripper.cc)
+
+- ##### [thirdparty-set_yinshi_gripper](example/thirdparty-set_yinshi_gripper.cc)
 
 
 ## Doc

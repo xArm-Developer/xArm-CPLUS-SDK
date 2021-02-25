@@ -1412,7 +1412,39 @@ public:
 	* return: See the code documentation for details.
 	*/
 	int set_collision_tool_model(int tool_type, int n = 0, ...);
+
+	/*
+	* Set the simulation robot
+
+	* @param on: enable or not
+
+	* return: See the code documentation for details.
+	*/
 	int set_simulation_robot(bool on);
+
+	/*
+	* Joint velocity control, need to be set to joint velocity control mode(this.set_mode(4))
+
+	* @param speeds: [spd_J1, spd_J2, ..., spd_J7]
+		if default_is_radian is true, the value of spd_J1/.../spd_J1 should be in radians
+		if default_is_radian is false, the value of spd_J1/.../spd_J1 should be in degrees
+	* @param is_sync: whether all joints accelerate and decelerate synchronously, default is true
+
+	* return: See the code documentation for details.
+	*/
+	int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true);
+
+	/*
+	* Cartesian velocity control, need to be set to cartesian velocity control mode(self.set_mode(5))
+
+	* @param speeds: [spd_x, spd_y, spd_z, spd_rx, spd_ry, spd_rz]
+		if default_is_radian is true, the value of spd_rx/spd_ry/spd_rz should be in radians
+		if default_is_radian is false, the value of spd_rx/spd_ry/spd_rz should be in degrees
+	* @param is_tool_coord: is tool coordinate or not, default is false
+
+	* return: See the code documentation for details.
+	*/
+	int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false);
 
 	int set_timeout(fp32 timeout);
 private:

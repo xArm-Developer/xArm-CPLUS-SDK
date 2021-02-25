@@ -41,7 +41,7 @@ extern "C" {
 #define PERRNO(ret, db_flg, str)        \
   {                                     \
     if (-1 == ret) {                    \
-      PRINT_ERR("%s%s\n", db_flg, str); \
+      PRINT_ERR("%s%s, errno=%d\n", db_flg, str, errno); \
       return -1;                        \
     }                                   \
   \
@@ -128,7 +128,8 @@ int socket_connect_server(int *socket, char server_ip[], int server_port) {
 
 int socket_send_data(int client_fp, unsigned char *data, int len) {
 	int ret = send(client_fp, (char *)data, len, 0);
-	if (ret == -1) { PRINT_ERR(DB_FLG "error: socket_send_data\n"); }
+	PERRNO(ret, DB_FLG, "error: socket_send_data");
+	// if (ret == -1) { PRINT_ERR(DB_FLG "error: socket_send_data\n"); }
 	return ret;
 }
 
@@ -140,8 +141,8 @@ int socket_init(char *local_ip, int port, int is_server) {
 
 	int on = 1;
 	int keepAlive = 1;     // Turn on keepalive attribute
-	int keepIdle = 1;      // If there is no data in n seconds, probe
-	int keepInterval = 1;  // Detection interval,5 seconds
+	int keepIdle = 60;      // If there is no data in n seconds, probe
+	int keepInterval = 10;  // Detection interval,5 seconds
 	int keepCount = 3;     // 3 detection attempts
 	struct timeval timeout = { 2, 0 };
 
@@ -191,7 +192,8 @@ int socket_connect_server(int *socket, char server_ip[], int server_port) {
 
 int socket_send_data(int client_fp, unsigned char *data, int len) {
 	int ret = send(client_fp, (void *)data, len, 0);
-	if (ret == -1) { PRINT_ERR(DB_FLG "error: socket_send_data\n"); }
+	PERRNO(ret, DB_FLG, "error: socket_send_data");
+	// if (ret == -1) { PRINT_ERR(DB_FLG "error: socket_send_data\n"); }
 	return ret;
 }
 

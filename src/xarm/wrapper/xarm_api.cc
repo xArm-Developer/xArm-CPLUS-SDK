@@ -2326,6 +2326,7 @@ int XArmAPI::_get_modbus_baudrate(int *baud_inx) {
 		}
 		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
 	}
+	if (ret == 0 && 0 <= *baud_inx < 13) modbus_baud_ = BAUDRATES[*baud_inx];
 	return ret;
 }
 
@@ -2343,16 +2344,17 @@ int XArmAPI::_checkset_modbus_baud(int baudrate, bool check) {
 				ignore_error_ = true;
 				ignore_state_ = (state != 4 && state != 5) ? true : false;
 				int state_ = state;
-				core->tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
+				// core->tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
 				core->tgpio_addr_w16(0x1a0b, (float)baud_inx);
+				sleep_milliseconds(300);
 				core->tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
 				int err_warn[2] = { 0 };
 				get_err_warn_code(err_warn);
 				if (error_code == 19 || error_code == 28) {
 					clean_error();
 					if (ignore_state_) set_state(state_ >= 3 ? state_ : 0);
+					sleep_milliseconds(1000);
 				}
-				sleep_milliseconds(1000);
 			}
 			catch (exception e) {
 				ignore_error_ = false;
@@ -2776,5 +2778,23 @@ int XArmAPI::set_collision_tool_model(int tool_type, int n, ...) {
 int XArmAPI::set_simulation_robot(bool on) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_simulation_robot((int)on);
+}
+
+int XArmAPI::vc_set_joint_velocity(fp32 speeds[7], bool is_sync) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	fp32 jnt_v[7];
+	for (int i = 0; i < 7; i++) {
+		jnt_v[i] = (float)(default_is_radian ? speeds[i] : speeds[i] / RAD_DEGREE);
+	}
+	return core->vc_set_jointv(jnt_v, is_sync ? 1 : 0);
+}
+
+int XArmAPI::vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	fp32 line_v[6];
+	for (int i = 0; i < 6; i++) {
+		line_v[i] = (float)((i < 3 || default_is_radian) ? speeds[i] : speeds[i] / RAD_DEGREE);
+	}
+	return core->vc_set_linev(line_v, is_tool_coord ? 1 : 0);
 }
 

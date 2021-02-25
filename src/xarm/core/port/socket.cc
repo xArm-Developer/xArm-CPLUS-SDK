@@ -31,10 +31,14 @@ void SocketPort::recv_proc(void) {
 		memset(recv_data, 0, que_maxlen_);
 		// num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
 		num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 4, 0);
+		if (num <= 0 && errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+			printf("EINTR occured, errno=%d\n", errno);
+			continue;
+		}
 		if (num <= 0) {
+			printf("socket read failed, fp=%d, errno=%d, exit\n", fp_, errno);
 			// close(fp_);
 			close_port();
-			printf("socket read failed, exit, %d\n", fp_);
 			// pthread_exit(0);
 			break;
 		}
@@ -72,10 +76,16 @@ SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
 	state_ = -1;
 	rx_que_ = new QueueMemcpy(que_num_, que_maxlen_);
 	fp_ = socket_init((char *)" ", 0, 0);
-	if (fp_ == -1) { return; }
+	if (fp_ == -1) { 
+		delete rx_que_;
+		return;
+	}
 
 	int ret = socket_connect_server(&fp_, server_ip, server_port);
-	if (ret == -1) { return; }
+	if (ret == -1) { 
+		delete rx_que_;
+		return;
+	}
 
 	state_ = 0;
 	flush();

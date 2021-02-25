@@ -94,6 +94,9 @@ public:
 	static const unsigned char SET_COLLIS_TOOL = 78;
 	static const unsigned char SET_SIMULATION_ROBOT = 79;
 
+	static const unsigned char VC_SET_JOINTV = 81;
+	static const unsigned char VC_SET_CARTV = 82;
+
 	static const unsigned char GET_TCP_POSE_AA = 91;
 	static const unsigned char MOVE_LINE_AA = 92;
 	static const unsigned char MOVE_SERVO_CART_AA = 93;
@@ -136,6 +139,16 @@ class UXBUS_STATE {
 public:
 	UXBUS_STATE(void) {}
 	~UXBUS_STATE(void) {}
+	static const int NOT_CONNECTED = -1;
+	static const int NOT_READY = -2;
+	static const int API_EXCEPTION = -3;
+	static const int CMD_NOT_EXIST = -4;
+	static const int TCP_LIMIT = -6;
+	static const int JOINT_LIMIT = -7;
+	static const int OUT_OF_RANGE = -8;
+	static const int EMERGENCY_STOP = -9;
+	static const int SERVO_NOT_EXIST = -10;
+	static const int CONVERT_FAILED = -11;
 	static const int ERR_CODE = 1;
 	static const int WAR_CODE = 2;
 	static const int ERR_TOUT = 3;
@@ -147,6 +160,10 @@ public:
 	static const int STATE_NOT_READY = 9;
 	static const int ERR_OTHER = 11;
 	static const int ERR_PARAM = 12;
+	static const int TRAJ_RW_FAILED = 31;
+	static const int TRAJ_RW_TOUT = 32;
+	static const int TRAJ_PLAYBACK_TOUT = 33;
+	static const int SUCTION_CUP_TOUT = 41;
 };
 
 class TRAJ_STATE {
@@ -185,6 +202,8 @@ public:
 	static const int SERVO = 1;
 	static const int TEACH_JOINT = 2;
 	static const int TEACH_CART = 3;
+	static const int VELO_JOINT = 4;
+	static const int VELO_CART = 5; 
 };
 
 class XARM_STATE {

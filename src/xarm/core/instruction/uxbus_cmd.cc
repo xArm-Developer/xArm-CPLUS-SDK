@@ -6,6 +6,7 @@
 #
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
 */
+
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/instruction/servo3_config.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
@@ -732,8 +733,9 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 	if (ret == 0) {
 		int baud_i = (int)val;
 		if (baud_i != baud_inx) {
-			tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
+			// tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
 			tgpio_addr_w16(0x1a0b, (float)baud_inx);
+			sleep_milliseconds(300);
 			return tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
 		}
 	}
@@ -1152,3 +1154,16 @@ int UxbusCmd::set_simulation_robot(int on_off) {
 	return set_nu8(UXBUS_RG::SET_SIMULATION_ROBOT, &on_off, 1);
 }
 
+int UxbusCmd::vc_set_jointv(float jnt_v[7], int jnt_sync) {
+	float txdata[7] = { 0 };
+	for (int i = 0; i < 7; i++) { txdata[i] = jnt_v[i]; }
+	char additional[1] = { (char)jnt_sync };
+	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_JOINTV, txdata, 7, additional, 1);
+}
+
+int UxbusCmd::vc_set_linev(float line_v[6], int coord) {
+	float txdata[6] = { 0 };
+	for (int i = 0; i < 6; i++) { txdata[i] = line_v[i]; }
+	char additional[1] = { (char)coord };
+	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_CARTV, txdata, 6, additional, 1);
+}

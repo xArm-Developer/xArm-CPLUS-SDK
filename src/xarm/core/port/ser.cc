@@ -66,7 +66,10 @@ SerialPort::SerialPort(const char *port, int baud, int que_num,
 		state_ = 0;
 	}
 
-	if (state_ == -1) { return; }
+	if (state_ == -1) { 
+		delete rx_que_;
+		return;
+	}
 
 	UXBUS_PROT_FROMID_ = 0x55;
 	UXBUS_PROT_TOID_ = 0xAA;

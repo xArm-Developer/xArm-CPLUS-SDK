@@ -8,8 +8,39 @@
 #define CORE_INSTRUCTION_UXBUS_CMD_H_
 
 #include <mutex>
+#include <iostream>
+#include <vector>
+#include <sys/timeb.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <time.h>
+#endif
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
+
+
+inline void sleep_milliseconds(unsigned long milliseconds) {
+#ifdef _WIN32
+	Sleep(milliseconds);
+#else
+	usleep(milliseconds * 1000);
+#endif
+}
+
+inline long long get_system_time()
+{
+#ifdef _WIN32
+	struct timeb t;
+	ftime(&t);
+	return 1000 * t.time + t.millitm; // milliseconds
+#else
+	struct timespec t;
+	clock_gettime(CLOCK_REALTIME, &t);
+	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
+#endif
+}
 
 class UxbusCmd {
 public:
@@ -156,6 +187,9 @@ public:
 	int set_self_collision_detection(int on_off);
 	int set_collision_tool_model(int tool_type, int n = 0, float *argv = NULL);
 	int set_simulation_robot(int on_off);
+
+	int vc_set_jointv(float jnt_v[7], int jnt_sync);
+	int vc_set_linev(float line_v[6], int coord);
 
 	virtual void close(void);
 

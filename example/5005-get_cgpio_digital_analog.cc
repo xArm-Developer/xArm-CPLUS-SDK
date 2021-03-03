@@ -30,10 +30,12 @@ int main(int argc, char **argv) {
     int ret;
 
     int digitals[8];
+    int digitals2[8];
     float io0, io1;
-    ret = arm->get_cgpio_digital(digitals);
+    ret = arm->get_cgpio_digital(digitals, digitals2);
     printf("get_cgpio_digital, ret=%d", ret);
     for (int i = 0; i < 8; ++i) { printf(", io%d=%d", i, digitals[i]); }
+    for (int i = 0; i < 8; ++i) { printf(", io%d=%d", i+8, digitals2[i]); }
     printf("\n");
     
     ret = arm->get_cgpio_analog(0, &io0);

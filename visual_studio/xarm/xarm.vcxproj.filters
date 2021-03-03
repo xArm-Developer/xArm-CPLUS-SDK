@@ -45,9 +45,6 @@
     <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_tcp.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\xarm\core\linux\network.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\xarm\core\port\socket.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -78,7 +75,7 @@
     <ClInclude Include="..\..\include\xarm\core\port\ser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\xarm\core\linux\thread.h">
+    <ClInclude Include="..\..\include\xarm\core\os\network.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -104,9 +101,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd_tcp.cc">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\xarm\core\linux\network.cc">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\xarm\core\port\socket.cc">
@@ -136,7 +130,7 @@
     <ClCompile Include="..\..\src\xarm\core\port\ser.cc">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\xarm\core\linux\thread.cc">
+    <ClCompile Include="..\..\src\xarm\core\os\network.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -147,8 +147,7 @@
     <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_config.h" />
     <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_ser.h" />
     <ClInclude Include="..\..\include\xarm\core\instruction\uxbus_cmd_tcp.h" />
-    <ClInclude Include="..\..\include\xarm\core\linux\network.h" />
-    <ClInclude Include="..\..\include\xarm\core\linux\thread.h" />
+    <ClInclude Include="..\..\include\xarm\core\os\network.h" />
     <ClInclude Include="..\..\include\xarm\core\port\ser.h" />
     <ClInclude Include="..\..\include\xarm\core\port\socket.h" />
     <ClInclude Include="..\..\include\xarm\core\xarm_config.h" />
@@ -173,8 +172,7 @@
     <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd.cc" />
     <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd_ser.cc" />
     <ClCompile Include="..\..\src\xarm\core\instruction\uxbus_cmd_tcp.cc" />
-    <ClCompile Include="..\..\src\xarm\core\linux\network.cc" />
-    <ClCompile Include="..\..\src\xarm\core\linux\thread.cc" />
+    <ClCompile Include="..\..\src\xarm\core\os\network.cc" />
     <ClCompile Include="..\..\src\xarm\core\port\ser.cc" />
     <ClCompile Include="..\..\src\xarm\core\port\socket.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_api.cc" />

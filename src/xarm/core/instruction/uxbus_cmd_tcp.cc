@@ -82,7 +82,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 		}
 		sleep_milliseconds(1);
 	}
-	delete rx_data;
+	delete[] rx_data;
 	return ret;
 }
 
@@ -100,7 +100,7 @@ int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {
 	arm_port_->flush();
 	// print_hex("send:", send_data, num + 7);
 	int ret = arm_port_->write_frame(send_data, len);
-	delete send_data;
+	delete[] send_data;
 	if (ret != len) { return -1; }
 
 	bus_flag_ += 1;
@@ -110,3 +110,5 @@ int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {
 }
 
 void UxbusCmdTcp::close(void) { arm_port_->close_port(); }
+
+int UxbusCmdTcp::is_ok(void) { return arm_port_->is_ok(); }

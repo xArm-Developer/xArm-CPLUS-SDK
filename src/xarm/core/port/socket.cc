@@ -7,40 +7,57 @@
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
 */
 #include <string.h>
+#include <errno.h>
+#include "xarm/core/port/socket.h"
+#include "xarm/core/os/network.h"
 
 #ifdef _WIN32
-#include <windows.h>
-#include <winsock.h>
+#include <ws2tcpip.h>
+static int close(int fd)
+{
+	return closesocket(fd);
+}
+
+static bool is_ignore_errno(int fp)
+{
+	if (WSAGetLastError() == WSAEINTR || WSAGetLastError() == WSAEWOULDBLOCK) {
+		printf("EINTR occured, fp=%d, errno=%d\n", fp, WSAGetLastError());
+		return true;
+	}
+	printf("socket read failed, fp=%d, errno=%d, exit\n", fp, WSAGetLastError());
+	return false;
+}
 #else
 #include <sys/socket.h>
 #include <unistd.h>
+static bool is_ignore_errno(int fp)
+{
+	if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+		printf("EINTR occured, fp=%d, errno=%d\n", fp, errno);
+		return true;
+	}
+	printf("socket read failed, fp=%d, errno=%d, exit\n", fp, errno);
+	return false;
+}
 #endif
 
-#include "xarm/core/port/socket.h"
-#include "xarm/core/linux/network.h"
-#include "xarm/core/linux/thread.h"
 
 void SocketPort::recv_proc(void) {
 	int ret;
 	int failed_cnt = 0;
 	int num;
-	// unsigned char recv_data[que_maxlen_];
 	unsigned char *recv_data = new unsigned char[que_maxlen_];
 	while (state_ == 0) {
-		//bzero(recv_data, que_maxlen_);
 		memset(recv_data, 0, que_maxlen_);
-		// num = recv(fp_, (void *)&recv_data[4], que_maxlen_ - 1, 0);
 		num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 4, 0);
-		if (num <= 0 && errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
-			printf("EINTR occured, errno=%d\n", errno);
-			continue;
-		}
 		if (num <= 0) {
-			printf("socket read failed, fp=%d, errno=%d, exit\n", fp_, errno);
-			// close(fp_);
-			close_port();
-			// pthread_exit(0);
-			break;
+			if (is_ignore_errno(fp_)) {
+				continue;
+			}
+			else {
+				close_port();
+				break;
+			}
 		}
 		bin32_to_8(num, &recv_data[0]);
 		ret = rx_que_->push(recv_data);
@@ -57,16 +74,15 @@ void SocketPort::recv_proc(void) {
 			break;
 		};
 	}
-	delete recv_data;
+	delete[] recv_data;
 	delete rx_que_;
 }
 
-static void recv_proc_(void *arg) {
+static void *recv_proc_(void *arg) {
 	SocketPort *my_this = (SocketPort *)arg;
 
 	my_this->recv_proc();
-
-	// pthread_exit(0);
+	return (void *)0;
 }
 
 SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
@@ -89,8 +105,8 @@ SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
 
 	state_ = 0;
 	flush();
-	thread_id_ = std::thread(recv_proc_, this);
-	thread_id_.detach();
+	std::thread th(recv_proc_, this);
+	th.detach();
 }
 
 SocketPort::~SocketPort(void) {
@@ -117,10 +133,6 @@ int SocketPort::write_frame(unsigned char *data, int len) {
 }
 
 void SocketPort::close_port(void) {
-#ifdef _WIN32
-	closesocket(fp_);
-#else
 	close(fp_);
-#endif
 	state_ = -1;
 }

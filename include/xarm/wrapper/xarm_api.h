@@ -17,6 +17,7 @@
 #include <cmath>
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/xarm_config.h"
+#include "xarm/core/report_data.h"
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/instruction/uxbus_cmd_ser.h"
 #include "xarm/core/instruction/uxbus_cmd_tcp.h"
@@ -30,7 +31,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.6.0"
+#define SDK_VERSION "1.6.9"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -757,6 +758,12 @@ public:
 	int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf, int *input_conf2 = NULL, int *output_conf2 = NULL);
 
 	/*
+	* Register the report data callback
+	*/
+	int register_report_data_callback(void(*callback)(XArmReportData *report_data_ptr));
+	int register_report_data_callback(std::function<void (XArmReportData *)> callback);
+
+	/*
 	* Register the report location callback
 	*/
 	int register_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles));
@@ -800,6 +807,13 @@ public:
 	* Register the value of counter changed callback
 	*/
 	int register_count_changed_callback(void(*callback)(int count));
+
+	/*
+	* Release the report data callback
+	* @param callback: NULL means to release all callbacks;
+	*/
+	int release_report_data_callback(void(*callback)(XArmReportData *report_data_ptr) = NULL);
+	int release_report_data_callback(std::function<void (XArmReportData *)> callback = NULL);
 
 	/*
 	* Release the location report callback
@@ -1448,6 +1462,11 @@ public:
 	*/
 	int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false);
 
+	int calibrate_tcp_coordinate_offset(float four_points[4][6], float ret_xyz[3]);
+	int calibrate_tcp_orientation_offset(float rpy_be[3], float rpy_bt[3], float ret_rpy[3]);
+	int calibrate_user_orientation_offset(float three_points[3][6], float ret_rpy[3], int mode = 0, int trust_ind = 0);
+	int calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
+
 	int set_timeout(fp32 timeout);
 private:
 	void _init(void);
@@ -1466,6 +1485,7 @@ private:
 	inline int _release_event_callback(callable_vector&& callbacks, callable&& f);
 	template<typename callable_vector, class... arguments>
 	inline void _report_callback(callable_vector&& callbacks, arguments&&... args);
+	inline void _report_data_callback(void);
 	inline void _report_location_callback(void);
 	inline void _report_connect_changed_callback(void);
 	inline void _report_state_changed_callback(void);
@@ -1557,8 +1577,11 @@ private:
 	SocketPort *stream_tcp_;
 	SocketPort *stream_tcp_report_;
 	SerialPort *stream_ser_;
-	ThreadPool pool;
+	ThreadPool pool_;
+	XArmReportData *report_data_ptr_;
 
+	std::vector<std::function<void (XArmReportData *)>> report_data_functions_;
+	std::vector<void(*)(XArmReportData *report_data_ptr)> report_data_callbacks_;
 	std::vector<void(*)(const fp32*, const fp32*)> report_location_callbacks_;
 	std::vector<void(*)(bool, bool)> connect_changed_callbacks_;
 	std::vector<void(*)(int)> state_changed_callbacks_;

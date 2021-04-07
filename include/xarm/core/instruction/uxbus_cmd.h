@@ -191,6 +191,11 @@ public:
 	int vc_set_jointv(float jnt_v[7], int jnt_sync);
 	int vc_set_linev(float line_v[6], int coord);
 
+	int cali_tcp_pose(float four_pnts[4][6], float ret_xyz[3]);
+	int cali_user_orient(float three_pnts[3][6], float ret_rpy[3], int mode = 0, int trust_ind = 0);
+	int cali_tcp_orient(float rpy_be[3], float rpy_bt[3], float ret_rpy[3]);
+	int cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
+
 	virtual void close(void);
 	virtual int is_ok(void);
 
@@ -208,7 +213,7 @@ private:
 	int get_nfp32(int funcode, float *rx_data, int num);
 	int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
 	int is_nfp32(int funcode, float datas[], int txn, int *value);
-	int set_nfp32_with_bytes(int funcode, float *datas, int num, char *additional, int n);
+	int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0);
 
 public:
 	bool state_is_ready;

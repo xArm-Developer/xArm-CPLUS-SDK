@@ -1,6 +1,6 @@
 CXX = g++
 C_DEFS = -DSOFT_VERSION=$(SOFT_VERSION)
-C_FLAGS = -std=c++0x -Wall -g -s $(C_DEFS) -I$(INC_DIR) $(LIBDIRS)
+C_FLAGS = -std=c++0x -Wall -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable -g -s $(C_DEFS) -I$(INC_DIR) $(LIBDIRS)
 LIBS += -lm -lpthread -fPIC -shared
 
 BUILDDIR = ./build/
@@ -33,7 +33,8 @@ SRC_XARM := $(wildcard $(SRC_SERIAL_DIR)*.cc \
 	$(SRC_XARM_CORE_DEBUG_DIR)*.cc \
 	$(SRC_XARM_CORE_INSTRUCTION_DIR)*.cc \
 	$(SRC_XARM_CORE_OS_DIR)*.cc \
-	$(SRC_XARM_CORE_PORT_DIR)*.cc)
+	$(SRC_XARM_CORE_PORT_DIR)*.cc \
+	$(SRC_XARM_CORE_DIR)*.cc)
 # OBJ_XARM := $(patsubst %.cc, %.o, $(SRC_XARM))
 
 LIB_NAME = libxarm.so
@@ -57,9 +58,11 @@ test-%:
 	$(CXX) $(addprefix ./$(EXAMPLE_DIR)/, $(subst test-, , $@)).cc $(C_FLAGS) -L$(BUILD_LIB_DIR) -lxarm -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@))
 
 install:
+	cp -rf include/serial /usr/include
 	cp -rf include/xarm /usr/include
 	cp -f build/lib/$(LIB_NAME) /usr/lib/
 uninstall:
+	rm -rf /usr/include/serial
 	rm -rf /usr/include/xarm
 	rm -f /usr/lib/$(LIB_NAME)
 

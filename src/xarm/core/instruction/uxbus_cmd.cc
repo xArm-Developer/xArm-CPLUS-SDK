@@ -162,16 +162,16 @@ int UxbusCmd::is_nfp32(int funcode, float tx_datas[], int txn, int *value) {
 	return ret;
 }
 
-int UxbusCmd::set_nfp32_with_bytes(int funcode, float *tx_datas, int num, char *additional, int len) {
-	unsigned char *send_data = new unsigned char[num * 4 + len];
-	nfp32_to_hex(tx_datas, send_data, num);
-	for (int i = 0; i < len; i++) { send_data[num * 4 + i] = additional[i]; }
+int UxbusCmd::set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data, int rx_len) {
+	unsigned char *send_data = new unsigned char[tx_num * 4 + add_len];
+	nfp32_to_hex(tx_data, send_data, tx_num);
+	for (int i = 0; i < add_len; i++) { send_data[tx_num * 4 + i] = add_data[i]; }
 
 	std::lock_guard<std::mutex> locker(mutex_);
-	int ret = send_xbus(funcode, send_data, num * 4 + len);
+	int ret = send_xbus(funcode, send_data, tx_num * 4 + add_len);
 	delete[] send_data;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
-	ret = send_pend(funcode, 0, SET_TIMEOUT_, NULL);
+	ret = send_pend(funcode, rx_len, SET_TIMEOUT_, rx_data);
 	return ret;
 }
 
@@ -1178,4 +1178,47 @@ int UxbusCmd::vc_set_linev(float line_v[6], int coord) {
 	for (int i = 0; i < 6; i++) { txdata[i] = line_v[i]; }
 	char additional[1] = { (char)coord };
 	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_CARTV, txdata, 6, additional, 1);
+}
+
+int UxbusCmd::cali_tcp_pose(float four_pnts[4][6], float ret_xyz[3])
+{
+	float txdata[24] = { 0 };
+	for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < 6; i++) { txdata[j*6 + i] = four_pnts[j][i]; }
+	}
+	return swop_nfp32(UXBUS_RG::CALI_TCP_POSE, txdata, 24, ret_xyz, 3);
+}
+
+int UxbusCmd::cali_user_orient(float three_pnts[3][6], float ret_rpy[3], int mode, int trust_ind)
+{
+	float txdata[18] = { 0 };
+	for (int j = 0; j < 3; j++) {
+		for (int i = 0; i < 6; i++) { txdata[j*6 + i] = three_pnts[j][i]; }
+	}
+	int rx_len = 12;
+	unsigned char rx_data[rx_len];
+	char additional[2] = { (char)mode, (char)trust_ind };
+	int ret = set_nfp32_with_bytes(UXBUS_RG::CALI_WRLD_ORIENT, txdata, 18, additional, 2, rx_data, rx_len);
+	hex_to_nfp32(rx_data, ret_rpy, 3);
+	return ret;
+}
+
+int UxbusCmd::cali_tcp_orient(float rpy_be[3], float rpy_bt[3], float ret_rpy[3])
+{
+	float txdata[6] = { 0 };
+	for (int j = 0; j < 3; j++) {
+		txdata[j] = rpy_be[j];
+		txdata[j+3] = rpy_bt[j];
+	}
+	return swop_nfp32(UXBUS_RG::CALI_TCP_ORIENT, txdata, 6, ret_rpy, 3);
+}
+
+int UxbusCmd::cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3])
+{
+	float txdata[6] = { 0 };
+	for (int j = 0; j < 3; j++) {
+		txdata[j] = rpy_ub[j];
+		txdata[j+3] = pos_b_uorg[j];
+	}
+	return swop_nfp32(UXBUS_RG::CALI_WRLD_POSE, txdata, 6, ret_xyz, 3);
 }

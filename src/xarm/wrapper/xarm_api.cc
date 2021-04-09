@@ -174,7 +174,7 @@ void XArmAPI::_init(void) {
 	gripper_version_numbers_[1] = -1;
 	gripper_version_numbers_[2] = -1;
 
-	report_data_ptr_ = new XArmReportData("rich");
+	report_data_ptr_ = new XArmReportData(report_type_);
 }
 
 bool XArmAPI::has_err_warn(void) {

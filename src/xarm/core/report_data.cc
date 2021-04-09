@@ -3,6 +3,7 @@
  * Software License Agreement (BSD License)
  *
  * Author: Jimy Zhang <jimy92@163.com>
+		   Vinman <vinman@gmail.com>
  ============================================================================*/
 #include <stdlib.h>
 #include <string.h>
@@ -242,7 +243,7 @@ void ReportDataRich::print_data(void) {
   print_nvect("p2p_msg = ", p2p_msg_, 5);
   print_nvect("ros_msg = ", rot_msg_, 2);
 
-  printf("ID   执行状态  错误代码\n");
+  printf("ID   Status  ErrorCode\n");
   for (int i = 0; i < 8; i++) {
     printf("%d      %d        0x%X\n", i + 1, sv3msg_[i * 2],
            sv3msg_[i * 2 + 1]);
@@ -320,6 +321,9 @@ XArmReportData::XArmReportData(std::string report_type_)
   memset(cgpio_output_analogs, 0, sizeof(cgpio_output_analogs));
   memset(cgpio_input_conf, 0, sizeof(cgpio_input_conf));
   memset(cgpio_output_conf, 0, sizeof(cgpio_output_conf));
+
+  debug_data = NULL;
+  debug_size = 0;
 }
 
 XArmReportData::~XArmReportData(void) {}
@@ -328,7 +332,7 @@ int XArmReportData::__flush_common_data(unsigned char *rx_data)
 {
   int sizeof_data = bin8_to_32(rx_data);
   if (sizeof_data < 87) {
-    return -2;
+    return -1;
   }
   data_fp = &rx_data[4];
   total_num = bin8_to_32(data_fp);
@@ -351,8 +355,19 @@ void XArmReportData::__print_common_data(void)
   print_nvect("tau     = ", tau, 7);
 }
 
+void XArmReportData::__flush_debug_data(int since_size) {
+  if (total_num > since_size) {
+    debug_size = total_num - since_size;
+    if (debug_data == NULL) {
+      debug_data = new unsigned char[debug_size];
+    }
+    memcpy(debug_data, &data_fp[since_size], debug_size);
+  }
+}
+
 int XArmReportData::_flush_dev_data(unsigned char *rx_data) {
-  int ret = __flush_common_data(rx_data);
+  int ret = __flush_common_data(rx_data);  
+  __flush_debug_data(87);
   return ret;
 }
 void XArmReportData::_print_dev_data(void) 
@@ -363,7 +378,11 @@ void XArmReportData::_print_dev_data(void)
 int XArmReportData::_flush_normal_data(unsigned char *rx_data)
 {
   int ret = __flush_common_data(rx_data);
-  if (total_num < 133 || ret != 0) return -1;
+  if (total_num < 133 || ret != 0) return (ret != 0 ? ret : -2);
+  if (data_fp[131] < 0 || data_fp[131] > 6 || data_fp[132] < 0 || data_fp[132] > 6) {
+    printf("DataException, collis_sens=%d, teach_sens=%d\n", data_fp[131], data_fp[132]);
+    return 1;
+  }
   mt_brake = data_fp[87];
   mt_able = data_fp[88];
   err = data_fp[89];
@@ -373,6 +392,7 @@ int XArmReportData::_flush_normal_data(unsigned char *rx_data)
   collis_sens = data_fp[131];
   teach_sens = data_fp[132];
   hex_to_nfp32(&data_fp[133], gravity_dir, 3);
+  __flush_debug_data(145);
   return ret;
 }
 void XArmReportData::_print_normal_data(void)
@@ -389,7 +409,7 @@ void XArmReportData::_print_normal_data(void)
 int XArmReportData::_flush_rich_data(unsigned char *rx_data)
 {
   int ret = _flush_normal_data(rx_data);
-  if (total_num < 245 || ret != 0) return -1;
+  if (total_num < 245 || ret != 0) return (ret != 0 ? ret : -3);
   arm_type = data_fp[145];
   axis_num = data_fp[146];
   master_id = data_fp[147];
@@ -466,6 +486,7 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
         cgpio_output_conf[i+8] = data_fp[425 + i];
       };
     }
+    __flush_debug_data(433);
   }
   return ret;
 }

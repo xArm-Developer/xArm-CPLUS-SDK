@@ -9,15 +9,23 @@
 #ifndef WRAPPER_XARM_API_H_
 #define WRAPPER_XARM_API_H_
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <functional>
+#include <algorithm>
 #include <thread>
 #include <vector>
 #include <assert.h>
 #include <cmath>
+#include <regex>
+#include <string>
+#include <stdarg.h>
+#include <string.h>
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/xarm_config.h"
 #include "xarm/core/report_data.h"
+#include "xarm/core/connect.h"
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/instruction/uxbus_cmd_ser.h"
 #include "xarm/core/instruction/uxbus_cmd_tcp.h"
@@ -27,6 +35,7 @@
 #include "xarm/wrapper/common/utils.h"
 #include "xarm/wrapper/common/timer.h"
 
+#define REPORT_BUF_SIZE 1024
 #define DEFAULT_IS_RADIAN false
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
@@ -47,6 +56,9 @@ struct RobotIqStatus {
 	unsigned char gPO = 0;
 	unsigned char gCU = 0;
 };
+
+bool compare_version(int v1[3], int v2[3]);
+
 
 class XArmAPI {
 public:
@@ -78,7 +90,10 @@ public:
 		bool check_is_ready = true,
 		bool check_is_pause = true,
 		int max_callback_thread_count = -1,
-		int max_cmdnum = 256);
+		int max_cmdnum = 512,
+		int init_axis = 7,
+		bool debug = false,
+		std::string report_type = "rich");
 	~XArmAPI(void);
 
 public:
@@ -767,107 +782,125 @@ public:
 	* Register the report location callback
 	*/
 	int register_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles));
+	int register_report_location_callback(std::function<void (const fp32*, const fp32*)> callback);
 
 	/*
 	* Register the connect status changed callback
 	*/
 	int register_connect_changed_callback(void(*callback)(bool connected, bool reported));
+	int register_connect_changed_callback(std::function<void (bool, bool)> callback);
 
 	/*
 	* Register the state status changed callback
 	*/
 	int register_state_changed_callback(void(*callback)(int state));
+	int register_state_changed_callback(std::function<void (int)> callback);
 
 	/*
 	* Register the mode changed callback
 	*/
 	int register_mode_changed_callback(void(*callback)(int mode));
+	int register_mode_changed_callback(std::function<void (int)> callback);
 
 	/*
 	* Register the motor enable states or motor brake states changed callback
 	*/
 	int register_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake));
+	int register_mtable_mtbrake_changed_callback(std::function<void (int, int)> callback);
 
 	/*
 	* Register the error code or warn code changed callback
 	*/
 	int register_error_warn_changed_callback(void(*callback)(int err_code, int warn_code));
+	int register_error_warn_changed_callback(std::function<void (int, int)> callback);
 
 	/*
 	* Register the cmdnum changed callback
 	*/
 	int register_cmdnum_changed_callback(void(*callback)(int cmdnum));
+	int register_cmdnum_changed_callback(std::function<void (int)> callback);
 
 	/*
 	* Register the temperature changed callback
 	*/
 	int register_temperature_changed_callback(void(*callback)(const fp32 *temps));
+	int register_temperature_changed_callback(std::function<void (const fp32*)> callback);
 
 	/*
 	* Register the value of counter changed callback
 	*/
 	int register_count_changed_callback(void(*callback)(int count));
+	int register_count_changed_callback(std::function<void (int)> callback);
 
 	/*
 	* Release the report data callback
 	* @param callback: NULL means to release all callbacks;
 	*/
 	int release_report_data_callback(void(*callback)(XArmReportData *report_data_ptr) = NULL);
-	int release_report_data_callback(std::function<void (XArmReportData *)> callback = NULL);
+	int release_report_data_callback(bool clear_all);
 
 	/*
 	* Release the location report callback
 	* @param callback: NULL means to release all callbacks;
 	*/
 	int release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles) = NULL);
+	int release_report_location_callback(bool clear_all);
 
 	/*
 	* Release the connect changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_connect_changed_callback(void(*callback)(bool connected, bool reported) = NULL);
+	int release_connect_changed_callback(bool clear_all);
 
 	/*
 	* Release the state changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_state_changed_callback(void(*callback)(int state) = NULL);
+	int release_state_changed_callback(bool clear_all);
 
 	/*
 	* Release the mode changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_mode_changed_callback(void(*callback)(int mode) = NULL);
+	int release_mode_changed_callback(bool clear_all);
 
 	/*
 	* Release the motor enable states or motor brake states changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake) = NULL);
+	int release_mtable_mtbrake_changed_callback(bool clear_all);
 
 	/*
 	* Release the error warn changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_error_warn_changed_callback(void(*callback)(int err_code, int warn_code) = NULL);
+	int release_error_warn_changed_callback(bool clear_all);
 
 	/*
 	* Release the cmdnum changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_cmdnum_changed_callback(void(*callback)(int cmdnum) = NULL);
+	int release_cmdnum_changed_callback(bool clear_all);
 
 	/*
 	* Release the temperature changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_temperature_changed_callback(void(*callback)(const fp32 *temps) = NULL);
+	int release_temperature_changed_callback(bool clear_all);
 
 	/*
 	* Release the value of counter changed callback
 	* @param callback: NULL means to release all callbacks for the same event
 	*/
 	int release_count_changed_callback(void(*callback)(int count) = NULL);
+	int release_count_changed_callback(bool clear_all);
 
 	/*
 	* Get suction cup state
@@ -1462,9 +1495,54 @@ public:
 	*/
 	int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false);
 
+	/*
+	* Four-point method to calibrate tool coordinate system position offset
+
+	* @param four_points: a list of four teaching coordinate positions [x, y, z, roll, pitch, yaw]
+		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+		if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+	* @param ret_xyz: the result of the calculated xyz(mm) TCP offset, [x, y, z]
+
+	* return: See the code documentation for details.
+	*/
 	int calibrate_tcp_coordinate_offset(float four_points[4][6], float ret_xyz[3]);
+	
+	/*
+	* An additional teaching point to calibrate the tool coordinate system attitude offset
+
+	* @param rpy_be: the rpy value of the teaching point without TCP offset [roll, pitch, yaw]
+	* @param rpy_bt: the rpy value of the teaching point with TCP offset [roll, pitch, yaw]
+		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+		if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+	* @param ret_rpy: the result of the calculated rpy TCP offset, [roll, pitch, yaw]
+
+	* return: See the code documentation for details.
+	*/
 	int calibrate_tcp_orientation_offset(float rpy_be[3], float rpy_bt[3], float ret_rpy[3]);
+	
+	/*
+	* Three-point method teaches user coordinate system posture offset
+
+	* @param four_points: a list of teaching TCP coordinate positions [x, y, z, roll, pitch, yaw]
+		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+		if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+	* @param ret_rpy: the result of the calculated rpy user offset, [roll, pitch, yaw]
+
+	* return: See the code documentation for details.
+	*/
 	int calibrate_user_orientation_offset(float three_points[3][6], float ret_rpy[3], int mode = 0, int trust_ind = 0);
+	
+	/*
+	* An additional teaching point determines the position offset of the user coordinate system.
+
+	* @param rpy_ub: the confirmed offset of the base coordinate system in the user coordinate system [roll, pitch, yaw], which is the result of calibrate_user_orientation_offset()
+		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+		if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+	* @param pos_b_uorg: the position of the teaching point in the base coordinate system [x, y, z], if the arm cannot reach the target position, the user can manually input the position of the target in the base coordinate.
+	* @param ret_xyz: the result of the calculated xyz user offset, [x, y, z]
+
+	* return: See the code documentation for details.
+	*/
 	int calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
 
 	int set_timeout(fp32 timeout);
@@ -1478,23 +1556,29 @@ private:
 	int _check_code(int code, bool is_move_cmd = false);
 	int _wait_move(fp32 timeout);
 	void _update_old(unsigned char *data);
-	void _update(unsigned char *data);
-	template<typename callable_vector, typename callable>
-	inline int _register_event_callback(callable_vector&& callbacks, callable&& f);
-	template<typename callable_vector, typename callable>
-	inline int _release_event_callback(callable_vector&& callbacks, callable&& f);
-	template<typename callable_vector, class... arguments>
-	inline void _report_callback(callable_vector&& callbacks, arguments&&... args);
-	inline void _report_data_callback(void);
-	inline void _report_location_callback(void);
-	inline void _report_connect_changed_callback(void);
-	inline void _report_state_changed_callback(void);
-	inline void _report_mode_changed_callback(void);
-	inline void _report_mtable_mtbrake_changed_callback(void);
-	inline void _report_error_warn_changed_callback(void);
-	inline void _report_cmdnum_changed_callback(void);
-	inline void _report_temperature_changed_callback(void);
-	inline void _report_count_changed_callback(void);
+	void _update(unsigned char *data);	
+	template<typename CallableVector, typename Callable>
+	int _register_event_callback(CallableVector&& callbacks, Callable&& callback);
+	template<typename CallableVector, typename Callable>
+	int _release_event_callback(CallableVector&& callbacks, Callable&& callback);
+	template<typename CallableVector, typename FunctionVector, class... arguments>
+	void _report_callback(CallableVector&& callbacks, FunctionVector&& functions, arguments&&... args);
+
+	template<typename FunctionVector, typename Function>
+	int _register_event_function(FunctionVector&& functions, Function&& function);
+	template<typename CallableVector, typename FunctionVector>
+	int _clear_event_callback(CallableVector&& callbacks, FunctionVector&& functions, bool clear_all = true);
+
+	void _report_data_callback(void);
+	void _report_location_callback(void);
+	void _report_connect_changed_callback(void);
+	void _report_state_changed_callback(void);
+	void _report_mode_changed_callback(void);
+	void _report_mtable_mtbrake_changed_callback(void);
+	void _report_error_warn_changed_callback(void);
+	void _report_cmdnum_changed_callback(void);
+	void _report_temperature_changed_callback(void);
+	void _report_count_changed_callback(void);
 	int _check_modbus_code(int ret, unsigned char *rx_data = NULL);
 	int _get_modbus_baudrate(int *baud_inx);
 	int _checkset_modbus_baud(int baudrate, bool check = true);
@@ -1579,8 +1663,20 @@ private:
 	SerialPort *stream_ser_;
 	ThreadPool pool_;
 	XArmReportData *report_data_ptr_;
+	std::string report_type_;
+	bool debug_;
 
 	std::vector<std::function<void (XArmReportData *)>> report_data_functions_;
+	std::vector<std::function<void (const fp32*, const fp32*)>> report_location_functions_;
+	std::vector<std::function<void (bool, bool)>> connect_changed_functions_;
+	std::vector<std::function<void (int)>> state_changed_functions_;
+	std::vector<std::function<void (int)>> mode_changed_functions_;
+	std::vector<std::function<void (int, int)>> mtable_mtbrake_changed_functions_;
+	std::vector<std::function<void (int, int)>> error_warn_changed_functions_;
+	std::vector<std::function<void (int)>> cmdnum_changed_functions_;
+	std::vector<std::function<void (const fp32*)>> temperature_changed_functions_;
+	std::vector<std::function<void (int)>> count_changed_functions_;
+
 	std::vector<void(*)(XArmReportData *report_data_ptr)> report_data_callbacks_;
 	std::vector<void(*)(const fp32*, const fp32*)> report_location_callbacks_;
 	std::vector<void(*)(bool, bool)> connect_changed_callbacks_;

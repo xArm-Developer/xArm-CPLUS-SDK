@@ -16,19 +16,10 @@ UxbusCmdSer::~UxbusCmdSer(void) {}
 
 int UxbusCmdSer::check_xbus_prot(unsigned char *datas, int funcode) {
 	state_is_ready = !(datas[3] & 0x10);
-	if (datas[3] & 0x40)
-	{
-		return UXBUS_STATE::ERR_CODE;
-	}
-	else
-		if (datas[3] & 0x20)
-		{
-			return UXBUS_STATE::WAR_CODE;
-		}
-		else
-		{
-			return 0;
-		}
+	if (datas[3] & 0x08) { return UXBUS_STATE::INVALID; }
+	if (datas[3] & 0x40) { return UXBUS_STATE::ERR_CODE; }
+	if (datas[3] & 0x20) { return UXBUS_STATE::WAR_CODE; }
+	return 0;
 }
 
 int UxbusCmdSer::send_pend(int funcode, int num, int timeout, unsigned char *ret_data) {

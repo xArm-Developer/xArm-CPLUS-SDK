@@ -3,6 +3,7 @@
  * Software License Agreement (BSD License)
  *
  * Author: Jimy Zhang <jimy92@163.com>
+           Vinman <vinman@gmail.com>
  ============================================================================*/
 #ifndef CORE_INSTRUCTION_UXBUS_CMD_CONFIG_H_
 #define CORE_INSTRUCTION_UXBUS_CMD_CONFIG_H_
@@ -163,6 +164,7 @@ public:
 	static const int ERR_FUN = 7;
 	static const int ERR_NOTTCP = 8;
 	static const int STATE_NOT_READY = 9;
+	static const int INVALID = 10;
 	static const int ERR_OTHER = 11;
 	static const int ERR_PARAM = 12;
 	static const int TRAJ_RW_FAILED = 31;
@@ -208,7 +210,7 @@ public:
 	static const int TEACH_JOINT = 2;
 	static const int TEACH_CART = 3;
 	static const int VELO_JOINT = 4;
-	static const int VELO_CART = 5; 
+	static const int VELO_CART = 5;
 };
 
 class XARM_STATE {

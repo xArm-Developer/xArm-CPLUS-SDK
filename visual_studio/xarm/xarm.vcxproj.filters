@@ -78,6 +78,12 @@
     <ClInclude Include="..\..\include\xarm\core\os\network.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\xarm\core\connect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\xarm\core\report_data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="xarm.rc">
@@ -131,6 +137,42 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\xarm\core\os\network.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\core\connect.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\core\report_data.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_bio.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_events.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_gpio.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_gripper.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_motion.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_params.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_record.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_report.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_robotiq.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_servo.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -130,6 +130,7 @@ private:
   void _print_normal_data(void);
   int _flush_rich_data(unsigned char *rx_data);
   void _print_rich_data(void);
+  void __flush_debug_data(int since_size);
 
 public:
   int total_num;
@@ -196,6 +197,8 @@ public:
   unsigned char cgpio_input_conf[16];
   unsigned char cgpio_output_conf[16];
 
+  int debug_size;
+  unsigned char *debug_data;
 private:
   std::string report_type;
   unsigned char *data_fp;

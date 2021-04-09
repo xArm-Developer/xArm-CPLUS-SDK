@@ -12,6 +12,11 @@
 
 ## Update Summary
 
+- > ### 1.6.9
+  - Support velocity control
+  - Support calibrate tcp offset and user offset
+  - Fix several bugs
+
 - > ### 1.6.0
 
   - Support the xArm BIO gripper, Robotiq 2F-85 gripper and Robotiq 2F-140 gripper
@@ -185,13 +190,17 @@
 
 - ##### [1001-move_line](example/1001-move_line.cc)
 
-- #####  [1004-move_arc_line](example/1004-move_arc_line.cc)
+- ##### [1004-move_arc_line](example/1004-move_arc_line.cc)
 
-- #####  [1006-move_tool_line](example/1006-move_tool_line.cc)
+- ##### [1006-move_tool_line](example/1006-move_tool_line.cc)
 
-- #####  [1007-counter](example/1007-counter.cc)
+- ##### [1007-counter](example/1007-counter.cc)
 
-- [__1008-move_line_aa__](example/1008-move_line_aa.cc)
+- ##### [1008-move_line_aa](example/1008-move_line_aa.cc)
+
+- ##### [1009-cartesian_velocity_control](example/1009-cartesian_velocity_control.cc)
+
+- ##### [2000-joint_velocity_control](example/2000-joint_velocity_control.cc)
 
 - ##### [2001-move_joint](example/2001-move_joint.cc)
 

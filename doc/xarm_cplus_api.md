@@ -1760,3 +1760,83 @@ Set the geometric model of the end effector for self collision detection
 :return: See the code documentation for details.
 ```
 
+__int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true)__
+
+```
+Joint velocity control, need to be set to joint velocity control mode(this.set_mode(4))
+
+:param speeds: [spd_J1, spd_J2, ..., spd_J7]
+	if default_is_radian is true, the value of spd_J1/.../spd_J1 should be in radians
+	if default_is_radian is false, the value of spd_J1/.../spd_J1 should be in degrees
+:param is_sync: whether all joints accelerate and decelerate synchronously, default is true
+
+:return: See the code documentation for details.
+```
+
+__int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false)__
+
+```
+Cartesian velocity control, need to be set to cartesian velocity control mode(self.set_mode(5))
+
+:param speeds: [spd_x, spd_y, spd_z, spd_rx, spd_ry, spd_rz]
+	if default_is_radian is true, the value of spd_rx/spd_ry/spd_rz should be in radians
+	if default_is_radian is false, the value of spd_rx/spd_ry/spd_rz should be in degrees
+:param is_tool_coord: is tool coordinate or not, default is false
+
+return: See the code documentation for details.
+```
+
+__int calibrate_tcp_coordinate_offset(float four_points[4][6], float ret_xyz[3])__
+
+```
+Four-point method to calibrate tool coordinate system position offset
+
+:param four_points: a list of four teaching coordinate positions [x, y, z, roll, pitch, yaw]
+	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+	if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+:param ret_xyz: the result of the calculated xyz(mm) TCP offset, [x, y, z]
+
+:return: See the code documentation for details.
+```
+
+__int calibrate_tcp_orientation_offset(float rpy_be[3], float rpy_bt[3], float ret_rpy[3])__
+
+```
+An additional teaching point to calibrate the tool coordinate system attitude offset
+
+:param rpy_be: the rpy value of the teaching point without TCP offset [roll, pitch, yaw]
+:param rpy_bt: the rpy value of the teaching point with TCP offset [roll, pitch, yaw]
+	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+	if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+:param ret_rpy: the result of the calculated rpy TCP offset, [roll, pitch, yaw]
+
+:return: See the code documentation for details.
+```
+
+__int calibrate_user_orientation_offset(float three_points[3][6], float ret_rpy[3], int mode = 0, int trust_ind = 0)__
+
+```
+Three-point method teaches user coordinate system posture offset
+
+:param four_points: a list of teaching TCP coordinate positions [x, y, z, roll, pitch, yaw]
+	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+	if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+:param ret_rpy: the result of the calculated rpy user offset, [roll, pitch, yaw]
+
+:return: See the code documentation for details.
+```
+
+__int calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3])__
+
+```
+An additional teaching point determines the position offset of the user coordinate system.
+
+:param rpy_ub: the confirmed offset of the base coordinate system in the user coordinate system [roll, pitch, yaw], which is the result of calibrate_user_orientation_offset()
+    if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+    if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+:param pos_b_uorg: the position of the teaching point in the base coordinate system [x, y, z], if the arm cannot reach the target position, the user can manually input the position of the target in the base coordinate.
+:param ret_xyz: the result of the calculated xyz user offset, [x, y, z]
+
+return: See the code documentation for details.
+```
+

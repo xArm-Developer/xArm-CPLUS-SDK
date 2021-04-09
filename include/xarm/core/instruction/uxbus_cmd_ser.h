@@ -3,6 +3,7 @@
  * Software License Agreement (BSD License)
  *
  * Author: Jimy Zhang <jimy92@163.com>
+           Vinman <vinman@gmail.com>
  ============================================================================*/
 #ifndef CORE_INSTRUCTION_UXBUS_CMD_SER_H_
 #define CORE_INSTRUCTION_UXBUS_CMD_SER_H_

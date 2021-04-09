@@ -48,6 +48,7 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 	if (prot != TX2_PROT_CON_) { return UXBUS_STATE::ERR_PROT; }
 	if (fun != funcode) { return UXBUS_STATE::ERR_FUN; }
 	state_is_ready = !(state & 0x10);
+	if (state & 0x08) { return UXBUS_STATE::INVALID; }
 	if (state & 0x40) { return UXBUS_STATE::ERR_CODE; }
 	if (state & 0x20) { return UXBUS_STATE::WAR_CODE; }
 	if (sizeof_data != len + 6) { return UXBUS_STATE::ERR_LENG; }

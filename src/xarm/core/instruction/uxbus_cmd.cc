@@ -1196,10 +1196,11 @@ int UxbusCmd::cali_user_orient(float three_pnts[3][6], float ret_rpy[3], int mod
 		for (int i = 0; i < 6; i++) { txdata[j*6 + i] = three_pnts[j][i]; }
 	}
 	int rx_len = 12;
-	unsigned char rx_data[rx_len];
+	unsigned char *rx_data = new unsigned char[rx_len];
 	char additional[2] = { (char)mode, (char)trust_ind };
 	int ret = set_nfp32_with_bytes(UXBUS_RG::CALI_WRLD_ORIENT, txdata, 18, additional, 2, rx_data, rx_len);
 	hex_to_nfp32(rx_data, ret_rpy, 3);
+	delete[] rx_data;
 	return ret;
 }
 

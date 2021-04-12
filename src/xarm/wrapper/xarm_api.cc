@@ -650,7 +650,7 @@ int XArmAPI::_wait_move(fp32 timeout) {
 			get_err_warn_code(err_warn);
 		}
 		if (error_code != 0) {
-			return API_CODE::ERR_CODE;
+			return API_CODE::HAS_ERROR;
 		}
 		if (state == 4 || state == 5) {
 			ret = get_state(&state_);

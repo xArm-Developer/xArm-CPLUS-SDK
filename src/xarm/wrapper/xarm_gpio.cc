@@ -161,8 +161,8 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec)
 		code = API_CODE::SUCTION_CUP_TOUT;
 		while (get_system_time() - start_time < timeout * 1000) {
 			ret = get_suction_cup(&val);
-			if (ret == API_CODE::ERR_CODE) {
-				code = API_CODE::ERR_CODE;
+			if (ret == UXBUS_STATE::ERR_CODE) {
+				code = UXBUS_STATE::ERR_CODE;
 				break;
 			}
 			if (ret == 0) {
@@ -205,7 +205,7 @@ int XArmAPI::set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], flo
 
 int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (ret == 0 || ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
+	if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 		if (rx_data != NULL && rx_data[0] != UXBUS_CONF::TGPIO_ID)
 			return API_CODE::TGPIO_ID_ERR;
 		if (ret != 0) {
@@ -224,7 +224,7 @@ int XArmAPI::_get_modbus_baudrate(int *baud_inx) {
 	float val;
 	int ret = core->tgpio_addr_r16(SERVO3_RG::MODBUS_BAUDRATE & 0x0FFF, &val);
 	*baud_inx = (int)val;
-	if (ret == API_CODE::ERR_CODE || ret == API_CODE::WAR_CODE) {
+	if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 		if (error_code != 19 && error_code != 28) {
 			int err_warn[2] = { 0 };
 			get_err_warn_code(err_warn);

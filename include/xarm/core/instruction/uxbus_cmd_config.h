@@ -132,6 +132,7 @@ public:
 	static const unsigned char CGPIO_SET_OUT_FUN = 138;
 	static const unsigned char CGPIO_GET_STATE = 139;
 
+	static const unsigned char GET_PWR_VERSION = 140;
 	static const unsigned char GET_HD_TYPES = 141;
 	static const unsigned char DELAYED_CGPIO_SET = 142;
 	static const unsigned char DELAYED_TGPIO_SET = 143;
@@ -139,22 +140,25 @@ public:
 	static const unsigned char POSITION_TGPIO_SET = 145;
 	static const unsigned char SET_IO_STOP_RESET = 146;
 	static const unsigned char POSITION_CGPIO_SET_ANALOG = 147;
+
+	static const unsigned char GET_EXE_FT = 150;
+    static const unsigned char FTSENSOR_ENABLE = 201;
+    static const unsigned char FTSENSOR_SET_APP = 202;
+    static const unsigned char FTSENSOR_GET_APP = 203;
+    static const unsigned char FTSENSOR_IDEN_LOAD = 204;
+    static const unsigned char FTSENSOR_CALI_LOAD_OFFSET = 205;
+    static const unsigned char FTSENSOR_SET_ZERO = 206;
+    static const unsigned char IMPEDANCE_CONFIG = 207;
+    static const unsigned char FORCE_CTRL_PID = 208;
+    static const unsigned char FORCE_CTRL_CONFIG = 209;
+    static const unsigned char IMPEDANCE_CTRL_MBK = 210;
+    static const unsigned char IMPEDANCE_CTRL_CONFIG = 211;
 };
 
 class UXBUS_STATE {
 public:
 	UXBUS_STATE(void) {}
 	~UXBUS_STATE(void) {}
-	static const int NOT_CONNECTED = -1;
-	static const int NOT_READY = -2;
-	static const int API_EXCEPTION = -3;
-	static const int CMD_NOT_EXIST = -4;
-	static const int TCP_LIMIT = -6;
-	static const int JOINT_LIMIT = -7;
-	static const int OUT_OF_RANGE = -8;
-	static const int EMERGENCY_STOP = -9;
-	static const int SERVO_NOT_EXIST = -10;
-	static const int CONVERT_FAILED = -11;
 	static const int ERR_CODE = 1;
 	static const int WAR_CODE = 2;
 	static const int ERR_TOUT = 3;
@@ -167,10 +171,6 @@ public:
 	static const int INVALID = 10;
 	static const int ERR_OTHER = 11;
 	static const int ERR_PARAM = 12;
-	static const int TRAJ_RW_FAILED = 31;
-	static const int TRAJ_RW_TOUT = 32;
-	static const int TRAJ_PLAYBACK_TOUT = 33;
-	static const int SUCTION_CUP_TOUT = 41;
 };
 
 class TRAJ_STATE {
@@ -247,20 +247,11 @@ public:
 	static const int CMD_PROT_ERROR = UXBUS_STATE::ERR_PROT;
 	static const int FUN_ERROR = UXBUS_STATE::ERR_FUN;
 	static const int NO_TCP = UXBUS_STATE::ERR_NOTTCP;
+	static const int STATE_NOT_READY = UXBUS_STATE::STATE_NOT_READY;
+	static const int RET_IS_INVALID = UXBUS_STATE::INVALID;
 	static const int OTHER = UXBUS_STATE::ERR_OTHER;
 	static const int PARAM_ERROR = UXBUS_STATE::ERR_PARAM;
 
-	static const int ERR_CODE = UXBUS_STATE::ERR_CODE;
-	static const int WAR_CODE = UXBUS_STATE::WAR_CODE;
-	static const int ERR_TOUT = UXBUS_STATE::ERR_TOUT;
-	static const int ERR_LENG = UXBUS_STATE::ERR_LENG;
-	static const int ERR_NUM = UXBUS_STATE::ERR_NUM;
-	static const int ERR_PROT = UXBUS_STATE::ERR_PROT;
-	static const int ERR_FUN = UXBUS_STATE::ERR_FUN;
-	static const int ERR_NOTTCP = UXBUS_STATE::ERR_NOTTCP;
-	static const int STATE_NOT_READY = UXBUS_STATE::STATE_NOT_READY;
-	static const int ERR_OTHER = UXBUS_STATE::ERR_OTHER;
-	static const int ERR_PARAM = UXBUS_STATE::ERR_PARAM;
 	static const int TGPIO_ID_ERR = 20;
 	static const int MODBUS_BAUD_NOT_SUPPORT = 21;
 	static const int MODBUS_BAUD_NOT_CORRECT = 22;

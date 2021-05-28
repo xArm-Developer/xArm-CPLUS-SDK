@@ -48,16 +48,20 @@ int UxbusCmd::set_timeout(float timeout) {
  * Uxbus generic protocol function
  *******************************************************/
 
-int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
-	unsigned char *send_data = new unsigned char[num];
-	for (int i = 0; i < num; i++) { send_data[i] = (unsigned char)datas[i]; }
-
+int UxbusCmd::set_nu8(int funcode, unsigned char *datas, int num) {
 	std::lock_guard<std::mutex> locker(mutex_);
-	int ret = send_xbus(funcode, send_data, num);
-	delete[] send_data;
+	int ret = send_xbus(funcode, datas, num);
 	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
 	int timeout = (funcode != UXBUS_RG::MOTION_EN || (funcode == UXBUS_RG::MOTION_EN && SET_TIMEOUT_ >= 2)) ? SET_TIMEOUT_ : 2000;
 	ret = send_pend(funcode, 0, timeout, NULL);
+	return ret;
+}
+
+int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
+	unsigned char *send_data = new unsigned char[num];
+	for (int i = 0; i < num; i++) { send_data[i] = (unsigned char)datas[i]; }
+	int ret = set_nu8(funcode, send_data, num);
+	delete[] send_data;
 	return ret;
 }
 
@@ -210,11 +214,15 @@ int UxbusCmd::playback_traj_old(int times) {
 }
 
 int UxbusCmd::save_traj(char filename[81]) {
-	return set_nu8(UXBUS_RG::SAVE_TRAJ, (int *)filename, 81);
+	return set_nu8(UXBUS_RG::SAVE_TRAJ, (unsigned char*)filename, 81);
 }
 
 int UxbusCmd::load_traj(char filename[81]) {
-	return set_nu8(UXBUS_RG::LOAD_TRAJ, (int *)filename, 81);
+	// std::lock_guard<std::mutex> locker(mutex_);
+	// int ret = send_xbus(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81);
+	// if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
+	// return send_pend(UXBUS_RG::LOAD_TRAJ, 0, SET_TIMEOUT_, NULL);
+	return set_nu8(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81);
 }
 
 int UxbusCmd::get_traj_rw_status(int *rx_data) {
@@ -265,11 +273,11 @@ int UxbusCmd::set_world_offset(float pose_offset[6]) {
 }
 
 int UxbusCmd::cnter_reset(void) {
-	return set_nu8(UXBUS_RG::CNTER_RESET, 0, 0);
+	return set_nu8(UXBUS_RG::CNTER_RESET, (int*)0, 0);
 }
 
 int UxbusCmd::cnter_plus(void) {
-	return set_nu8(UXBUS_RG::CNTER_PLUS, 0, 0);
+	return set_nu8(UXBUS_RG::CNTER_PLUS, (int*)0, 0);
 }
 
 int UxbusCmd::set_reduced_jrange(float jrange_rad[14]) {
@@ -495,11 +503,11 @@ int UxbusCmd::set_gravity_dir(float gravity_dir[3]) {
 }
 
 int UxbusCmd::clean_conf() {
-	return set_nu8(UXBUS_RG::CLEAN_CONF, 0, 0);
+	return set_nu8(UXBUS_RG::CLEAN_CONF, (int*)0, 0);
 }
 
 int UxbusCmd::save_conf() {
-	return set_nu8(UXBUS_RG::SAVE_CONF, 0, 0);
+	return set_nu8(UXBUS_RG::SAVE_CONF, (int*)0, 0);
 }
 
 int UxbusCmd::get_tcp_pose(float pose[6]) {

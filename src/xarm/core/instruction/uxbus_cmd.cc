@@ -491,7 +491,7 @@ int UxbusCmd::set_tcp_load(float mass, float load_offset[3]) {
 }
 
 int UxbusCmd::set_collis_sens(int value) {
-	return set_nu8(UXBUS_RG::SET_TEACH_SENS, &value, 1);
+	return set_nu8(UXBUS_RG::SET_COLLIS_SENS, &value, 1);
 }
 
 int UxbusCmd::set_teach_sens(int value) {

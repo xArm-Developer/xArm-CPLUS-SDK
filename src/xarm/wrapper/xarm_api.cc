@@ -439,7 +439,7 @@ void XArmAPI::disconnect(void) {
 
 int XArmAPI::set_timeout(fp32 timeout) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	assert(timeout > 0);
+	if (timeout <= 0) return API_CODE::PARAM_ERROR;
 	cmd_timeout_ = timeout;
 	return core->set_timeout(timeout);
 }

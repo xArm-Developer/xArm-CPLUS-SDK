@@ -108,7 +108,7 @@ int XArmAPI::set_servo_angle(fp32 angs[7], bool wait, fp32 timeout, fp32 radius)
 }
 
 int XArmAPI::set_servo_angle(int servo_id, fp32 angle, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius) {
-	assert(servo_id > 0 && servo_id <= 7);
+	if (servo_id <= 0 || servo_id > 7) return API_CODE::PARAM_ERROR;
 	last_used_angles[servo_id - 1] = angle;
 	return set_servo_angle(last_used_angles, speed, acc, mvtime, wait, timeout, radius);
 }

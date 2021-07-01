@@ -46,7 +46,7 @@ int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int wait_code = _wait_until_cmdnum_lt_max();
 	if (wait_code != 0) return wait_code;
-	assert(ionum == 0 || ionum == 1);
+	if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
 	if (delay_sec > 0) {
 		return core->tgpio_delay_set_digital(ionum + 1, value, delay_sec);
 	}
@@ -57,7 +57,7 @@ int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
 
 int XArmAPI::get_tgpio_analog(int ionum, float *value) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	assert(ionum == 0 || ionum == 1);
+	if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
 	if (ionum == 0) {
 		return core->tgpio_get_analog1(value);
 	}
@@ -83,7 +83,7 @@ int XArmAPI::get_cgpio_digital(int *digitals, int *digitals2) {
 
 int XArmAPI::get_cgpio_analog(int ionum, fp32 *value) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	assert(ionum == 0 || ionum == 1);
+	if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
 	if (ionum == 0) {
 		return core->cgpio_get_analog1(value);
 	}
@@ -96,7 +96,7 @@ int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int wait_code = _wait_until_cmdnum_lt_max();
 	if (wait_code != 0) return wait_code;
-	assert(ionum >= 0 && ionum < 16);
+	if (ionum < 0 || ionum >= 16) return API_CODE::PARAM_ERROR;
 	if (delay_sec > 0) {
 		return core->cgpio_delay_set_digital(ionum, value, delay_sec);
 	}
@@ -109,7 +109,7 @@ int XArmAPI::set_cgpio_analog(int ionum, fp32 value) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int wait_code = _wait_until_cmdnum_lt_max();
 	if (wait_code != 0) return wait_code;
-	assert(ionum == 0 || ionum == 1);
+	if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
 	if (ionum == 0) {
 		return core->cgpio_set_analog1(value);
 	}
@@ -120,13 +120,13 @@ int XArmAPI::set_cgpio_analog(int ionum, fp32 value) {
 
 int XArmAPI::set_cgpio_digital_input_function(int ionum, int fun) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	assert(ionum >= 0 && ionum < 16);
+	if (ionum < 0 || ionum >= 16) return API_CODE::PARAM_ERROR;
 	return core->cgpio_set_infun(ionum, fun);
 }
 
 int XArmAPI::set_cgpio_digital_output_function(int ionum, int fun) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	assert(ionum >= 0 && ionum < 16);
+	if (ionum < 0 || ionum >= 16) return API_CODE::PARAM_ERROR;
 	return core->cgpio_set_outfun(ionum, fun);
 }
 

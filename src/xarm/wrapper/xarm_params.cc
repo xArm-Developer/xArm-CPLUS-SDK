@@ -197,7 +197,8 @@ int XArmAPI::set_collision_tool_model(int tool_type, int n, ...) {
 	if (tool_type < COLLISION_TOOL_TYPE::USE_PRIMITIVES) {
 		return core->set_collision_tool_model(tool_type);
 	}
-	assert(n > (tool_type == COLLISION_TOOL_TYPE::BOX ? 2 : tool_type == COLLISION_TOOL_TYPE::CYLINDER ? 1 : 0));
+	if (n <= (tool_type == COLLISION_TOOL_TYPE::BOX ? 2 : tool_type == COLLISION_TOOL_TYPE::CYLINDER ? 1 : 0))
+		return API_CODE::PARAM_ERROR;
 	fp32 *params = new fp32[n];
 	va_list args;
 	va_start(args, n);

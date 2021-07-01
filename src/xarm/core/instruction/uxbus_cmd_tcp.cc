@@ -81,7 +81,8 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 				break;
 			}
 		}
-		sleep_milliseconds(1);
+		sleep_nanoseconds(500000);
+		// sleep_milliseconds(1);
 	}
 	delete[] rx_data;
 	return ret;

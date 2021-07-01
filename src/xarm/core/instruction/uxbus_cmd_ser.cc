@@ -35,7 +35,8 @@ int UxbusCmdSer::send_pend(int funcode, int num, int timeout, unsigned char *ret
 			delete[] rx_data;
 			return ret;
 		}
-		sleep_milliseconds(1);
+		sleep_nanoseconds(500000);
+		// sleep_milliseconds(1);
 	}
 	delete[] rx_data;
 	return UXBUS_STATE::ERR_TOUT;

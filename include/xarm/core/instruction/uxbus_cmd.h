@@ -8,6 +8,8 @@
 #ifndef CORE_INSTRUCTION_UXBUS_CMD_H_
 #define CORE_INSTRUCTION_UXBUS_CMD_H_
 
+#include <thread>
+#include <chrono>
 #include <mutex>
 #include <iostream>
 #include <vector>
@@ -21,6 +23,10 @@
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
 
+
+inline void sleep_nanoseconds(unsigned long nanoseconds) {
+	std::this_thread::sleep_for(std::chrono::nanoseconds(nanoseconds));
+}
 
 inline void sleep_milliseconds(unsigned long milliseconds) {
 #ifdef _WIN32

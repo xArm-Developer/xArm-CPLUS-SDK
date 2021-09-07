@@ -80,6 +80,14 @@ int UxbusCmd::get_nu8(int funcode, unsigned char *rx_data, int num) {
 	return send_pend(funcode, num, GET_TIMEOUT_, rx_data);
 }
 
+int UxbusCmd::getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num)
+{
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(funcode, tx_data, tx_num);
+	if (ret != 0) { return UXBUS_STATE::ERR_NOTTCP; }
+	return send_pend(funcode, rx_num, GET_TIMEOUT_, rx_data);
+}
+
 int UxbusCmd::set_nu16(int funcode, int *datas, int num) {
 	unsigned char *send_data = new unsigned char[num * 2];
 	for (int i = 0; i < num; i++) { bin16_to_8(datas[i], &send_data[i * 2]); }
@@ -176,6 +184,19 @@ int UxbusCmd::set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char
 	delete[] send_data;
 	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
 	ret = send_pend(funcode, rx_len, SET_TIMEOUT_, rx_data);
+	return ret;
+}
+
+int UxbusCmd::get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout)
+{
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(funcode, tx_data, tx_num);
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+
+	unsigned char *datas = new unsigned char[rxn * 4];
+	ret = send_pend(funcode, rxn * 4, timeout, datas);
+	hex_to_nfp32(datas, rx_data, rxn);
+	delete[] datas;
 	return ret;
 }
 
@@ -1174,18 +1195,20 @@ int UxbusCmd::set_simulation_robot(int on_off) {
 	return set_nu8(UXBUS_RG::SET_SIMULATION_ROBOT, &on_off, 1);
 }
 
-int UxbusCmd::vc_set_jointv(float jnt_v[7], int jnt_sync) {
+int UxbusCmd::vc_set_jointv(float jnt_v[7], int jnt_sync, float duration) {
 	float txdata[7] = { 0 };
 	for (int i = 0; i < 7; i++) { txdata[i] = jnt_v[i]; }
-	char additional[1] = { (char)jnt_sync };
-	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_JOINTV, txdata, 7, additional, 1);
+	char additional[5] = { (char)jnt_sync, 0, 0, 0, 0 };
+	fp32_to_hex(duration, (unsigned char *)&additional[1]);
+	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_JOINTV, txdata, 7, additional, duration >= 0 ? 5 : 1);
 }
 
-int UxbusCmd::vc_set_linev(float line_v[6], int coord) {
+int UxbusCmd::vc_set_linev(float line_v[6], int coord, float duration) {
 	float txdata[6] = { 0 };
 	for (int i = 0; i < 6; i++) { txdata[i] = line_v[i]; }
-	char additional[1] = { (char)coord };
-	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_CARTV, txdata, 6, additional, 1);
+	char additional[5] = { (char)coord, 0, 0, 0, 0 };
+	fp32_to_hex(duration, (unsigned char *)&additional[1]);
+	return set_nfp32_with_bytes(UXBUS_RG::VC_SET_CARTV, txdata, 6, additional, duration >= 0 ? 5 : 1);
 }
 
 int UxbusCmd::cali_tcp_pose(float four_pnts[4][6], float ret_xyz[3])
@@ -1230,4 +1253,137 @@ int UxbusCmd::cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[
 		txdata[j+3] = pos_b_uorg[j];
 	}
 	return swop_nfp32(UXBUS_RG::CALI_WRLD_POSE, txdata, 6, ret_xyz, 3);
+}
+
+int UxbusCmd::iden_load(int iden_type, float *rx_data, int num_get, int timeout)
+{
+    return get_nfp32_with_bytes(UXBUS_RG::IDEN_LOAD, (unsigned char *)&iden_type, 1, rx_data, num_get, timeout);
+}
+
+int UxbusCmd::set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6])
+{
+    unsigned char tx_data[79] = {0};
+    tx_data[0] = (unsigned char)coord;
+    for (unsigned int i = 0; i < 6; i++) {
+        tx_data[i+1] = (unsigned char)c_axis[i];
+    }
+
+    nfp32_to_hex(M, &tx_data[7], 6);
+    nfp32_to_hex(K, &tx_data[31], 6);
+    nfp32_to_hex(B, &tx_data[55], 6);
+
+    std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::IMPEDANCE_CONFIG, tx_data, 79);
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+
+	return send_pend(UXBUS_RG::IMPEDANCE_CONFIG, 0, SET_TIMEOUT_, NULL);
+}
+
+int UxbusCmd::set_impedance_mbk(float M[6], float K[6], float B[6])
+{
+    unsigned char tx_data[72] = {0};
+
+    nfp32_to_hex(M, &tx_data[0], 6);
+    nfp32_to_hex(K, &tx_data[24], 6);
+    nfp32_to_hex(B, &tx_data[48], 6);
+
+    std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::IMPEDANCE_CTRL_MBK, tx_data, 72);
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+
+	return send_pend(UXBUS_RG::IMPEDANCE_CTRL_MBK, 0, SET_TIMEOUT_, NULL);
+}
+
+int UxbusCmd::set_impedance_config(int coord, int c_axis[6])
+{
+    unsigned char tx_data[7] = {0};
+    tx_data[0] = (unsigned char)coord;
+    for (unsigned int i = 0; i < 6; i++) {
+        tx_data[i+1] = (unsigned char)c_axis[i];
+    }
+
+    std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::IMPEDANCE_CTRL_CONFIG, tx_data, 7);
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+
+	return send_pend(UXBUS_RG::IMPEDANCE_CTRL_CONFIG, 0, SET_TIMEOUT_, NULL);
+}
+
+int UxbusCmd::config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6])
+{
+    unsigned char tx_data[55] = {0};
+    tx_data[0] = (unsigned char)coord;
+    for (unsigned int i = 0; i < 6; i++) {
+        tx_data[i+1] = (unsigned char)c_axis[i];
+    }
+
+    nfp32_to_hex(f_ref, &tx_data[7], 6);
+    nfp32_to_hex(limits, &tx_data[31], 6);
+
+    std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::FORCE_CTRL_CONFIG, tx_data, 55);
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+
+	return send_pend(UXBUS_RG::FORCE_CTRL_CONFIG, 0, SET_TIMEOUT_, NULL);
+}
+
+int UxbusCmd::set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6])
+{
+    unsigned char tx_data[96] = {0};
+
+    nfp32_to_hex(kp, &tx_data[0], 6);
+    nfp32_to_hex(ki, &tx_data[24], 6);
+    nfp32_to_hex(kd, &tx_data[48], 6);
+    nfp32_to_hex(xe_limit, &tx_data[72], 6);
+
+    std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::FORCE_CTRL_PID, tx_data, 96);
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+
+	return send_pend(UXBUS_RG::FORCE_CTRL_PID, 0, SET_TIMEOUT_, NULL);
+}
+
+int UxbusCmd::ft_sensor_set_zero(void)
+{
+    int txdata[1] = { 0 };
+	return set_nu8(UXBUS_RG::FTSENSOR_SET_ZERO, txdata, 0);
+}
+
+int UxbusCmd::ft_sensor_iden_load(float result[10])
+{
+    return iden_load(0, result, 10, 500000);
+}
+
+int UxbusCmd::ft_sensor_cali_load(float load[10])
+{
+    return set_nfp32(UXBUS_RG::FTSENSOR_CALI_LOAD_OFFSET, load, 10);
+}
+
+int UxbusCmd::ft_sensor_enable(int on_off)
+{
+    int txdata[1] = { on_off };
+	return set_nu8(UXBUS_RG::FTSENSOR_ENABLE, txdata, 1);
+}
+
+int UxbusCmd::ft_sensor_app_set(int app_code)
+{
+    unsigned char txdata[1] = { (unsigned char)app_code };
+    unsigned char rxdata[1] = {0};
+	int ret = getset_nu8(UXBUS_RG::FTSENSOR_SET_APP, txdata, 1, rxdata, 1);
+    return ret != 0 ? ret : rxdata[0] != 0 ? UXBUS_STATE::INVALID : 0;
+}
+
+int UxbusCmd::ft_sensor_app_get(int *app_code)
+{
+    return get_nu8(UXBUS_RG::FTSENSOR_GET_APP, app_code, 1);
+}
+
+int UxbusCmd::get_exe_ft(float exe_ft[6])
+{
+    return get_nfp32(UXBUS_RG::GET_EXE_FT, exe_ft, 6);
+}
+
+int UxbusCmd::iden_tcp_load(float result[4])
+{
+	return iden_load(1, result, 4, 300000);
 }

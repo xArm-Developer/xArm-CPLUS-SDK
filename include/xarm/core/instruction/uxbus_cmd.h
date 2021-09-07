@@ -195,13 +195,28 @@ public:
 	int set_collision_tool_model(int tool_type, int n = 0, float *argv = NULL);
 	int set_simulation_robot(int on_off);
 
-	int vc_set_jointv(float jnt_v[7], int jnt_sync);
-	int vc_set_linev(float line_v[6], int coord);
+	int vc_set_jointv(float jnt_v[7], int jnt_sync, float duration = -1.0);
+	int vc_set_linev(float line_v[6], int coord, float duration = -1.0);
 
 	int cali_tcp_pose(float four_pnts[4][6], float ret_xyz[3]);
 	int cali_user_orient(float three_pnts[3][6], float ret_rpy[3], int mode = 0, int trust_ind = 0);
 	int cali_tcp_orient(float rpy_be[3], float rpy_bt[3], float ret_rpy[3]);
 	int cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
+
+	int iden_load(int iden_type, float *rx_data, int num_get, int timeout=500000);
+	int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6]);
+	int set_impedance_mbk(float M[6], float K[6], float B[6]);
+	int set_impedance_config(int coord, int c_axis[6]);
+	int config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6]);
+	int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
+	int ft_sensor_set_zero(void);
+	int ft_sensor_iden_load(float result[10]);
+	int ft_sensor_cali_load(float load[10]);
+	int ft_sensor_enable(int on_off);
+	int ft_sensor_app_set(int app_code);
+	int ft_sensor_app_get(int *app_code);
+	int get_exe_ft(float exe_ft[6]);
+	int iden_tcp_load(float result[4]);
 
 	virtual void close(void);
 	virtual int is_ok(void);
@@ -214,6 +229,7 @@ private:
 	int set_nu8(int funcode, int *datas, int num);
 	int get_nu8(int funcode, int *rx_data, int num);
 	int get_nu8(int funcode, unsigned char *rx_data, int num);
+	int getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
 	int set_nu16(int funcode, int *datas, int num);
 	int get_nu16(int funcode, int *rx_data, int num);
 	int set_nfp32(int funcode, float *datas, int num);
@@ -222,6 +238,7 @@ private:
 	int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
 	int is_nfp32(int funcode, float datas[], int txn, int *value);
 	int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0);
+	int get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
 
 public:
 	bool state_is_ready;

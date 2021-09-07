@@ -143,7 +143,10 @@ public:
 	fp32 *world_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
 	fp32 *temperatures;
 	int count;
+	int iden_progress;
 	unsigned char *gpio_reset_config; // unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
+	fp32 *ft_ext_force;
+	fp32 *ft_raw_force;
 
 	bool default_is_radian;
 
@@ -833,6 +836,12 @@ public:
 	int register_count_changed_callback(std::function<void (int)> callback);
 
 	/*
+	* Register the progress of identification changed callback
+	*/
+	int register_iden_progress_changed_callback(void(*callback)(int progress));
+	int register_iden_progress_changed_callback(std::function<void (int)> callback);
+
+	/*
 	* Release the report data callback
 	* @param callback: NULL means to release all callbacks;
 	*/
@@ -901,6 +910,13 @@ public:
 	*/
 	int release_count_changed_callback(void(*callback)(int count) = NULL);
 	int release_count_changed_callback(bool clear_all);
+
+	/*
+	* Release the progress of identification changed callback
+	* @param callback: NULL means to release all callbacks for the same event
+	*/
+	int release_iden_progress_changed_callback(void(*callback)(int progress) = NULL);
+	int release_iden_progress_changed_callback(bool clear_all);
 
 	/*
 	* Get suction cup state
@@ -1478,10 +1494,16 @@ public:
 		if default_is_radian is true, the value of spd_J1/.../spd_J1 should be in radians
 		if default_is_radian is false, the value of spd_J1/.../spd_J1 should be in degrees
 	* @param is_sync: whether all joints accelerate and decelerate synchronously, default is true
+	* @param duration: the maximum duration of the speed, over this time will automatically set the speed to 0.
+		duration > 0: seconds, indicates the maximum number of seconds that this speed can be maintained
+		duration == 0: always effective, will not stop automativally
+		duration < 0: default value, only used to be compatible with the old protocol, equivalent to 0
+		Note:
+			only available if firmware_version >= 1.8.0
 
 	* return: See the code documentation for details.
 	*/
-	int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true);
+	int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true, fp32 duration = -1.0);
 
 	/*
 	* Cartesian velocity control, need to be set to cartesian velocity control mode(self.set_mode(5))
@@ -1490,10 +1512,15 @@ public:
 		if default_is_radian is true, the value of spd_rx/spd_ry/spd_rz should be in radians
 		if default_is_radian is false, the value of spd_rx/spd_ry/spd_rz should be in degrees
 	* @param is_tool_coord: is tool coordinate or not, default is false
-
+	* @param duration: the maximum duration of the speed, over this time will automatically set the speed to 0.
+		duration > 0: seconds, indicates the maximum number of seconds that this speed can be maintained
+		duration == 0: always effective, will not stop automativally
+		duration < 0: default value, only used to be compatible with the old protocol, equivalent to 0
+		Note:
+			only available if firmware_version >= 1.8.0
 	* return: See the code documentation for details.
 	*/
-	int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false);
+	int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false, fp32 duration = -1.0);
 
 	/*
 	* Four-point method to calibrate tool coordinate system position offset
@@ -1545,6 +1572,20 @@ public:
 	*/
 	int calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
 
+	int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6]);
+	int set_impedance_mbk(float M[6], float K[6], float B[6]);
+	int set_impedance_config(int coord, int c_axis[6]);
+	int config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6]);
+	int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
+	int ft_sensor_set_zero(void);
+	int ft_sensor_iden_load(float result[10]);
+	int ft_sensor_cali_load(float load[10]);
+	int ft_sensor_enable(int on_off);
+	int ft_sensor_app_set(int app_code);
+	int ft_sensor_app_get(int *app_code);
+	int get_exe_ft(float exe_ft[6]);
+	int iden_tcp_load(float result[4]);
+
 	int set_timeout(fp32 timeout);
 private:
 	void _init(void);
@@ -1579,6 +1620,7 @@ private:
 	void _report_cmdnum_changed_callback(void);
 	void _report_temperature_changed_callback(void);
 	void _report_count_changed_callback(void);
+	void _report_iden_progress_changed_callback(void);
 	int _check_modbus_code(int ret, unsigned char *rx_data = NULL);
 	int _get_modbus_baudrate(int *baud_inx);
 	int _checkset_modbus_baud(int baudrate, bool check = true);
@@ -1676,6 +1718,7 @@ private:
 	std::vector<std::function<void (int)>> cmdnum_changed_functions_;
 	std::vector<std::function<void (const fp32*)>> temperature_changed_functions_;
 	std::vector<std::function<void (int)>> count_changed_functions_;
+	std::vector<std::function<void (int)>> iden_progress_changed_functions_;
 
 	std::vector<void(*)(XArmReportData *report_data_ptr)> report_data_callbacks_;
 	std::vector<void(*)(const fp32*, const fp32*)> report_location_callbacks_;
@@ -1687,6 +1730,7 @@ private:
 	std::vector<void(*)(int)> cmdnum_changed_callbacks_;
 	std::vector<void(*)(const fp32*)> temperature_changed_callbacks_;
 	std::vector<void(*)(int)> count_changed_callbacks_;
+	std::vector<void(*)(int)> iden_progress_changed_callbacks_;
 };
 
 #endif

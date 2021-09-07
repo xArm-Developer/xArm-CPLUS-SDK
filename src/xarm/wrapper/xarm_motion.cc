@@ -244,20 +244,20 @@ int XArmAPI::set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord, bool relat
 	return set_servo_cartesian_aa(pose, 0, 0, is_tool_coord, relative);
 }
 
-int XArmAPI::vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord) {
+int XArmAPI::vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord, fp32 duration) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 line_v[6];
 	for (int i = 0; i < 6; i++) {
 		line_v[i] = (float)((i < 3 || default_is_radian) ? speeds[i] : speeds[i] / RAD_DEGREE);
 	}
-	return core->vc_set_linev(line_v, is_tool_coord ? 1 : 0);
+	return core->vc_set_linev(line_v, is_tool_coord ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : -1.0);
 }
 
-int XArmAPI::vc_set_joint_velocity(fp32 speeds[7], bool is_sync) {
+int XArmAPI::vc_set_joint_velocity(fp32 speeds[7], bool is_sync, fp32 duration) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 jnt_v[7];
 	for (int i = 0; i < 7; i++) {
 		jnt_v[i] = (float)(default_is_radian ? speeds[i] : speeds[i] / RAD_DEGREE);
 	}
-	return core->vc_set_jointv(jnt_v, is_sync ? 1 : 0);
+	return core->vc_set_jointv(jnt_v, is_sync ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : -1.0);
 }

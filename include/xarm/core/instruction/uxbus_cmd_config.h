@@ -145,7 +145,7 @@ public:
     static const unsigned char FTSENSOR_ENABLE = 201;
     static const unsigned char FTSENSOR_SET_APP = 202;
     static const unsigned char FTSENSOR_GET_APP = 203;
-    static const unsigned char FTSENSOR_IDEN_LOAD = 204;
+    static const unsigned char IDEN_LOAD = 204;
     static const unsigned char FTSENSOR_CALI_LOAD_OFFSET = 205;
     static const unsigned char FTSENSOR_SET_ZERO = 206;
     static const unsigned char IMPEDANCE_CONFIG = 207;
@@ -153,6 +153,7 @@ public:
     static const unsigned char FORCE_CTRL_CONFIG = 209;
     static const unsigned char IMPEDANCE_CTRL_MBK = 210;
     static const unsigned char IMPEDANCE_CTRL_CONFIG = 211;
+	static const unsigned char GET_MAX_JOINT_VELOCITY = 231;
 };
 
 class UXBUS_STATE {

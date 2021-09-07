@@ -349,6 +349,19 @@ void XArmAPI::_update(unsigned char *rx_data) {
 				cgpio_output_conf[i] = report_data_ptr_->cgpio_output_conf[i];
 			}
 		}
+		if (sizeof_data >= 481) {
+			for (int i = 0; i < 6; i++) {
+				ft_ext_force[i] = report_data_ptr_->ft_ext_force[i];
+				ft_raw_force[i] = report_data_ptr_->ft_raw_force[i];
+			}
+		}
+		if (sizeof_data >= 482) {
+			if (iden_progress != report_data_ptr_->iden_progress) {
+				iden_progress = report_data_ptr_->iden_progress;
+				_report_iden_progress_changed_callback();
+			}
+			iden_progress = report_data_ptr_->iden_progress;
+		}
 	}
 }
 
@@ -630,8 +643,8 @@ void XArmAPI::_recv_report_data(void) {
 			bin32_to_8(size, &ret_data[0]);
 		}
 		if (num + offset < size) {
-			printf("[READ:%d][PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d] The data packet length is insufficient, waiting for the next packet splicing. num=%d, offset=%d, length=%d\n", 
-				db_read_cnt, db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt, num, offset, num + offset);
+			// printf("[READ:%d][PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d] The data packet length is insufficient, waiting for the next packet splicing. num=%d, offset=%d, length=%d\n", 
+			// 	db_read_cnt, db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt, num, offset, num + offset);
 			memcpy(ret_data + offset + 4, rx_data + 4, num);
 			offset += num;
 			continue;
@@ -643,8 +656,8 @@ void XArmAPI::_recv_report_data(void) {
 			while (num - offset2 >= size) {
 				db_discard_pkt_cnt += 1;
 				db_packet_cnt += 1;
-				printf("[READ:%d][PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d] Data packet stick to packets, the previous data packet will be discarded. num=%d, offset=%d\n", 
-					db_read_cnt, db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt, num, offset);
+				// printf("[READ:%d][PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d] Data packet stick to packets, the previous data packet will be discarded. num=%d, offset=%d\n", 
+				// 	db_read_cnt, db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt, num, offset);
 				// PRINT_HEX_DATA(ret_data, size + 4, "[%d] Discard Packet: ", db_packet_cnt);
 				memcpy(ret_data + 4, rx_data + 4 + offset2, size);
 				offset2 += size;
@@ -672,8 +685,8 @@ void XArmAPI::_recv_report_data(void) {
 			}
 			offset = num - offset2;
 			if (offset > 0) {
-				printf("[READ:%d][PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d] Data packets are redundant and will be left for the next packet splicing process. num=%d, offset=%d\n", 
-					db_read_cnt, db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt, num, offset);
+				// printf("[READ:%d][PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d] Data packets are redundant and will be left for the next packet splicing process. num=%d, offset=%d\n", 
+				// 	db_read_cnt, db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt, num, offset);
 				memcpy(ret_data + 4, rx_data + 4 + offset2, offset);
 			}
 			if (!prev_pkt_is_not_empty) {

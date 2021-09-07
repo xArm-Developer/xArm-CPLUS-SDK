@@ -322,6 +322,11 @@ XArmReportData::XArmReportData(std::string report_type_)
   memset(cgpio_input_conf, 0, sizeof(cgpio_input_conf));
   memset(cgpio_output_conf, 0, sizeof(cgpio_output_conf));
 
+  memset(ft_ext_force, 0, sizeof(ft_ext_force));
+  memset(ft_raw_force, 0, sizeof(ft_raw_force));
+
+  iden_progress = 0;
+
   debug_data = NULL;
   debug_size = 0;
 }
@@ -366,13 +371,22 @@ void XArmReportData::__flush_debug_data(int since_size) {
 }
 
 int XArmReportData::_flush_dev_data(unsigned char *rx_data) {
-  int ret = __flush_common_data(rx_data);  
-  __flush_debug_data(87);
+  int ret = __flush_common_data(rx_data);
+  if (total_num >= 135) {
+    // FT_SENSOR
+    hex_to_nfp32(&data_fp[87], ft_ext_force, 6);
+    hex_to_nfp32(&data_fp[111], ft_raw_force, 6);
+  }
+  __flush_debug_data(135);
   return ret;
 }
 void XArmReportData::_print_dev_data(void) 
 {
   __print_common_data();
+  if (total_num >= 135) {
+    print_nvect("ft_ext_force = ", ft_ext_force, 6);
+    print_nvect("ft_raw_force = ", ft_raw_force, 6);
+  }
 }
 
 int XArmReportData::_flush_normal_data(unsigned char *rx_data)
@@ -486,7 +500,16 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
         cgpio_output_conf[i+8] = data_fp[425 + i];
       };
     }
-    __flush_debug_data(433);
+
+    if (total_num >= 481) {
+      // FT_SENSOR
+      hex_to_nfp32(&data_fp[433], ft_ext_force, 6);
+      hex_to_nfp32(&data_fp[457], ft_raw_force, 6);
+    }
+    if (total_num >= 482) {
+      iden_progress = data_fp[481];
+    }
+    __flush_debug_data(482);
   }
   return ret;
 }
@@ -569,6 +592,10 @@ void XArmReportData::_print_rich_data(void)
       printf("    [DO] ");
         for (int i = 8; i < 16; ++i) { printf("DO%d=%d, ", i-8, cgpio_output_conf[i]); }
       printf("\n");
+  }
+  if (total_num >= 481) {
+    print_nvect("ft_ext_force = ", ft_ext_force, 6);
+    print_nvect("ft_raw_force = ", ft_raw_force, 6);
   }
 }
 

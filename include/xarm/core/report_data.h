@@ -197,6 +197,10 @@ public:
   unsigned char cgpio_input_conf[16];
   unsigned char cgpio_output_conf[16];
 
+  float ft_ext_force[6];
+  float ft_raw_force[6];
+  int iden_progress;
+
   int debug_size;
   unsigned char *debug_data;
 private:

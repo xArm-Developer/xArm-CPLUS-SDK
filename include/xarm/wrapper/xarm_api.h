@@ -1420,7 +1420,7 @@ public:
 
 	* return: See the code documentation for details.
 	*/
-	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length);
+	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
 
 	/*
 	* Set the reported torque or electric current
@@ -1586,6 +1586,17 @@ public:
 	int get_exe_ft(float exe_ft[6]);
 	int iden_tcp_load(float result[4]);
 
+	int get_linear_track_error(int *err);
+	int get_linear_track_status(int *status);
+	int get_linear_track_pos(fp32 *pos);
+	int check_linear_track_on_zero(int *status);
+	int clean_linear_track_error(void);
+	int set_linear_track_enable(bool enable);
+	int set_linear_track_speed(int speed);
+	int set_linear_track_back_origin(bool wait = true, bool auto_enable = true);
+	int set_linear_track_pos(fp32 pos, bool wait = true, fp32 timeout = 100);
+	int stop_linear_track(void);
+
 	int set_timeout(fp32 timeout);
 private:
 	void _init(void);
@@ -1621,7 +1632,7 @@ private:
 	void _report_temperature_changed_callback(void);
 	void _report_count_changed_callback(void);
 	void _report_iden_progress_changed_callback(void);
-	int _check_modbus_code(int ret, unsigned char *rx_data = NULL);
+	int _check_modbus_code(int ret, unsigned char *rx_data = NULL, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
 	int _get_modbus_baudrate(int *baud_inx);
 	int _checkset_modbus_baud(int baudrate, bool check = true);
 	int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]);
@@ -1640,6 +1651,9 @@ private:
 	int _check_gripper_status(fp32 timeout = 10);
 	bool _gripper_is_support_status(void);
 	int _get_gripper_status(int *status);
+
+	int _wait_linear_track_stop(fp32 timeout = 100);
+	int _wait_linear_track_back_origin(fp32 timeout = 10);
 private:
 	std::string port_;
 	bool check_tcp_limit_;
@@ -1693,6 +1707,7 @@ private:
 	int xarm_gripper_error_code_;
 	int bio_gripper_error_code_;
 	int robotiq_error_code_;
+	int linear_track_error_code_;
 	int gripper_version_numbers_[3];
 
 	long long last_report_time_;

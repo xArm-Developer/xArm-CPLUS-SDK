@@ -7,6 +7,7 @@
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
 */
 
+#include <string.h>
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/instruction/servo3_config.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
@@ -653,7 +654,7 @@ int UxbusCmd::gripper_clean_err() {
  *******************************************************/
 int UxbusCmd::tgpio_addr_w16(int addr, float value) {
 	unsigned char *txdata = new unsigned char[7];
-	txdata[0] = UXBUS_CONF::TGPIO_ID;
+	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
 
@@ -666,7 +667,7 @@ int UxbusCmd::tgpio_addr_w16(int addr, float value) {
 
 int UxbusCmd::tgpio_addr_r16(int addr, float *value) {
 	unsigned char *txdata = new unsigned char[3];
-	txdata[0] = UXBUS_CONF::TGPIO_ID;
+	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
 	bin16_to_8(addr, &txdata[1]);
 
 	std::lock_guard<std::mutex> locker(mutex_);
@@ -681,7 +682,7 @@ int UxbusCmd::tgpio_addr_r16(int addr, float *value) {
 }
 int UxbusCmd::tgpio_addr_w32(int addr, float value) {
 	unsigned char *txdata = new unsigned char[7];
-	txdata[0] = UXBUS_CONF::TGPIO_ID;
+	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
 
@@ -694,7 +695,7 @@ int UxbusCmd::tgpio_addr_w32(int addr, float value) {
 
 int UxbusCmd::tgpio_addr_r32(int addr, float *value) {
 	unsigned char *txdata = new unsigned char[3];
-	txdata[0] = UXBUS_CONF::TGPIO_ID;
+	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
 	bin16_to_8(addr, &txdata[1]);
 
 	std::lock_guard<std::mutex> locker(mutex_);
@@ -773,9 +774,9 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 	return ret;
 }
 
-int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data) {
+int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id) {
 	unsigned char *txdata = new unsigned char[len_t + 1];
-	txdata[0] = UXBUS_CONF::TGPIO_ID;
+	txdata[0] = host_id;
 	for (int i = 0; i < len_t; i++) { txdata[i + 1] = modbus_t[i]; }
 
 	std::lock_guard<std::mutex> locker(mutex_);
@@ -1387,3 +1388,30 @@ int UxbusCmd::iden_tcp_load(float result[4])
 {
 	return iden_load(1, result, 4, 300000);
 }
+
+int UxbusCmd::track_modbus_r16s(int addr, unsigned char *rx_data, int len, unsigned char fcode)
+{
+	unsigned char *txdata = new unsigned char[6];
+	txdata[0] = UXBUS_CONF::TRACK_ID;
+	txdata[1] = fcode;
+	bin16_to_8(addr, &txdata[2]);
+	bin16_to_8(len, &txdata[4]);
+	int ret = tgpio_set_modbus(txdata, 6, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID);
+	delete[] txdata;
+	return ret;
+}
+
+int UxbusCmd::track_modbus_w16s(int addr, unsigned char *send_data, int len, unsigned char *rx_data)
+{
+	unsigned char *txdata = new unsigned char[7+len*2];
+	txdata[0] = UXBUS_CONF::TRACK_ID;
+	txdata[1] = 0x10;
+	bin16_to_8(addr, &txdata[2]);
+	bin16_to_8(len, &txdata[4]);
+	txdata[6] = len * 2;
+	memcpy(&txdata[7], send_data, len * 2);
+	int ret = tgpio_set_modbus(txdata, len * 2 + 7, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID);
+	delete[] txdata;
+	return ret;
+}
+

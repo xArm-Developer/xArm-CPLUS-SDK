@@ -203,10 +203,10 @@ int XArmAPI::set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], flo
 	return core->cgpio_position_set_analog(ionum, value, xyz, tol_r);
 }
 
-int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data) {
+int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data, unsigned char host_id) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
-		if (rx_data != NULL && rx_data[0] != UXBUS_CONF::TGPIO_ID)
+		if (rx_data != NULL && rx_data[0] != host_id)
 			return API_CODE::TGPIO_ID_ERR;
 		if (ret != 0) {
 			if (error_code != 19 && error_code != 28) {
@@ -293,11 +293,11 @@ int XArmAPI::get_tgpio_modbus_baudrate(int *baud) {
 	return ret;
 }
 
-int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length) {
+int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char *rx_data = new unsigned char[ret_length + 1];
-	int ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data);
-	ret = _check_modbus_code(ret, rx_data);
+	int ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data, host_id);
+	ret = _check_modbus_code(ret, rx_data, host_id);
 	memcpy(ret_data, rx_data + 1, ret_length);
 	delete[] rx_data;
 	return ret;

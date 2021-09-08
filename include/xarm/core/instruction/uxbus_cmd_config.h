@@ -195,8 +195,13 @@ public:
 
 	static const int SET_TIMEOUT = 2000;  // ms
 	static const int GET_TIMEOUT = 2000;  // ms
+
+	static const int TRACK_ID = 1;
 	static const int GRIPPER_ID = 8;
-	static const int TGPIO_ID = 9;
+	
+	static const int TGPIO_HOST_ID = 9;
+	static const int LINEAR_TRACK_HOST_ID = 11;
+	
 	static const int MASTER_ID = 0xAA;
 	static const int SLAVE_ID = 0x55;
 };

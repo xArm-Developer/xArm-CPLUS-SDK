@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 	ret = arm->ft_sensor_enable(1);
 	printf("ft_sensor_enable, ret=%d\n", ret);
 	ret = arm->ft_sensor_iden_load(result);
-	printf("ret=%d, result=[");
+	printf("ret=%d, result=[", ret);
 	for (unsigned int i = 0; i < 10; i++) {
 		printf("%f%s", result[i], i == 9 ? "" : ", ");
 	}

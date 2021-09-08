@@ -146,7 +146,7 @@ public:
 
 	int set_modbus_timeout(int value);
 	int set_modbus_baudrate(int baud);
-	int tgpio_set_modbus(unsigned char *send_data, int length, unsigned char *recv_data);
+	int tgpio_set_modbus(unsigned char *send_data, int length, unsigned char *recv_data, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
 	int gripper_modbus_w16s(int addr, float value, int len);
 	int gripper_modbus_r16s(int addr, int len, unsigned char *rx_data);
 	int gripper_modbus_set_en(int value);
@@ -217,6 +217,9 @@ public:
 	int ft_sensor_app_get(int *app_code);
 	int get_exe_ft(float exe_ft[6]);
 	int iden_tcp_load(float result[4]);
+
+	int track_modbus_r16s(int addr, unsigned char *data, int len, unsigned char fcode = 0x03);
+	int track_modbus_w16s(int addr, unsigned char *send_data, int len, unsigned char *rx_data);
 
 	virtual void close(void);
 	virtual int is_ok(void);

@@ -1572,29 +1572,252 @@ public:
 	*/
 	int calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
 
+    /*
+    * Set all parameters of impedance control.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param coord: task frame. 0: base frame. 1: tool frame.
+    * @param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param M: mass. (kg)
+    * @param K: stiffness coefficient.
+    * @param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+
+    * return: See the code documentation for details.
+    */
 	int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6]);
+
+	/*
+    * Set mbk parameters of impedance control.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param M: mass. (kg)
+    * @param K: stiffness coefficient.
+    * @param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+
+    * return: See the code documentation for details.
+    */
 	int set_impedance_mbk(float M[6], float K[6], float B[6]);
+
+	/*
+    * Set impedance control parameters of impedance control.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param coord: task frame. 0: base frame. 1: tool frame.
+    * @param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+
+    * return: See the code documentation for details.
+    */
 	int set_impedance_config(int coord, int c_axis[6]);
+
+	/*
+    * Set force control parameters.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param coord: task frame. 0: base frame. 1: tool frame.
+    * @param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param f_ref:  the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
+    * @param limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
+
+    * return: See the code documentation for details.
+    */
 	int config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6]);
+
+	/*
+    * Set force control pid parameters.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param kp: proportional gain
+    * @param ki: integral gain.
+    * @param kd: differential gain.
+    * @param xe_limit: 6d vector. for compliant axes, these values are the maximum allowed tcp speed along/about the axis. mm/s
+
+    * return: See the code documentation for details.
+    */
 	int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
+
+	/*
+    * Set force/torque offset.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * return: See the code documentation for details.
+    */
 	int ft_sensor_set_zero(void);
+
+	/*
+    * Identification the tcp load with ftsensor
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param result: the result of identification
+
+    * return: See the code documentation for details.
+    */
 	int ft_sensor_iden_load(float result[10]);
+
+	/*
+    * Write load parameter value
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Mx_offset，My_offset，Mz_ffset])
+
+    * return: See the code documentation for details.
+    */
 	int ft_sensor_cali_load(float load[10]);
+
+	/*
+    * Used for enabling and disabling the use of external F/T measurements in the controller.
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param on_off: enable or disable F/T data sampling.
+
+    * return: See the code documentation for details.
+    */
 	int ft_sensor_enable(int on_off);
+
+	/*
+    * Set robot to be controlled in force mode
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param app_code: force mode. 0: non-force mode  1: impendance control  2:force control
+
+    * return: See the code documentation for details.
+    */
 	int ft_sensor_app_set(int app_code);
+
+	/*
+    * Get force mode
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param app_code: the result of force mode.
+
+    * return: See the code documentation for details.
+    */
 	int ft_sensor_app_get(int *app_code);
+
+	/*
+    * Get extenal force/torque
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param exe_ft: the result of the extenal force/torque.
+
+    * return: See the code documentation for details.
+    */
 	int get_exe_ft(float exe_ft[6]);
+
+	/*
+    * Identification the tcp load with current
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param result: the result of identification. [mass，x_centroid，y_centroid，z_centroid]
+
+    * return: See the code documentation for details.
+    */
 	int iden_tcp_load(float result[4]);
 
+    /*
+    * Get the error code of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param err: the result of linear track error
+
+    * return: See the code documentation for details.
+    */
 	int get_linear_track_error(int *err);
+
+	/*
+    * Get the status of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param status: the result of linear track status
+    *   status & 0x03 == 0: reach the target location
+    *   status & 0x03 == 1: in motion
+    *   status & 0x03 == 2: Has stopped
+
+    * return: See the code documentation for details.
+    */
 	int get_linear_track_status(int *status);
+
+	/*
+    * Get the pos of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param pos: the result of linear track position
+
+    * return: See the code documentation for details.
+    */
 	int get_linear_track_pos(fp32 *pos);
+
+	/*
+    * Check the linear track is on zero positon or not
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param status: the result of linear track status
+    *   status == 0: linear track is not on zero
+    *   status == 1: linear track is on zero
+
+    * return: See the code documentation for details.
+    */
 	int check_linear_track_on_zero(int *status);
+
+	/*
+    * Clean the linear track error
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * return: See the code documentation for details.
+    */
 	int clean_linear_track_error(void);
+
+	/*
+    * Set the linear track enable/disable
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param enable: enable or not
+
+    * return: See the code documentation for details.
+    */
 	int set_linear_track_enable(bool enable);
+
+	/*
+    * Set the speed of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param speed: Integer between 100 and 3000.
+
+    * return: See the code documentation for details.
+    */
 	int set_linear_track_speed(int speed);
+
+	/*
+    * Set the linear track go back to the origin position
+    *   Note:
+            1. only available if firmware_version >= 1.8.0
+            2. only useful when powering on for the first time
+            3. this operation must be performed at the first power-on
+
+    * @param wait: wait to motion finish or not, default is True
+    * @param auto_enable: enable after back to origin or not, default is True
+
+    * return: See the code documentation for details.
+    */
 	int set_linear_track_back_origin(bool wait = true, bool auto_enable = true);
+
+	/*
+    * Set the position of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param pos: position. Integer between 0 and 750.
+    * @param wait: wait to motion finish or not, default is True
+    * @param timeout: wait timeout, seconds, default is 100s.
+
+    * return: See the code documentation for details.
+    */
 	int set_linear_track_pos(fp32 pos, bool wait = true, fp32 timeout = 100);
+
+	/*
+    * Set the linear track to stop
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * return: See the code documentation for details.
+    */
 	int stop_linear_track(void);
 
 	int set_timeout(fp32 timeout);

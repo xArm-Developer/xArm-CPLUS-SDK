@@ -250,7 +250,7 @@ int XArmAPI::vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord, fp32 
 	for (int i = 0; i < 6; i++) {
 		line_v[i] = (float)((i < 3 || default_is_radian) ? speeds[i] : speeds[i] / RAD_DEGREE);
 	}
-	return core->vc_set_linev(line_v, is_tool_coord ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : -1.0);
+	return core->vc_set_linev(line_v, is_tool_coord ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : (fp32)-1.0);
 }
 
 int XArmAPI::vc_set_joint_velocity(fp32 speeds[7], bool is_sync, fp32 duration) {
@@ -259,5 +259,5 @@ int XArmAPI::vc_set_joint_velocity(fp32 speeds[7], bool is_sync, fp32 duration) 
 	for (int i = 0; i < 7; i++) {
 		jnt_v[i] = (float)(default_is_radian ? speeds[i] : speeds[i] / RAD_DEGREE);
 	}
-	return core->vc_set_jointv(jnt_v, is_sync ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : -1.0);
+	return core->vc_set_jointv(jnt_v, is_sync ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : (fp32)-1.0);
 }

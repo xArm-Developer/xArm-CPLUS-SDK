@@ -22,6 +22,7 @@ static int get_baud_inx(int baud) {
 
 UxbusCmd::UxbusCmd(void) {
 	state_is_ready = false;
+	last_modbus_comm_us_ = get_us();
 }
 
 UxbusCmd::~UxbusCmd(void) {}
@@ -774,17 +775,26 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 	return ret;
 }
 
-int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id) {
+int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id, float limit_sec) {
 	unsigned char *txdata = new unsigned char[len_t + 1];
 	txdata[0] = host_id;
 	for (int i = 0; i < len_t; i++) { txdata[i + 1] = modbus_t[i]; }
 
 	std::lock_guard<std::mutex> locker(mutex_);
+	if (limit_sec > 0) {
+		long long diff_us = get_us() - last_modbus_comm_us_;
+		long long limit_us = (long long)(limit_sec * 1000000);
+		if (diff_us < limit_us) sleep_us(limit_us - diff_us);
+	}
 	int ret = send_xbus(UXBUS_RG::TGPIO_MODBUS, txdata, len_t + 1);
 	delete[] txdata;
-	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	if (0 != ret) { 
+		last_modbus_comm_us_ = get_us();
+		return UXBUS_STATE::ERR_NOTTCP;
+	}
 
 	ret = send_pend(UXBUS_RG::TGPIO_MODBUS, -1, SET_TIMEOUT_, rx_data);
+	last_modbus_comm_us_ = get_us();
 	return ret;
 }
 
@@ -1396,7 +1406,7 @@ int UxbusCmd::track_modbus_r16s(int addr, unsigned char *rx_data, int len, unsig
 	txdata[1] = fcode;
 	bin16_to_8(addr, &txdata[2]);
 	bin16_to_8(len, &txdata[4]);
-	int ret = tgpio_set_modbus(txdata, 6, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID);
+	int ret = tgpio_set_modbus(txdata, 6, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID, (float)0.001);
 	delete[] txdata;
 	return ret;
 }
@@ -1410,7 +1420,7 @@ int UxbusCmd::track_modbus_w16s(int addr, unsigned char *send_data, int len, uns
 	bin16_to_8(len, &txdata[4]);
 	txdata[6] = len * 2;
 	memcpy(&txdata[7], send_data, len * 2);
-	int ret = tgpio_set_modbus(txdata, len * 2 + 7, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID);
+	int ret = tgpio_set_modbus(txdata, len * 2 + 7, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID, (float)0.001);
 	delete[] txdata;
 	return ret;
 }

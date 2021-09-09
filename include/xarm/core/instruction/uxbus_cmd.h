@@ -35,7 +35,7 @@ inline long long get_us() {
 #else
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
-	return (t.tv_sec * 1000000000 + tv.tv_nsec) * 0.001;
+	return (t.tv_sec * 1000000000 + t.tv_nsec) * 0.001;
 #endif
 }
 

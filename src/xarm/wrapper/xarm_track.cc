@@ -22,7 +22,7 @@ int XArmAPI::_get_linear_track_registers(unsigned char *ret_data, int addr, int 
 
 int XArmAPI::get_linear_track_registers(LinearTrackStatus *status, int addr, int number_of_registers)
 {
-    if (!((addr == 0x0A20 && number_of_registers >= 2) || (0x0A22 <= addr <= 0x0A27 && number_of_registers >= 1)))
+    if (!((addr == 0x0A20 && number_of_registers >= 2) || (addr >= 0x0A22 && addr <= 0x0A27 && number_of_registers >= 1)))
         return API_CODE::PARAM_ERROR;
     unsigned char *rx_data = new unsigned char[4 + 2 * number_of_registers];
     int ret = _get_linear_track_registers(rx_data, addr, number_of_registers);
@@ -31,27 +31,27 @@ int XArmAPI::get_linear_track_registers(LinearTrackStatus *status, int addr, int
             linear_track_status.pos = (int)(bin8_to_32(&rx_data[4]) / 2000);
         }
         int start_inx;
-        if (0x0A22 - number_of_registers < addr <= 0x0A22) {
+        if (addr > (0x0A22 - number_of_registers) && addr <= 0x0A22) {
             start_inx = (0x0A22 - addr) * 2 + 4;
             linear_track_status.status = bin8_to_16(&rx_data[start_inx]);
         }
-        if (0x0A23 - number_of_registers < addr <= 0x0A23) {
+        if (addr > (0x0A23 - number_of_registers) && addr <= 0x0A23) {
             start_inx = (0x0A23 - addr) * 2 + 4;
             linear_track_status.error = bin8_to_16(&rx_data[start_inx]);
         }
-        if (0x0A24 - number_of_registers < addr <= 0x0A24) {
+        if (addr > (0x0A24 - number_of_registers) && addr <= 0x0A24) {
             start_inx = (0x0A24 - addr) * 2 + 4;
             linear_track_status.is_enabled = bin8_to_16(&rx_data[start_inx]) & 0x01;
         }
-        if (0x0A25 - number_of_registers < addr <= 0x0A25) {
+        if (addr > (0x0A25 - number_of_registers) && addr <= 0x0A25) {
             start_inx = (0x0A25 - addr) * 2 + 4;
             linear_track_status.on_zero = bin8_to_16(&rx_data[start_inx]) & 0x01;
         }
-        if (0x0A26 - number_of_registers < addr <= 0x0A26) {
+        if (addr > (0x0A26 - number_of_registers) && addr <= 0x0A26) {
             start_inx = (0x0A26 - addr) * 2 + 4;
             linear_track_status.sci = (bin8_to_16(&rx_data[start_inx]) >> 1) & 0x01;
         }
-        if (0x0A27 - number_of_registers < addr <= 0x0A27) {
+        if (addr > (0x0A27 - number_of_registers) && addr <= 0x0A27) {
             start_inx = (0x0A27 - addr) * 2 + 4;
             int sco = bin8_to_16(&rx_data[start_inx]);
             linear_track_status.sco[0] = sco & 0x01;

@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1FBAB395-FC3E-41C5-94D2-01CDBFF7F383}</ProjectGuid>
+    <ProjectGuid>{5089BE79-1049-40F9-810D-F9AD98C60449}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>My9000linear_track_test</RootNamespace>
+    <RootNamespace>My9000set_linear_track</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -148,12 +148,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\example\9000-set_linear_track.cc" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\xarm\xarm.vcxproj">
       <Project>{dee3d7ef-64e9-4614-8e4b-c78464a758e5}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\example\9000-linear_track_test.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

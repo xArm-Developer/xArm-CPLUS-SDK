@@ -424,11 +424,11 @@ namespace XArmWrapper
 	int __stdcall get_linear_track_on_zero(int *status) {
 		return arm->get_linear_track_on_zero(status);
 	}
-	int get_linear_track_sci(int *sci1) {
-		return arm->get_linear_track_sci(status);
+	int __stdcall get_linear_track_sci(int *sci1) {
+		return arm->get_linear_track_sci(sci1);
 	}
-	int get_linear_track_sco(int sco[2]) {
-		return arm->get_linear_track_sco(status);
+	int __stdcall get_linear_track_sco(int sco[2]) {
+		return arm->get_linear_track_sco(sco);
 	}
 	int __stdcall clean_linear_track_error(void) {
 		return arm->clean_linear_track_error();

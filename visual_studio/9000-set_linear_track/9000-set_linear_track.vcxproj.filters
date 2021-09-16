@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\9000-linear_track_test.cc">
+    <ClCompile Include="..\..\example\9000-set_linear_track.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -269,6 +269,7 @@ public:
 
 	static const int LINEAR_TRACK_HAS_FAULT = 80;
 	static const int LINEAR_TRACK_SCI_IS_LOW = 81;
+	static const int LINEAR_TRACK_NOT_INIT = 82;
 
 	static const int WAIT_FINISH_TIMEOUT = 100;
 	static const int CHECK_FAILED = 101;

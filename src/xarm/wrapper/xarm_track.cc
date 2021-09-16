@@ -199,6 +199,7 @@ int XArmAPI::set_linear_track_pos(int pos, int speed, bool wait, fp32 timeout, b
     int ret = get_linear_track_registers(NULL, 0x0A23, 3);
     if (ret == 0 && linear_track_status.on_zero != 1) {
         printf("[WARN] linear track is not on zero, please set linear track back to origin\n");
+        return API_CODE::LINEAR_TRACK_NOT_INIT;
     }
     if (auto_enable && (ret != 0 || linear_track_status.is_enabled != 1)) {
         set_linear_track_enable(true);

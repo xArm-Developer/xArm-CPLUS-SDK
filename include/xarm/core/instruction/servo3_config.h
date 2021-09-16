@@ -64,8 +64,6 @@ public:
 	static const unsigned short ANALOG_IO2 = 0x0A17;
 
 	static const unsigned short BACK_ORIGIN = 0x0A0A;
-	static const unsigned short CHECK_ON_ORIGIN = 0x004F;
-	static const unsigned short GET_STATUS = 0x0000;
 	static const unsigned short STOP_TRACK = 0x0A0E;
 };
 

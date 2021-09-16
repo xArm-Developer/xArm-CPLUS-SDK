@@ -91,8 +91,4 @@ uninstall:
 
 clean:
 	rm -rf ./build
-clean-xarm:
-	rm -rf ./build/lib
 
-clean-test:
-	rm -rf ./build/example

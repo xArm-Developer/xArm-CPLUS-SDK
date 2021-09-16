@@ -172,11 +172,16 @@ void XArmAPI::_init(void) {
 
 	xarm_gripper_error_code_ = 0;
 	bio_gripper_error_code_ = 0;
-	linear_track_error_code_ = 0;
 	robotiq_error_code_ = 0;
 	gripper_version_numbers_[0] = -1;
 	gripper_version_numbers_[1] = -1;
 	gripper_version_numbers_[2] = -1;
+
+	linear_track_baud_ = -1;
+	linear_track_speed_ = 0;
+
+	memset(&linear_track_status, 0, sizeof(linear_track_status));
+	linear_track_status.sci = 1;
 
 	report_data_ptr_ = new XArmReportData(report_type_);
 }
@@ -641,7 +646,7 @@ int XArmAPI::set_pause_time(fp32 sltime) {
 
 int XArmAPI::_wait_move(fp32 timeout) {
 	long long start_time = get_system_time();
-	long long expired = timeout <= 0 ? 0 : (get_system_time() + timeout * 1000 + sleep_finish_time_ > start_time ? sleep_finish_time_ : 0);
+	long long expired = timeout <= 0 ? 0 : (get_system_time() + (long long)(timeout * 1000) + (sleep_finish_time_ > start_time ? sleep_finish_time_ : 0));
 	int cnt = 0;
 	int state_;
 	int err_warn[2];

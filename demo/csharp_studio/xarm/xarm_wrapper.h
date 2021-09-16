@@ -125,7 +125,7 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall set_tgpio_modbus_timeout(int timeout);
 	extern "C" __declspec(dllexport) int __stdcall set_tgpio_modbus_baudrate(int baud);
 	extern "C" __declspec(dllexport) int __stdcall get_tgpio_modbus_baudrate(int *baud);
-	extern "C" __declspec(dllexport) int __stdcall getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	extern "C" __declspec(dllexport) int __stdcall getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length);
 	extern "C" __declspec(dllexport) int __stdcall set_self_collision_detection(bool on);
 	extern "C" __declspec(dllexport) int __stdcall set_simulation_robot(bool on);
 	extern "C" __declspec(dllexport) int __stdcall vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true, fp32 duration = -1.0);
@@ -148,13 +148,16 @@ namespace XArmWrapper {
 
 	extern "C" __declspec(dllexport) int __stdcall get_linear_track_error(int *err);
 	extern "C" __declspec(dllexport) int __stdcall get_linear_track_status(int *status);
-	extern "C" __declspec(dllexport) int __stdcall get_linear_track_pos(fp32 *pos);
-	extern "C" __declspec(dllexport) int __stdcall check_linear_track_on_zero(int *status);
+	extern "C" __declspec(dllexport) int __stdcall get_linear_track_pos(int *pos);
+	extern "C" __declspec(dllexport) int __stdcall get_linear_track_is_enabled(int *status);
+	extern "C" __declspec(dllexport) int __stdcall get_linear_track_on_zero(int *status);
+	extern "C" __declspec(dllexport) int __stdcall get_linear_track_sci(int *sci1);
+	extern "C" __declspec(dllexport) int __stdcall get_linear_track_sco(int sco[2]);
 	extern "C" __declspec(dllexport) int __stdcall clean_linear_track_error(void);
 	extern "C" __declspec(dllexport) int __stdcall set_linear_track_enable(bool enable);
 	extern "C" __declspec(dllexport) int __stdcall set_linear_track_speed(int speed);
 	extern "C" __declspec(dllexport) int __stdcall set_linear_track_back_origin(bool wait = true, bool auto_enable = true);
-	extern "C" __declspec(dllexport) int __stdcall set_linear_track_pos(fp32 pos, bool wait = true, fp32 timeout = 100);
-	extern "C" __declspec(dllexport) int __stdcall stop_linear_track(void);
+	extern "C" __declspec(dllexport) int __stdcall set_linear_track_pos(int pos, int speed = 0, bool wait = true, fp32 timeout = 100, bool auto_enable = true);
+	extern "C" __declspec(dllexport) int __stdcall set_linear_track_stop(void);
 }
 

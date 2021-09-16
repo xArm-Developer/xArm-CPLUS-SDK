@@ -62,7 +62,19 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 		warn_code = data_fp[8];
 		if (error_code != err || warn_code != warn) _report_error_warn_changed_callback();
 
-		if ((error_code >= 10 && error_code <= 17) || error_code ==1 || error_code == 19 || error_code == 28) {
+		bool reset_tgpio_params = false;
+		bool reset_linear_track_params = false;
+		if (error_code > 0 && error_code <= 17) {
+			reset_tgpio_params = true;
+			reset_linear_track_params = true;
+		}
+		else if (error_code == 19 || error_code == 28) {
+			reset_tgpio_params = true;
+		}
+		else if (error_code == 111) {
+			reset_linear_track_params = true;
+		}
+		if (reset_tgpio_params) {
 			modbus_baud_ = -1;
 			robotiq_is_activated_ = false;
 			gripper_is_enabled_ = false;
@@ -72,6 +84,22 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 			gripper_version_numbers_[1] = -1;
 			gripper_version_numbers_[2] = -1;
 		}
+		if (reset_linear_track_params) {
+			linear_track_baud_ = -1;
+			linear_track_speed_ = 0;
+			linear_track_status.is_enabled = 0;
+		}
+
+		// if ((error_code >= 10 && error_code <= 17) || error_code ==1 || error_code == 19 || error_code == 28) {
+		// 	modbus_baud_ = -1;
+		// 	robotiq_is_activated_ = false;
+		// 	gripper_is_enabled_ = false;
+		// 	bio_gripper_is_enabled_ = false;
+		// 	bio_gripper_speed_ = -1;
+		// 	gripper_version_numbers_[0] = -1;
+		// 	gripper_version_numbers_[1] = -1;
+		// 	gripper_version_numbers_[2] = -1;
+		// }
 
 		hex_to_nfp32(&data_fp[9], angles, 7);
 		for (int i = 0; i < 7; i++) {
@@ -210,7 +238,19 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		warn_code = report_data_ptr_->war;
 		if (error_code != err || warn_code != warn) _report_error_warn_changed_callback();
 
-		if ((error_code >= 10 && error_code <= 17) || error_code == 1 || error_code == 19 || error_code == 28) {
+		bool reset_tgpio_params = false;
+		bool reset_linear_track_params = false;
+		if (error_code > 0 && error_code <= 17) {
+			reset_tgpio_params = true;
+			reset_linear_track_params = true;
+		}
+		else if (error_code == 18 || error_code == 19) {
+			reset_tgpio_params = true;
+		}
+		else if (error_code == 111) {
+			reset_linear_track_params = true;
+		}
+		if (reset_tgpio_params) {
 			modbus_baud_ = -1;
 			robotiq_is_activated_ = false;
 			gripper_is_enabled_ = false;
@@ -220,6 +260,22 @@ void XArmAPI::_update(unsigned char *rx_data) {
 			gripper_version_numbers_[1] = -1;
 			gripper_version_numbers_[2] = -1;
 		}
+		if (reset_linear_track_params) {
+			linear_track_baud_ = -1;
+			linear_track_speed_ = 0;
+			linear_track_status.is_enabled = 0;
+		}
+
+		// if ((error_code >= 10 && error_code <= 17) || error_code == 1 || error_code == 19 || error_code == 28) {
+		// 	modbus_baud_ = -1;
+		// 	robotiq_is_activated_ = false;
+		// 	gripper_is_enabled_ = false;
+		// 	bio_gripper_is_enabled_ = false;
+		// 	bio_gripper_speed_ = -1;
+		// 	gripper_version_numbers_[0] = -1;
+		// 	gripper_version_numbers_[1] = -1;
+		// 	gripper_version_numbers_[2] = -1;
+		// }
 		if (!is_sync_ && error_code != 0 && state != 4 && state != 5) {
 			_sync();
 			is_sync_ = true;

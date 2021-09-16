@@ -15,7 +15,7 @@ __XArmAPI(const std::string &port="",
 
 ```c++
 :param port: ip-address(such as "192.168.1.185")
-	Note: this parameter is required if parameter do_not_open is false
+    Note: this parameter is required if parameter do_not_open is false
 :param is_radian: set the default unit is radians or not, default is false
 :param do_not_open: do not open, default is False, if true, you need to manually call the connect interface.
 :param check_tcp_limit: reversed, whether checking tcp limit, default is true
@@ -25,9 +25,9 @@ __XArmAPI(const std::string &port="",
 :param check_is_ready: reversed, check robot is ready to move or not, default is true
 :param check_is_pause: check robot is pause or not, default is true
 :param max_callback_thread_count: max callback thread count, default is -1
-	Note: greater than 0 means the maximum number of threads that can be used to process callbacks
-	Note: equal to 0 means no thread is used to process the callback
-	Note: less than 0 means no limit on the number of threads used for callback
+    Note: greater than 0 means the maximum number of threads that can be used to process callbacks
+    Note: equal to 0 means no thread is used to process the callback
+    Note: less than 0 means no limit on the number of threads used for callback
 :param max_cmdnum: max cmdnum, default is 256
     Note: only available in the param `check_cmdnum_limit` is true
 ```
@@ -74,7 +74,7 @@ __bool motor_brake_states[8]__
 ```
 Motor brake state list, only available in socket way and  enable_report is True and report_type is 'rich'
 Note:
-	For a robot with a number of axes n, only the first n states are valid, and the latter are reserved.
+    For a robot with a number of axes n, only the first n states are valid, and the latter are reserved.
 
 :return: bool[8]{servo-1, ..., servo-7, reversed}
 ```
@@ -331,6 +331,23 @@ __fp32 collision_model_params[6]__
 self collision model params
 ```
 
+__int iden_progress__
+
+```
+the progress of identifition
+```
+
+__fp32 ft_ext_force[6]__
+
+```
+the ext force data of ft sensor
+```
+
+__fp32 ft_raw_force[6]__
+
+```
+the raw force data of ft sensor
+```
 
 
 ## Method
@@ -410,7 +427,7 @@ __int shutdown_system(int value=1)__
 Shutdown the xArm controller system
 
 :param value:
-	1: remote shutdown
+    1: remote shutdown
 :return: see the API code documentation for details.
 ```
 
@@ -621,7 +638,7 @@ Set the servo angle
 :param wait: whether to wait for the arm to complete, default is False
 :param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
 :param radius: move radius, if radius less than 0, will MoveJoint, else MoveArcJoint
-	The blending radius cannot be greater than the track length.
+    The blending radius cannot be greater than the track length.
 
 :return: see the API code documentation for details.
 ```
@@ -649,8 +666,8 @@ __int set_servo_cartesian(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0,
 Servo cartesian motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
 
 :param pose: position, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
-	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
-	if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
+    if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+    if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
 :param speed: reserved, move speed (mm/s)
 :param mvacc: reserved, move acceleration (mm/s^2)
 :param mvtime: reserved, 0
@@ -1052,6 +1069,11 @@ __int register_count_changed_callback(void(*callback)(int count))__
 Register the value of counter changed callback
 ```
 
+__int register_iden_progress_changed_callback(void(*callback)(int progress))__
+```
+Register the progress of identification changed callback
+```
+
 __int release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles)=NULL)__
 ```
 Release the location report callback
@@ -1111,6 +1133,13 @@ Release the temperature changed callback
 __int release_count_changed_callback(void(*callback)(int count)=NULL)__
 ```
 Release the value of counter changed callback
+
+:param callback: NULL means to release all callbacks for the same event
+```
+
+__int release_iden_progress_changed_callback(void(*callback)(int progress) = NULL)__
+```
+Release the progress of identification changed callback
 
 :param callback: NULL means to release all callbacks for the same event
 ```
@@ -1324,7 +1353,7 @@ Playback trajectory
 
 :param times: number of playbacks.
 :param filename: the name of the trajectory to play back
-	if filename is None, you need to manually call the `load_trajectory` to load the trajectory.
+    if filename is None, you need to manually call the `load_trajectory` to load the trajectory.
 :param wait: whether to wait for the arm to complete, default is False.
 :param double_speed: double speed, only support 1/2/4, default is 1, only available if version > 1.2.11
 
@@ -1422,8 +1451,8 @@ __int set_position_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = 
 Set the pose represented by the axis angle pose
 
 :param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
-	Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
-	Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
+    Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
+    Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
 :param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
 :param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
 :param mvtime: reserved, 0
@@ -1439,11 +1468,11 @@ __int set_servo_cartesian_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, bool is
 __int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false)__
 ```
 Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))
-	Note: only available if firmware_version >= 1.4.7
+    Note: only available if firmware_version >= 1.4.7
 
 :param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
-	Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
-	Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
+    Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
+    Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
 :param speed: reserved, move speed (mm/s)
 :param mvacc: reserved, move acceleration (mm/s^2)
 :param is_tool_coord: is tool coordinate or not
@@ -1457,11 +1486,11 @@ __int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orien
 Calculate the pose offset of two given points
 
 :param pose1: position, like [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
-	Note: if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
-	Note: if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
+    Note: if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
+    Note: if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
 :param pose2: position, like [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
-	Note: if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
-	Note: if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
+    Note: if default_is_radian is true, the value of roll/rx/pitch/ry/yaw/rz should be in radians
+    Note: if default_is_radian is false, The value of roll/rx/pitch/ry/yaw/rz should be in degrees
 :param offset: the offset between pose1 and pose2
 :param orient_type_in: input attitude notation, 0 is RPY (default), 1 is axis angle
 :param orient_type_out: notation of output attitude, 0 is RPY (default), 1 is axis angle
@@ -1474,8 +1503,8 @@ __int get_position_aa(fp32 pose[6])__
 Get the pose represented by the axis angle pose
 
 :param pose: the pose represented by the axis angle pose of xArm, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
-	Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
-	Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
+    Note: if default_is_radian is true, the value of rx/ry/rz should be in radians
+    Note: if default_is_radian is false, The value of rx/ry/rz should be in degrees
 
 :return: see the API code documentation for details.
 ```
@@ -1560,14 +1589,14 @@ Reading the status of robotiq gripper
 
 :param ret_data: the response from robotiq
 :param number_of_registers: number of registers, 1/2/3, default is 3
-	number_of_registers=1: reading the content of register 0x07D0
-	number_of_registers=2: reading the content of register 0x07D0/0x07D1
-	number_of_registers=3: reading the content of register 0x07D0/0x07D1/0x07D2
-		
-	Note:
-		register 0x07D0: Register GRIPPER STATUS
-		register 0x07D1: Register FAULT STATUS and register POSITION REQUEST ECHO
-		register 0x07D2: Register POSITION and register CURRENT
+    number_of_registers=1: reading the content of register 0x07D0
+    number_of_registers=2: reading the content of register 0x07D0/0x07D1
+    number_of_registers=3: reading the content of register 0x07D0/0x07D1/0x07D2
+        
+    Note:
+        register 0x07D0: Register GRIPPER STATUS
+        register 0x07D1: Register FAULT STATUS and register POSITION REQUEST ECHO
+        register 0x07D2: Register POSITION and register CURRENT
 
 :return: see the API code documentation for details.
 ```
@@ -1628,7 +1657,7 @@ __int get_bio_gripper_status(int *status)__
 Get the status of the bio gripper
 
 :param status: the result of the bio gripper status value
-	status & 0x03 == 0: stop
+    status & 0x03 == 0: stop
     status & 0x03 == 1: motion
     status & 0x03 == 2: catch
     status & 0x03 == 3: error
@@ -1706,8 +1735,8 @@ __int set_report_tau_or_i(int tau_or_i = 0)__
 Set the reported torque or electric current
 
 :param tau_or_i:
-	0: torque
-	1: electric current
+    0: torque
+    1: electric current
 
 return: See the code documentation for details.
 ```
@@ -1738,7 +1767,7 @@ __int set_collision_tool_model(int tool_type, int n = 0, ...)__
 Set the geometric model of the end effector for self collision detection
 
 :param tool_type: the geometric model type
-	0: No end effector, no additional parameters required
+    0: No end effector, no additional parameters required
     1: xArm Gripper, no additional parameters required
     2: xArm Vacuum Gripper, no additional parameters required
     3: xArm Bio Gripper, no additional parameters required
@@ -1760,28 +1789,40 @@ Set the geometric model of the end effector for self collision detection
 :return: See the code documentation for details.
 ```
 
-__int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true)__
+__int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true, fp32 duration = -1.0)__
 
 ```
 Joint velocity control, need to be set to joint velocity control mode(this.set_mode(4))
 
 :param speeds: [spd_J1, spd_J2, ..., spd_J7]
-	if default_is_radian is true, the value of spd_J1/.../spd_J1 should be in radians
-	if default_is_radian is false, the value of spd_J1/.../spd_J1 should be in degrees
+    if default_is_radian is true, the value of spd_J1/.../spd_J1 should be in radians
+    if default_is_radian is false, the value of spd_J1/.../spd_J1 should be in degrees
 :param is_sync: whether all joints accelerate and decelerate synchronously, default is true
+:param duration: the maximum duration of the speed, over this time will automatically set the speed to 0.
+    duration > 0: seconds, indicates the maximum number of seconds that this speed can be maintained
+    duration == 0: always effective, will not stop automativally
+    duration < 0: default value, only used to be compatible with the old protocol, equivalent to 0
+    Note:
+        only available if firmware_version >= 1.8.0
 
 :return: See the code documentation for details.
 ```
 
-__int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false)__
+__int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false, fp32 duration = -1.0)__
 
 ```
 Cartesian velocity control, need to be set to cartesian velocity control mode(self.set_mode(5))
 
 :param speeds: [spd_x, spd_y, spd_z, spd_rx, spd_ry, spd_rz]
-	if default_is_radian is true, the value of spd_rx/spd_ry/spd_rz should be in radians
-	if default_is_radian is false, the value of spd_rx/spd_ry/spd_rz should be in degrees
+    if default_is_radian is true, the value of spd_rx/spd_ry/spd_rz should be in radians
+    if default_is_radian is false, the value of spd_rx/spd_ry/spd_rz should be in degrees
 :param is_tool_coord: is tool coordinate or not, default is false
+:param duration: the maximum duration of the speed, over this time will automatically set the speed to 0.
+    duration > 0: seconds, indicates the maximum number of seconds that this speed can be maintained
+    duration == 0: always effective, will not stop automativally
+    duration < 0: default value, only used to be compatible with the old protocol, equivalent to 0
+    Note:
+        only available if firmware_version >= 1.8.0
 
 return: See the code documentation for details.
 ```
@@ -1792,8 +1833,8 @@ __int calibrate_tcp_coordinate_offset(float four_points[4][6], float ret_xyz[3])
 Four-point method to calibrate tool coordinate system position offset
 
 :param four_points: a list of four teaching coordinate positions [x, y, z, roll, pitch, yaw]
-	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
-	if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+    if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+    if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
 :param ret_xyz: the result of the calculated xyz(mm) TCP offset, [x, y, z]
 
 :return: See the code documentation for details.
@@ -1806,8 +1847,8 @@ An additional teaching point to calibrate the tool coordinate system attitude of
 
 :param rpy_be: the rpy value of the teaching point without TCP offset [roll, pitch, yaw]
 :param rpy_bt: the rpy value of the teaching point with TCP offset [roll, pitch, yaw]
-	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
-	if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+    if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+    if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
 :param ret_rpy: the result of the calculated rpy TCP offset, [roll, pitch, yaw]
 
 :return: See the code documentation for details.
@@ -1819,8 +1860,8 @@ __int calibrate_user_orientation_offset(float three_points[3][6], float ret_rpy[
 Three-point method teaches user coordinate system posture offset
 
 :param four_points: a list of teaching TCP coordinate positions [x, y, z, roll, pitch, yaw]
-	if default_is_radian is true, the value of roll/pitch/yaw should be in radians
-	if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
+    if default_is_radian is true, the value of roll/pitch/yaw should be in radians
+    if default_is_radian is false, the value of roll/pitch/yaw should be in degrees
 :param ret_rpy: the result of the calculated rpy user offset, [roll, pitch, yaw]
 
 :return: See the code documentation for details.
@@ -1837,6 +1878,290 @@ An additional teaching point determines the position offset of the user coordina
 :param pos_b_uorg: the position of the teaching point in the base coordinate system [x, y, z], if the arm cannot reach the target position, the user can manually input the position of the target in the base coordinate.
 :param ret_xyz: the result of the calculated xyz user offset, [x, y, z]
 
-return: See the code documentation for details.
+:return: See the code documentation for details.
 ```
 
+__int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6])__
+```
+Set all parameters of impedance control.
+    Note: only available if firmware_version >= 1.8.0
+
+:param coord: task frame. 0: base frame. 1: tool frame.
+:param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+:param M: mass. (kg)
+:param K: stiffness coefficient.
+:param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+
+:return: See the code documentation for details.
+```
+
+__int set_impedance_mbk(float M[6], float K[6], float B[6])__
+```
+Set mbk parameters of impedance control.
+    Note: only available if firmware_version >= 1.8.0
+
+:param M: mass. (kg)
+:param K: stiffness coefficient.
+:param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+
+:return: See the code documentation for details.
+```
+
+__int set_impedance_config(int coord, int c_axis[6])__
+```
+Set impedance control parameters of impedance control.
+    Note: only available if firmware_version >= 1.8.0
+
+:param coord: task frame. 0: base frame. 1: tool frame.
+:param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+
+:return: See the code documentation for details.
+```
+
+__int config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6])__
+```
+Set force control parameters.
+    Note: only available if firmware_version >= 1.8.0
+
+:param coord: task frame. 0: base frame. 1: tool frame.
+:param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+:param f_ref:  the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
+:param limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
+
+:return: See the code documentation for details.
+```
+
+__int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6])__
+```
+Set force control pid parameters.
+    Note: only available if firmware_version >= 1.8.0
+
+:param kp: proportional gain
+:param ki: integral gain.
+:param kd: differential gain.
+:param xe_limit: 6d vector. for compliant axes, these values are the maximum allowed tcp speed along/about the axis. mm/s
+
+:return: See the code documentation for details.
+```
+
+__int ft_sensor_set_zero(void)__
+```
+Set force/torque offset.
+    Note: only available if firmware_version >= 1.8.0
+
+:return: See the code documentation for details.
+```
+
+__int ft_sensor_iden_load(float result[10])__
+```
+Identification the tcp load with ftsensor
+    Note: only available if firmware_version >= 1.8.0
+
+:param result: the result of identification
+
+:return: See the code documentation for details.
+```
+
+__int ft_sensor_cali_load(float load[10])__
+```
+Write load parameter value
+    Note: only available if firmware_version >= 1.8.0
+
+:param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Mx_offset，My_offset，Mz_ffset])
+
+:return: See the code documentation for details.
+```
+
+__int ft_sensor_enable(int on_off)__
+```
+Used for enabling and disabling the use of external F/T measurements in the controller.
+    only available if firmware_version >= 1.8.0
+
+:param on_off: enable or disable F/T data sampling.
+
+:return: See the code documentation for details.
+```
+
+__int ft_sensor_app_set(int app_code)__
+```
+Set robot to be controlled in force mode
+    Note: only available if firmware_version >= 1.8.0
+
+:param app_code: force mode. 0: non-force mode  1: impendance control  2:force control
+
+:return: See the code documentation for details.
+```
+
+__int ft_sensor_app_get(int *app_code)__
+```
+Get force mode
+    Note: only available if firmware_version >= 1.8.0
+
+:param app_code: the result of force mode.
+
+:return: See the code documentation for details.
+```
+
+__int get_exe_ft(float exe_ft[6])__
+```
+Get extenal force/torque
+    Note: only available if firmware_version >= 1.8.0
+
+:param exe_ft: the result of the extenal force/torque.
+
+:return: See the code documentation for details.
+```
+
+__int iden_tcp_load(float result[4])__
+```
+Identification the tcp load with current
+    Note: only available if firmware_version >= 1.8.0
+
+:param result: the result of identification. [mass，x_centroid，y_centroid，z_centroid]
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_error(int *err)__
+```
+Get the error code of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param err: the result of linear track error
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_status(int *status)__
+```
+Get the status of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param status: the result of linear track status
+    status & 0x00: motion finish.
+    status & 0x01: in motion
+    status & 0x02: has stop
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_pos(int *pos)__
+```
+Get the pos of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param pos: the result of linear track position
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_is_enabled(int *status)__
+```
+Get the linear track is enabled or not
+    Note: only available if firmware_version >= 1.8.0
+
+:param status: the result of linear track status
+    status == 0: linear track is not enabled
+    status == 1: linear track is enabled
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_on_zero(int *status)__
+```
+Get the linear track is on zero positon or not
+    Note: only available if firmware_version >= 1.8.0
+
+:param status: the result of linear track status
+    status == 0: linear track is not on zero
+    status == 1: linear track is on zero
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_sci(int *sci1)__
+```
+Get the sci1 value of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param sci1: the result of linear track sci1
+
+:return: See the code documentation for details.
+```
+
+__int get_linear_track_sco(int sco[2])__
+```
+Get the sco value of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param sco: the result of linear track sco0 and sco1
+
+:return: See the code documentation for details.
+```
+
+__int clean_linear_track_error(void)__
+```
+Clean the linear track error
+    Note: only available if firmware_version >= 1.8.0
+
+:return: See the code documentation for details.
+```
+
+__int set_linear_track_enable(bool enable)__
+```
+Set the linear track enable/disable
+    Note: only available if firmware_version >= 1.8.0
+
+:param enable: enable or not
+
+:return: See the code documentation for details.
+```
+
+__int set_linear_track_speed(int speed)__
+```
+Set the speed of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param speed: Integer between 1 and 1000mm/s.
+
+:return: See the code documentation for details.
+```
+
+__int set_linear_track_back_origin(bool wait = true, bool auto_enable = true)__
+```
+Set the linear track go back to the origin position
+Note:
+    1. only available if firmware_version >= 1.8.0
+    2. only useful when powering on for the first time
+    3. this operation must be performed at the first power-on
+
+:param wait: wait to motion finish or not, default is True
+:param auto_enable: enable after back to origin or not, default is True
+
+:return: See the code documentation for details.
+```
+
+__int set_linear_track_pos(int pos, int speed = 0, bool wait = true, fp32 timeout = 100, bool auto_enable = true)__
+```
+Set the position of the linear track
+    Note: only available if firmware_version >= 1.8.0
+
+:param pos: position. Integer between 0 and 700/1000/1500.
+    If the SN of the linear track is start with AL1300, the position range is 0~700mm.
+    If the SN of the linear track is start with AL1301, the position range is 0~1000mm.
+    If the SN of the linear track is start with AL1302, the position range is 0~1500mm.
+:param speed: auto set the speed of the linear track if the speed is changed, Integer between of 1 and 1000mm/s, default is -1(not set)
+:param wait: wait to motion finish or not, default is True
+:param timeout: wait timeout, seconds, default is 100s.
+:param auto_enable: auto enable if not enabled, default is true
+
+:return: See the code documentation for details.
+```
+
+__int set_linear_track_stop(void)__
+```
+Set the linear track to stop
+    Note: only available if firmware_version >= 1.8.0
+
+:return: See the code documentation for details.
+```

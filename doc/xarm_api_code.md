@@ -25,7 +25,7 @@
 - 10: the result is invalid
 - 11: other error
 - 12: parameter error
-- 20: tgpio id error
+- 20: host id error
 - 21: modbus baudrate not supported
 - 22: modbus baudrate not correct
 - 23: modbus reply length error
@@ -33,16 +33,19 @@
 - 32: trajectory read/write timeout
 - 33: playback trajectory timeout
 - 41: wait to set suction cup timeout
+- 80: linear track has error
+- 81: linear track sci is low
 - 100: wait finish timeout
 - 101: too many consecutive failed tests
 - 102: end effector has error
-- 103: end effector is not endabled
+- 103: end effector is not enabled
 
 ## Controller warning code
 - 11: uxbux que is full
 - 12: parameter error
 - 13: the instruction does not exist
 - 14: command has no solution
+- 15: modbus cmd full
 
 ## Controller error code
 - 1: The Emergency Stop Button is pushed
@@ -76,6 +79,11 @@
 - 37: Abnormal movement in Manual Mode
 - 38: Abnormal Joint Angle
 - 39: Abnormal Communication Between Master and Slave IC of Power Board
+- 50: Force sensor read error
+- 51: Force sensor set mode error
+- 52: Force sensor set zero error
+- 110: Robot Arm Base Board Communication Error
+- 111: Control Box External 485 Device Communication Error
 
 ## Servo Error Code
 

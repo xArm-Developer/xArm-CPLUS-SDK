@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.6.9"
+#define SDK_VERSION "1.8.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -55,6 +55,16 @@ struct RobotIqStatus {
 	unsigned char gPR = 0;
 	unsigned char gPO = 0;
 	unsigned char gCU = 0;
+};
+
+struct LinearTrackStatus {
+	int pos;
+	int status;
+	int error;
+	unsigned char is_enabled;
+	unsigned char on_zero;
+	unsigned char sci;
+	unsigned char sco[2];
 };
 
 bool compare_version(int v1[3], int v2[3]);
@@ -153,6 +163,7 @@ public:
 	UxbusCmd *core;
 
 	struct RobotIqStatus robotiq_status;
+	struct LinearTrackStatus linear_track_status;
 
 	fp32 *voltages; // fp32[7]{servo-1, ..., servo-7}
 	fp32 *currents; // fp32[7]{servo-1, ..., servo-7}
@@ -1420,7 +1431,7 @@ public:
 
 	* return: See the code documentation for details.
 	*/
-	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length);
 
 	/*
 	* Set the reported torque or electric current
@@ -1713,7 +1724,40 @@ public:
     */
 	int iden_tcp_load(float result[4]);
 
-    /*
+	/*
+    * Get all status of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param status: the result of linear track status
+
+    * return: See the code documentation for details.
+    */
+	int get_linear_track_registers(LinearTrackStatus *status = NULL, int addr = 0x0A20, int number_of_registers = 8);
+
+	/*
+    * Get the pos of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param pos: the result of linear track position
+
+    * return: See the code documentation for details.
+    */
+	int get_linear_track_pos(int *pos);
+
+	/*
+    * Get the motion status of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param status: the result of linear track status
+		status & 0x00: motion finish.
+		status & 0x01: in motion
+		status & 0x02: has stop
+
+    * return: See the code documentation for details.
+    */
+	int get_linear_track_status(int *status);
+
+	/*
     * Get the error code of the linear track
     *   Note: only available if firmware_version >= 1.8.0
 
@@ -1724,30 +1768,19 @@ public:
 	int get_linear_track_error(int *err);
 
 	/*
-    * Get the status of the linear track
+    * Get the linear track is enabled or not
     *   Note: only available if firmware_version >= 1.8.0
 
     * @param status: the result of linear track status
-    *   status & 0x03 == 0: reach the target location
-    *   status & 0x03 == 1: in motion
-    *   status & 0x03 == 2: Has stopped
+    *   status == 0: linear track is not enabled
+    *   status == 1: linear track is enabled
 
     * return: See the code documentation for details.
     */
-	int get_linear_track_status(int *status);
+	int get_linear_track_is_enabled(int *status);
 
 	/*
-    * Get the pos of the linear track
-    *   Note: only available if firmware_version >= 1.8.0
-
-    * @param pos: the result of linear track position
-
-    * return: See the code documentation for details.
-    */
-	int get_linear_track_pos(fp32 *pos);
-
-	/*
-    * Check the linear track is on zero positon or not
+    * Get the linear track is on zero positon or not
     *   Note: only available if firmware_version >= 1.8.0
 
     * @param status: the result of linear track status
@@ -1756,7 +1789,27 @@ public:
 
     * return: See the code documentation for details.
     */
-	int check_linear_track_on_zero(int *status);
+	int get_linear_track_on_zero(int *status);
+
+	/*
+    * Get the sci1 value of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param sci1: the result of linear track sci1
+
+    * return: See the code documentation for details.
+    */
+	int get_linear_track_sci(int *sci1);
+
+	/*
+    * Get the sco value of the linear track
+    *   Note: only available if firmware_version >= 1.8.0
+
+    * @param sco: the result of linear track sco0 and sco1
+
+    * return: See the code documentation for details.
+    */
+	int get_linear_track_sco(int sco[2]);
 
 	/*
     * Clean the linear track error
@@ -1780,7 +1833,7 @@ public:
     * Set the speed of the linear track
     *   Note: only available if firmware_version >= 1.8.0
 
-    * @param speed: Integer between 100 and 3000.
+    * @param speed: Integer between 1 and 1000mm/s.
 
     * return: See the code documentation for details.
     */
@@ -1804,13 +1857,18 @@ public:
     * Set the position of the linear track
     *   Note: only available if firmware_version >= 1.8.0
 
-    * @param pos: position. Integer between 0 and 750.
+    * @param pos: position. Integer between 0 and 700/1000/1500.
+		If the SN of the linear track is start with AL1300, the position range is 0~700mm.
+		If the SN of the linear track is start with AL1301, the position range is 0~1000mm.
+		If the SN of the linear track is start with AL1302, the position range is 0~1500mm.
+	* @param speed: auto set the speed of the linear track if the speed is changed, Integer between of 1 and 1000mm/s, default is -1(not set)
     * @param wait: wait to motion finish or not, default is True
     * @param timeout: wait timeout, seconds, default is 100s.
+	* @param auto_enable: auto enable if not enabled, default is true
 
     * return: See the code documentation for details.
     */
-	int set_linear_track_pos(fp32 pos, bool wait = true, fp32 timeout = 100);
+	int set_linear_track_pos(int pos, int speed = 0, bool wait = true, fp32 timeout = 100, bool auto_enable = true);
 
 	/*
     * Set the linear track to stop
@@ -1818,7 +1876,7 @@ public:
 
     * return: See the code documentation for details.
     */
-	int stop_linear_track(void);
+	int set_linear_track_stop(void);
 
 	int set_timeout(fp32 timeout);
 private:
@@ -1856,8 +1914,8 @@ private:
 	void _report_count_changed_callback(void);
 	void _report_iden_progress_changed_callback(void);
 	int _check_modbus_code(int ret, unsigned char *rx_data = NULL, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
-	int _get_modbus_baudrate(int *baud_inx);
-	int _checkset_modbus_baud(int baudrate, bool check = true);
+	int _get_modbus_baudrate(int *baud_inx, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int _checkset_modbus_baud(int baudrate, bool check = true, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
 	int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]);
 	int _robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers = 0x03);
 	int _robotiq_wait_activation_completed(fp32 timeout = 3);
@@ -1875,6 +1933,7 @@ private:
 	bool _gripper_is_support_status(void);
 	int _get_gripper_status(int *status);
 
+	int _get_linear_track_registers(unsigned char *ret_data, int addr, int number_of_registers = 1);
 	int _wait_linear_track_stop(fp32 timeout = 100);
 	int _wait_linear_track_back_origin(fp32 timeout = 10);
 private:
@@ -1930,7 +1989,8 @@ private:
 	int xarm_gripper_error_code_;
 	int bio_gripper_error_code_;
 	int robotiq_error_code_;
-	int linear_track_error_code_;
+	int linear_track_baud_;
+	int linear_track_speed_;
 	int gripper_version_numbers_[3];
 
 	long long last_report_time_;

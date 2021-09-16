@@ -207,42 +207,68 @@ int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data, unsigned char h
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 		if (rx_data != NULL && rx_data[0] != host_id)
-			return API_CODE::TGPIO_ID_ERR;
+			return API_CODE::HOST_ID_ERR;
 		if (ret != 0) {
+			if (host_id == UXBUS_CONF::TGPIO_HOST_ID) {
+				if (error_code != 19 && error_code != 28) {
+					int err_warn[2] = { 0 };
+					get_err_warn_code(err_warn);
+				}
+				ret = (error_code != 19 && error_code != 28) ? 0 : ret;
+			}
+			else {
+				if (error_code != 100 + host_id) {
+					int err_warn[2] = { 0 };
+					get_err_warn_code(err_warn);
+				}
+				ret = (error_code != 100 + host_id) ? 0 : ret;
+			}
+		}
+	}
+	return ret;
+}
+
+int XArmAPI::_get_modbus_baudrate(int *baud_inx, unsigned char host_id) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	float val;
+	int ret = core->tgpio_addr_r16(SERVO3_RG::MODBUS_BAUDRATE & 0x0FFF, &val, host_id);
+	*baud_inx = (int)val;
+	if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
+		if (host_id == UXBUS_CONF::TGPIO_HOST_ID) {
 			if (error_code != 19 && error_code != 28) {
 				int err_warn[2] = { 0 };
 				get_err_warn_code(err_warn);
 			}
-			return (error_code != 19 && error_code != 28) ? 0 : ret;
+			ret = (error_code != 19 && error_code != 28) ? 0 : ret;
 		}
-	}
-	return ret;
-}
-
-int XArmAPI::_get_modbus_baudrate(int *baud_inx) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	float val;
-	int ret = core->tgpio_addr_r16(SERVO3_RG::MODBUS_BAUDRATE & 0x0FFF, &val);
-	*baud_inx = (int)val;
-	if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
-		if (error_code != 19 && error_code != 28) {
-			int err_warn[2] = { 0 };
-			get_err_warn_code(err_warn);
+		else {
+			if (error_code != 100 + host_id) {
+				int err_warn[2] = { 0 };
+				get_err_warn_code(err_warn);
+			}
+			ret = (error_code != 100 + host_id) ? 0 : ret;
 		}
 		ret = (error_code != 19 && error_code != 28) ? 0 : ret;
 	}
-	if (ret == 0 && *baud_inx >= 0 && *baud_inx < 13) modbus_baud_ = BAUDRATES[*baud_inx];
+	if (ret == 0 && *baud_inx >= 0 && *baud_inx < 13) {
+		if (host_id == UXBUS_CONF::TGPIO_HOST_ID) {
+			modbus_baud_ = BAUDRATES[*baud_inx];
+		}
+		else if (host_id == UXBUS_CONF::LINEAR_TRACK_HOST_ID) {
+			linear_track_baud_ = BAUDRATES[*baud_inx];
+		}
+	}
 	return ret;
 }
 
-int XArmAPI::_checkset_modbus_baud(int baudrate, bool check) {
+int XArmAPI::_checkset_modbus_baud(int baudrate, bool check, unsigned char host_id) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (check && modbus_baud_ == baudrate)
+	if (check && ((host_id == UXBUS_CONF::TGPIO_HOST_ID && modbus_baud_ == baudrate) || (host_id == UXBUS_CONF::LINEAR_TRACK_HOST_ID && linear_track_baud_ == baudrate)))
 		return 0;
 	int baud_inx = get_baud_inx(baudrate);
 	if (baud_inx == -1) return API_CODE::MODBUS_BAUD_NOT_SUPPORT;
 	int cur_baud_inx;
-	int ret = _get_modbus_baudrate(&cur_baud_inx);
+	int ret = _get_modbus_baudrate(&cur_baud_inx, host_id);
 	if (ret == 0) {
 		if (cur_baud_inx != baud_inx) {
 			try {
@@ -250,15 +276,24 @@ int XArmAPI::_checkset_modbus_baud(int baudrate, bool check) {
 				ignore_state_ = (state != 4 && state != 5) ? true : false;
 				int state_ = state;
 				// core->tgpio_addr_w16(SERVO3_RG::MODBUS_BAUDRATE, (float)baud_inx);
-				core->tgpio_addr_w16(0x1a0b, (float)baud_inx);
+				core->tgpio_addr_w16(0x1a0b, (float)baud_inx, host_id);
 				sleep_milliseconds(300);
-				core->tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1);
+				core->tgpio_addr_w16(SERVO3_RG::SOFT_REBOOT, 1, host_id);
 				int err_warn[2] = { 0 };
 				get_err_warn_code(err_warn);
-				if (error_code == 19 || error_code == 28) {
-					clean_error();
-					if (ignore_state_) set_state(state_ >= 3 ? state_ : 0);
-					sleep_milliseconds(1000);
+				if (host_id == UXBUS_CONF::TGPIO_HOST_ID) {
+					if (error_code == 19 || error_code == 28) {
+						clean_error();
+						if (ignore_state_) set_state(state_ >= 3 ? state_ : 0);
+						sleep_milliseconds(1000);
+					}
+				}
+				else {
+					if (error_code == 100 + host_id) {
+						clean_error();
+						if (ignore_state_) set_state(state_ >= 3 ? state_ : 0);
+						sleep_milliseconds(1000);
+					}
 				}
 			}
 			catch (...) {
@@ -268,11 +303,29 @@ int XArmAPI::_checkset_modbus_baud(int baudrate, bool check) {
 			}
 			ignore_error_ = false;
 			ignore_state_ = false;
-			ret = _get_modbus_baudrate(&cur_baud_inx);
+			ret = _get_modbus_baudrate(&cur_baud_inx, host_id);
 		}
-		if (ret == 0 && cur_baud_inx < 13) modbus_baud_ = BAUDRATES[cur_baud_inx];
+		if (ret == 0 && cur_baud_inx < 13) {
+			if (host_id == UXBUS_CONF::TGPIO_HOST_ID) {
+				modbus_baud_ = BAUDRATES[cur_baud_inx];
+			}
+			else if (host_id == UXBUS_CONF::LINEAR_TRACK_HOST_ID) {
+				linear_track_baud_ = BAUDRATES[cur_baud_inx];
+			}
+		}
 	}
-	return modbus_baud_ == baudrate ? 0 : API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (host_id == UXBUS_CONF::TGPIO_HOST_ID) {
+		return modbus_baud_ == baudrate ? 0 : API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	}
+	else if (host_id == UXBUS_CONF::LINEAR_TRACK_HOST_ID) {
+		return linear_track_baud_ == baudrate ? 0 : API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	}
+	else {
+		if (ret == 0 && cur_baud_inx < 13) {
+			return BAUDRATES[cur_baud_inx] == baudrate ? 0 : API_CODE::MODBUS_BAUD_NOT_CORRECT;
+		}
+		return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	}
 }
 
 int XArmAPI::set_tgpio_modbus_timeout(int timeout) {
@@ -293,11 +346,11 @@ int XArmAPI::get_tgpio_modbus_baudrate(int *baud) {
 	return ret;
 }
 
-int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id) {
+int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char *rx_data = new unsigned char[ret_length + 1];
-	int ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data, host_id);
-	ret = _check_modbus_code(ret, rx_data, host_id);
+	int ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data);
+	ret = _check_modbus_code(ret, rx_data);
 	memcpy(ret_data, rx_data + 1, ret_length);
 	delete[] rx_data;
 	return ret;

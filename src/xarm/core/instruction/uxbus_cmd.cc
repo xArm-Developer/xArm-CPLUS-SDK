@@ -653,9 +653,9 @@ int UxbusCmd::gripper_clean_err() {
 /*******************************************************
  * tool gpio
  *******************************************************/
-int UxbusCmd::tgpio_addr_w16(int addr, float value) {
+int UxbusCmd::tgpio_addr_w16(int addr, float value, unsigned char host_id) {
 	unsigned char *txdata = new unsigned char[7];
-	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
+	txdata[0] = host_id;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
 
@@ -666,9 +666,9 @@ int UxbusCmd::tgpio_addr_w16(int addr, float value) {
 	return send_pend(UXBUS_RG::TGPIO_W16B, 0, GET_TIMEOUT_, NULL);
 }
 
-int UxbusCmd::tgpio_addr_r16(int addr, float *value) {
+int UxbusCmd::tgpio_addr_r16(int addr, float *value, unsigned char host_id) {
 	unsigned char *txdata = new unsigned char[3];
-	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
+	txdata[0] = host_id;
 	bin16_to_8(addr, &txdata[1]);
 
 	std::lock_guard<std::mutex> locker(mutex_);
@@ -681,9 +681,9 @@ int UxbusCmd::tgpio_addr_r16(int addr, float *value) {
 	delete[] rx_data;
 	return ret;
 }
-int UxbusCmd::tgpio_addr_w32(int addr, float value) {
+int UxbusCmd::tgpio_addr_w32(int addr, float value, unsigned char host_id) {
 	unsigned char *txdata = new unsigned char[7];
-	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
+	txdata[0] = host_id;
 	bin16_to_8(addr, &txdata[1]);
 	fp32_to_hex(value, &txdata[3]);
 
@@ -694,9 +694,9 @@ int UxbusCmd::tgpio_addr_w32(int addr, float value) {
 	return send_pend(UXBUS_RG::TGPIO_W32B, 0, GET_TIMEOUT_, NULL);
 }
 
-int UxbusCmd::tgpio_addr_r32(int addr, float *value) {
+int UxbusCmd::tgpio_addr_r32(int addr, float *value, unsigned char host_id) {
 	unsigned char *txdata = new unsigned char[3];
-	txdata[0] = UXBUS_CONF::TGPIO_HOST_ID;
+	txdata[0] = host_id;
 	bin16_to_8(addr, &txdata[1]);
 
 	std::lock_guard<std::mutex> locker(mutex_);
@@ -1396,7 +1396,7 @@ int UxbusCmd::get_exe_ft(float exe_ft[6])
 
 int UxbusCmd::iden_tcp_load(float result[4])
 {
-	return iden_load(1, result, 4, 300000);
+	return iden_load(1, result, 4, 500000);
 }
 
 int UxbusCmd::track_modbus_r16s(int addr, unsigned char *rx_data, int len, unsigned char fcode)

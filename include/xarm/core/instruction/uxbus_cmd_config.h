@@ -258,7 +258,7 @@ public:
 	static const int OTHER = UXBUS_STATE::ERR_OTHER;
 	static const int PARAM_ERROR = UXBUS_STATE::ERR_PARAM;
 
-	static const int TGPIO_ID_ERR = 20;
+	static const int HOST_ID_ERR = 20;
 	static const int MODBUS_BAUD_NOT_SUPPORT = 21;
 	static const int MODBUS_BAUD_NOT_CORRECT = 22;
 	static const int MODBUS_ERR_LENG = 23;
@@ -266,6 +266,10 @@ public:
 	static const int TRAJ_RW_TOUT = 32;
 	static const int TRAJ_PLAYBACK_TOUT = 33;
 	static const int SUCTION_CUP_TOUT = 41;
+
+	static const int LINEAR_TRACK_HAS_FAULT = 80;
+	static const int LINEAR_TRACK_SCI_IS_LOW = 81;
+
 	static const int WAIT_FINISH_TIMEOUT = 100;
 	static const int CHECK_FAILED = 101;
 	static const int END_EFFECTOR_HAS_FAULT = 102;

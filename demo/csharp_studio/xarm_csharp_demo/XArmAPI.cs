@@ -245,7 +245,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_tgpio_modbus_baudrate(ref int baud);
         [DllImport("xarm.dll")]
-        public static extern int getset_tgpio_modbus_data(byte[] modbus_data, int modbus_length, byte[] ret_data, int ret_length, byte host_id = 9);
+        public static extern int getset_tgpio_modbus_data(byte[] modbus_data, int modbus_length, byte[] ret_data, int ret_length);
         [DllImport("xarm.dll")]
         public static extern int set_self_collision_detection(bool on);
         [DllImport("xarm.dll")]
@@ -288,9 +288,15 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_linear_track_status(ref int status);
         [DllImport("xarm.dll")]
-        public static extern int get_linear_track_pos(ref float pos);
+        public static extern int get_linear_track_pos(ref int pos);
         [DllImport("xarm.dll")]
-        public static extern int check_linear_track_on_zero(ref int status);
+        public static extern int get_linear_track_is_enabled(ref int status);
+        [DllImport("xarm.dll")]
+        public static extern int get_linear_track_on_zero(ref int status);
+        [DllImport("xarm.dll")]
+        public static extern int get_linear_track_sci(ref int sci1);
+        [DllImport("xarm.dll")]
+        public static extern int get_linear_track_sco(int[] sco);
         [DllImport("xarm.dll")]
         public static extern int clean_linear_track_error();
         [DllImport("xarm.dll")]
@@ -300,9 +306,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_linear_track_back_origin(bool wait = true, bool auto_enable = true);
         [DllImport("xarm.dll")]
-        public static extern int set_linear_track_pos(float pos, bool wait = true, float timeout = 100);
+        public static extern int set_linear_track_pos(int pos, int speed = 0, bool wait = true, float timeout = 100, bool auto_enable = true);
         [DllImport("xarm.dll")]
-        public static extern int stop_linear_track();
+        public static extern int set_linear_track_stop();
 
 
         public static int set_position(float[] pose, float radius = -1,

@@ -21,18 +21,8 @@ int main(int argc, char **argv) {
 	sleep_milliseconds(500);
 	
     int ret;
-
     int int_val;
-    float fp_val;
-    ret = arm->get_linear_track_error(&int_val);
-    printf("get_linear_track_error, ret=%d, err=%d\n", ret, int_val);
-    ret = arm->get_linear_track_status(&int_val);
-    printf("get_linear_track_status, ret=%d, status=%d\n", ret, int_val);
-    ret = arm->get_linear_track_pos(&fp_val);
-    printf("get_linear_track_pos, ret=%d, pos=%f\n", ret, fp_val);
-    ret = arm->check_linear_track_on_zero(&int_val);
-    printf("check_linear_track_on_zero, ret=%d, status=%d\n", ret, int_val);
-    
+
     ret = arm->clean_linear_track_error();
     printf("clean_linear_track_error, ret=%d\n", ret);
 
@@ -42,7 +32,7 @@ int main(int argc, char **argv) {
     ret = arm->set_linear_track_enable(true);
     printf("set_linear_track_enable, ret=%d\n", ret);
 
-    ret = arm->set_linear_track_speed(500);
+    ret = arm->set_linear_track_speed(100);
     printf("set_linear_track_speed, ret=%d\n", ret);
 
     ret = arm->set_linear_track_pos(500);
@@ -51,8 +41,8 @@ int main(int argc, char **argv) {
     ret = arm->set_linear_track_pos(200);
     printf("set_linear_track_pos, ret=%d\n", ret);
 
-    ret = arm->stop_linear_track();
-    printf("stop_linear_track, ret=%d\n", ret);
+    ret = arm->set_linear_track_stop();
+    printf("set_linear_track_stop, ret=%d\n", ret);
 
 	return 0;
 }

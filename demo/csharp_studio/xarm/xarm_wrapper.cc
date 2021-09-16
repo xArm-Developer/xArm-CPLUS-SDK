@@ -352,8 +352,8 @@ namespace XArmWrapper
 	int __stdcall get_tgpio_modbus_baudrate(int *baud) {
 		return arm->get_tgpio_modbus_baudrate(baud);
 	}
-	int __stdcall getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id) {
-		return arm->getset_tgpio_modbus_data(modbus_data, modbus_length, ret_data, ret_length, host_id);
+	int __stdcall getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length) {
+		return arm->getset_tgpio_modbus_data(modbus_data, modbus_length, ret_data, ret_length);
 	}
 	int __stdcall set_self_collision_detection(bool on) {
 		return arm->set_self_collision_detection(on);
@@ -415,11 +415,20 @@ namespace XArmWrapper
 	int __stdcall get_linear_track_status(int *status) {
 		return arm->get_linear_track_status(status);
 	}
-	int __stdcall get_linear_track_pos(fp32 *pos) {
+	int __stdcall get_linear_track_pos(int *pos) {
 		return arm->get_linear_track_pos(pos);
 	}
-	int __stdcall check_linear_track_on_zero(int *status) {
-		return arm->check_linear_track_on_zero(status);
+	int __stdcall get_linear_track_is_enabled(int *status) {
+		return arm->get_linear_track_is_enabled(status);
+	}
+	int __stdcall get_linear_track_on_zero(int *status) {
+		return arm->get_linear_track_on_zero(status);
+	}
+	int get_linear_track_sci(int *sci1) {
+		return arm->get_linear_track_sci(status);
+	}
+	int get_linear_track_sco(int sco[2]) {
+		return arm->get_linear_track_sco(status);
 	}
 	int __stdcall clean_linear_track_error(void) {
 		return arm->clean_linear_track_error();
@@ -433,10 +442,10 @@ namespace XArmWrapper
 	int __stdcall set_linear_track_back_origin(bool wait, bool auto_enable) {
 		return arm->set_linear_track_back_origin(wait, auto_enable);
 	}
-	int __stdcall set_linear_track_pos(fp32 pos, bool wait, fp32 timeout) {
-		return arm->set_linear_track_pos(pos, wait, timeout);
+	int __stdcall set_linear_track_pos(int pos, int speed, bool wait, fp32 timeout, bool auto_enable) {
+		return arm->set_linear_track_pos(pos, speed, wait, timeout, auto_enable);
 	}
-	int __stdcall stop_linear_track(void) {
-		return arm->stop_linear_track();
+	int __stdcall set_linear_track_stop(void) {
+		return arm->set_linear_track_stop();
 	}
 }

@@ -72,6 +72,7 @@
 - Build all (build library and build all example)
 
     ```bash
+    make clean
     make # make xarm && make test
     ```
 

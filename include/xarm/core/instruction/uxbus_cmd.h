@@ -162,10 +162,10 @@ public:
 	int gripper_get_errcode(int rx_data[2]);
 	int gripper_clean_err(void);
 
-	int tgpio_addr_w16(int addr, float value);
-	int tgpio_addr_r16(int addr, float *value);
-	int tgpio_addr_w32(int addr, float value);
-	int tgpio_addr_r32(int addr, float *value);
+	int tgpio_addr_w16(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int tgpio_addr_r16(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int tgpio_addr_w32(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int tgpio_addr_r32(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
 	int tgpio_get_digital(int *io1, int *io2);
 	int tgpio_set_digital(int ionum, int value);
 	int tgpio_get_analog1(float *value);

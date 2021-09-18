@@ -54,5 +54,5 @@ void print_hex(const char *str, unsigned char *hex, int len) {
 	for (i = 0; i < len; ++i) { sprintf((char *)&buf[i * 3], "%02x ", hex[i]); }
 
 	printf("%s %s\n", str, buf);
-	delete buf;
+	delete[] buf;
 }

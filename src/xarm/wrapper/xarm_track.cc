@@ -61,7 +61,7 @@ int XArmAPI::get_linear_track_registers(LinearTrackStatus *status, int addr, int
             memcpy(status, &linear_track_status, sizeof(linear_track_status));
         }
     }
-    delete rx_data;
+    delete[] rx_data;
     return ret;
 }
 

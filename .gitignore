@@ -264,3 +264,4 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 CMakeLists.txt
+*.old

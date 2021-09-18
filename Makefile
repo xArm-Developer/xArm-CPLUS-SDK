@@ -1,8 +1,14 @@
 CC = gcc
 CXX = g++
 C_DEFS = -DSOFT_VERSION=$(SOFT_VERSION)
-C_FLAGS = -std=c++0x -Wall -fPIC -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable -g -s $(C_DEFS) -I$(INC_DIR) $(LIBDIRS)
-LIBS += -lm -lpthread -fPIC -shared
+UNAME := $(shell uname -s)
+ifeq ($(UNAME), Darwin)
+	C_FLAGS = -std=c++0x -Wall -fPIC -Wno-sign-compare -Wno-unused-variable -g -I$(INC_DIR) $(LIBDIRS)
+	LIBS += -lm -lpthread -fPIC -shared -framework IOKit -framework CoreFoundation
+else
+	C_FLAGS = -std=c++0x -Wall -fPIC -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable -g -s $(C_DEFS) -I$(INC_DIR) $(LIBDIRS)
+	LIBS += -lm -lpthread -fPIC -shared
+endif
 
 BUILDDIR = ./build/
 INC_DIR = ./include/
@@ -50,27 +56,64 @@ EXAMPLE_OBJS = $(addprefix $(BUILD_OBJ_DIR), $(addsuffix .o, $(basename $(SRC_EX
 
 all: xarm test
 
-xarm: $(XARM_OBJS)
-	mkdir -p $(BUILD_LIB_DIR)
-	mkdir -p $(BUILD_OBJ_DIR)
-	mkdir -p $(BUILD_MAP_DIR)
-	# $(CXX) $(SRC_XARM) $(C_FLAGS) $(LIBS) -o $(BUILD_LIB_DIR)/$(LIB_NAME)
-	$(CXX) -o $(C_FLAGS) -s -fopenmp $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
-
 test: $(EXAMPLE_OBJS)
 	mkdir -p $(BUILD_EXAMPLE_DIR)
 	mkdir -p $(BUILD_OBJ_DIR)
 	mkdir -p $(BUILD_MAP_DIR)
 	for file in $(SRC_EXAMPLE); do \
 		make test-`echo $$file | awk -F'/' '{print $$NF}' | awk -F'.cc' '{print $$1}'`; \
-		# $(CXX) $$file $(C_FLAGS) -L$(BUILD_LIB_DIR) -lxarm -o $(BUILD_EXAMPLE_DIR)/`echo $$file | awk -F'/' '{print $$NF}' | awk -F'.cc' '{print $$1}'`; \
 	done
+
+ifeq ($(UNAME), Darwin)
+xarm: $(XARM_OBJS)
+	mkdir -p $(BUILD_LIB_DIR)
+	mkdir -p $(BUILD_OBJ_DIR)
+	mkdir -p $(BUILD_MAP_DIR)
+	$(CXX) -o $(C_FLAGS) $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl
 test-%:
 	mkdir -p $(BUILD_EXAMPLE_DIR)
 	mkdir -p $(BUILD_OBJ_DIR)
 	mkdir -p $(BUILD_MAP_DIR)
-	# $(CXX) $(addprefix ./$(EXAMPLE_DIR)/, $(subst test-, , $@)).cc $(C_FLAGS) -L$(BUILD_LIB_DIR) -lxarm -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@))
+	$(CXX) -o $(C_FLAGS) $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl
+else
+xarm: $(XARM_OBJS)
+	mkdir -p $(BUILD_LIB_DIR)
+	mkdir -p $(BUILD_OBJ_DIR)
+	mkdir -p $(BUILD_MAP_DIR)
+	$(CXX) -o $(C_FLAGS) -s -fopenmp $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
+test-%:
+	mkdir -p $(BUILD_EXAMPLE_DIR)
+	mkdir -p $(BUILD_OBJ_DIR)
+	mkdir -p $(BUILD_MAP_DIR)
 	$(CXX) -o $(C_FLAGS) -s -fopenmp $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
+endif
+
+# xarm: $(XARM_OBJS)
+# 	mkdir -p $(BUILD_LIB_DIR)
+# 	mkdir -p $(BUILD_OBJ_DIR)
+# 	mkdir -p $(BUILD_MAP_DIR)
+# 	# $(CXX) $(SRC_XARM) $(C_FLAGS) $(LIBS) -o $(BUILD_LIB_DIR)/$(LIB_NAME)
+# 	ifeq ($(UNAME), Darwin)
+# 		$(CXX) -o $(C_FLAGS) -s $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl
+# 	else
+# 		$(CXX) -o $(C_FLAGS) -s -fopenmp $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
+# 	endif
+
+# test: $(EXAMPLE_OBJS)
+# 	mkdir -p $(BUILD_EXAMPLE_DIR)
+# 	mkdir -p $(BUILD_OBJ_DIR)
+# 	mkdir -p $(BUILD_MAP_DIR)
+# 	for file in $(SRC_EXAMPLE); do \
+# 		make test-`echo $$file | awk -F'/' '{print $$NF}' | awk -F'.cc' '{print $$1}'`; \
+# 	done
+
+# test-%:
+# 	mkdir -p $(BUILD_EXAMPLE_DIR)
+# 	mkdir -p $(BUILD_OBJ_DIR)
+# 	mkdir -p $(BUILD_MAP_DIR)
+# 	# $(CXX) $(addprefix ./$(EXAMPLE_DIR)/, $(subst test-, , $@)).cc $(C_FLAGS) -L$(BUILD_LIB_DIR) -lxarm -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@))
+# 	# $(CXX) -o $(C_FLAGS) -s -fopenmp $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
+# 	$(CXX) -o $(C_FLAGS) -s $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl
 
 $(BUILD_OBJ_DIR)%.o: %.c
 	mkdir -p $(dir $@)

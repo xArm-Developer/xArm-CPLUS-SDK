@@ -88,33 +88,6 @@ test-%:
 	$(CXX) -o $(C_FLAGS) -s -fopenmp $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
 endif
 
-# xarm: $(XARM_OBJS)
-# 	mkdir -p $(BUILD_LIB_DIR)
-# 	mkdir -p $(BUILD_OBJ_DIR)
-# 	mkdir -p $(BUILD_MAP_DIR)
-# 	# $(CXX) $(SRC_XARM) $(C_FLAGS) $(LIBS) -o $(BUILD_LIB_DIR)/$(LIB_NAME)
-# 	ifeq ($(UNAME), Darwin)
-# 		$(CXX) -o $(C_FLAGS) -s $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl
-# 	else
-# 		$(CXX) -o $(C_FLAGS) -s -fopenmp $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
-# 	endif
-
-# test: $(EXAMPLE_OBJS)
-# 	mkdir -p $(BUILD_EXAMPLE_DIR)
-# 	mkdir -p $(BUILD_OBJ_DIR)
-# 	mkdir -p $(BUILD_MAP_DIR)
-# 	for file in $(SRC_EXAMPLE); do \
-# 		make test-`echo $$file | awk -F'/' '{print $$NF}' | awk -F'.cc' '{print $$1}'`; \
-# 	done
-
-# test-%:
-# 	mkdir -p $(BUILD_EXAMPLE_DIR)
-# 	mkdir -p $(BUILD_OBJ_DIR)
-# 	mkdir -p $(BUILD_MAP_DIR)
-# 	# $(CXX) $(addprefix ./$(EXAMPLE_DIR)/, $(subst test-, , $@)).cc $(C_FLAGS) -L$(BUILD_LIB_DIR) -lxarm -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@))
-# 	# $(CXX) -o $(C_FLAGS) -s -fopenmp $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
-# 	$(CXX) -o $(C_FLAGS) -s $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl
-
 $(BUILD_OBJ_DIR)%.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) -c $(C_FLAGS) $< -o $@

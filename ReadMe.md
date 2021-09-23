@@ -2,7 +2,7 @@
 
 
 ## Overview
-- The current version supports Linux and windows, but the source code structure has changed.
+- The current version supports Linux/windows/MacOS(beta), but the source code structure has changed.
 
 ## Caution
 - During use, people should stay away from the robot arm to avoid accidental injury or damage to other items by the robot arm.
@@ -11,6 +11,15 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+
+- > ### 1.8.0
+
+  - The Velocity interface supports the duration parameter (requires firmware 1.8.0 or higher)
+  - Added identification interface (current identification and torque identification) (requires firmware 1.8.0 or higher)
+  - Support linear track interface (requires firmware 1.8.0 or higher)
+  - Fix the problem of not waiting when the timeout parameter of the motion interface is greater than 0
+  - Support macos compilation
+  - Fix some bugs
 
 - > ### 1.6.9
   - Support velocity control

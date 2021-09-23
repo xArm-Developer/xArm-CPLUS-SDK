@@ -201,6 +201,8 @@ public:
   float ft_raw_force[6];
   int iden_progress;
 
+  float pose_aa[6];
+
   int debug_size;
   unsigned char *debug_data;
 private:

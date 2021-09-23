@@ -143,6 +143,7 @@ public:
 	fp32 last_used_joint_speed;
 	fp32 last_used_joint_acc;
 	fp32 *position; // fp32[6]{x, y, z, roll, pitch, yaw}
+	fp32 *position_aa; // fp32[6]{x, y, z, rx, ry, rz}
 	fp32 *last_used_position; // fp32[6]{x, y, z, roll, pitch, yaw}
 	fp32 *tcp_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
 	fp32 *gravity_direction; // fp32[3]{x_direction, y_direction, z_direction}

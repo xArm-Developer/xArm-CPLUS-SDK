@@ -327,6 +327,8 @@ XArmReportData::XArmReportData(std::string report_type_)
 
   iden_progress = 0;
 
+  memset(pose_aa, 0, sizeof(pose_aa));
+
   debug_data = NULL;
   debug_size = 0;
 }
@@ -508,6 +510,10 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
     }
     if (total_num >= 482) {
       iden_progress = data_fp[481];
+    }
+    if (total_num >= 494) {
+      memcpy(pose_aa, pose, sizeof(float) * 3);
+      hex_to_nfp32(&data_fp[482], pose_aa, 3);
     }
     __flush_debug_data(482);
   }

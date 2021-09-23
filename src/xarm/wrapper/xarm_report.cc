@@ -266,16 +266,6 @@ void XArmAPI::_update(unsigned char *rx_data) {
 			linear_track_status.is_enabled = 0;
 		}
 
-		// if ((error_code >= 10 && error_code <= 17) || error_code == 1 || error_code == 19 || error_code == 28) {
-		// 	modbus_baud_ = -1;
-		// 	robotiq_is_activated_ = false;
-		// 	gripper_is_enabled_ = false;
-		// 	bio_gripper_is_enabled_ = false;
-		// 	bio_gripper_speed_ = -1;
-		// 	gripper_version_numbers_[0] = -1;
-		// 	gripper_version_numbers_[1] = -1;
-		// 	gripper_version_numbers_[2] = -1;
-		// }
 		if (!is_sync_ && error_code != 0 && state != 4 && state != 5) {
 			_sync();
 			is_sync_ = true;
@@ -417,6 +407,11 @@ void XArmAPI::_update(unsigned char *rx_data) {
 				_report_iden_progress_changed_callback();
 			}
 			iden_progress = report_data_ptr_->iden_progress;
+		}
+		if (sizeof_data >= 494) {
+			for (int i = 0; i < 6; i++) {
+				position_aa[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose_aa[i] : report_data_ptr_->pose_aa[i] * RAD_DEGREE);
+			}
 		}
 	}
 }

@@ -101,6 +101,7 @@ void XArmAPI::_init(void) {
 		last_used_joint_speed = (float)0.3490658503988659; // rad/s (20°/s);
 		last_used_joint_acc = (float)8.726646259971648;    // rad/s^2 (500°/s^2);
 		position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
+		position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
 		last_used_position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
 	}
 	else {
@@ -109,6 +110,7 @@ void XArmAPI::_init(void) {
 		last_used_joint_speed = (fp32)(0.3490658503988659 * RAD_DEGREE); // rad/s (20°/s);
 		last_used_joint_acc = (fp32)(8.726646259971648 * RAD_DEGREE);    // rad/s^2 (500°/s^2);
 		position = new fp32[6]{ 201.5, 0, 140.5, (fp32)(3.1415926 * RAD_DEGREE), 0, 0 };
+		position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
 		last_used_position = new fp32[6]{ 201.5, 0, 140.5, (fp32)(3.1415926 * RAD_DEGREE), 0, 0 };
 	}
 
@@ -810,6 +812,7 @@ int XArmAPI::get_position_aa(fp32 pose[6]) {
 	if (ret == 0) {
 		for (int i = 0; i < 6; i++) {
 			pose[i] = (!default_is_radian && i > 2) ? (float)(pose[i] * RAD_DEGREE) : pose[i];
+			position_aa[i] = pose[i];
 		}
 	}
 	return ret;

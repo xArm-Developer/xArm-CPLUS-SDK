@@ -653,7 +653,7 @@ int XArmAPI::_wait_move(fp32 timeout) {
 	int state_;
 	int err_warn[2];
 	int ret = get_state(&state_);
-	int max_cnt = (ret == 0 && state_ == 1) ? 2 : 10;
+	int max_cnt = (ret == 0 && state_ == 1) ? 4 : 10;
 	while (timeout <= 0 || get_system_time() < expired) {
 		if (!is_connected()) return API_CODE::NOT_CONNECTED;
 		if (get_system_time() - last_report_time_ > 400) {
@@ -663,6 +663,8 @@ int XArmAPI::_wait_move(fp32 timeout) {
 		if (error_code != 0) {
 			return API_CODE::HAS_ERROR;
 		}
+		// no wait in velocity mode
+		if (mode == 4 || mode == 5) return 0;
 		if (state == 4 || state == 5) {
 			ret = get_state(&state_);
 			if (ret != 0 || (state_ != 4 && state_ != 5)) {

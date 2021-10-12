@@ -280,9 +280,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_ft_sensor_data(float[] ft_data);
         [DllImport("xarm.dll")]
-        public static extern int get_ft_sensor_config(ref int ft_app_status = null, ref int ft_is_started = null, ref int ft_type = null, ref int ft_id = null, ref int ft_freq = null, 
-            ref float ft_mass = null, ref float ft_dir_bias = null, float[] ft_centroid = null, float[] ft_zero = null, ref int imp_coord = null, int[] imp_c_axis = null, float[] M = null, float[] K = null, float[] B = null,
-            ref int f_coord = null, int[] f_c_axis = null, float[] f_ref = null, float[] f_limits = null, float[] kp = null, float[] ki = null, float[] kd = null, float[] xe_limit = null);
+        public static extern int get_ft_sensor_config(ref int ft_app_status, ref int ft_is_started, ref int ft_type, ref int ft_id, ref int ft_freq, 
+            ref float ft_mass, ref float ft_dir_bias, float[] ft_centroid, float[] ft_zero, ref int imp_coord, int[] imp_c_axis, float[] M, float[] K, float[] B,
+            ref int f_coord, int[] f_c_axis, float[] f_ref, float[] f_limits, float[] kp, float[] ki, float[] kd, float[] xe_limit);
         
         [DllImport("xarm.dll")]
         public static extern int iden_tcp_load(float[] result);

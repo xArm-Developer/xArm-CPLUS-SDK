@@ -401,8 +401,15 @@ namespace XArmWrapper
 	int __stdcall ft_sensor_app_get(int *app_code) {
 		return arm->ft_sensor_app_get(app_code);
 	}
-	int __stdcall get_exe_ft(float exe_ft[6]) {
-		return arm->get_exe_ft(exe_ft);
+	int __stdcall get_ft_sensor_data(float ft_data[6]) {
+		return arm->get_ft_sensor_data(ft_data);
+	}
+	int __stdcall get_ft_sensor_config(int *ft_app_status, int *ft_is_started, int *ft_type, int *ft_id, int *ft_freq, 
+		float *ft_mass, float *ft_dir_bias, float ft_centroid[3], float ft_zero[6], int *imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6],
+		int *f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6], float kp[6], float ki[6], float kd[6], float xe_limit[6]) {
+		return arm->get_ft_sensor_config(ft_app_status, ft_is_started, ft_type, ft_id, ft_freq,
+			ft_mass, ft_dir_bias, ft_centroid, ft_zero, imp_coord, imp_c_axis, M, K, B,
+			f_coord, f_c_axis, f_ref, f_limits, kp, ki, kd, xe_limit);
 	}
 	
 	int __stdcall iden_tcp_load(float result[4]) {

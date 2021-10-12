@@ -403,7 +403,7 @@ int XArmAPI::connect(const std::string &port) {
 	is_ready_ = true;
 	if (port_ == "localhost" || std::regex_match(port_, pattern)) {
 		is_tcp_ = true;
-		stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 128);
+		stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320);
 		if (stream_tcp_->is_ok() != 0) {
 			printf("Error: Tcp control connection failed\n");
 			return -2;

@@ -1389,9 +1389,42 @@ int UxbusCmd::ft_sensor_app_get(int *app_code)
     return get_nu8(UXBUS_RG::FTSENSOR_GET_APP, app_code, 1);
 }
 
-int UxbusCmd::get_exe_ft(float exe_ft[6])
+int UxbusCmd::ft_sensor_get_data(float ft_data[6], bool is_new)
 {
-    return get_nfp32(UXBUS_RG::GET_EXE_FT, exe_ft, 6);
+    return get_nfp32(is_new ? UXBUS_RG::FTSENSOR_GET_DATA : UXBUS_RG::FTSENSOR_GET_DATA_OLD, ft_data, 6);
+}
+
+int UxbusCmd::ft_sensor_get_config(int *ft_app_status, int *ft_is_started, int *ft_type, int *ft_id, int *ft_freq, 
+	float *ft_mass, float *ft_dir_bias, float ft_centroid[3], float ft_zero[6], int *imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6],
+	int *f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6], float kp[6], float ki[6], float kd[6], float xe_limit[6])
+{
+	unsigned char data[280];
+	int ret = get_nu8(UXBUS_RG::FTSENSOR_GET_CONFIG, data, 280);
+	if (ft_app_status != NULL) *ft_app_status = data[0];
+	if (ft_is_started != NULL) *ft_is_started = data[1];
+	if (ft_type != NULL) *ft_type = data[2];
+	if (ft_id != NULL) *ft_id = data[3];
+	if (ft_freq != NULL) *ft_freq = bin8_to_16(&data[4]);
+	if (ft_mass != NULL) *ft_mass = hex_to_fp32(&data[6]);
+	if (ft_dir_bias != NULL) *ft_dir_bias = hex_to_fp32(&data[10]);
+	if (ft_centroid != NULL) hex_to_nfp32(&data[14], ft_centroid, 3);
+	if (ft_zero != NULL) hex_to_nfp32(&data[26], ft_zero, 6);
+	if (imp_coord != NULL) *imp_coord = data[50];
+	if (imp_c_axis != NULL) { for(int i = 0; i < 6; i++) imp_c_axis[i] = data[51+i]; };
+	if (M != NULL) hex_to_nfp32(&data[57], M, 6);
+	if (K != NULL) hex_to_nfp32(&data[81], K, 6);
+	if (B != NULL) hex_to_nfp32(&data[105], B, 6);
+
+	if (f_coord != NULL) *f_coord = data[129];
+	if (f_c_axis != NULL) { for(int i = 0; i < 6; i++) f_c_axis[i] = data[130+i]; };
+	if (f_ref != NULL) hex_to_nfp32(&data[136], f_ref, 6);
+	if (f_limits != NULL) hex_to_nfp32(&data[160], f_limits, 6);
+	if (kp != NULL) hex_to_nfp32(&data[184], kp, 6);
+	if (ki != NULL) hex_to_nfp32(&data[208], ki, 6);
+	if (kd != NULL) hex_to_nfp32(&data[232], kd, 6);
+	if (xe_limit != NULL) hex_to_nfp32(&data[256], xe_limit, 6);
+
+	return ret;
 }
 
 int UxbusCmd::iden_tcp_load(float result[4])

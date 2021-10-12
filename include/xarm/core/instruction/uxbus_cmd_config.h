@@ -141,7 +141,8 @@ public:
 	static const unsigned char SET_IO_STOP_RESET = 146;
 	static const unsigned char POSITION_CGPIO_SET_ANALOG = 147;
 
-	static const unsigned char GET_EXE_FT = 150;
+	static const unsigned char FTSENSOR_GET_DATA_OLD = 150;  // only available in firmware version < 1.8.3
+	static const unsigned char FTSENSOR_GET_DATA = 200;
     static const unsigned char FTSENSOR_ENABLE = 201;
     static const unsigned char FTSENSOR_SET_APP = 202;
     static const unsigned char FTSENSOR_GET_APP = 203;
@@ -153,6 +154,8 @@ public:
     static const unsigned char FORCE_CTRL_CONFIG = 209;
     static const unsigned char IMPEDANCE_CTRL_MBK = 210;
     static const unsigned char IMPEDANCE_CTRL_CONFIG = 211;
+	static const unsigned char FTSENSOR_GET_CONFIG = 212;
+
 	static const unsigned char GET_MAX_JOINT_VELOCITY = 231;
 };
 

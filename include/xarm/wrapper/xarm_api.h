@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.8.0"
+#define SDK_VERSION "1.8.1"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1588,15 +1588,15 @@ public:
     * Set all parameters of impedance control.
     *   Note: only available if firmware_version >= 1.8.0
 
-    * @param coord: task frame. 0: base frame. 1: tool frame.
-    * @param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param imp_coord: task frame. 0: base frame. 1: tool frame.
+    * @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
     * @param M: mass. (kg)
     * @param K: stiffness coefficient.
     * @param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
 
     * return: See the code documentation for details.
     */
-	int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6]);
+	int set_impedance(int imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6]);
 
 	/*
     * Set mbk parameters of impedance control.
@@ -1614,25 +1614,25 @@ public:
     * Set impedance control parameters of impedance control.
     *   Note: only available if firmware_version >= 1.8.0
 
-    * @param coord: task frame. 0: base frame. 1: tool frame.
-    * @param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param imp_coord: task frame. 0: base frame. 1: tool frame.
+    * @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
 
     * return: See the code documentation for details.
     */
-	int set_impedance_config(int coord, int c_axis[6]);
+	int set_impedance_config(int imp_coord, int imp_c_axis[6]);
 
 	/*
     * Set force control parameters.
     *   Note: only available if firmware_version >= 1.8.0
 
-    * @param coord: task frame. 0: base frame. 1: tool frame.
-    * @param c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param f_coord: task frame. 0: base frame. 1: tool frame.
+    * @param f_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
     * @param f_ref:  the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
-    * @param limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
+    * @param f_limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
 
     * return: See the code documentation for details.
     */
-	int config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6]);
+	int config_force_control(int f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6]);
 
 	/*
     * Set force control pid parameters.
@@ -1669,7 +1669,7 @@ public:
     * Write load parameter value
     *   Note: only available if firmware_version >= 1.8.0
 
-    * @param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Mx_offset，My_offset，Mz_ffset])
+    * @param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
 
     * return: See the code documentation for details.
     */
@@ -1706,14 +1706,54 @@ public:
 	int ft_sensor_app_get(int *app_code);
 
 	/*
-    * Get extenal force/torque
-    *   Note: only available if firmware_version >= 1.8.0
+    * Get the data of the extenal force/torque
+    *   Note: only available if firmware_version >= 1.8.3
 
-    * @param exe_ft: the result of the extenal force/torque.
+    * @param ft_data: the result of the extenal force/torque.
 
     * return: See the code documentation for details.
     */
-	int get_exe_ft(float exe_ft[6]);
+	int get_ft_sensor_data(float ft_data[6]);
+
+	/*
+    * Get the config of the extenal force/torque
+    *   Note: only available if firmware_version >= 1.8.3
+
+	* @param ft_app_status: force mode
+		0: non-force mode
+		1: impendance control
+		2: force control
+	* @param ft_is_started: ft sensor is enable or not
+	* @param ft_type: ft sensor type
+	* @param ft_id: ft sensor id
+	* @param ft_freq: ft sensor frequency
+	* @param ft_mass: load mass
+	* @param ft_dir_bias:
+	* @param ft_centroid: [x_centroid，y_centroid，z_centroid]
+	* @param ft_zero: [Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset]
+	* @param imp_coord: task frame of impendance control mode.
+		0: base frame.
+		1: tool frame.
+	* @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param M: mass. (kg)
+    * @param K: stiffness coefficient.
+    * @param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+	* @param f_coord: task frame of force control mode. 
+		0: base frame.
+		1: tool frame.
+	* @param f_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
+    * @param f_ref:  the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
+    * @param f_limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
+    * @param kp: proportional gain
+    * @param ki: integral gain.
+    * @param kd: differential gain.
+    * @param xe_limit: 6d vector. for compliant axes, these values are the maximum allowed tcp speed along/about the axis. mm/s
+
+    * return: See the code documentation for details.
+    */
+	int get_ft_sensor_config(int *ft_app_status = NULL, int *ft_is_started = NULL, int *ft_type = NULL, int *ft_id = NULL, int *ft_freq = NULL, 
+		float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL,
+		int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
 
 	/*
     * Identification the tcp load with current

@@ -85,10 +85,22 @@ int XArmAPI::ft_sensor_app_get(int *app_code)
 	return _check_code(ret);
 }
 
-int XArmAPI::get_exe_ft(float exe_ft[6])
+int XArmAPI::get_ft_sensor_data(float ft_data[6])
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int ret = core->get_exe_ft(exe_ft);
+	int ret = core->ft_sensor_get_data(ft_data, _version_is_ge(1, 8, 3));
+	return _check_code(ret);
+}
+
+int XArmAPI::get_ft_sensor_config(int *ft_app_status, int *ft_is_started, int *ft_type, int *ft_id, int *ft_freq, 
+	float *ft_mass, float *ft_dir_bias, float ft_centroid[3], float ft_zero[6], int *imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6],
+	int *f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6], float kp[6], float ki[6], float kd[6], float xe_limit[6])
+{
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int ret = core->ft_sensor_get_config(ft_app_status, ft_is_started, ft_type, ft_id, ft_freq,
+		ft_mass, ft_dir_bias, ft_centroid, ft_zero, imp_coord, imp_c_axis, M, K, B,
+		f_coord, f_c_axis, f_ref, f_limits, kp, ki, kd, xe_limit
+	);
 	return _check_code(ret);
 }
 

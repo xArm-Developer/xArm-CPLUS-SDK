@@ -1,3 +1,12 @@
+/*
+# Software License Agreement (MIT License)
+#
+# Copyright (c) 2021, UFACTORY, Inc.
+# All rights reserved.
+#
+# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+*/
+
 #include "xarm/wrapper/xarm_api.h"
 
 namespace XArmWrapper {
@@ -12,6 +21,7 @@ namespace XArmWrapper {
 		bool check_robot_sn = false,
 		bool check_is_ready = true,
 		bool check_is_pause = true);
+	extern "C" __declspec(dllexport) int __stdcall remove_instance(int instance_id);
 	extern "C" __declspec(dllexport) int __stdcall connect(char* port="");
 	extern "C" __declspec(dllexport) void __stdcall disconnect(void);
 	
@@ -138,7 +148,7 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
 	extern "C" __declspec(dllexport) int __stdcall ft_sensor_set_zero(void);
 	extern "C" __declspec(dllexport) int __stdcall ft_sensor_iden_load(float result[10]);
-	extern "C" __declspec(dllexport) int __stdcall ft_sensor_cali_load(float load[10]);
+	extern "C" __declspec(dllexport) int __stdcall ft_sensor_cali_load(float load[10], bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8);
 	extern "C" __declspec(dllexport) int __stdcall ft_sensor_enable(int on_off);
 	extern "C" __declspec(dllexport) int __stdcall ft_sensor_app_set(int app_code);
 	extern "C" __declspec(dllexport) int __stdcall ft_sensor_app_get(int *app_code);

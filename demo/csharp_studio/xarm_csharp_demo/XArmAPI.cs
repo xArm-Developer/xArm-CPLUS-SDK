@@ -1,4 +1,12 @@
-﻿using System;
+/*
+# Software License Agreement (MIT License)
+#
+# Copyright (c) 2021, UFACTORY, Inc.
+# All rights reserved.
+#
+# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -270,7 +278,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int ft_sensor_iden_load(float[] result);
         [DllImport("xarm.dll")]
-        public static extern int ft_sensor_cali_load(float[] load);
+        public static extern int ft_sensor_cali_load(float[] load, bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8);
         [DllImport("xarm.dll")]
         public static extern int ft_sensor_enable(int on_off);
         [DllImport("xarm.dll")]

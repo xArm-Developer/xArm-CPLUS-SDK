@@ -1,17 +1,47 @@
+/*
+# Software License Agreement (MIT License)
+#
+# Copyright (c) 2021, UFACTORY, Inc.
+# All rights reserved.
+#
+# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+*/
+
 #include <map>
 #include "xarm_wrapper.h"
 
 
 namespace XArmWrapper
 {
-	XArmAPI* arm;
+	XArmAPI* arm = NULL;
 	int id = 0;
 	std::map<int, XArmAPI*> xarm_map;
 
 	int __stdcall switch_xarm(int instance_id) {
 		std::map<int, XArmAPI*>::iterator iter = xarm_map.find(instance_id);
 		if (iter != xarm_map.end()) {
+			if (arm != NULL && arm != iter->second) {
+				arm->disconnect();
+				delete arm;
+			}
 			arm = iter->second;
+			return 0;
+		}
+		printf("No instance with ID %d\n", instance_id);
+		return -1;
+	}
+
+	int __stdcall remove_instance(int instance_id) {
+		std::map<int, XArmAPI*>::iterator iter = xarm_map.find(instance_id);
+		if (iter != xarm_map.end()) {
+			if (iter->second == arm) {
+				printf("You removed the instance you are using, and the instance will be disconnected and destroyed when you successfully switch to another instance\n");
+			}
+			else {
+				arm->disconnect();
+				delete arm;
+			}
+			xarm_map.erase(iter);
 			return 0;
 		}
 		return -1;
@@ -389,8 +419,8 @@ namespace XArmWrapper
 	int __stdcall ft_sensor_iden_load(float result[10]) {
 		return arm->ft_sensor_iden_load(result);
 	}
-	int __stdcall ft_sensor_cali_load(float load[10]) {
-		return arm->ft_sensor_cali_load(load);
+	int __stdcall ft_sensor_cali_load(float load[10], bool association_setting_tcp_load, float m, float x, float y, float z) {
+		return arm->ft_sensor_cali_load(load, association_setting_tcp_load, m, x, y, z);
 	}
 	int __stdcall ft_sensor_enable(int on_off) {
 		return arm->ft_sensor_enable(on_off);

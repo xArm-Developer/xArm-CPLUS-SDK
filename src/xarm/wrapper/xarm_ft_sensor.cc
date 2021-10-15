@@ -57,11 +57,21 @@ int XArmAPI::ft_sensor_iden_load(float result[10])
 	return _check_code(ret);
 }
 
-int XArmAPI::ft_sensor_cali_load(float load[10])
+int XArmAPI::ft_sensor_cali_load(float load[10], bool association_setting_tcp_load, float m, float x, float y, float z)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->ft_sensor_cali_load(load);
-	return _check_code(ret);
+	ret = _check_code(ret);
+	if (ret == 0 && association_setting_tcp_load) {
+		float mass = load[0] + m;
+		float center_of_gravity[3] = {
+			(m * x + load[0] * load[1]) / mass,
+			(m * y + load[0] * load[2]) / mass,
+			(m * z + load[0] * (32 + load[3])) / mass
+		};
+		return set_tcp_load(mass, center_of_gravity);
+	}
+	return ret;
 }
 
 int XArmAPI::ft_sensor_enable(int on_off)

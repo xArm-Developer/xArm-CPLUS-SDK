@@ -1667,13 +1667,15 @@ public:
 
 	/*
     * Write load parameter value
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
+	* @param association_setting_tcp_load: whether to convert the paramster to the corresponding tcp load and set, default is false
+		if true, the value of tcp load will be modified
 
     * return: See the code documentation for details.
     */
-	int ft_sensor_cali_load(float load[10]);
+	int ft_sensor_cali_load(float load[10], bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8);
 
 	/*
     * Used for enabling and disabling the use of external F/T measurements in the controller.

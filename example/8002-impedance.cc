@@ -28,11 +28,17 @@ int main(int argc, char **argv) {
 
 	printf("=========================================\n");
 
-	float M[6] = { 0.5, 0.5, 0.5, 0.005, 0.005, 0.005 };
-	float K[6] = { 200, 200, 200, 4, 4, 4 };
+	// set tool impedance parmeters
+	// Attention: for M, smaller value means less effort to drive the arm, but may also be less stable, please be careful. 
+	// x/y/z equivalent mass; range: 0.02 ~ 1 kg
+	// Rx/Ry/Rz equivalent moment of inertia, range: 1e-4 ~ 0.01 (Kg*m^2)
+	float M[6] = { 0.06, 0.06, 0.06, 0.0006, 0.0006, 0.0006 }; // M => {x, y, z, Rx, Ry, Rz} 
+	// x/y/z linear stiffness coefficient, range: 0 ~ 2000 (N/m)
+	// Rx/Ry/Rz rotational stiffness coefficient, range: 0 ~ 20 (Nm/rad)
+	float K[6] = { 300, 300, 300, 4, 4, 4 }; // K => {x, y, z, Rx, Ry, Rz}
 	float B[6] = { 0 };
-	int coord = 1;
-	int c_axis[6] = { 0, 0, 1, 0, 0, 0 };
+	int coord = 0; // 0 : base , 1 : tool
+	int c_axis[6] = { 0, 0, 1, 0, 0, 0 }; // set z axis as compliant axis
 	int ret;
 
 	ret = arm->set_impedance_mbk(M, K, B);
@@ -40,20 +46,24 @@ int main(int argc, char **argv) {
 	ret = arm->set_impedance_config(coord, c_axis);
 	printf("set_impedance_config, ret=%d\n", ret);
 
+	// enable ft sensor communication
 	ret = arm->ft_sensor_enable(1);
 	printf("ft_sensor_enable, ret=%d\n", ret);
-	ret = arm->ft_sensor_set_zero();
+	// will overwrite previous sensor zero and payload configuration
+	ret = arm->ft_sensor_set_zero(); // remove this if zero_offset and payload already identified & compensated!
 	printf("ft_sensor_set_zero, ret=%d\n", ret);
-	sleep_milliseconds(200);
+	sleep_milliseconds(200); // wait for writting zero operation to take effect, do not remove
 
-	// move robot in impendance control mode
+	// move robot in impendance control application
 	ret = arm->ft_sensor_app_set(1);
 	printf("ft_sensor_app_set, ret=%d\n", ret);
+	// will start after set_state(0)
 	ret = arm->set_state(0);
 
-	// you can send position to robot
+	// compliance effective for 10 secs, you may send position command to robot, or just keep it still
 	sleep_milliseconds(1000 * 10);
 
+	// remember to reset ft_sensor_app when finished
 	ret = arm->ft_sensor_app_set(0);
 	printf("ft_sensor_app_set, ret=%d\n", ret);
 	ret = arm->ft_sensor_enable(0);

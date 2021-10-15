@@ -15,19 +15,37 @@ namespace XArmWrapper
 {
 	XArmAPI* arm = NULL;
 	int id = 0;
+	int active_instance_id = 0;
 	std::map<int, XArmAPI*> xarm_map;
 
 	int __stdcall switch_xarm(int instance_id) {
 		std::map<int, XArmAPI*>::iterator iter = xarm_map.find(instance_id);
 		if (iter != xarm_map.end()) {
 			if (arm != NULL && arm != iter->second) {
-				arm->disconnect();
-				delete arm;
+				bool removed = true;
+				for (std::map<int, XArmAPI*>::iterator it = xarm_map.begin(); it != xarm_map.end(); ++it) {
+					if (it->second == arm) {
+						removed = false;
+						break;
+					}
+				}
+				if (removed) {
+					arm->disconnect();
+					delete arm;
+				}
+				printf("current active instance_id: %d\n", iter->first);
 			}
 			arm = iter->second;
+			active_instance_id = iter->first;
 			return 0;
 		}
-		printf("No instance with ID %d\n", instance_id);
+		printf("[switch failed], no instance with id %d, ", instance_id);
+		if (active_instance_id != 0) {
+			printf("current active instance_id: %d\n", active_instance_id);
+		}
+		else {
+			printf("no active instance\n");
+		}
 		return -1;
 	}
 

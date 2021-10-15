@@ -31,6 +31,8 @@ namespace xarm_csharp_demo
             bool check_is_ready = true,
             bool check_is_pause = true);
         [DllImport("xarm.dll")]
+        public static extern int remove_instance(int instance_id);
+        [DllImport("xarm.dll")]
         public static extern int switch_xarm(int instance_id);
         [DllImport("xarm.dll")]
         public static extern int connect(string port = "");
@@ -278,7 +280,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int ft_sensor_iden_load(float[] result);
         [DllImport("xarm.dll")]
-        public static extern int ft_sensor_cali_load(float[] load, bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8);
+        public static extern int ft_sensor_cali_load(float[] load, bool association_setting_tcp_load = false, float m = (float)0.325, float x = -17, float y = 9, float z = (float)11.8);
         [DllImport("xarm.dll")]
         public static extern int ft_sensor_enable(int on_off);
         [DllImport("xarm.dll")]

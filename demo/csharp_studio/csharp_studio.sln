@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xarm", "xarm\xarm.vcxproj", "{64DB8C68-8120-405D-9893-1459CAC5DCCA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xarm_csharp_demo", "xarm_csharp_demo\xarm_csharp_demo.csproj", "{5A3C96D8-E2E3-48D5-AF68-5486D6405492}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64DB8C68-8120-405D-9893-1459CAC5DCCA} = {64DB8C68-8120-405D-9893-1459CAC5DCCA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

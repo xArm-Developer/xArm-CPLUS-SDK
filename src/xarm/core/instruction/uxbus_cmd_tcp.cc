@@ -71,7 +71,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 			if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 				int n = num;
 				if (num == -1) {
-					n = rx_data[9] - 2;
+					n = bin8_to_16(&rx_data[8]) - 2;
 				}
 				for (i = 0; i < n; i++) { ret_data[i] = rx_data[i + 8 + 4]; }
 				// print_hex(" 3", rx_data, num + 8 + 4);

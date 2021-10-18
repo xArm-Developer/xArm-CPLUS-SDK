@@ -422,7 +422,7 @@ int XArmAPI::connect(const std::string &port) {
 	}
 	else {
 		is_tcp_ = false;
-		stream_ser_ = new SerialPort((const char *)port_.data(), XARM_CONF::SERIAL_BAUD, 3, 128);
+		stream_ser_ = new SerialPort((const char *)port_.data(), XARM_CONF::SERIAL_BAUD, 3, 320);
 		core = new UxbusCmdSer((SerialPort *)stream_ser_);
 		_report_connect_changed_callback();
 		sleep_milliseconds(200);

@@ -1378,10 +1378,8 @@ int UxbusCmd::ft_sensor_enable(int on_off)
 
 int UxbusCmd::ft_sensor_app_set(int app_code)
 {
-    unsigned char txdata[1] = { (unsigned char)app_code };
-    unsigned char rxdata[1] = {0};
-	int ret = getset_nu8(UXBUS_RG::FTSENSOR_SET_APP, txdata, 1, rxdata, 1);
-    return ret != 0 ? ret : rxdata[0] != 0 ? UXBUS_STATE::INVALID : 0;
+	int txdata[1] = { app_code };
+	return set_nu8(UXBUS_RG::FTSENSOR_SET_APP, txdata, 1);
 }
 
 int UxbusCmd::ft_sensor_app_get(int *app_code)

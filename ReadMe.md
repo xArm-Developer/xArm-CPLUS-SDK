@@ -242,11 +242,25 @@
 
 - ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
 
-- ##### [7002-servo_j](example/7001-servo_j.cc)
+- ##### [7001-servo_j](example/7001-servo_j.cc)
 
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
 
 - ##### [7003-servo_cartesian_aa](example/7003-servo_cartesian_aa.cc)
+
+- ##### [8000-load_identify_current](example/8000-load_identify_current.cc)
+
+- ##### [8001-force_tech](example/8001-force_tech.cc)
+
+- ##### [8002-impedance](example/8002-impedance.cc)
+
+- ##### [8003-force_control](example/8003-force_control.cc)
+
+- ##### [8004-load_identify](example/8004-load_identify.cc)
+
+- ##### [8006-save_force_zero](example/8006-save_force_zero.cc)
+
+- ##### [8010-get_ft_sensor_config](example/8010-get_ft_sensor_config.cc)
 
 - ##### [thirdparty-set_robotiq_gripper](example/thirdparty-set_robotiq_gripper.cc)
 

@@ -1957,7 +1957,7 @@ __int ft_sensor_iden_load(float result[10])__
 Identification the tcp load with ftsensor
     Note: only available if firmware_version >= 1.8.0
 
-:param result: the result of identification
+:param result: the result of identification, ([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
 
 :return: See the code documentation for details.
 ```

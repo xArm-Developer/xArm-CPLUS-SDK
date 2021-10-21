@@ -1884,13 +1884,14 @@ An additional teaching point determines the position offset of the user coordina
 __int set_impedance(int imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6])__
 ```
 Set all parameters of impedance control.
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
 :param imp_coord: task frame. 0: base frame. 1: tool frame.
 :param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
 :param M: mass. (kg)
 :param K: stiffness coefficient.
-:param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+:param B: damping coefficient. invalid.
+    Note: the value is set to 2*sqrt(M*K) in controller.
 
 :return: See the code documentation for details.
 ```
@@ -1898,11 +1899,12 @@ Set all parameters of impedance control.
 __int set_impedance_mbk(float M[6], float K[6], float B[6])__
 ```
 Set mbk parameters of impedance control.
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
 :param M: mass. (kg)
 :param K: stiffness coefficient.
-:param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+:param B: damping coefficient. invalid.
+    Note: the value is set to 2*sqrt(M*K) in controller.
 
 :return: See the code documentation for details.
 ```
@@ -1910,7 +1912,7 @@ Set mbk parameters of impedance control.
 __int set_impedance_config(int imp_coord, int imp_c_axis[6])__
 ```
 Set impedance control parameters of impedance control.
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
 :param imp_coord: task frame. 0: base frame. 1: tool frame.
 :param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
@@ -1921,12 +1923,12 @@ Set impedance control parameters of impedance control.
 __int config_force_control(int f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6])__
 ```
 Set force control parameters.
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
 :param f_coord: task frame. 0: base frame. 1: tool frame.
 :param f_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
-:param f_ref:  the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
-:param f_limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
+:param f_ref: the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
+:param f_limits: for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
 
 :return: See the code documentation for details.
 ```
@@ -1934,7 +1936,7 @@ Set force control parameters.
 __int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6])__
 ```
 Set force control pid parameters.
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
 :param kp: proportional gain
 :param ki: integral gain.
@@ -1946,16 +1948,16 @@ Set force control pid parameters.
 
 __int ft_sensor_set_zero(void)__
 ```
-Set force/torque offset.
-    Note: only available if firmware_version >= 1.8.0
+Set the current state to the zero point of the extenal force/torque sensor
+    Note: only available if firmware_version >= 1.8.3
 
 :return: See the code documentation for details.
 ```
 
 __int ft_sensor_iden_load(float result[10])__
 ```
-Identification the tcp load with ftsensor
-    Note: only available if firmware_version >= 1.8.0
+Identification the tcp load with the extenal force/torque sensor
+    Note: only available if firmware_version >= 1.8.3
 
 :param result: the result of identification, ([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
 
@@ -1977,7 +1979,7 @@ Write load parameter value
 __int ft_sensor_enable(int on_off)__
 ```
 Used for enabling and disabling the use of external F/T measurements in the controller.
-    only available if firmware_version >= 1.8.0
+    only available if firmware_version >= 1.8.3
 
 :param on_off: enable or disable F/T data sampling.
 
@@ -1987,9 +1989,12 @@ Used for enabling and disabling the use of external F/T measurements in the cont
 __int ft_sensor_app_set(int app_code)__
 ```
 Set robot to be controlled in force mode
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
-:param app_code: force mode. 0: non-force mode  1: impendance control  2:force control
+:param app_code: force mode. 
+    0: non-force mode  
+    1: impendance control  
+    2: force control
 
 :return: See the code documentation for details.
 ```
@@ -1997,16 +2002,19 @@ Set robot to be controlled in force mode
 __int ft_sensor_app_get(int *app_code)__
 ```
 Get force mode
-    Note: only available if firmware_version >= 1.8.0
+    Note: only available if firmware_version >= 1.8.3
 
 :param app_code: the result of force mode.
+    0: non-force mode  
+    1: impendance control  
+    2: force control
 
 :return: See the code documentation for details.
 ```
 
 __int get_ft_sensor_data(float ft_data[6])__
 ```
-Get the data of the extenal force/torque
+Get the data of the extenal force/torque sensor
     Note: only available if firmware_version >= 1.8.3
 
 :param ft_data: the result of the extenal force/torque.
@@ -2016,7 +2024,7 @@ Get the data of the extenal force/torque
 
 __int get_ft_sensor_config(int *ft_app_status = NULL, int *ft_is_started = NULL, int *ft_type = NULL, int *ft_id = NULL, int *ft_freq = NULL, float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL, int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL)__
 ```
-Get the config of the extenal force/torque
+Get the config of the extenal force/torque sensor
     Note: only available if firmware_version >= 1.8.3
 
 :param ft_app_status: force mode

@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.8.2"
+#define SDK_VERSION "1.8.4"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -225,6 +225,8 @@ public:
 
 	/*no use please*/
 	void _recv_report_data(void);
+	/*no use please*/
+	void _handle_report_data(void);
 
 	/*
 	* Get the xArm version
@@ -533,7 +535,7 @@ public:
 		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
 	* return: see the API code documentation for details.
 	*/
-	int set_tcp_offset(fp32 pose_offset[6]);
+	int set_tcp_offset(fp32 pose_offset[6], bool wait = true);
 
 	/*
 	* Set the load
@@ -647,7 +649,7 @@ public:
 	* @param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
 	* return: see the API code documentation for details.
 	*/
-	int set_gripper_position(fp32 pos, bool wait = false, fp32 timeout = 10);
+	int set_gripper_position(fp32 pos, bool wait = false, fp32 timeout = 10, bool wait_motion = true);
 
 	/*
 	* Set the gripper speed
@@ -1270,10 +1272,10 @@ public:
 	* @param ret_data: the response from robotiq
 	* return: see the API code documentation for details.
 	*/
-	int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL);
-	int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL);
+	int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL, bool wait_motion = true);
 
 	/*
 	* Open the robotiq gripper
@@ -1284,10 +1286,10 @@ public:
 	* @param ret_data: the response from robotiq
 	* return: see the API code documentation for details.
 	*/
-	int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL);
-	int robotiq_open(unsigned char ret_data[6] = NULL);
+	int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_open(unsigned char ret_data[6] = NULL, bool wait_motion = true);
 
 	/*
 	* Close the robotiq gripper
@@ -1298,10 +1300,10 @@ public:
 	* @param ret_data: the response from robotiq
 	* return: see the API code documentation for details.
 	*/
-	int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL);
-	int robotiq_close(unsigned char ret_data[6] = NULL);
+	int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_close(unsigned char ret_data[6] = NULL, bool wait_motion = true);
 
 	/*
 	* Reading the status of robotiq gripper
@@ -1348,8 +1350,8 @@ public:
         
 	* return: See the code documentation for details.
 	*/
-	int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
-	int open_bio_gripper(bool wait = true, fp32 timeout = 5);
+	int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+	int open_bio_gripper(bool wait = true, fp32 timeout = 5, bool wait_motion = true);
 	
 	/*
 	* Close the bio gripper
@@ -1360,8 +1362,8 @@ public:
 
 	* return: See the code documentation for details.
 	*/
-	int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
-	int close_bio_gripper(bool wait = true, fp32 timeout = 5);
+	int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+	int close_bio_gripper(bool wait = true, fp32 timeout = 5, bool wait_motion = true);
 	
 	/*
 	* Get the status of the bio gripper
@@ -1586,13 +1588,14 @@ public:
 
     /*
     * Set all parameters of impedance control.
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param imp_coord: task frame. 0: base frame. 1: tool frame.
     * @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
     * @param M: mass. (kg)
     * @param K: stiffness coefficient.
-    * @param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+    * @param B: damping coefficient. invalid.
+	* 	Note: the value is set to 2*sqrt(M*K) in controller.
 
     * return: See the code documentation for details.
     */
@@ -1600,11 +1603,12 @@ public:
 
 	/*
     * Set mbk parameters of impedance control.
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param M: mass. (kg)
     * @param K: stiffness coefficient.
-    * @param B: damping coefficient. invalid.   Note: the value is set to 2*sqrt(M*K) in controller.
+    * @param B: damping coefficient. invalid.
+	* 	Note: the value is set to 2*sqrt(M*K) in controller.
 
     * return: See the code documentation for details.
     */
@@ -1612,7 +1616,7 @@ public:
 
 	/*
     * Set impedance control parameters of impedance control.
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param imp_coord: task frame. 0: base frame. 1: tool frame.
     * @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
@@ -1623,12 +1627,12 @@ public:
 
 	/*
     * Set force control parameters.
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param f_coord: task frame. 0: base frame. 1: tool frame.
     * @param f_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
-    * @param f_ref:  the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
-    * @param f_limits:  for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
+    * @param f_ref: the forces/torques the robot will apply to its environment. The robot adjusts its position along/about compliant axis in order to achieve the specified force/torque.
+    * @param f_limits: for compliant axes, these values are the maximum allowed tcp speed along/about the axis.
 
     * return: See the code documentation for details.
     */
@@ -1636,7 +1640,7 @@ public:
 
 	/*
     * Set force control pid parameters.
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param kp: proportional gain
     * @param ki: integral gain.
@@ -1648,16 +1652,16 @@ public:
 	int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
 
 	/*
-    * Set force/torque offset.
-    *   Note: only available if firmware_version >= 1.8.0
+    * Set the current state to the zero point of the extenal force/torque sensor
+    *   Note: only available if firmware_version >= 1.8.3
 
     * return: See the code documentation for details.
     */
 	int ft_sensor_set_zero(void);
 
 	/*
-    * Identification the tcp load with ftsensor
-    *   Note: only available if firmware_version >= 1.8.0
+    * Identification the tcp load with the extenal force/torque sensor
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param result: the result of identification
 
@@ -1679,7 +1683,7 @@ public:
 
 	/*
     * Used for enabling and disabling the use of external F/T measurements in the controller.
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param on_off: enable or disable F/T data sampling.
 
@@ -1689,9 +1693,12 @@ public:
 
 	/*
     * Set robot to be controlled in force mode
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
-    * @param app_code: force mode. 0: non-force mode  1: impendance control  2:force control
+    * @param app_code: force mode. 
+		0: non-force mode
+		1: impendance control
+		2: force control
 
     * return: See the code documentation for details.
     */
@@ -1699,16 +1706,19 @@ public:
 
 	/*
     * Get force mode
-    *   Note: only available if firmware_version >= 1.8.0
+    *   Note: only available if firmware_version >= 1.8.3
 
     * @param app_code: the result of force mode.
+		0: non-force mode
+		1: impendance control
+		2: force control
 
     * return: See the code documentation for details.
     */
 	int ft_sensor_app_get(int *app_code);
 
 	/*
-    * Get the data of the extenal force/torque
+    * Get the data of the extenal force/torque sensor
     *   Note: only available if firmware_version >= 1.8.3
 
     * @param ft_data: the result of the extenal force/torque.
@@ -1718,7 +1728,7 @@ public:
 	int get_ft_sensor_data(float ft_data[6]);
 
 	/*
-    * Get the config of the extenal force/torque
+    * Get the config of the extenal force/torque sensor
     *   Note: only available if firmware_version >= 1.8.3
 
 	* @param ft_app_status: force mode
@@ -1968,8 +1978,8 @@ private:
 	int _bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data, int ret_length);
 	int _bio_gripper_wait_motion_completed(fp32 timeout = 5);
 	int _bio_gripper_wait_enable_completed(fp32 timeout = 3);
-	int _set_bio_gripper_position(int pos, int speed = 0, bool wait = true, fp32 timeout = 5);
-	int _set_bio_gripper_position(int pos, bool wait = true, fp32 timeout = 5);
+	int _set_bio_gripper_position(int pos, int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+	int _set_bio_gripper_position(int pos, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
 
 	int _check_gripper_position(fp32 target_pos, fp32 timeout = 10);
 	int _check_gripper_status(fp32 timeout = 10);
@@ -1991,7 +2001,9 @@ private:
 	int max_cmdnum_;
 	// pthread_t report_thread_;
 	std::thread report_thread_;
+	std::thread callback_thread_;
 	std::mutex mutex_;
+	std::mutex report_mutex_;
 	std::condition_variable cond_;
 	bool is_ready_;
 	bool is_tcp_;
@@ -2046,6 +2058,7 @@ private:
 	SerialPort *stream_ser_;
 	ThreadPool pool_;
 	XArmReportData *report_data_ptr_;
+	QueueMemcpy *report_que_;
 	std::string report_type_;
 	bool debug_;
 

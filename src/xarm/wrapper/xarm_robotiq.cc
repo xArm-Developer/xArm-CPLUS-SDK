@@ -140,15 +140,17 @@ int XArmAPI::robotiq_set_activate(unsigned char ret_data[6]) {
 	return robotiq_set_activate(true, ret_data);
 }
 
-int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
+int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char params[6] = { 0x09, 0x00, 0x00, pos, speed, force };
 	unsigned char rx_data[6] = { 0 };
-	bool has_error = error_code != 0;
-	bool is_stop = state == 4 || state == 5;
-	int code = _wait_move(NO_TIMEOUT);
-	if (!(code == 0 || (is_stop && code == API_CODE::EMERGENCY_STOP) || (has_error && code == API_CODE::HAS_ERROR))) {
-		return code;
+	if (wait_motion) {
+		bool has_error = error_code != 0;
+		bool is_stop = state == 4 || state == 5;
+		int code = _wait_move(NO_TIMEOUT);
+		if (!(code == 0 || (is_stop && code == API_CODE::EMERGENCY_STOP) || (has_error && code == API_CODE::HAS_ERROR))) {
+			return code;
+		}
 	}
 	int ret = _robotiq_set(params, 6, rx_data);
 	if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
@@ -156,45 +158,45 @@ int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char speed, unsign
 	return ret;
 }
 
-int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	return robotiq_set_position(pos, 0xFF, 0xFF, wait, timeout, ret_data);
+int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(pos, 0xFF, 0xFF, wait, timeout, ret_data, wait_motion);
 }
-int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, unsigned char ret_data[6]) {
-	return robotiq_set_position(pos, wait, 5, ret_data);
-}
-
-int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char ret_data[6]) {
-	return robotiq_set_position(pos, true, ret_data);
+int XArmAPI::robotiq_set_position(unsigned char pos, bool wait, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(pos, wait, 5, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_open(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	return robotiq_set_position(0x00, speed, force, wait, timeout, ret_data);
+int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(pos, true, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_open(bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	return robotiq_set_position(0x00, wait, timeout, ret_data);
+int XArmAPI::robotiq_open(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(0x00, speed, force, wait, timeout, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_open(bool wait, unsigned char ret_data[6]) {
-	return robotiq_open(wait, 5, ret_data);
+int XArmAPI::robotiq_open(bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(0x00, wait, timeout, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_open(unsigned char ret_data[6]) {
-	return robotiq_open(true, ret_data);
+int XArmAPI::robotiq_open(bool wait, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_open(wait, 5, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_close(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	return robotiq_set_position(0xFF, speed, force, wait, timeout, ret_data);
+int XArmAPI::robotiq_open(unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_open(true, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_close(bool wait, fp32 timeout, unsigned char ret_data[6]) {
-	return robotiq_set_position(0xFF, wait, timeout, ret_data);
+int XArmAPI::robotiq_close(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(0xFF, speed, force, wait, timeout, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_close(bool wait, unsigned char ret_data[6]) {
-	return robotiq_close(wait, 5, ret_data);
+int XArmAPI::robotiq_close(bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_set_position(0xFF, wait, timeout, ret_data, wait_motion);
 }
 
-int XArmAPI::robotiq_close(unsigned char ret_data[6]) {
-	return robotiq_close(true, ret_data);
+int XArmAPI::robotiq_close(bool wait, unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_close(wait, 5, ret_data, wait_motion);
+}
+
+int XArmAPI::robotiq_close(unsigned char ret_data[6], bool wait_motion) {
+	return robotiq_close(true, ret_data, wait_motion);
 }

@@ -59,7 +59,7 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall set_gripper_enable(bool enable);
 	extern "C" __declspec(dllexport) int __stdcall set_gripper_mode(int mode);
 	extern "C" __declspec(dllexport) int __stdcall set_gripper_speed(fp32 speed);
-	extern "C" __declspec(dllexport) int __stdcall set_gripper_position(fp32 pos, bool wait=false, fp32 timeout=10);
+	extern "C" __declspec(dllexport) int __stdcall set_gripper_position(fp32 pos, bool wait=false, fp32 timeout=10, bool wait_motion = true);
 	extern "C" __declspec(dllexport) int __stdcall get_gripper_position(fp32 *pos);
 	extern "C" __declspec(dllexport) int __stdcall get_gripper_err_code(int *err);
 	extern "C" __declspec(dllexport) int __stdcall clean_gripper_error(void);
@@ -121,14 +121,14 @@ namespace XArmWrapper {
 	
 	extern "C" __declspec(dllexport) int __stdcall robotiq_reset(unsigned char ret_data[6] = NULL);
 	extern "C" __declspec(dllexport) int __stdcall robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = NULL);
-	extern "C" __declspec(dllexport) int __stdcall robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	extern "C" __declspec(dllexport) int __stdcall robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
-	extern "C" __declspec(dllexport) int __stdcall robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL);
+	extern "C" __declspec(dllexport) int __stdcall robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	extern "C" __declspec(dllexport) int __stdcall robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	extern "C" __declspec(dllexport) int __stdcall robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
 	extern "C" __declspec(dllexport) int __stdcall robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers = 3);
 	extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_enable(bool enable, bool wait = true, fp32 timeout = 3);
 	extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_speed(int speed);
-	extern "C" __declspec(dllexport) int __stdcall open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
-	extern "C" __declspec(dllexport) int __stdcall close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5);
+	extern "C" __declspec(dllexport) int __stdcall open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+	extern "C" __declspec(dllexport) int __stdcall close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
 	extern "C" __declspec(dllexport) int __stdcall get_bio_gripper_status(int *status);
 	extern "C" __declspec(dllexport) int __stdcall get_bio_gripper_error(int *err);
 	extern "C" __declspec(dllexport) int __stdcall clean_bio_gripper_error(void);

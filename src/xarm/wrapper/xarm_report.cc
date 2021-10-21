@@ -179,6 +179,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		_update_old(rx_data);
 		return;
 	}
+	if (report_data_ptr_->flush_data(rx_data) != 0) return;
 	_report_data_callback();
 	int sizeof_data = bin8_to_32(rx_data);
 	if (sizeof_data >= 87) {
@@ -639,6 +640,20 @@ void XArmAPI::_update(unsigned char *rx_data) {
 // 	}
 // }
 
+void XArmAPI::_handle_report_data(void) {
+	int ret = 0;
+	unsigned char rx_data[REPORT_BUF_SIZE];
+	while (is_connected()) {
+		if (report_que_->size() == 0) {
+			sleep_milliseconds(10);
+			continue;
+		}
+		if (report_que_->pop(rx_data) != 0) continue;
+
+		_update(rx_data);
+	}
+}
+
 void XArmAPI::_recv_report_data(void) {
 	int size = 0;
 	int num = 0;
@@ -745,15 +760,47 @@ void XArmAPI::_recv_report_data(void) {
 				continue;
 			}
 		}
+		if (is_old_protocol_ && size >= 256) {
+			is_old_protocol_ = false;
+			stream_tcp_report_->close_port();
+			continue;
+		}
 		if (is_old_protocol_) {
-			db_success_pkt_cnt++;
-			_update(prev_data);
+			while (is_connected())
+			{
+				if (report_que_->size() != 0 && report_que_->pop(rx_data) == 0)
+					db_success_pkt_cnt--;
+				if (report_que_->push(prev_data) == 0) {
+					db_success_pkt_cnt++;
+					break;
+				}
+				sleep_milliseconds(1);
+			}
+			// db_success_pkt_cnt++;
+			// _update(prev_data);
 		}
 		else {
-			ret = report_data_ptr_->flush_data(prev_data);
+			ret = report_data_ptr_->check_data(prev_data);
+			// ret = report_data_ptr_->flush_data(prev_data);
 			if (ret == 0)  {
-				db_success_pkt_cnt++;
-				_update(prev_data);
+				while (is_connected())
+				{
+					if (report_que_->size() != 0 && report_que_->pop(rx_data) == 0) {
+						db_success_pkt_cnt--;
+						db_discard_pkt_cnt += 1;
+					}
+					if (report_que_->push(prev_data) == 0) {
+						db_success_pkt_cnt++;
+						break;
+					}
+					sleep_milliseconds(1);
+				}
+				if (db_packet_cnt % 1000 == 60) {
+					printf("[PACKET:%d][SUCCESS:%d][DISCARD:%d][FAILED:%d]\n", 
+						db_packet_cnt, db_success_pkt_cnt, db_discard_pkt_cnt, db_failed_pkt_cnt);
+				}
+				// db_success_pkt_cnt++;
+				// _update(prev_data);
 			}
 			else {
 				printf("flush report data failed, ret=%d\n", ret);

@@ -37,14 +37,16 @@ int XArmAPI::save_conf(void) {
 	return core->save_conf();
 }
 
-int XArmAPI::set_tcp_offset(fp32 pose_offset[6]) {
+int XArmAPI::set_tcp_offset(fp32 pose_offset[6], bool wait) {
 	_check_is_pause();
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 offset[6];
 	for (int i = 0; i < 6; i++) {
 		offset[i] = (float)(default_is_radian || i < 3 ? pose_offset[i] : pose_offset[i] / RAD_DEGREE);
 	}
-	_wait_move(NO_TIMEOUT);
+	if (wait) {
+		_wait_move(NO_TIMEOUT);
+	}
 	return core->set_tcp_offset(offset);
 }
 

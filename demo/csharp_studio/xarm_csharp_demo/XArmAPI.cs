@@ -115,7 +115,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_gripper_speed(float speed);
         [DllImport("xarm.dll")]
-        public static extern int set_gripper_position(float pos, bool wait = false, float timeout = 10);
+        public static extern int set_gripper_position(float pos, bool wait = false, float timeout = 10, bool wait_motion = true);
         [DllImport("xarm.dll")]
         public static extern int get_gripper_position(ref float pos);
         [DllImport("xarm.dll")]
@@ -227,11 +227,11 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int robotiq_set_activate(bool wait = true, float timeout = 3, byte[] ret_data = null);
         [DllImport("xarm.dll")]
-        public static extern int robotiq_set_position(byte pos, byte speed = 0xFF, byte force = 0xFF, bool wait = true, float timeout = 5, byte[] ret_data = null);
+        public static extern int robotiq_set_position(byte pos, byte speed = 0xFF, byte force = 0xFF, bool wait = true, float timeout = 5, byte[] ret_data = null, bool wait_motion = true);
         [DllImport("xarm.dll")]
-        public static extern int robotiq_open(byte speed = 0xFF, byte force = 0xFF, bool wait = true, float timeout = 5, byte[] ret_data = null);
+        public static extern int robotiq_open(byte speed = 0xFF, byte force = 0xFF, bool wait = true, float timeout = 5, byte[] ret_data = null, bool wait_motion = true);
         [DllImport("xarm.dll")]
-        public static extern int robotiq_close(byte speed = 0xFF, byte force = 0xFF, bool wait = true, float timeout = 5, byte[] ret_data = null);
+        public static extern int robotiq_close(byte speed = 0xFF, byte force = 0xFF, bool wait = true, float timeout = 5, byte[] ret_data = null, bool wait_motion = true);
         [DllImport("xarm.dll")]
         public static extern int robotiq_get_status(byte[] ret_data, byte number_of_registers = 3);
         [DllImport("xarm.dll")]
@@ -239,9 +239,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_bio_gripper_speed(int speed);
         [DllImport("xarm.dll")]
-        public static extern int open_bio_gripper(int speed = 0, bool wait = true, float timeout = 5);
+        public static extern int open_bio_gripper(int speed = 0, bool wait = true, float timeout = 5, bool wait_motion = true);
         [DllImport("xarm.dll")]
-        public static extern int close_bio_gripper(int speed = 0, bool wait = true, float timeout = 5);
+        public static extern int close_bio_gripper(int speed = 0, bool wait = true, float timeout = 5, bool wait_motion = true);
         [DllImport("xarm.dll")]
         public static extern int get_bio_gripper_status(ref int status);
         [DllImport("xarm.dll")]

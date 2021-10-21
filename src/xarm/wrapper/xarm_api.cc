@@ -186,6 +186,7 @@ void XArmAPI::_init(void) {
 	linear_track_status.sci = 1;
 
 	report_data_ptr_ = new XArmReportData(report_type_);
+	report_que_ = new QueueMemcpy(1, REPORT_BUF_SIZE);
 }
 
 bool XArmAPI::has_err_warn(void) {
@@ -211,6 +212,11 @@ bool XArmAPI::is_reported(void) {
 static void report_thread_handle_(void *arg) {
 	XArmAPI *my_this = (XArmAPI *)arg;
 	my_this->_recv_report_data();
+}
+
+static void callback_thread_handle_(void *arg) {
+	XArmAPI *my_this = (XArmAPI *)arg;
+	my_this->_handle_report_data();
 }
 
 void XArmAPI::_sync(void) {
@@ -282,8 +288,7 @@ void XArmAPI::_check_version(void) {
 	version_number[0] = major_version_number_;
 	version_number[1] = minor_version_number_;
 	version_number[2] = revision_version_number_;
-	printf("FIRMWARE_VERSION: %d.%d.%d, PROTOCOL: V%d\n", major_version_number_, minor_version_number_, revision_version_number_, is_old_protocol_ ? 0 : 1);
-	printf("HARDWARE_TYPE: %d, CONTROL_BOX_TYPE: %d\n", arm_type, control_type);
+	printf("FIRMWARE_VERSION: v%d.%d.%d, PROTOCOL: V%d, DETAIL: %s\n", major_version_number_, minor_version_number_, revision_version_number_, is_old_protocol_ ? 0 : 1, version_);
 	if (check_robot_sn_) {
 		cnt = 5;
 		int err_warn[2];
@@ -294,7 +299,7 @@ void XArmAPI::_check_version(void) {
 			sleep_milliseconds(100);
 			cnt -= 1;
 		}
-		printf("robot_sn: %s\n", sn);
+		printf("ROBOT_SN: %s\n", sn);
 	}
 }
 
@@ -419,6 +424,8 @@ int XArmAPI::connect(const std::string &port) {
 		if (!is_reported()) { return -3; }
 		report_thread_ = std::thread(report_thread_handle_, this);
 		report_thread_.detach();
+		callback_thread_ = std::thread(callback_thread_handle_, this);
+		callback_thread_.detach();
 	}
 	else {
 		is_tcp_ = false;

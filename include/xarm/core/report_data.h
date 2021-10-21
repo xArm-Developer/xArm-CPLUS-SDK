@@ -120,16 +120,25 @@ public:
 
   int flush_data(unsigned char *rx_data);
   void print_data(void);
+  int check_data(unsigned char *rx_data);
 
 private:
+  int __check_common_data(unsigned char *rx_data);
   int __flush_common_data(unsigned char *rx_data);
   void __print_common_data(void);
+
+  int _check_dev_data(unsigned char *rx_data);
   int _flush_dev_data(unsigned char *rx_data);
   void _print_dev_data(void);
+  
+  int _check_normal_data(unsigned char *rx_data);
   int _flush_normal_data(unsigned char *rx_data);
   void _print_normal_data(void);
+  
+  int _check_rich_data(unsigned char *rx_data);
   int _flush_rich_data(unsigned char *rx_data);
   void _print_rich_data(void);
+  
   void __flush_debug_data(int since_size);
 
 public:

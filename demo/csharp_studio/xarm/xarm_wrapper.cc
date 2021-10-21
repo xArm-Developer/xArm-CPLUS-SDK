@@ -184,8 +184,8 @@ namespace XArmWrapper
 	int __stdcall set_gripper_speed(fp32 speed) {
 		return arm->set_gripper_speed(speed);
 	}
-	int __stdcall set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
-		return arm->set_gripper_position(pos, wait, timeout);
+	int __stdcall set_gripper_position(fp32 pos, bool wait, fp32 timeout, bool wait_motion) {
+		return arm->set_gripper_position(pos, wait, timeout, wait_motion);
 	}
 	int __stdcall get_gripper_position(fp32 *pos) {
 		return arm->get_gripper_position(pos);
@@ -356,14 +356,14 @@ namespace XArmWrapper
 	int __stdcall robotiq_set_activate(bool wait, fp32 timeout, unsigned char ret_data[6]) {
 		return arm->robotiq_set_activate(wait, timeout, ret_data);
 	}
-	int __stdcall robotiq_set_position(unsigned char pos, unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-		return arm->robotiq_set_position(pos, speed, force, wait, timeout, ret_data);
+	int __stdcall robotiq_set_position(unsigned char pos, unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+		return arm->robotiq_set_position(pos, speed, force, wait, timeout, ret_data, wait_motion);
 	}
-	int __stdcall robotiq_open(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-		return arm->robotiq_open(speed, force, wait, timeout, ret_data);
+	int __stdcall robotiq_open(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+		return arm->robotiq_open(speed, force, wait, timeout, ret_data, wait_motion);
 	}
-	int __stdcall robotiq_close(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6]) {
-		return arm->robotiq_close(speed, force, wait, timeout, ret_data);
+	int __stdcall robotiq_close(unsigned char speed, unsigned char force, bool wait, fp32 timeout, unsigned char ret_data[6], bool wait_motion) {
+		return arm->robotiq_close(speed, force, wait, timeout, ret_data, wait_motion);
 	}
 	int __stdcall robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers) {
 		return arm->robotiq_get_status(ret_data, number_of_registers);
@@ -375,11 +375,11 @@ namespace XArmWrapper
 	int __stdcall set_bio_gripper_speed(int speed) {
 		return arm->set_bio_gripper_speed(speed);
 	}
-	int __stdcall open_bio_gripper(int speed, bool wait, fp32 timeout) {
-		return arm->open_bio_gripper(speed, wait, timeout);
+	int __stdcall open_bio_gripper(int speed, bool wait, fp32 timeout, bool wait_motion) {
+		return arm->open_bio_gripper(speed, wait, timeout, wait_motion);
 	}
-	int __stdcall close_bio_gripper(int speed, bool wait, fp32 timeout) {
-		return arm->close_bio_gripper(speed, wait, timeout);
+	int __stdcall close_bio_gripper(int speed, bool wait, fp32 timeout, bool wait_motion) {
+		return arm->close_bio_gripper(speed, wait, timeout, wait_motion);
 	}
 	int __stdcall get_bio_gripper_status(int *status) {
 		return arm->get_bio_gripper_status(status);

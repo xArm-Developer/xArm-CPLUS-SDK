@@ -337,14 +337,11 @@ XArmReportData::~XArmReportData(void) {}
 
 int XArmReportData::__flush_common_data(unsigned char *rx_data)
 {
-  int sizeof_data = bin8_to_32(rx_data);
-  if (sizeof_data < 87) {
-    return -1;
-  }
+  int ret = __check_common_data(rx_data);
+  if (ret != 0) return ret;
+
   data_fp = &rx_data[4];
   total_num = bin8_to_32(data_fp);
-
-  if (total_num < 87) return -1;
   state = data_fp[4] & 0x0F;
   mode = data_fp[4] >> 4;
   cmdnum = bin8_to_16(&data_fp[5]);
@@ -374,6 +371,7 @@ void XArmReportData::__flush_debug_data(int since_size) {
 
 int XArmReportData::_flush_dev_data(unsigned char *rx_data) {
   int ret = __flush_common_data(rx_data);
+  if (ret != 0) return ret;
   if (total_num >= 135) {
     // FT_SENSOR
     hex_to_nfp32(&data_fp[87], ft_ext_force, 6);
@@ -393,12 +391,9 @@ void XArmReportData::_print_dev_data(void)
 
 int XArmReportData::_flush_normal_data(unsigned char *rx_data)
 {
-  int ret = __flush_common_data(rx_data);
-  if (total_num < 133 || ret != 0) return (ret != 0 ? ret : -2);
-  if (data_fp[131] < 0 || data_fp[131] > 6 || data_fp[132] < 0 || data_fp[132] > 6) {
-    printf("DataException, collis_sens=%d, teach_sens=%d\n", data_fp[131], data_fp[132]);
-    return 1;
-  }
+  int ret = _check_normal_data(rx_data);
+  if (ret != 0) return ret;
+  ret = __flush_common_data(rx_data);
   mt_brake = data_fp[87];
   mt_able = data_fp[88];
   err = data_fp[89];
@@ -424,8 +419,9 @@ void XArmReportData::_print_normal_data(void)
 
 int XArmReportData::_flush_rich_data(unsigned char *rx_data)
 {
-  int ret = _flush_normal_data(rx_data);
-  if (total_num < 245 || ret != 0) return (ret != 0 ? ret : -3);
+  int ret = _check_rich_data(rx_data);
+  if (ret != 0) return ret;
+  ret = _flush_normal_data(rx_data);
   arm_type = data_fp[145];
   axis_num = data_fp[146];
   master_id = data_fp[147];
@@ -515,7 +511,7 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
       memcpy(pose_aa, pose, sizeof(float) * 3);
       hex_to_nfp32(&data_fp[482], pose_aa, 3);
     }
-    __flush_debug_data(482);
+    __flush_debug_data(494);
   }
   return ret;
 }
@@ -628,5 +624,50 @@ void XArmReportData::print_data(void)
   }
   else {
     _print_normal_data();
+  }
+}
+
+int XArmReportData::__check_common_data(unsigned char *rx_data)
+{
+  if (bin8_to_32(rx_data) < 87) return -1;
+  if (bin8_to_32(&rx_data[4]) < 87) return -1;
+  return 0;
+}
+
+int XArmReportData::_check_dev_data(unsigned char *rx_data)
+{
+  return __check_common_data(rx_data);
+}
+
+int XArmReportData::_check_normal_data(unsigned char *rx_data)
+{
+  int ret = __check_common_data(rx_data);
+  if (ret != 0) return ret;
+  if (bin8_to_32(&rx_data[4]) < 133) return -2;
+  if (rx_data[131+4] < 0 || rx_data[131+4] > 6 || rx_data[132+4] < 0 || rx_data[132+4] > 6) {
+    printf("DataException, collis_sens=%d, teach_sens=%d\n", rx_data[131+4], rx_data[132+4]);
+    return 1;
+  }
+  return 0;
+}
+
+int XArmReportData::_check_rich_data(unsigned char *rx_data)
+{
+  int ret = _check_normal_data(rx_data);
+  if (ret != 0) return ret;
+  if (bin8_to_32(&rx_data[4]) < 245) return -3;
+  return 0;
+}
+
+int XArmReportData::check_data(unsigned char *rx_data)
+{
+  if (report_type == "dev") {
+    return _check_dev_data(rx_data);
+  }
+  else if (report_type == "rich") {
+    return _check_rich_data(rx_data);
+  }
+  else {
+    return _check_normal_data(rx_data);
   }
 }

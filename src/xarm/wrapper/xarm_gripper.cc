@@ -218,13 +218,15 @@ int XArmAPI::_check_gripper_status(fp32 timeout) {
 	return code;
 }
 
-int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
+int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout, bool wait_motion) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	bool has_error = error_code != 0;
-	bool is_stop = state == 4 || state == 5;
-	int code = _wait_move(NO_TIMEOUT);
-	if (!(code == 0 || (is_stop && code == API_CODE::EMERGENCY_STOP) || (has_error && code == API_CODE::HAS_ERROR))) {
-		return code;
+	if (wait_motion) {
+		bool has_error = error_code != 0;
+		bool is_stop = state == 4 || state == 5;
+		int code = _wait_move(NO_TIMEOUT);
+		if (!(code == 0 || (is_stop && code == API_CODE::EMERGENCY_STOP) || (has_error && code == API_CODE::HAS_ERROR))) {
+			return code;
+		}
 	}
 	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_pos(pos);

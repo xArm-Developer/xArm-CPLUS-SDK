@@ -265,3 +265,4 @@ ModelManifest.xml
 .fake/
 CMakeLists.txt
 *.old
+example/0000*

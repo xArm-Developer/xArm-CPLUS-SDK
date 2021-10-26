@@ -114,6 +114,13 @@ int XArmAPI::get_ft_sensor_config(int *ft_app_status, int *ft_is_started, int *f
 	return _check_code(ret);
 }
 
+int XArmAPI::get_ft_sensor_error(int *err)
+{
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int ret = core->ft_sensor_get_error(err);
+	return _check_code(ret);
+}
+
 int XArmAPI::iden_tcp_load(float result[4])
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;

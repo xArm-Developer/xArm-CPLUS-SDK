@@ -44,23 +44,26 @@ int main(int argc, char **argv) {
         return 0;
     }
     std::string port(argv[1]);
-
-    XArmAPI *arm = new XArmAPI(port, false, true);
+    XArmAPI *arm = new XArmAPI(port, false, true, true, true, true, false, true, true, 0);
 
     printf("register events\n");
     arm->register_report_location_callback(report_location_callback);
     arm->register_connect_changed_callback(connect_changed_callback);
-    arm->register_state_changed_callback(state_changed_callback);
+    // arm->register_state_changed_callback(state_changed_callback);
     arm->register_mode_changed_callback(mode_changed_callback);
     arm->register_mtable_mtbrake_changed_callback(mtable_mtbrake_changed_callback);
     arm->register_error_warn_changed_callback(error_warn_changed_callback);
-    arm->register_cmdnum_changed_callback(cmdnum_changed_callback);
+    // arm->register_cmdnum_changed_callback(cmdnum_changed_callback);
 
     arm->connect();
-    arm->motion_enable(true);
-    arm->set_mode(0);
-    arm->set_state(0);
-    sleep_milliseconds(100000);
+    // arm->motion_enable(true);
+    // arm->set_mode(0);
+    // arm->set_state(0);
+    // sleep_milliseconds(100000);
+
+    while (arm->is_connected()) {
+        sleep_milliseconds(1000);
+    }
 
     printf("release events\n");
     arm->release_report_location_callback(report_location_callback);
@@ -71,6 +74,6 @@ int main(int argc, char **argv) {
     arm->release_error_warn_changed_callback(error_warn_changed_callback);
     arm->release_cmdnum_changed_callback(cmdnum_changed_callback);
 
-    sleep_milliseconds(30000);
+    // sleep_milliseconds(30000);
     return 0;
 }

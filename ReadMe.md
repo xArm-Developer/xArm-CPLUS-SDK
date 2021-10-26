@@ -13,7 +13,7 @@
 ## Update Summary
 - > ### 1.8.4
   - Support six-dimensional torque sensor (not a third party)
-  - Add threads to handle callbacks
+  - Modify the reporting processing logic and optimize the processing of sticky packets
   - Fixed frequent switching of the pause state causing the program to hang
   - Fix the program hangs when setting the mechanical claw position in speed mode
 
@@ -263,6 +263,8 @@
 - ##### [8003-force_control](example/8003-force_control.cc)
 
 - ##### [8004-load_identify](example/8004-load_identify.cc)
+
+- ##### [8005-read_force_data](example/8005-read_force_data.cc)
 
 - ##### [8006-save_force_zero](example/8006-save_force_zero.cc)
 

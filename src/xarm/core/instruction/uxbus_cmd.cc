@@ -1425,6 +1425,29 @@ int UxbusCmd::ft_sensor_get_config(int *ft_app_status, int *ft_is_started, int *
 	return ret;
 }
 
+int UxbusCmd::ft_sensor_get_error(int *err)
+{
+	unsigned char *txdata = new unsigned char[3];
+	txdata[0] = 8;
+	bin16_to_8(0x0010, &txdata[1]);
+
+	std::lock_guard<std::mutex> locker(mutex_);
+	int ret = send_xbus(UXBUS_RG::SERVO_R16B, txdata, 3);
+	delete[] txdata;
+	if (0 != ret) { return UXBUS_STATE::ERR_NOTTCP; }
+	unsigned char *rx_data = new unsigned char[4];
+	ret = send_pend(UXBUS_RG::SERVO_R16B, 4, GET_TIMEOUT_, rx_data);
+	if (ret == 0 || ret == 1 || ret == 2) {
+		if (bin8_to_32(rx_data) == 27) {
+			*err = 0;
+		}
+		else {
+			*err = rx_data[2];
+		}
+	}
+	return ret;
+}
+
 int UxbusCmd::iden_tcp_load(float result[4])
 {
 	return iden_load(1, result, 4, 500000);

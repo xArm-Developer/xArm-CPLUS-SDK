@@ -2060,6 +2060,16 @@ Get the config of the extenal force/torque sensor
 :return: See the code documentation for details.
 ```
 
+__int get_ft_sensor_error(int *err)__
+```
+Get the error of the extenal force/torque sensor
+    Note: only available if firmware_version >= 1.8.3
+
+:param err: the result of ft sensor error code
+
+:return: See the code documentation for details.
+```
+
 __int iden_tcp_load(float result[4])__
 ```
 Identification the tcp load with current

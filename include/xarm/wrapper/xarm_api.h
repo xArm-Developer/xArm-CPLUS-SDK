@@ -1766,6 +1766,16 @@ public:
 		int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
 
 	/*
+    * Get the error of the extenal force/torque sensor
+    *   Note: only available if firmware_version >= 1.8.3
+
+    * @param err: the result of ft sensor error code
+
+    * return: See the code documentation for details.
+    */
+	int get_ft_sensor_error(int *err);
+
+	/*
     * Identification the tcp load with current
     *   Note: only available if firmware_version >= 1.8.0
 

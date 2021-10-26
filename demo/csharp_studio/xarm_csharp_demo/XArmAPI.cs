@@ -293,7 +293,9 @@ namespace xarm_csharp_demo
         public static extern int get_ft_sensor_config(ref int ft_app_status, ref int ft_is_started, ref int ft_type, ref int ft_id, ref int ft_freq, 
             ref float ft_mass, ref float ft_dir_bias, float[] ft_centroid, float[] ft_zero, ref int imp_coord, int[] imp_c_axis, float[] M, float[] K, float[] B,
             ref int f_coord, int[] f_c_axis, float[] f_ref, float[] f_limits, float[] kp, float[] ki, float[] kd, float[] xe_limit);
-        
+        [DllImport("xarm.dll")]
+        public static extern int get_ft_sensor_error(ref int err);
+
         [DllImport("xarm.dll")]
         public static extern int iden_tcp_load(float[] result);
 

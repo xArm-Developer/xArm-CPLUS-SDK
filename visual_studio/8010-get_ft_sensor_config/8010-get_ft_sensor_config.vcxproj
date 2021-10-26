@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7C208608-3117-45A3-B7E1-B8CBD8E8B4FC}</ProjectGuid>
+    <ProjectGuid>{8C10ACAE-6B49-45DD-A95B-48C00DCB8D7B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>My8005save_force_zero</RootNamespace>
+    <RootNamespace>My8010get_ft_sensor_config</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -148,12 +148,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\example\8010-get_ft_sensor_config.cc" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\xarm\xarm.vcxproj">
       <Project>{dee3d7ef-64e9-4614-8e4b-c78464a758e5}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\example\8006-save_force_zero.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

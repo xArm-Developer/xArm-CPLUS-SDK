@@ -43,18 +43,18 @@ static bool is_ignore_errno(int fp, int port)
 #endif
 
 
-inline unsigned long long get_ms()
-{
-#ifdef _WIN32
-	struct timeb t;
-	ftime(&t);
-	return 1000 * t.time + t.millitm; // milliseconds
-#else
-	struct timespec t;
-	clock_gettime(CLOCK_REALTIME, &t);
-	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
-#endif
-}
+// inline unsigned long long get_ms()
+// {
+// #ifdef _WIN32
+// 	struct timeb t;
+// 	ftime(&t);
+// 	return 1000 * t.time + t.millitm; // milliseconds
+// #else
+// 	struct timespec t;
+// 	clock_gettime(CLOCK_REALTIME, &t);
+// 	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
+// #endif
+// }
 
 void SocketPort::recv_report_proc(void) {
 	int ret;

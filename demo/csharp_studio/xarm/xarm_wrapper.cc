@@ -459,6 +459,9 @@ namespace XArmWrapper
 			ft_mass, ft_dir_bias, ft_centroid, ft_zero, imp_coord, imp_c_axis, M, K, B,
 			f_coord, f_c_axis, f_ref, f_limits, kp, ki, kd, xe_limit);
 	}
+	int __stdcall get_ft_sensor_error(int *err) {
+		return arm->get_ft_sensor_error(err);
+	}
 	
 	int __stdcall iden_tcp_load(float result[4]) {
 		return arm->iden_tcp_load(result);

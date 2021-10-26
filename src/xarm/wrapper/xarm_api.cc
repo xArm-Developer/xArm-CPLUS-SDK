@@ -211,11 +211,6 @@ bool XArmAPI::is_reported(void) {
 
 static void report_thread_handle_(void *arg) {
 	XArmAPI *my_this = (XArmAPI *)arg;
-	my_this->_recv_report_data();
-}
-
-static void callback_thread_handle_(void *arg) {
-	XArmAPI *my_this = (XArmAPI *)arg;
 	my_this->_handle_report_data();
 }
 
@@ -424,8 +419,6 @@ int XArmAPI::connect(const std::string &port) {
 		if (!is_reported()) { return -3; }
 		report_thread_ = std::thread(report_thread_handle_, this);
 		report_thread_.detach();
-		callback_thread_ = std::thread(callback_thread_handle_, this);
-		callback_thread_.detach();
 	}
 	else {
 		is_tcp_ = false;

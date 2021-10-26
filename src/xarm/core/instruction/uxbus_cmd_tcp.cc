@@ -23,7 +23,7 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 	unsigned char *data_fp = &datas[4];
 
 	int sizeof_data = bin8_to_32(datas);
-	if (sizeof_data < 8 || sizeof_data >= arm_port_->que_maxlen_)
+	if (sizeof_data < 8 || sizeof_data >= arm_port_->que_maxlen)
 	{
 		return UXBUS_STATE::ERR_LENG;
 	}
@@ -60,13 +60,13 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 	int i;
 	int ret = UXBUS_STATE::ERR_TOUT;
 	int ret2;
-	// unsigned char rx_data[arm_port_->que_maxlen_] = {0};
-	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen_];
+	// unsigned char rx_data[arm_port_->que_maxlen] = {0};
+	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen];
 	long long expired = get_system_time() + (long long)timeout;
 	while (get_system_time() < expired) {
 		ret2 = arm_port_->read_frame(rx_data);
 		if (ret2 != -1) {
-			// print_hex("recv:", rx_data, arm_port_->que_maxlen_);
+			// print_hex("recv:", rx_data, arm_port_->que_maxlen);
 			ret = check_xbus_prot(rx_data, funcode);
 			if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 				int n = num;

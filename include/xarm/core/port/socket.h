@@ -14,15 +14,17 @@
 
 class SocketPort {
 public:
-	SocketPort(char *server_ip, int server_port, int que_num, int que_maxlen);
+	SocketPort(char *server_ip, int server_port, int que_num, int que_maxlen, int tcp_type = 0);
 	~SocketPort(void);
 	int is_ok(void);
 	void flush(void);
 	void recv_proc(void);
+	void recv_report_proc(void);
 	int write_frame(unsigned char *data, int len);
 	int read_frame(unsigned char *data);
 	void close_port(void);
-	int que_maxlen_;
+	int que_maxlen;
+	bool is_report;
 
 private:
 	int port_;

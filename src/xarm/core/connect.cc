@@ -24,7 +24,7 @@ UxbusCmdSer *connect_rs485_control(const char *com) {
 
 UxbusCmdTcp *connect_tcp_control(char *server_ip) {
   SocketPort *arm_port =
-    new SocketPort(server_ip, XARM_CONF::TCP_PORT_CONTROL, 3, 128);
+    new SocketPort(server_ip, XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0);
   if (arm_port->is_ok() != 0) {
     printf("Error: Tcp Control connection failed\n");
     return NULL;
@@ -36,7 +36,7 @@ UxbusCmdTcp *connect_tcp_control(char *server_ip) {
 
 SocketPort *connect_tcp_report_norm(char *server_ip) {
   SocketPort *arm_report =
-    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_NORM, 5, 149); // 145 + 4
+    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_NORM, 5, 145 + 4, 1); // 145 + 4
   if (arm_report->is_ok() != 0) {
     printf("Error: Tcp Report Norm connection failed, ip: %s\n", server_ip);
     return NULL;
@@ -47,7 +47,7 @@ SocketPort *connect_tcp_report_norm(char *server_ip) {
 
 SocketPort *connect_tcp_report_rich(char *server_ip) {
   SocketPort *arm_report =
-    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_RICH, 5, 512);
+    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_RICH, 5, 1024 + 4, 1);  // 494 + 4
   if (arm_report->is_ok() != 0) {
     printf("Error: Tcp Report Rich connection failed\n");
     return NULL;
@@ -58,7 +58,7 @@ SocketPort *connect_tcp_report_rich(char *server_ip) {
 
 SocketPort *connect_tcp_report_devl(char *server_ip) {
   SocketPort *arm_report =
-    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_DEVL, 10, 91); // 87 + 4
+    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_DEVL, 10, 135 + 4, 1); // 87 + 48 + 4
   if (arm_report->is_ok() != 0) {
     printf("Error: Tcp Report develop connection failed\n");
     return NULL;

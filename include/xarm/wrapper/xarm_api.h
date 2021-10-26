@@ -224,8 +224,6 @@ public:
 	void disconnect(void);
 
 	/*no use please*/
-	void _recv_report_data(void);
-	/*no use please*/
 	void _handle_report_data(void);
 
 	/*
@@ -2001,9 +1999,7 @@ private:
 	int max_cmdnum_;
 	// pthread_t report_thread_;
 	std::thread report_thread_;
-	std::thread callback_thread_;
 	std::mutex mutex_;
-	std::mutex report_mutex_;
 	std::condition_variable cond_;
 	bool is_ready_;
 	bool is_tcp_;

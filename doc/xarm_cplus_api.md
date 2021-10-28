@@ -2041,7 +2041,7 @@ Get the data of the Six-axis Force Torque Sensor
         1. only available if firmware_version >= 1.8.3
         2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
-:param ft_data: the result of the extenal force/torque.
+:param ft_data: the result of the Six-axis Force Torque Sensor.
 
 :return: See the code documentation for details.
 ```

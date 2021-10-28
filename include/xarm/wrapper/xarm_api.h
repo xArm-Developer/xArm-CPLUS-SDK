@@ -1585,8 +1585,11 @@ public:
 	int calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
 
     /*
-    * Set all parameters of impedance control.
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set all parameters of impedance control through the Six-axis Force Torque Sensor.
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
+
 
     * @param imp_coord: task frame. 0: base frame. 1: tool frame.
     * @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
@@ -1600,8 +1603,10 @@ public:
 	int set_impedance(int imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6]);
 
 	/*
-    * Set mbk parameters of impedance control.
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set mbk parameters of impedance control through the Six-axis Force Torque Sensor.
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param M: mass. (kg)
     * @param K: stiffness coefficient.
@@ -1613,8 +1618,10 @@ public:
 	int set_impedance_mbk(float M[6], float K[6], float B[6]);
 
 	/*
-    * Set impedance control parameters of impedance control.
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set impedance control parameters of impedance control through the Six-axis Force Torque Sensor.
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param imp_coord: task frame. 0: base frame. 1: tool frame.
     * @param imp_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
@@ -1624,8 +1631,10 @@ public:
 	int set_impedance_config(int imp_coord, int imp_c_axis[6]);
 
 	/*
-    * Set force control parameters.
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set force control parameters through the Six-axis Force Torque Sensor.
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param f_coord: task frame. 0: base frame. 1: tool frame.
     * @param f_c_axis: a 6d vector of 0s and 1s. 1 means that robot will be impedance in the corresponding axis of the task frame.
@@ -1637,8 +1646,10 @@ public:
 	int config_force_control(int f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6]);
 
 	/*
-    * Set force control pid parameters.
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set force control pid parameters through the Six-axis Force Torque Sensor.
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param kp: proportional gain
     * @param ki: integral gain.
@@ -1650,15 +1661,17 @@ public:
 	int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
 
 	/*
-    * Set the current state to the zero point of the extenal force/torque sensor
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set the current state to the zero point of the Six-axis Force Torque Sensor
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * return: See the code documentation for details.
     */
 	int ft_sensor_set_zero(void);
 
 	/*
-    * Identification the tcp load with the extenal force/torque sensor
+    * Identification the tcp load with the the Six-axis Force Torque Sensor
     *   Note: only available if firmware_version >= 1.8.3
 
     * @param result: the result of identification
@@ -1668,8 +1681,10 @@ public:
 	int ft_sensor_iden_load(float result[10]);
 
 	/*
-    * Write load parameter value
-    *   Note: only available if firmware_version >= 1.8.3
+    * Write the load offset parameters identified by the Six-axis Force Torque Sensor
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
 	* @param association_setting_tcp_load: whether to convert the paramster to the corresponding tcp load and set, default is false
@@ -1680,8 +1695,10 @@ public:
 	int ft_sensor_cali_load(float load[10], bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8);
 
 	/*
-    * Used for enabling and disabling the use of external F/T measurements in the controller.
-    *   Note: only available if firmware_version >= 1.8.3
+    * Used for enabling and disabling the use of the Six-axis Force Torque Sensor measurements in the controller.
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param on_off: enable or disable F/T data sampling.
 
@@ -1690,8 +1707,10 @@ public:
 	int ft_sensor_enable(int on_off);
 
 	/*
-    * Set robot to be controlled in force mode
-    *   Note: only available if firmware_version >= 1.8.3
+    * Set robot to be controlled in force mode. (Through the Six-axis Force Torque Sensor)
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param app_code: force mode. 
 		0: non-force mode
@@ -1704,7 +1723,9 @@ public:
 
 	/*
     * Get force mode
-    *   Note: only available if firmware_version >= 1.8.3
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param app_code: the result of force mode.
 		0: non-force mode
@@ -1716,8 +1737,10 @@ public:
 	int ft_sensor_app_get(int *app_code);
 
 	/*
-    * Get the data of the extenal force/torque sensor
-    *   Note: only available if firmware_version >= 1.8.3
+    * Get the data of the Six-axis Force Torque Sensor
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param ft_data: the result of the extenal force/torque.
 
@@ -1726,8 +1749,10 @@ public:
 	int get_ft_sensor_data(float ft_data[6]);
 
 	/*
-    * Get the config of the extenal force/torque sensor
-    *   Note: only available if firmware_version >= 1.8.3
+    * Get the config of the Six-axis Force Torque Sensor
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
 	* @param ft_app_status: force mode
 		0: non-force mode
@@ -1766,8 +1791,10 @@ public:
 		int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
 
 	/*
-    * Get the error of the extenal force/torque sensor
-    *   Note: only available if firmware_version >= 1.8.3
+    * Get the error code of the Six-axis Force Torque Sensor
+    *   Note: 
+		* 		1. only available if firmware_version >= 1.8.3
+		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
 
     * @param err: the result of ft sensor error code
 

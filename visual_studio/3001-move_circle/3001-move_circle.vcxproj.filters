@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="3001-move_circle.cc">
+    <ClCompile Include="..\..\example\3001-move_circle.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

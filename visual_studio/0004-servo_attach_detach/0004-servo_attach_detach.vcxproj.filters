@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="0004-servo_attach_detach.cc">
+    <ClCompile Include="..\..\example\0004-servo_attach_detach.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

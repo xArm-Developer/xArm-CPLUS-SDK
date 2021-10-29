@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="3003-playback_trajectory.cc">
+    <ClCompile Include="..\..\example\3003-playback_trajectory.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

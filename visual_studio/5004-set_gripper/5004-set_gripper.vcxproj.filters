@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="5004-set_gripper.cc">
+    <ClCompile Include="..\..\example\5004-set_gripper.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

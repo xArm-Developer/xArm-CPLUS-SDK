@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="5005-get_cgpio_digital_analog.cc">
+    <ClCompile Include="..\..\example\5005-get_cgpio_digital_analog.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

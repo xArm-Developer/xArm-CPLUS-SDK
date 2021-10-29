@@ -799,7 +799,7 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
 }
 
 int UxbusCmd::gripper_modbus_w16s(int addr, float value, int len) {
-	unsigned char *txdata = new unsigned char[9];
+	unsigned char *txdata = new unsigned char[11];
 	unsigned char *rx_data = new unsigned char[254];
 	txdata[0] = UXBUS_CONF::GRIPPER_ID;
 	txdata[1] = 0x10;
@@ -825,7 +825,7 @@ int UxbusCmd::gripper_modbus_r16s(int addr, int len, unsigned char *rx_data) {
 }
 
 int UxbusCmd::gripper_modbus_set_en(int value) {
-	unsigned char *txdata = new unsigned char[2];
+	unsigned char *txdata = new unsigned char[4];
 	bin16_to_8(value, &txdata[0]);
 	float _value = hex_to_fp32(txdata);
 	delete[] txdata;
@@ -833,7 +833,7 @@ int UxbusCmd::gripper_modbus_set_en(int value) {
 }
 
 int UxbusCmd::gripper_modbus_set_mode(int value) {
-	unsigned char *txdata = new unsigned char[2];
+	unsigned char *txdata = new unsigned char[4];
 	bin16_to_8(value, &txdata[0]);
 	float _value = hex_to_fp32(txdata);
 	delete[] txdata;
@@ -864,7 +864,7 @@ int UxbusCmd::gripper_modbus_set_pos(float pulse) {
 }
 
 int UxbusCmd::gripper_modbus_set_posspd(float speed) {
-	unsigned char *txdata = new unsigned char[2];
+	unsigned char *txdata = new unsigned char[4];
 	bin16_to_8((int)speed, &txdata[0]);
 	float value = hex_to_fp32(txdata);
 	delete[] txdata;

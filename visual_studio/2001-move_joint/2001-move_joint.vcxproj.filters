@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="2001-move_joint.cc">
+    <ClCompile Include="..\..\example\2001-move_joint.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

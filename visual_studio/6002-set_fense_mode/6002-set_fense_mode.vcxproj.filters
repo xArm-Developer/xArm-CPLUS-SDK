@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="6002-set_fense_mode.cc">
+    <ClCompile Include="..\..\example\6002-set_fense_mode.cc">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

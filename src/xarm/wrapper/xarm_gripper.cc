@@ -11,7 +11,7 @@
 int XArmAPI::get_gripper_version(unsigned char versions[3]) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char val1[6], val2[6], val3[6];
-	int code;
+	int code = 0;
 	versions[0] = 0;
 	versions[1] = 0;
 	versions[2] = 0;

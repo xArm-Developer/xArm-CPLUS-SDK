@@ -515,7 +515,7 @@ namespace XArmWrapper
 	}
 
 	int __stdcall set_timeout(float timeout) {
-		return arm->set_timeout();
+		return arm->set_timeout(timeout);
 	}
 
 	int __stdcall set_baud_checkset_enable(bool enable) {

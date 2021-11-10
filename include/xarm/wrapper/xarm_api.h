@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.8.4"
+#define SDK_VERSION "1.8.5"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -103,7 +103,8 @@ public:
 		int max_cmdnum = 512,
 		int init_axis = 7,
 		bool debug = false,
-		std::string report_type = "rich");
+		std::string report_type = "rich",
+		bool baud_checkset = true);
 	~XArmAPI(void);
 
 public:
@@ -1967,6 +1968,39 @@ public:
 	int set_linear_track_stop(void);
 
 	int set_timeout(fp32 timeout);
+
+	/*
+	* Enable auto checkset the baudrate of the end IO board or not
+	*	Note: only available in the API of gripper/bio/robotiq/linear_track.
+	*/
+	int set_baud_checkset_enable(bool enable);
+	
+	/*
+	* Set the checkset baud value
+	*	Note: do not modify at will, only use when the baud rate of the corresponding peripheral is changed
+
+	* @param type: checkset type
+		1: xarm gripper
+		2: bio gripper
+		3: robotiq gripper
+		4: linear track
+	* @param baud: checkset baud value, less than or equal to 0 means disable checkset
+	* return: See the code documentation for details.
+	*/
+	int set_checkset_default_baud(int type, int baud);
+
+	/*
+	* Get the checkset baud
+
+	* @param type: checkset type
+		1: xarm gripper
+		2: bio gripper
+		3: robotiq gripper
+		4: linear track
+	* @param baud: checkset baud value, less than or equal to 0 means disable checkset
+	* return: See the code documentation for details.
+	*/
+	int get_checkset_default_baud(int type, int *baud);
 private:
 	void _init(void);
 	void _sync(void);
@@ -2091,9 +2125,13 @@ private:
 	SerialPort *stream_ser_;
 	ThreadPool pool_;
 	XArmReportData *report_data_ptr_;
-	QueueMemcpy *report_que_;
 	std::string report_type_;
 	bool debug_;
+	int default_bio_baud_;
+	int default_gripper_baud_;
+	int default_robotiq_baud_;
+	int default_linear_track_baud_;
+	bool baud_checkset_flag_;
 
 	std::vector<std::function<void (XArmReportData *)>> report_data_functions_;
 	std::vector<std::function<void (const fp32*, const fp32*)>> report_location_functions_;

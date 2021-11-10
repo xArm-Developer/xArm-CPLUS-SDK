@@ -35,11 +35,12 @@ XArmAPI::XArmAPI(
 	int max_cmdnum,
 	int init_axis,
 	bool debug,
-	std::string report_type)
+	std::string report_type,
+	bool baud_checkset)
 	: default_is_radian(is_radian), port_(port),
 	check_tcp_limit_(check_tcp_limit), check_joint_limit_(check_joint_limit),
 	check_cmdnum_limit_(check_cmdnum_limit), check_robot_sn_(check_robot_sn),
-	check_is_ready_(check_is_ready), check_is_pause_(check_is_pause) {
+	check_is_ready_(check_is_ready), check_is_pause_(check_is_pause), baud_checkset_flag_(baud_checkset) {
 	// default_is_radian = is_radian;
 	// check_tcp_limit_ = check_tcp_limit;
 	pool_.set_max_thread_count(max_callback_thread_count);
@@ -185,8 +186,60 @@ void XArmAPI::_init(void) {
 	memset(&linear_track_status, 0, sizeof(linear_track_status));
 	linear_track_status.sci = 1;
 
+	default_bio_baud_ = 2000000;
+	default_gripper_baud_ = 2000000;
+	default_robotiq_baud_ = 115200;
+	default_linear_track_baud_ = 2000000;
+
 	report_data_ptr_ = new XArmReportData(report_type_);
-	report_que_ = new QueueMemcpy(1, REPORT_BUF_SIZE);
+}
+
+int XArmAPI::set_baud_checkset_enable(bool enable)
+{
+	baud_checkset_flag_ = enable;
+	return 0;
+}
+
+int XArmAPI::set_checkset_default_baud(int type, int baud)
+{
+	switch (type) {
+		case 1:
+			default_gripper_baud_ = baud;
+			break;
+		case 2:
+			default_bio_baud_ = baud;
+			break;
+		case 3:
+			default_robotiq_baud_ = baud;
+			break;
+		case 4:
+			default_linear_track_baud_ = baud;
+			break;
+		default:
+			return API_CODE::API_EXCEPTION;
+	}
+	return 0;
+}
+
+int XArmAPI::get_checkset_default_baud(int type, int *baud)
+{
+	switch (type) {
+		case 1:
+			*baud = default_gripper_baud_;
+			break;
+		case 2:
+			*baud = default_bio_baud_;
+			break;
+		case 3:
+			*baud = default_robotiq_baud_;
+			break;
+		case 4:
+			*baud = default_linear_track_baud_;
+			break;
+		default:
+			return API_CODE::API_EXCEPTION;
+	}
+	return 0;
 }
 
 bool XArmAPI::has_err_warn(void) {

@@ -13,7 +13,7 @@
 int XArmAPI::_get_linear_track_registers(unsigned char *ret_data, int addr, int number_of_registers)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 
     int ret = core->track_modbus_r16s(addr, ret_data, number_of_registers);
     ret = _check_modbus_code(ret, ret_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID);
@@ -132,7 +132,7 @@ int XArmAPI::get_linear_track_sco(int sco[2])
 int XArmAPI::clean_linear_track_error(void)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
     
     unsigned char send_data[2];
     bin16_to_8(1, send_data);
@@ -146,7 +146,7 @@ int XArmAPI::clean_linear_track_error(void)
 int XArmAPI::set_linear_track_enable(bool enable)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 
     unsigned char rx_data[7] = {0};
     unsigned char send_data[2];
@@ -160,7 +160,7 @@ int XArmAPI::set_linear_track_enable(bool enable)
 int XArmAPI::set_linear_track_speed(int speed)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
     
     unsigned char rx_data[7] = {0};
     unsigned char send_data[2];
@@ -176,8 +176,8 @@ int XArmAPI::set_linear_track_speed(int speed)
 int XArmAPI::set_linear_track_back_origin(bool wait, bool auto_enable)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
-    
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+
     unsigned char rx_data[7] = {0};
     int ret = core->track_modbus_r16s(SERVO3_RG::BACK_ORIGIN, rx_data, 1, 0x06);
     ret = _check_modbus_code(ret, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID);
@@ -194,7 +194,7 @@ int XArmAPI::set_linear_track_back_origin(bool wait, bool auto_enable)
 int XArmAPI::set_linear_track_pos(int pos, int speed, bool wait, fp32 timeout, bool auto_enable)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
     
     int ret = get_linear_track_registers(NULL, 0x0A23, 3);
     if (ret == 0 && linear_track_status.on_zero != 1) {
@@ -223,8 +223,8 @@ int XArmAPI::set_linear_track_pos(int pos, int speed, bool wait, fp32 timeout, b
 int XArmAPI::set_linear_track_stop(void)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(TRACK_BAUD, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
-    
+    if (baud_checkset_flag_ && _checkset_modbus_baud(default_linear_track_baud_, true, UXBUS_CONF::LINEAR_TRACK_HOST_ID) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+
     unsigned char rx_data[7] = {0};
     unsigned char send_data[2];
     bin16_to_8(1, send_data);

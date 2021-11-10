@@ -20,7 +20,13 @@ namespace XArmWrapper {
 		bool check_cmdnum_limit = true,
 		bool check_robot_sn = false,
 		bool check_is_ready = true,
-		bool check_is_pause = true);
+		bool check_is_pause = true,
+		int max_callback_thread_count = -1,
+		int max_cmdnum = 512,
+		int init_axis = 7,
+		bool debug = false,
+		char* report_type = "rich",
+		bool baud_checkset = true);
 	extern "C" __declspec(dllexport) int __stdcall remove_instance(int instance_id);
 	extern "C" __declspec(dllexport) int __stdcall connect(char* port="");
 	extern "C" __declspec(dllexport) void __stdcall disconnect(void);
@@ -172,5 +178,10 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall set_linear_track_back_origin(bool wait = true, bool auto_enable = true);
 	extern "C" __declspec(dllexport) int __stdcall set_linear_track_pos(int pos, int speed = 0, bool wait = true, fp32 timeout = 100, bool auto_enable = true);
 	extern "C" __declspec(dllexport) int __stdcall set_linear_track_stop(void);
+	
+	extern "C" __declspec(dllexport) int __stdcall set_timeout(float timeout);
+	extern "C" __declspec(dllexport) int __stdcall set_baud_checkset_enable(bool enable);
+	extern "C" __declspec(dllexport) int __stdcall set_checkset_default_baud(int type, int baud);
+	extern "C" __declspec(dllexport) int __stdcall get_checkset_default_baud(int type, int *baud);
 }
 

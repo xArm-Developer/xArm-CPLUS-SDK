@@ -10,7 +10,7 @@
 
 int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(115200) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_robotiq_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	unsigned char *send_data = new unsigned char[7 + length];
 	send_data[0] = 0x09;
 	send_data[1] = 0x10;
@@ -26,7 +26,7 @@ int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_d
 }
 int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(115200) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_robotiq_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	unsigned char *send_data = new unsigned char[6];
 	send_data[0] = 0x09;
 	send_data[1] = 0x03;

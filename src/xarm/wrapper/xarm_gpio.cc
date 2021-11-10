@@ -263,6 +263,8 @@ int XArmAPI::_get_modbus_baudrate(int *baud_inx, unsigned char host_id) {
 
 int XArmAPI::_checkset_modbus_baud(int baudrate, bool check, unsigned char host_id) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	// skip checkset if check is true and (baud_checkset_flag_ is false or baudrate == 0)
+	if (check && (!baud_checkset_flag_ || baudrate <= 0)) return 0;
 	if (check && ((host_id == UXBUS_CONF::TGPIO_HOST_ID && modbus_baud_ == baudrate) || (host_id == UXBUS_CONF::LINEAR_TRACK_HOST_ID && linear_track_baud_ == baudrate)))
 		return 0;
 	int baud_inx = get_baud_inx(baudrate);

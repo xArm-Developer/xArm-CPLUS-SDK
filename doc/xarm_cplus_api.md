@@ -861,7 +861,7 @@ Get the gripper position
 :return: see the API code documentation for details.
 ```
 
-__int set_gripper_position(fp32 pos, bool wait=false, fp32 timeout=10)__
+__int set_gripper_position(fp32 pos, bool wait=false, fp32 timeout=10, bool wait_motion = true)__
 ```
 Set the gripper position
 
@@ -2249,5 +2249,40 @@ __int set_linear_track_stop(void)__
 Set the linear track to stop
     Note: only available if firmware_version >= 1.8.0
 
+:return: See the code documentation for details.
+```
+
+__int set_baud_checkset_enable(bool enable)__
+```
+Enable auto checkset the baudrate of the end IO board or not
+    Note: only available in the API of gripper/bio/robotiq/linear_track.
+
+:return: See the code documentation for details.
+```
+
+__int set_checkset_default_baud(int type, int baud)__
+```
+Set the checkset baud value
+    Note: do not modify at will, only use when the baud rate of the corresponding peripheral is changed
+
+:param type: checkset type
+    1: xarm gripper
+    2: bio gripper
+    3: robotiq gripper
+    4: linear track
+:param baud: checkset baud value, less than or equal to 0 means disable checkset
+:return: See the code documentation for details.
+```
+
+__int get_checkset_default_baud(int type, int *baud)__
+```
+Get the checkset baud value
+
+:param type: checkset type
+    1: xarm gripper
+    2: bio gripper
+    3: robotiq gripper
+    4: linear track
+:param baud: checkset baud value, less than or equal to 0 means disable checkset
 :return: See the code documentation for details.
 ```

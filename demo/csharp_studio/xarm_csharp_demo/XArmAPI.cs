@@ -29,7 +29,13 @@ namespace xarm_csharp_demo
             bool check_cmdnum_limit = true,
             bool check_robot_sn = false,
             bool check_is_ready = true,
-            bool check_is_pause = true);
+            bool check_is_pause = true,
+            int max_callback_thread_count = -1,
+            int max_cmdnum = 512,
+            int init_axis = 7,
+            bool debug = false,
+            string report_type = "rich",
+            bool baud_checkset = true);
         [DllImport("xarm.dll")]
         public static extern int remove_instance(int instance_id);
         [DllImport("xarm.dll")]
@@ -325,6 +331,15 @@ namespace xarm_csharp_demo
         public static extern int set_linear_track_pos(int pos, int speed = 0, bool wait = true, float timeout = 100, bool auto_enable = true);
         [DllImport("xarm.dll")]
         public static extern int set_linear_track_stop();
+
+        [DllImport("xarm.dll")]
+        public static extern int set_timeout(float timeout);
+        [DllImport("xarm.dll")]
+        public static extern int set_baud_checkset_enable(bool enable);
+        [DllImport("xarm.dll")]
+        public static extern int set_checkset_default_baud(int type, int baud);
+        [DllImport("xarm.dll")]
+        public static extern int get_checkset_default_baud(int type, ref int baud);
 
 
         public static int set_position(float[] pose, float radius = -1,

@@ -74,10 +74,17 @@ namespace XArmWrapper
 		bool check_cmdnum_limit,
 		bool check_robot_sn,
 		bool check_is_ready,
-		bool check_is_pause) {
+		bool check_is_pause,
+		int max_callback_thread_count,
+		int max_cmdnum,
+		int init_axis,
+		bool debug,
+		char* report_type,
+		bool baud_checkset) {
 		arm = new XArmAPI(port, is_radian, do_not_open,
 			check_tcp_limit, check_joint_limit, check_cmdnum_limit,
-			check_robot_sn, check_is_ready, check_is_pause);
+			check_robot_sn, check_is_ready, check_is_pause,
+			max_callback_thread_count, max_cmdnum, init_axis, debug, report_type, baud_checkset);
 		id++;
 		xarm_map[id] = arm;
 		return id;
@@ -505,5 +512,21 @@ namespace XArmWrapper
 	}
 	int __stdcall set_linear_track_stop(void) {
 		return arm->set_linear_track_stop();
+	}
+
+	int __stdcall set_timeout(float timeout) {
+		return arm->set_timeout();
+	}
+
+	int __stdcall set_baud_checkset_enable(bool enable) {
+		return arm->set_baud_checkset_enable(enable);
+	}
+
+	int __stdcall set_checkset_default_baud(int type, int baud) {
+		return arm->set_checkset_default_baud(type, baud);
+	}
+
+	int __stdcall get_checkset_default_baud(int type, int *baud) {
+		return arm->get_checkset_default_baud(type, baud);
 	}
 }

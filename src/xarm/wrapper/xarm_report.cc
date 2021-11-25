@@ -427,27 +427,47 @@ void XArmAPI::_handle_report_data(void) {
 	int ret = 0;
 	int size = 0;
 	int connect_fail_count = 0;
-	bool need_reconnect = false;
 
     bool reported = is_reported();
+	int max_reconnect_cnts = 10;
+	long long last_send_ms = 0;
+	long long curr_ms = 0;
+	int state;
+	int prot_flag = 2;
 
 	while (is_connected()) {
 		if (ret != 0)
 			sleep_milliseconds(1);
-		if (connect_fail_count > 5) break;
-		if (need_reconnect || !is_reported()) {
-			if (need_reconnect)
-				printf("report data exception, try reconnect.\n");
-			else
-				printf("report socket had disconnected, try connect\n");
-			need_reconnect = false;
-			connect_fail_count += 1;
+		curr_ms = get_system_time();
+		if (prot_flag != 3 && _version_is_ge(1, 8, 6) && core->set_prot_flag(3) == 0) prot_flag = 3;
+		if (prot_flag == 3 && curr_ms - last_send_ms > 10000 && curr_ms - core->last_recv_ms > 30000) {
+			if (get_state(&state) >= 0) last_send_ms = curr_ms;
+			// printf("send heart beat\n");
+			if (curr_ms - core->last_recv_ms > 90000) {
+				printf("client timeout over 90s, disconnect.\n");
+				break;
+			}
+		}
+		if (!is_reported()) {
             if (reported) {
                 reported = false;
                 _report_connect_changed_callback();
             }
             stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
-			continue;
+			if (stream_tcp_report_ == NULL) {
+				connect_fail_count += 1;
+				if (is_connected() && (connect_fail_count <= max_reconnect_cnts || prot_flag == 3))
+					sleep_milliseconds(2000);
+				else if (!is_connected() || prot_flag == 2)
+				{
+					printf("report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+					break;
+				}
+				continue;
+			}
+			else {
+				connect_fail_count = 0;
+			}
 		}
         if (!reported) {
             reported = true;

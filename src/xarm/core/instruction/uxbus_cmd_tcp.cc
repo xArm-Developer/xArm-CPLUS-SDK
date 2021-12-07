@@ -19,6 +19,17 @@ UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
 
 UxbusCmdTcp::~UxbusCmdTcp(void) {}
 
+int UxbusCmdTcp::set_prot_flag(int prot_flag)
+{
+	std::lock_guard<std::mutex> locker(mutex_);
+	if (prot_flag_ != prot_flag || TX2_PROT_CON_ != prot_flag) {
+		TX2_PROT_CON_ = prot_flag;
+		prot_flag_ = prot_flag;
+		printf("change prot_flag to %d\n", prot_flag_);
+	}
+	return 0;
+}
+
 int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 	unsigned char *data_fp = &datas[4];
 
@@ -67,6 +78,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 		ret2 = arm_port_->read_frame(rx_data);
 		if (ret2 != -1) {
 			// print_hex("recv:", rx_data, arm_port_->que_maxlen);
+			last_recv_ms = get_system_time();
 			ret = check_xbus_prot(rx_data, funcode);
 			if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 				int n = num;

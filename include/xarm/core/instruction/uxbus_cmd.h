@@ -254,6 +254,7 @@ public:
 
 	virtual void close(void);
 	virtual int is_ok(void);
+	virtual int set_prot_flag(int prot_flag = 2);
 
 private:
 	virtual int check_xbus_prot(unsigned char *data, int funcode);
@@ -276,9 +277,12 @@ private:
 
 public:
 	bool state_is_ready;
+	long long last_recv_ms;
+
+protected:
+	std::mutex mutex_;
 
 private:
-	std::mutex mutex_;
 	int GET_TIMEOUT_ = UXBUS_CONF::GET_TIMEOUT;
 	int SET_TIMEOUT_ = UXBUS_CONF::SET_TIMEOUT;
 

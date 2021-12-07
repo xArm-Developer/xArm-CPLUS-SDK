@@ -23,9 +23,12 @@ static int get_baud_inx(int baud) {
 UxbusCmd::UxbusCmd(void) {
 	state_is_ready = false;
 	last_modbus_comm_us_ = get_us();
+	last_recv_ms = get_system_time();
 }
 
 UxbusCmd::~UxbusCmd(void) {}
+
+int UxbusCmd::set_prot_flag(int prot_flag) { return -11; }
 
 int UxbusCmd::check_xbus_prot(unsigned char *data, int funcode) { return -11; }
 

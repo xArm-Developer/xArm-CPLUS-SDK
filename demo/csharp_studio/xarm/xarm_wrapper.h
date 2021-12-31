@@ -37,9 +37,9 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall clean_warn(void);
 	extern "C" __declspec(dllexport) int __stdcall clean_error(void);
 
-	extern "C" __declspec(dllexport) int __stdcall set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
+	extern "C" __declspec(dllexport) int __stdcall set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
 	extern "C" __declspec(dllexport) int __stdcall set_tool_position(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=0);
-	extern "C" __declspec(dllexport) int __stdcall set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
+	extern "C" __declspec(dllexport) int __stdcall set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
 	extern "C" __declspec(dllexport) int __stdcall set_servo_angle_j(fp32 angles[7], fp32 speed=0, fp32 acc=0, fp32 mvtime=0);
 	extern "C" __declspec(dllexport) int __stdcall set_servo_cartesian(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false);
 	extern "C" __declspec(dllexport) int __stdcall move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);

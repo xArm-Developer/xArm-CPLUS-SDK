@@ -57,7 +57,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_position(float[] pose, float radius = -1,
             float speed = 0, float acc = 0, float mvtime = 0,
-            bool wait = false, float timeout = NO_TIMEOUT);
+            bool wait = false, float timeout = NO_TIMEOUT, bool relative = false);
         [DllImport("xarm.dll")]
         public static extern int set_tool_position(float[] pose,
             float speed = 0, float acc = 0, float mvtime = 0,
@@ -65,7 +65,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_servo_angle(float[] angles,
             float speed = 0, float acc = 0, float mvtime = 0,
-            bool wait = false, float timeout = NO_TIMEOUT, float radius = -1);
+            bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, bool relative = false);
         [DllImport("xarm.dll")]
         public static extern int set_servo_angle_j(float[] angles,
             float speed = 0, float acc = 0, float mvtime = 0);
@@ -343,22 +343,22 @@ namespace xarm_csharp_demo
 
 
         public static int set_position(float[] pose, float radius = -1,
-            bool wait = false, float timeout = NO_TIMEOUT)
+            bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {
-            return set_position(pose, radius, 0, 0, 0, wait, timeout);
+            return set_position(pose, radius, 0, 0, 0, wait, timeout, relative);
         }
-        public static int set_position(float[] pose, bool wait = false, float timeout = NO_TIMEOUT)
+        public static int set_position(float[] pose, bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {
-            return set_position(pose, -1, 0, 0, 0, wait, timeout);
+            return set_position(pose, -1, 0, 0, 0, wait, timeout, relative);
         }
         public static int set_tool_position(float[] pose,
             bool wait = false, float timeout = NO_TIMEOUT)
         {
             return set_tool_position(pose, 0, 0, 0, wait, timeout);
         }
-        public static int set_servo_angle(float[] angles, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1)
+        public static int set_servo_angle(float[] angles, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, bool relative = false)
         {
-            return set_servo_angle(angles, 0, 0, 0, wait, timeout, radius);
+            return set_servo_angle(angles, 0, 0, 0, wait, timeout, radius, relative);
         }
     }
 }

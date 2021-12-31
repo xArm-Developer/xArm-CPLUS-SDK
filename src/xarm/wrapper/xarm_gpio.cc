@@ -43,10 +43,11 @@ int XArmAPI::get_tgpio_digital(int *io0, int *io1) {
 }
 
 int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
 	if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	if (delay_sec > 0) {
 		return core->tgpio_delay_set_digital(ionum + 1, value, delay_sec);
 	}
@@ -93,10 +94,11 @@ int XArmAPI::get_cgpio_analog(int ionum, fp32 *value) {
 }
 
 int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
 	if (ionum < 0 || ionum >= 16) return API_CODE::PARAM_ERROR;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	if (delay_sec > 0) {
 		return core->cgpio_delay_set_digital(ionum, value, delay_sec);
 	}
@@ -106,10 +108,11 @@ int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
 }
 
 int XArmAPI::set_cgpio_analog(int ionum, fp32 value) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
 	if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	if (ionum == 0) {
 		return core->cgpio_set_analog1(value);
 	}
@@ -142,9 +145,10 @@ int XArmAPI::get_suction_cup(int *val) {
 }
 
 int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	int code1, code2;
 	if (on) {
 		code1 = set_tgpio_digital(0, 1, delay_sec);
@@ -154,7 +158,7 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec)
 		code1 = set_tgpio_digital(0, 0, delay_sec);
 		code2 = set_tgpio_digital(1, 1, delay_sec);
 	}
-	int code = code1 == 0 ? code2 : code1;
+	code = code1 == 0 ? code2 : code1;
 	if (code == 0 && wait) {
 		long long start_time = get_system_time();
 		int val, ret;
@@ -183,23 +187,26 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec)
 }
 
 int XArmAPI::set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	return core->tgpio_position_set_digital(ionum, value, xyz, tol_r);
 }
 
 int XArmAPI::set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	return core->cgpio_position_set_digital(ionum, value, xyz, tol_r);
 }
 
 int XArmAPI::set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], float tol_r) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	return core->cgpio_position_set_analog(ionum, value, xyz, tol_r);
 }
 

@@ -21,6 +21,14 @@ bool compare_version(int v1[3], int v2[3]) {
 	return false;
 }
 
+fp32 to_radian(fp32 val) {
+	return (fp32)(val / RAD_DEGREE);
+}
+
+fp32 to_degree(fp32 val) {
+	return (fp32)(val * RAD_DEGREE);
+}
+
 XArmAPI::XArmAPI(
 	const std::string &port,
 	bool is_radian,
@@ -106,13 +114,13 @@ void XArmAPI::_init(void) {
 		last_used_position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
 	}
 	else {
-		joint_speed_limit = new fp32[2]{ (fp32)(min_joint_speed_ * RAD_DEGREE), (fp32)(max_joint_speed_ * RAD_DEGREE) };
-		joint_acc_limit = new fp32[2]{ (fp32)(min_joint_acc_ * RAD_DEGREE), (fp32)(max_joint_acc_ * RAD_DEGREE) };
-		last_used_joint_speed = (fp32)(0.3490658503988659 * RAD_DEGREE); // rad/s (20°/s);
-		last_used_joint_acc = (fp32)(8.726646259971648 * RAD_DEGREE);    // rad/s^2 (500°/s^2);
-		position = new fp32[6]{ 201.5, 0, 140.5, (fp32)(3.1415926 * RAD_DEGREE), 0, 0 };
+		joint_speed_limit = new fp32[2]{ to_degree(min_joint_speed_), to_degree(max_joint_speed_) };
+		joint_acc_limit = new fp32[2]{ to_degree(min_joint_acc_), to_degree(max_joint_acc_) };
+		last_used_joint_speed = to_degree(0.3490658503988659); // rad/s (20°/s);
+		last_used_joint_acc = to_degree(8.726646259971648);    // rad/s^2 (500°/s^2);
+		position = new fp32[6]{ 201.5, 0, 140.5, to_degree(3.1415926), 0, 0 };
 		position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
-		last_used_position = new fp32[6]{ 201.5, 0, 140.5, (fp32)(3.1415926 * RAD_DEGREE), 0, 0 };
+		last_used_position = new fp32[6]{ 201.5, 0, 140.5, to_degree(3.1415926), 0, 0 };
 	}
 
 	state = 4;
@@ -133,7 +141,7 @@ void XArmAPI::_init(void) {
 	motor_tid = 0;
 	motor_fid = 0;
 	tcp_jerk = 1000;        // mm/s^3
-	joint_jerk = default_is_radian ? 20 : (fp32)(20 * RAD_DEGREE); // 20 rad/s^3
+	joint_jerk = default_is_radian ? 20.0 : to_degree(20.0); // 20 rad/s^3
 	rot_jerk = (float)2.3;
 	max_rot_acc = (float)2.7;
 	tcp_speed_limit = new fp32[2]{ min_tcp_speed_, max_tcp_speed_ };
@@ -351,28 +359,54 @@ void XArmAPI::_check_version(void) {
 	}
 }
 
-void XArmAPI::_check_is_pause(void) {
-	if (check_is_pause_ && state == 3) {
+void XArmAPI::_wait_until_not_pause(void) {
+	if (is_connected() && check_is_pause_ && state == 3) {
 		std::unique_lock<std::mutex> locker(mutex_);
 		cond_.wait(locker, [this] { return state != 3 || !is_connected(); });
 		locker.unlock();
 	}
 }
 
-int XArmAPI::_wait_until_cmdnum_lt_max(void) {
-	if (!check_cmdnum_limit_) return 0;
-	while (cmd_num >= max_cmdnum_) {
-		if (!is_connected()) return API_CODE::NOT_CONNECTED;
-		if (error_code != 0) return API_CODE::HAS_ERROR;
-		if (state == 4 || state == 5) return API_CODE::NOT_READY;
+void XArmAPI::_wait_until_cmdnum_lt_max(void) {
+	if (!check_cmdnum_limit_) return;
+	int cmdnum_;
+	while (is_connected() && cmd_num >= max_cmdnum_) {
+		if (get_system_time() - last_report_time_ > 400) {
+			get_cmdnum(&cmdnum_);
+		}
 		sleep_milliseconds(50);
 	}
+}
+
+int XArmAPI::_xarm_is_ready(void) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	if (check_is_ready_ && !_version_is_ge(1, 5, 20)) {
+		if (error_code != 0) return API_CODE::HAS_ERROR;
+		if (state == 4 || state == 5) return API_CODE::NOT_READY;
+		return is_ready_ ? 0 : API_CODE::NOT_READY;
+	}
+	// no check if version >= 1.5.20
 	return 0;
 }
 
-int XArmAPI::_check_code(int code, bool is_move_cmd) {
+int XArmAPI::_check_code(int code, bool is_move_cmd, int mode_) {
 	if (is_move_cmd) {
-		return ((code == 0 || code == UXBUS_STATE::WAR_CODE) && core->state_is_ready) ? 0 : !core->state_is_ready ? UXBUS_STATE::STATE_NOT_READY : code;
+		if (code == 0 || code == UXBUS_STATE::WAR_CODE) {
+			if (core->state_is_ready) {
+				if (mode_ >= 0 && mode != mode_) {
+					printf("The mode may be incorrect, just as a reminder, mode: %d (%d)\n", mode_, mode);
+				}
+				return 0;
+				// return (mode_ < 0 || mode == mode_) ? 0 : API_CODE::MODE_IS_NOT_CORRECT;
+			}
+			else {
+				return UXBUS_STATE::STATE_NOT_READY;
+			}
+		}
+		else {
+			return code;
+		}
+		// return ((code == 0 || code == UXBUS_STATE::WAR_CODE) && core->state_is_ready) ? 0 : !core->state_is_ready ? UXBUS_STATE::STATE_NOT_READY : code;
 	}
 	else {
 		return (code == 0 || code == UXBUS_STATE::ERR_CODE || code == UXBUS_STATE::WAR_CODE || code == UXBUS_STATE::STATE_NOT_READY) ? 0 : code;
@@ -578,7 +612,7 @@ int XArmAPI::get_position(fp32 pose[6]) {
 	if (ret == 0) {
 		for (int i = 0; i < 6; i++) {
 			if (!default_is_radian && i > 2) {
-				pose[i] = (float)(pose[i] * RAD_DEGREE);
+				pose[i] = to_degree(pose[i]);
 			}
 			position[i] = pose[i];
 		}
@@ -593,7 +627,7 @@ int XArmAPI::get_servo_angle(fp32 angs[7]) {
 	if (ret == 0) {
 		for (int i = 0; i < 7; i++) {
 			if (!default_is_radian) {
-				angs[i] = (float)(angs[i] * RAD_DEGREE);
+				angs[i] = to_degree(angs[i]);
 			}
 			angles[i] = angs[i];
 		}
@@ -687,9 +721,10 @@ int XArmAPI::clean_warn(void) {
 }
 
 int XArmAPI::set_pause_time(fp32 sltime) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	int ret = core->sleep_instruction(sltime);
 	if (get_system_time() >= sleep_finish_time_) {
 		sleep_finish_time_ = get_system_time() + (long long)(sltime * 1000);
@@ -772,14 +807,14 @@ int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7]) 
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 pose[6];
 	for (int i = 0; i < 6; i++) {
-		pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : source_pose[i] / RAD_DEGREE);
+		pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : to_radian(source_pose[i]));
 	}
 	fp32 angs[7];
 	int ret = core->get_ik(pose, angs);
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 7; i++) {
-			target_angles[i] = (float)(default_is_radian ? angs[i] : angs[i] * RAD_DEGREE);
+			target_angles[i] = (float)(default_is_radian ? angs[i] : to_degree(angs[i]));
 		}
 	}
 	return ret;
@@ -789,14 +824,14 @@ int XArmAPI::get_forward_kinematics(fp32 source_angles[7], fp32 target_pose[6]) 
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 angs[7];
 	for (int i = 0; i < 7; i++) {
-		angs[i] = (float)(default_is_radian ? source_angles[i] : source_angles[i] / RAD_DEGREE);
+		angs[i] = (float)(default_is_radian ? source_angles[i] : to_radian(source_angles[i]));
 	}
 	fp32 pose[6];
 	int ret = core->get_fk(angs, pose);
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 6; i++) {
-			target_pose[i] = (float)(default_is_radian || i < 3 ? pose[i] : pose[i] * RAD_DEGREE);
+			target_pose[i] = (float)(default_is_radian || i < 3 ? pose[i] : to_degree(pose[i]));
 		}
 	}
 	return ret;
@@ -806,7 +841,7 @@ int XArmAPI::is_tcp_limit(fp32 source_pose[6], int *limit) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 pose[6];
 	for (int i = 0; i < 6; i++) {
-		pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : source_pose[i] / RAD_DEGREE);
+		pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : to_radian(source_pose[i]));
 	}
 	int ret = core->is_tcp_limit(pose, limit);
 	return _check_code(ret);
@@ -816,7 +851,7 @@ int XArmAPI::is_joint_limit(fp32 source_angles[7], int *limit) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 angs[7];
 	for (int i = 0; i < 7; i++) {
-		angs[i] = (float)(default_is_radian ? source_angles[i] : source_angles[i] / RAD_DEGREE);
+		angs[i] = (float)(default_is_radian ? source_angles[i] : to_radian(source_angles[i]));
 	}
 	int ret = core->is_joint_limit(angs, limit);
 	return _check_code(ret);
@@ -829,17 +864,19 @@ int XArmAPI::reload_dynamics(void) {
 }
 
 int XArmAPI::set_counter_reset(void) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	int ret = core->cnter_reset();
 	return _check_code(ret);
 }
 
 int XArmAPI::set_counter_increase(void) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	int ret = core->cnter_plus();
 	return _check_code(ret);
 }
@@ -848,14 +885,14 @@ int XArmAPI::get_pose_offset(float pose1[6], float pose2[6], float offset[6], in
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 p1[6], p2[6];
 	for (int i = 0; i < 6; i++) {
-		p1[i] = (float)(default_is_radian || i < 3 ? pose1[i] : pose1[i] / RAD_DEGREE);
-		p2[i] = (float)(default_is_radian || i < 3 ? pose2[i] : pose2[i] / RAD_DEGREE);
+		p1[i] = (float)(default_is_radian || i < 3 ? pose1[i] : to_radian(pose1[i]));
+		p2[i] = (float)(default_is_radian || i < 3 ? pose2[i] : to_radian(pose2[i]));
 	}
 	int ret = core->get_pose_offset(p1, p2, offset, orient_type_in, orient_type_out);
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 6; i++) {
-			offset[i] = (float)(default_is_radian || i < 3 ? offset[i] : offset[i] * RAD_DEGREE);
+			offset[i] = (float)(default_is_radian || i < 3 ? offset[i] : to_degree(offset[i]));
 		}
 	}
 	return ret;
@@ -867,7 +904,7 @@ int XArmAPI::get_position_aa(fp32 pose[6]) {
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 6; i++) {
-			pose[i] = (!default_is_radian && i > 2) ? (float)(pose[i] * RAD_DEGREE) : pose[i];
+			pose[i] = (!default_is_radian && i > 2) ? to_degree(pose[i]) : pose[i];
 			position_aa[i] = pose[i];
 		}
 	}
@@ -886,7 +923,7 @@ int XArmAPI::calibrate_tcp_coordinate_offset(float four_points[4][6], float ret_
 	fp32 points[4][6];
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 6; j++) {
-			points[i][j] = (float)((j < 3 || default_is_radian) ? four_points[i][j] : four_points[i][j] / RAD_DEGREE);
+			points[i][j] = (float)((j < 3 || default_is_radian) ? four_points[i][j] : to_radian(four_points[i][j]));
 		}
 	}
 	int ret = core->cali_tcp_pose(points, ret_xyz);
@@ -899,12 +936,12 @@ int XArmAPI::calibrate_tcp_orientation_offset(float rpy_be[3], float rpy_bt[3], 
 	fp32 rpy_be_[3];
 	fp32 rpy_bt_[3];
 	for (int i = 0; i < 3; i++) {
-		rpy_be_[i] = (float)(default_is_radian ? rpy_be[i] : rpy_be[i] / RAD_DEGREE);
-		rpy_bt_[i] = (float)(default_is_radian ? rpy_bt[i] : rpy_bt[i] / RAD_DEGREE);
+		rpy_be_[i] = (float)(default_is_radian ? rpy_be[i] : to_radian(rpy_be[i]));
+		rpy_bt_[i] = (float)(default_is_radian ? rpy_bt[i] : to_radian(rpy_bt[i]));
 	}
 	int ret = core->cali_tcp_orient(rpy_be_, rpy_bt_, ret_rpy);
 	for (int i = 0; i < 3; i++) {
-		ret_rpy[i] = (float)(default_is_radian ? ret_rpy[i] : ret_rpy[i] * RAD_DEGREE);
+		ret_rpy[i] = (float)(default_is_radian ? ret_rpy[i] : to_degree(ret_rpy[i]));
 	}
 	return _check_code(ret);
 }
@@ -915,12 +952,12 @@ int XArmAPI::calibrate_user_orientation_offset(float three_points[3][6], float r
 	fp32 points[3][6];
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 6; j++) {
-			points[i][j] = (float)((j < 3 || default_is_radian) ? three_points[i][j] : three_points[i][j] / RAD_DEGREE);
+			points[i][j] = (float)((j < 3 || default_is_radian) ? three_points[i][j] : to_radian(three_points[i][j]));
 		}
 	}
 	int ret = core->cali_user_orient(points, ret_rpy, mode, trust_ind);
 	for (int i = 0; i < 3; i++) {
-		ret_rpy[i] = (float)(default_is_radian ? ret_rpy[i] : ret_rpy[i] * RAD_DEGREE);
+		ret_rpy[i] = (float)(default_is_radian ? ret_rpy[i] : to_degree(ret_rpy[i]));
 	}
 	return _check_code(ret);
 }
@@ -930,7 +967,7 @@ int XArmAPI::calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 rpy_ub_[3];
 	for (int i = 0; i < 3; i++) {
-		rpy_ub_[i] = (float)(default_is_radian ? rpy_ub[i] : rpy_ub[i] / RAD_DEGREE);
+		rpy_ub_[i] = (float)(default_is_radian ? rpy_ub[i] : to_radian(rpy_ub[i]));
 	}
 	int ret = core->cali_user_pos(rpy_ub_, pos_b_uorg, ret_xyz);
 	return _check_code(ret);

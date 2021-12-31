@@ -1106,6 +1106,18 @@ int UxbusCmd::move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int
 	return set_nfp32_with_bytes(UXBUS_RG::MOVE_SERVO_CART_AA, txdata, 9, additional, 1);
 }
 
+int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion, bool is_angle_axis)
+{
+	float txdata[11] = { 0 };
+	for (int i = 0; i < 7; i++) { txdata[i] = mvpose[i]; }
+	txdata[7] = mvvelo;
+	txdata[8] = mvacc;
+	txdata[9] = mvtime;
+	txdata[10] = radius;
+	char additional[2] = { (char)is_joint_motion, (char)is_angle_axis };
+	return set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 2);
+}
+
 int UxbusCmd::tgpio_delay_set_digital(int ionum, int value, float delay_sec) {
 	unsigned char *txdata = new unsigned char[6];
 	txdata[0] = ionum;

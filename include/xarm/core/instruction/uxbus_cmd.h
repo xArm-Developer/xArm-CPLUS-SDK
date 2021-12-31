@@ -207,6 +207,7 @@ public:
 	int get_position_aa(float pose[6]);
 	int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0);
 	int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
+	int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_angle_axis = false);
 
 	int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
 	int cgpio_delay_set_digital(int ionum, int value, float delay_sec);

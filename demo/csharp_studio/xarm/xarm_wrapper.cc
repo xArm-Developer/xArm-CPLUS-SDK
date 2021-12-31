@@ -111,14 +111,14 @@ namespace XArmWrapper
 	int __stdcall clean_error(void) {
 		return arm->clean_error();
 	}
-	int __stdcall set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
-		return arm->set_position(pose, radius, speed, acc, mvtime, wait, timeout);
+	int __stdcall set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, bool relative) {
+		return arm->set_position(pose, radius, speed, acc, mvtime, wait, timeout, relative);
 	}
 	int __stdcall set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 		return arm->set_tool_position(pose, speed, acc, mvtime, wait, timeout);
 	}
-	int __stdcall set_servo_angle(fp32 angles[7], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius) {
-		return arm->set_servo_angle(angles, speed, acc, mvtime, wait, timeout, radius);
+	int __stdcall set_servo_angle(fp32 angles[7], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius, bool relative) {
+		return arm->set_servo_angle(angles, speed, acc, mvtime, wait, timeout, radius, relative);
 	}
 	int __stdcall set_servo_angle_j(fp32 angles[7], fp32 speed, fp32 acc, fp32 mvtime) {
 		return arm->set_servo_angle_j(angles, speed, acc, mvtime);

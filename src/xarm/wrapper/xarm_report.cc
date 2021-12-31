@@ -103,11 +103,11 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 
 		hex_to_nfp32(&data_fp[9], angles, 7);
 		for (int i = 0; i < 7; i++) {
-			angles[i] = (float)(default_is_radian ? angles[i] : angles[i] * RAD_DEGREE);
+			angles[i] = (float)(default_is_radian ? angles[i] : to_degree(angles[i]));
 		}
 		hex_to_nfp32(&data_fp[37], position, 6);
 		for (int i = 0; i < 6; i++) {
-			position[i] = (float)(default_is_radian || i < 3 ? position[i] : position[i] * RAD_DEGREE);
+			position[i] = (float)(default_is_radian || i < 3 ? position[i] : to_degree(position[i]));
 		}
 		_report_location_callback();
 
@@ -117,7 +117,7 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 
 		hex_to_nfp32(&data_fp[63], tcp_offset, 6);
 		for (int i = 0; i < 6; i++) {
-			tcp_offset[i] = (float)(default_is_radian || i < 3 ? tcp_offset[i] : tcp_offset[i] * RAD_DEGREE);
+			tcp_offset[i] = (float)(default_is_radian || i < 3 ? tcp_offset[i] : to_degree(tcp_offset[i]));
 		}
 	}
 	if (sizeof_data >= 187) {
@@ -144,7 +144,7 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 		tcp_acc_limit[1] = max_tcp_acc_;
 
 		hex_to_nfp32(&data_fp[143], p2p_msg_, 5);
-		joint_jerk = default_is_radian ? p2p_msg_[0] : (fp32)(p2p_msg_[0] * RAD_DEGREE);
+		joint_jerk = default_is_radian ? p2p_msg_[0] : to_degree(p2p_msg_[0]);
 		min_joint_acc_ = p2p_msg_[1];
 		max_joint_acc_ = p2p_msg_[2];
 		min_joint_speed_ = p2p_msg_[3];
@@ -156,10 +156,10 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 			joint_acc_limit[1] = max_joint_speed_;
 		}
 		else {
-			joint_speed_limit[0] = (float)(min_joint_acc_ * RAD_DEGREE);
-			joint_speed_limit[1] = (float)(max_joint_acc_ * RAD_DEGREE);
-			joint_acc_limit[0] = (float)(min_joint_speed_ * RAD_DEGREE);
-			joint_acc_limit[1] = (float)(max_joint_speed_ * RAD_DEGREE);
+			joint_speed_limit[0] = to_degree(min_joint_acc_);
+			joint_speed_limit[1] = to_degree(max_joint_acc_);
+			joint_acc_limit[0] = to_degree(min_joint_speed_);
+			joint_acc_limit[1] = to_degree(max_joint_speed_);
 		}
 
 		hex_to_nfp32(&data_fp[163], rot_msg_, 2);
@@ -205,11 +205,11 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		if (cmd_num != cmdnum_) _report_cmdnum_changed_callback();
 
 		for (int i = 0; i < 7; i++) {
-			angles[i] = (float)(default_is_radian ? report_data_ptr_->angle[i] : report_data_ptr_->angle[i] * RAD_DEGREE);
+			angles[i] = (float)(default_is_radian ? report_data_ptr_->angle[i] : to_degree(report_data_ptr_->angle[i]));
 			joints_torque[i] = report_data_ptr_->tau[i];
 		}
 		for (int i = 0; i < 6; i++) {
-			position[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose[i] : report_data_ptr_->pose[i] * RAD_DEGREE);
+			position[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose[i] : to_degree(report_data_ptr_->pose[i]));
 		}
 		_report_location_callback();
 	}
@@ -277,7 +277,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		}
 
 		for (int i = 0; i < 6; i++) {
-			tcp_offset[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->tcp_offset[i] : report_data_ptr_->tcp_offset[i] * RAD_DEGREE);
+			tcp_offset[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->tcp_offset[i] : to_degree(report_data_ptr_->tcp_offset[i]));
 		}
 		for (int i = 0; i < 4; i++) {
 			tcp_load[i] = report_data_ptr_->tcp_load[i];
@@ -317,7 +317,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		tcp_acc_limit[0] = min_tcp_acc_;
 		tcp_acc_limit[1] = max_tcp_acc_;
 
-		joint_jerk = default_is_radian ? report_data_ptr_->p2p_jerk : (fp32)(report_data_ptr_->p2p_jerk * RAD_DEGREE);
+		joint_jerk = default_is_radian ? report_data_ptr_->p2p_jerk : to_degree(report_data_ptr_->p2p_jerk);
 		min_joint_acc_ = report_data_ptr_->p2p_accmin;
 		max_joint_acc_ = report_data_ptr_->p2p_accmax;
 		min_joint_speed_ = report_data_ptr_->p2p_velomin;
@@ -329,10 +329,10 @@ void XArmAPI::_update(unsigned char *rx_data) {
 			joint_acc_limit[1] = max_joint_speed_;
 		}
 		else {
-			joint_speed_limit[0] = (float)(min_joint_acc_ * RAD_DEGREE);
-			joint_speed_limit[1] = (float)(max_joint_acc_ * RAD_DEGREE);
-			joint_acc_limit[0] = (float)(min_joint_speed_ * RAD_DEGREE);
-			joint_acc_limit[1] = (float)(max_joint_speed_ * RAD_DEGREE);
+			joint_speed_limit[0] = to_degree(min_joint_acc_);
+			joint_speed_limit[1] = to_degree(max_joint_acc_);
+			joint_acc_limit[0] = to_degree(min_joint_speed_);
+			joint_acc_limit[1] = to_degree(max_joint_speed_);
 		}
 
 		rot_jerk = report_data_ptr_->rot_jerk;
@@ -365,7 +365,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		}
 		if (sizeof_data >= 312) {
 			for (int i = 0; i < 6; i++) {
-				world_offset[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->world_offset[i] : report_data_ptr_->world_offset[i] * RAD_DEGREE);
+				world_offset[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->world_offset[i] : to_degree(report_data_ptr_->world_offset[i]));
 			}
 		}
 		if (sizeof_data >= 314) {
@@ -415,7 +415,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		}
 		if (sizeof_data >= 494) {
 			for (int i = 0; i < 6; i++) {
-				position_aa[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose_aa[i] : report_data_ptr_->pose_aa[i] * RAD_DEGREE);
+				position_aa[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose_aa[i] : to_degree(report_data_ptr_->pose_aa[i]));
 			}
 		}
 	}

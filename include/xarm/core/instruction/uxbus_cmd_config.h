@@ -97,6 +97,7 @@ public:
 
 	static const unsigned char VC_SET_JOINTV = 81;
 	static const unsigned char VC_SET_CARTV = 82;
+	static const unsigned char MOVE_RELATIVE = 83;
 
 	static const unsigned char GET_TCP_POSE_AA = 91;
 	static const unsigned char MOVE_LINE_AA = 92;
@@ -269,6 +270,8 @@ public:
 	static const int TRAJ_RW_TOUT = 32;
 	static const int TRAJ_PLAYBACK_TOUT = 33;
 	static const int SUCTION_CUP_TOUT = 41;
+
+	static const int MODE_IS_NOT_CORRECT = 51;
 
 	static const int LINEAR_TRACK_HAS_FAULT = 80;
 	static const int LINEAR_TRACK_SCI_IS_LOW = 81;

@@ -69,6 +69,9 @@ struct LinearTrackStatus {
 
 bool compare_version(int v1[3], int v2[3]);
 
+fp32 to_radian(fp32 val);
+fp32 to_degree(fp32 val);
+
 
 class XArmAPI {
 public:
@@ -81,7 +84,8 @@ public:
 	* @param check_joint_limit: reversed, whether checking joint limit, default is true
 	* @param check_cmdnum_limit: whether checking command num limit, default is true
 	* @param check_robot_sn: whether checking robot sn, default is false
-	* @param check_is_ready: reversed, check robot is ready to move or not, default is true
+	* @param check_is_ready: check robot is ready to move or not, default is true
+	*	Note: only available if firmware_version < 1.5.20
 	* @param check_is_pause: check robot is pause or not, default is true
 	* @param max_callback_thread_count: max callback thread count, default is -1
 	*   Note: greater than 0 means the maximum number of threads that can be used to process callbacks
@@ -230,14 +234,14 @@ public:
 	/*
 	* Get the xArm version
 	* @param version:
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_version(unsigned char version[40]);
 
 	/*
 	* Get the xArm sn
 	* @param robot_sn:
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_robot_sn(unsigned char robot_sn[40]);
 
@@ -248,7 +252,7 @@ public:
 		2: sleeping
 		3: suspended
 		4: stopping
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_state(int *state);
 
@@ -256,19 +260,19 @@ public:
 	* Shutdown the xArm controller system
 	* @param value:
 		1: remote shutdown
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int shutdown_system(int value = 1);
 
 	/*
 	* Get the cmd count in cache
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_cmdnum(int *cmdnum);
 
 	/*
 	* Get the controller error and warn code
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_err_warn_code(int err_warn[2]);
 
@@ -277,7 +281,7 @@ public:
 	* @param pose: the position of xArm, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
 		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
 		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_position(fp32 pose[6]);
 
@@ -286,7 +290,7 @@ public:
 	* @param angles: the angles of the servos, like [servo-1, ..., servo-7]
 		if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
 		if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_servo_angle(fp32 angles[7]);
 
@@ -294,7 +298,7 @@ public:
 	* Motion enable
 	* @param enable: enable or not
 	* @param servo_id: servo id, 1-8, 8(enable/disable all servo)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int motion_enable(bool enable, int servo_id = 8);
 
@@ -304,7 +308,7 @@ public:
 		0: sport state
 		3: pause state
 		4: stop state
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_state(int state);
 
@@ -315,62 +319,63 @@ public:
 		1: servo motion mode
 		2: joint teaching mode
 		3: cartesian teaching mode (invalid)
-		4: simulation mode
-	* return: see the API code documentation for details.
+		4: joint velocity control mode
+		5: cartesian velocity control mode
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_mode(int mode);
 
 	/*
 	* Attach the servo
 	* @param servo_id: servo id, 1-8, 8(attach all servo)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_attach(int servo_id);
 
 	/*
 	* Detach the servo, be sure to do protective work before unlocking to avoid injury or damage.
 	* @param servo_id: servo id, 1-8, 8(detach all servo)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_detach(int servo_id);
 
 	/*
 	* Clean the controller error, need to be manually enabled motion and set state after clean error
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int clean_error(void);
 
 	/*
 	* Clean the controller warn
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int clean_warn(void);
 
 	/*
 	* Set the arm pause time, xArm will pause sltime second
 	* @param sltime: sleep second
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_pause_time(fp32 sltime);
 
 	/*
 	* Set the sensitivity of collision
 	* @param sensitivity: sensitivity value, 0~5
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_collision_sensitivity(int sensitivity);
 
 	/*
 	* Set the sensitivity of drag and teach
 	* @param sensitivity: sensitivity value, 1~5
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_teach_sensitivity(int sensitivity);
 
 	/*
 	* Set the direction of gravity
 	* @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_gravity_direction(fp32 gravity_dir[3]);
 
@@ -378,7 +383,7 @@ public:
 	* Clean current config and restore system default settings
 	* Note:
 		1. This interface will clear the current settings and restore to the original settings (system default settings)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int clean_conf(void);
 
@@ -387,7 +392,7 @@ public:
 	* Note:
 		1. This interface can record the current settings and will not be lost after the restart.
 		2. The clean_conf interface can restore system default settings
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int save_conf(void);
 
@@ -404,11 +409,13 @@ public:
 	* @param mvtime: reserved, 0
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
-	* return: see the API code documentation for details.
+	* @param relative: relative move or not
+	*   Note: only available if firmware_version >= 1.8.100
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_position(fp32 pose[6], fp32 radius = -1, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_position(fp32 pose[6], bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
+	int set_position(fp32 pose[6], fp32 radius = -1, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
+	int set_position(fp32 pose[6], bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
 
 	/*
 	* Movement relative to the tool coordinate system
@@ -420,7 +427,7 @@ public:
 	* @param mvtime: reserved, 0
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
 	int set_tool_position(fp32 pose[6], bool wait = false, fp32 timeout = NO_TIMEOUT);
@@ -442,13 +449,16 @@ public:
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
 	* @param radius: move radius, if radius less than 0, will MoveJoint, else MoveArcJoint
-		The blending radius cannot be greater than the track length.
-	* return: see the API code documentation for details.
+	*	Note: the blending radius cannot be greater than the track length.
+	*   Note: only available if firmware_version >= 1.5.20
+	* @param relative: relative move or not
+	*   Note: only available if firmware_version >= 1.8.100
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
-	int set_servo_angle(fp32 angles[7], bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
-	int set_servo_angle(int servo_id, fp32 angle, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
-	int set_servo_angle(int servo_id, fp32 angle, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1);
+	int set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
+	int set_servo_angle(fp32 angles[7], bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
+	int set_servo_angle(int servo_id, fp32 angle, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
+	int set_servo_angle(int servo_id, fp32 angle, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
 
 	/*
 	* Servo_j motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
@@ -462,7 +472,7 @@ public:
 		if default_is_radian is true, the value of acc should be in radians
 		if default_is_radian is false, The value of acc should be in degrees
 	* @param mvtime: reserved, 0
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_angle_j(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0);
 
@@ -475,7 +485,7 @@ public:
 	* @param mvacc: reserved, move acceleration (mm/s^2)
 	* @param mvtime: reserved, 0
 	* @param is_tool_coord: is tool coordinate or not
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_cartesian(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false);
 
@@ -494,7 +504,7 @@ public:
 	* @param mvtime: 0, reserved
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is True
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
 
@@ -509,7 +519,7 @@ public:
 	* @param mvtime: reserved, 0
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int move_gohome(fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
 	int move_gohome(bool wait = false, fp32 timeout = NO_TIMEOUT);
@@ -518,7 +528,7 @@ public:
 	* Reset
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	void reset(bool wait = false, fp32 timeout = NO_TIMEOUT);
 
@@ -532,7 +542,7 @@ public:
 	* @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
 		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
 		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tcp_offset(fp32 pose_offset[6], bool wait = true);
 
@@ -540,21 +550,21 @@ public:
 	* Set the load
 	* @param weight: load weight (unit: kg)
 	* @param center_of_gravity: tcp load center of gravity, like [x(mm), y(mm), z(mm)]
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tcp_load(fp32 weight, fp32 center_of_gravity[3]);
 
 	/*
 	* Set the translational jerk of Cartesian space
 	* @param jerk: jerk (mm/s^3)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tcp_jerk(fp32 jerk);
 
 	/*
 	* Set the max translational acceleration of Cartesian space
 	* @param acc: max acceleration (mm/s^2)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tcp_maxacc(fp32 acc);
 
@@ -563,7 +573,7 @@ public:
 	* @param jerk: jerk (°/s^3 or rad/s^3)
 		if default_is_radian is true, the value of jerk should be in radians
 		if default_is_radian is false, The value of jerk should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_joint_jerk(fp32 jerk);
 
@@ -572,7 +582,7 @@ public:
 	* @param acc: max acceleration (°/s^2 or rad/s^2)
 		if default_is_radian is true, the value of jerk should be in radians
 		if default_is_radian is false, The value of jerk should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_joint_maxacc(fp32 acc);
 
@@ -584,7 +594,7 @@ public:
 	* @param angles: target angles, like [servo-1, ..., servo-7]
 		if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
 		if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_inverse_kinematics(fp32 pose[6], fp32 angles[7]);
 
@@ -596,7 +606,7 @@ public:
 	* @param pose: target pose, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
 		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
 		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_forward_kinematics(fp32 angles[7], fp32 pose[6]);
 
@@ -606,7 +616,7 @@ public:
 		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
 		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
 	* @param limit: 1: limit, 0: no limit
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int is_tcp_limit(fp32 pose[6], int *limit);
 
@@ -616,28 +626,28 @@ public:
 		if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
 		if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees
 	* @param limit: 1: limit, 0: no limit
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int is_joint_limit(fp32 angles[7], int *limit);
 
 	/*
 	* Set the gripper enable
 	* @param enable: enable or not
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_gripper_enable(bool enable);
 
 	/*
 	* Set the gripper mode
 	* @param mode: 1: location mode, 2: speed mode(no use), 3: torque mode(no use)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_gripper_mode(int mode);
 
 	/*
 	* Get the gripper position
 	* @param pos: used to store the results obtained
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_gripper_position(fp32 *pos);
 
@@ -646,27 +656,27 @@ public:
 	* @param pos: gripper position
 	* @param wait: wait or not, default is false
 	* @param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_gripper_position(fp32 pos, bool wait = false, fp32 timeout = 10, bool wait_motion = true);
 
 	/*
 	* Set the gripper speed
 	* @param speed:
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_gripper_speed(fp32 speed);
 
 	/*
 	* Get the gripper error code
 	* @param err: used to store the results obtained
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_gripper_err_code(int *err);
 
 	/*
 	* Clean the gripper error
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int clean_gripper_error(void);
 
@@ -674,7 +684,7 @@ public:
 	* Get the digital value of the Tool GPIO
 	* @param io0_value: the digital value of Tool GPIO-0
 	* @param io1_value: the digital value of Tool GPIO-1
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_tgpio_digital(int *io0_value, int *io1_value);
 
@@ -683,7 +693,7 @@ public:
 	* @param ionum: ionum, 0 or 1
 	* @param value: the digital value of the specified io
 	* @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tgpio_digital(int ionum, int value, float delay_sec=0);
 
@@ -691,7 +701,7 @@ public:
 	* Get the analog value of the specified Tool GPIO
 	* @param ionum: ionum, 0 or 1
 	* @param value: the analog value of the specified tool io
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_tgpio_analog(int ionum, float *value);
 
@@ -699,7 +709,7 @@ public:
 	* Get the digital value of the specified Controller GPIO
 	* @param digitals: the values of the controller GPIO(0-7)
 	* @param digitals2: the values of the controller GPIO(8-15)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_cgpio_digital(int *digitals, int *digitals2 = NULL);
 
@@ -707,16 +717,16 @@ public:
 	* Get the analog value of the specified Controller GPIO
 	* @param ionum: ionum, 0 or 1
 	* @param value: the analog value of the specified controller io
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_cgpio_analog(int ionum, fp32 *value);
 
 	/*
 	* Set the digital value of the specified Controller GPIO
-	* @param ionum: ionum, 0 ~ 7
+	* @param ionum: ionum, 0 ~ 15
 	* @param value: the digital value of the specified io
 	* @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_cgpio_digital(int ionum, int value, float delay_sec=0);
 
@@ -724,29 +734,28 @@ public:
 	* Set the analog value of the specified Controller GPIO
 	* @param ionum: ionum, 0 or 1
 	* @param value: the analog value of the specified io
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_cgpio_analog(int ionum, fp32 value);
 
 	/*
 	* Set the digital input functional mode of the Controller GPIO
-	* @param ionum: ionum, 0 ~ 7
+	* @param ionum: ionum, 0 ~ 15
 	* @param fun: functional mode
 		0: general input
 		1: external emergency stop
-		2: reversed, protection reset
-		3: reversed, reduced mode
-		4: reversed, operating mode
-		5: reversed, three-state switching signal
+		2: protection reset
 		11: offline task
 		12: teaching mode
-	* return: see the API code documentation for details.
+		13: reduced mode
+		14: enable arm
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_cgpio_digital_input_function(int ionum, int fun);
 
 	/*
 	* Set the digital output functional mode of the specified Controller GPIO
-	* @param ionum: ionum, 0 ~ 7
+	* @param ionum: ionum, 0 ~ 15
 	* @param fun: functional mode
 		0: general output
 		1: emergency stop
@@ -756,7 +765,10 @@ public:
 		13: in collision
 		14: in teaching
 		15: in offline task
-	* return: see the API code documentation for details.
+		16: in reduced mode
+		17: is enabled
+		18: emergency stop is pressed
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_cgpio_digital_output_function(int ionum, int fun);
 
@@ -784,7 +796,7 @@ public:
 	* @param output_conf: digital(0-7) output functional info
 	* @param input_conf2: digital(8-15) input functional info
 	* @param output_conf2: digital(8-15) output functional info
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf, int *input_conf2 = NULL, int *output_conf2 = NULL);
 
@@ -936,7 +948,7 @@ public:
 	* @param val:
 		0: suction cup is off
 		1: suction cup is on
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_suction_cup(int *val);
 	int get_vacuum_gripper(int *val) { return get_suction_cup(val); }
@@ -947,46 +959,46 @@ public:
 	* @param wait: wait or not, default is false
 	* @param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
 	* @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0);
 	int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0) { return set_suction_cup(on, wait, timeout, delay_sec); }
 
 	/*
 	* Get gripper version, only for debug
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_gripper_version(unsigned char versions[3]);
 
 	/*
 	* Get servo version, only for debug
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_servo_version(unsigned char versions[3], int servo_id = 1);
 
 	/*
 	* Get tool gpio version, only for debug
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_tgpio_version(unsigned char versions[3]);
 
 	/*
 	* Reload dynamics, only for debug
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int reload_dynamics(void);
 
 	/*
 	* Turn on/off reduced mode
 	* @param on: on/off
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_reduced_mode(bool on);
 
 	/*
 	* Set the maximum tcp speed of the reduced mode
 	* @param speed: the maximum tcp speed
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_reduced_max_tcp_speed(float speed);
 
@@ -995,7 +1007,7 @@ public:
 	* @param speed: the maximum joint speed
 		if default_is_radian is true, the value of speed should be in radians
 		if default_is_radian is false, The value of speed should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_reduced_max_joint_speed(float speed);
 
@@ -1004,7 +1016,7 @@ public:
 	* @param mode:
 		0: reduced mode is on
 		1: reduced mode is off
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_reduced_mode(int *mode);
 
@@ -1027,14 +1039,14 @@ public:
 	* @param collision_rebound_is_on:
 		0: collision rebound is on
 		1: collision rebound is off
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14] = NULL, int *fense_is_on = NULL, int *collision_rebound_is_on = NULL);
 
 	/*
 	* Set the boundary of the safety boundary mode
 	* @param boundary: like [x_max(mm), x_min(mm), y_max(mm), y_min(mm), z_max(mm), z_min(mm)]
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_reduced_tcp_boundary(int boundary[6]);
 
@@ -1043,14 +1055,14 @@ public:
 	* @param jrange: like [joint-1-min, joint-1-max, ..., joint-7-min, joint-7-max]
 		if default_is_radian is true, the value of speed should be in radians
 		if default_is_radian is false, The value of speed should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_reduced_joint_range(float jrange[14]);
 
 	/*
 	* Turn on/off safety mode
 	* @param on: on/off
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_fense_mode(bool on);
 	int set_fence_mode(bool on) { return set_fense_mode(on); };
@@ -1058,7 +1070,7 @@ public:
 	/*
 	* Turn on/off collision rebound
 	* @param on: on/off
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_collision_rebound(bool on);
 
@@ -1067,13 +1079,13 @@ public:
 	* @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
 		if default_is_radian is true, the value of roll/pitch/yaw should be in radians
 		if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_world_offset(float pose_offset[6]);
 
 	/*
 	* Start trajectory recording, only in teach mode, so you need to set joint teaching mode before.
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int start_record_trajectory(void);
 
@@ -1084,7 +1096,7 @@ public:
 		the trajectory is saved in the controller box.
 		this action will overwrite the trajectory with the same name
 		empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int stop_record_trajectory(char* filename = NULL);
 
@@ -1094,7 +1106,7 @@ public:
 		the trajectory is saved in the controller box.
 		this action will overwrite the trajectory with the same name
 		empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int save_record_trajectory(char* filename, float timeout = 10);
 
@@ -1102,7 +1114,7 @@ public:
 	* Load the trajectory
 	* @param filename: the name of the trajectory to load
 	* @param timeout: the maximum timeout waiting for loading to complete, default is 10 seconds.
-	return: see the API code documentation for details.
+	return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int load_trajectory(char* filename, float timeout = 10);
 
@@ -1113,7 +1125,7 @@ public:
 		if filename is None, you need to manually call the `load_trajectory` to load the trajectory.
 	* @param wait: whether to wait for the arm to complete, default is False.
 	* @param double_speed: double speed, only support 1/2/4, default is 1, only available if version > 1.2.11
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int playback_trajectory(int times = 1, char* filename = NULL, bool wait = false, int double_speed = 1);
 
@@ -1127,19 +1139,19 @@ public:
 		4: saving
 		5: save success
 		6: save failed
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_trajectory_rw_status(int *status);
 
 	/*
 	* Reset counter value
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_counter_reset(void);
 
 	/*
 	* Set counter plus 1
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_counter_increase(void);
 
@@ -1149,7 +1161,7 @@ public:
 	* @param value: value
 	* @param xyz: position xyz, as [x, y, z]
 	* @param tol_r: fault tolerance radius
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
 
@@ -1159,7 +1171,7 @@ public:
 	* @param value: value
 	* @param xyz: position xyz, as [x, y, z]
 	* @param tol_r: fault tolerance radius
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r);
 
@@ -1169,21 +1181,21 @@ public:
 	* @param value: value, 0~10.0
 	* @param xyz: position xyz, as [x, y, z]
 	* @param tol_r: fault tolerance radius
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], float tol_r);
 
 	/*
 	* Config the Tool GPIO reset the digital output when the robot is in stop state
 	* @param on_off: true/false
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int config_tgpio_reset_when_stop(bool on_off);
 
 	/*
 	* Config the Controller GPIO reset the digital output when the robot is in stop state
 	* @param on_off: true/false
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int config_cgpio_reset_when_stop(bool on_off);
 
@@ -1199,7 +1211,7 @@ public:
 	* @param relative: relative move or not
 	* @param wait: whether to wait for the arm to complete, default is False
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
 	int set_position_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
@@ -1214,7 +1226,7 @@ public:
 	* @param mvacc: reserved, move acceleration (mm/s^2)
 	* @param is_tool_coord: is tool coordinate or not
 	* @param relative: relative move or not
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_cartesian_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, bool is_tool_coord = false, bool relative = false);
 	int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false);
@@ -1230,7 +1242,7 @@ public:
 	* @param offset: the offset between pose1 and pose2
 	* @param orient_type_in: input attitude notation, 0 is RPY (default), 1 is axis angle
 	* @param orient_type_out: notation of output attitude, 0 is RPY (default), 1 is axis angle
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in = 0, int orient_type_out = 0);
 
@@ -1239,14 +1251,14 @@ public:
 	* @param pose: the pose represented by the axis angle pose of xArm, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
 		if default_is_radian is true, the value of rx/ry/rz should be in radians
 		if default_is_radian is false, The value of rx/ry/rz should be in degrees
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_position_aa(fp32 pose[6]);
 
 	/*
 	* Reset the robotiq gripper (clear previous activation if any)
 	* @param ret_data: the response from robotiq
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_reset(unsigned char ret_data[6] = NULL);
 
@@ -1255,7 +1267,7 @@ public:
 	* @param wait: whether to wait for the robotiq activate complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 3, only available if wait=true
 	* @param ret_data: the response from robotiq
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = NULL);
 	int robotiq_set_activate(bool wait = true, unsigned char ret_data[6] = NULL);
@@ -1269,7 +1281,7 @@ public:
 	* @param wait: whether to wait for the robotion motion complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
 	* @param ret_data: the response from robotiq
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
 	int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
@@ -1283,7 +1295,7 @@ public:
 	* @param wait: whether to wait for the robotion motion complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
 	* @param ret_data: the response from robotiq
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
 	int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
@@ -1297,7 +1309,7 @@ public:
 	* @param wait: whether to wait for the robotion motion complete, default is true
 	* @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
 	* @param ret_data: the response from robotiq
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
 	int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
@@ -1316,7 +1328,7 @@ public:
 			register 0x07D0: Register GRIPPER STATUS
 			register 0x07D1: Register FAULT STATUS and register POSITION REQUEST ECHO
 			register 0x07D2: Register POSITION and register CURRENT
-	* return: see the API code documentation for details.
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers = 3);
 
@@ -2006,9 +2018,10 @@ private:
 	void _sync(void);
 	void _check_version(void);
 	bool _version_is_ge(int major = 1, int minor = 2, int revision = 11);
-	void _check_is_pause(void);
-	int _wait_until_cmdnum_lt_max(void);
-	int _check_code(int code, bool is_move_cmd = false);
+	void _wait_until_not_pause(void);
+	void _wait_until_cmdnum_lt_max(void);
+	int _xarm_is_ready(void);
+	int _check_code(int code, bool is_move_cmd = false, int mode = -1);
 	int _wait_move(fp32 timeout);
 	void _update_old(unsigned char *data);
 	void _update(unsigned char *data);	

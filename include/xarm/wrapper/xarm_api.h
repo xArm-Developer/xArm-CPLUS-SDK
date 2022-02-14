@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.8.6"
+#define SDK_VERSION "1.8.7"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -229,6 +229,9 @@ public:
 	void disconnect(void);
 
 	/*no use please*/
+	void _handle_report_rich_data(void);
+
+	/*no use please*/
 	void _handle_report_data(void);
 
 	/*
@@ -293,6 +296,21 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int get_servo_angle(fp32 angles[7]);
+
+	/*
+	* Get the joint states
+	*   Note: only available if firmware_version >= 1.9.0
+
+	* @param position: the angles of the joints, like [angle-1, ..., angle-7]
+		if default_is_radian is true, the value of angle-1/.../angle-7 should be in radians
+		if default_is_radian is false, The value of angle-1/.../angle-7 should be in degrees
+	* @param velocity: the velocities of the joints, like [velo-1, ..., velo-7]
+		if default_is_radian is true, the value of velo-1/.../velo-7 should be in radians
+		if default_is_radian is false, The value of velo-1/.../velo-7 should be in degrees
+	* @param effort: the efforts of the joints, like [effort-1, ..., effort-7]
+	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+	*/
+	int get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]);
 
 	/*
 	* Motion enable
@@ -2013,6 +2031,24 @@ public:
 	* return: See the code documentation for details.
 	*/
 	int get_checkset_default_baud(int type, int *baud);
+
+	/*
+	* Set cartesian motion velocity continuous
+
+	* @param on_off: continuous or not, default is false
+
+	* return: See the code documentation for details.
+	*/
+	int set_cartesian_velo_continuous(bool on_off);
+
+	/*
+	* Set allow to avoid overspeed near some singularities using approximate solutions
+
+	* @param on_off: allow or not, default is false
+
+	* return: See the code documentation for details.
+	*/
+	int set_allow_approx_motion(bool on_off);
 private:
 	void _init(void);
 	void _sync(void);
@@ -2037,7 +2073,7 @@ private:
 	template<typename CallableVector, typename FunctionVector>
 	int _clear_event_callback(CallableVector&& callbacks, FunctionVector&& functions, bool clear_all = true);
 
-	void _report_data_callback(void);
+	void _report_data_callback(XArmReportData *report_data_ptr);
 	void _report_location_callback(void);
 	void _report_connect_changed_callback(void);
 	void _report_state_changed_callback(void);
@@ -2071,6 +2107,8 @@ private:
 	int _get_linear_track_registers(unsigned char *ret_data, int addr, int number_of_registers = 1);
 	int _wait_linear_track_stop(fp32 timeout = 100);
 	int _wait_linear_track_back_origin(fp32 timeout = 10);
+
+	bool _is_rich_reported(void);
 private:
 	std::string port_;
 	bool check_tcp_limit_;
@@ -2081,9 +2119,10 @@ private:
 	bool check_is_pause_;
 	bool callback_in_thread_;
 	int max_cmdnum_;
-	// pthread_t report_thread_;
 	std::thread report_thread_;
+	std::thread report_rich_thread_;
 	std::mutex mutex_;
+	std::mutex report_mutex_;
 	std::condition_variable cond_;
 	bool is_ready_;
 	bool is_tcp_;
@@ -2133,11 +2172,13 @@ private:
 
 	fp32 cmd_timeout_;
 
+	SerialPort *stream_ser_;
 	SocketPort *stream_tcp_;
 	SocketPort *stream_tcp_report_;
-	SerialPort *stream_ser_;
+	SocketPort *stream_tcp_rich_report_;
 	ThreadPool pool_;
 	XArmReportData *report_data_ptr_;
+	XArmReportData *report_rich_data_ptr_;
 	std::string report_type_;
 	bool debug_;
 	int default_bio_baud_;

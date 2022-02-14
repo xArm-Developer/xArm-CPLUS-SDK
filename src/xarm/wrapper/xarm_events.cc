@@ -21,8 +21,8 @@ void XArmAPI::_report_callback(CallableVector&& callbacks, FunctionVector&& func
 	}
 }
 
-void XArmAPI::_report_data_callback(void) {
-	_report_callback(report_data_callbacks_, report_data_functions_, report_data_ptr_);
+void XArmAPI::_report_data_callback(XArmReportData *report_data_ptr) {
+	_report_callback(report_data_callbacks_, report_data_functions_, report_data_ptr);
 }
 
 void XArmAPI::_report_location_callback(void) {
@@ -151,6 +151,7 @@ int XArmAPI::_clear_event_callback(CallableVector&& callbacks, FunctionVector&& 
 int XArmAPI::register_report_data_callback(void(*callback)(XArmReportData *report_data_ptr)) {
 	return _register_event_callback(report_data_callbacks_, callback);
 }
+
 int XArmAPI::register_report_data_callback(std::function<void (XArmReportData *)> callback) {
     return _register_event_function(report_data_functions_, callback);
 }

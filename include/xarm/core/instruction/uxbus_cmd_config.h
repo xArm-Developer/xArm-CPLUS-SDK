@@ -81,6 +81,7 @@ public:
 	static const unsigned char LOAD_TRAJ = 63;
 	static const unsigned char PLAY_TRAJ = 64;
 	static const unsigned char GET_TRAJ_RW_STATUS = 65;
+	static const unsigned char ALLOW_APPROX_MOTION = 66;
 
 	static const unsigned char REPORT_TAU_OR_I = 70;
 	static const unsigned char SET_TIMER = 71;
@@ -94,6 +95,7 @@ public:
 	static const unsigned char SET_SELF_COLLIS_CHECK = 77;
 	static const unsigned char SET_COLLIS_TOOL = 78;
 	static const unsigned char SET_SIMULATION_ROBOT = 79;
+	static const unsigned char SET_CARTV_CONTINUE = 80;
 
 	static const unsigned char VC_SET_JOINTV = 81;
 	static const unsigned char VC_SET_CARTV = 82;

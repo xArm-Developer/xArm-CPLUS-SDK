@@ -72,6 +72,7 @@ void XArmAPI::_init(void) {
 	core = NULL;
 	stream_tcp_ = NULL;
 	stream_tcp_report_ = NULL;
+	stream_tcp_rich_report_ = NULL;
 	stream_ser_ = NULL;
 	is_ready_ = true;
 	is_tcp_ = true;
@@ -199,7 +200,14 @@ void XArmAPI::_init(void) {
 	default_robotiq_baud_ = 115200;
 	default_linear_track_baud_ = 2000000;
 
-	report_data_ptr_ = new XArmReportData(report_type_);
+	report_rich_data_ptr_ = new XArmReportData("rich");
+	if (report_type_ != "rich") {
+		report_data_ptr_ = new XArmReportData(report_type_);
+	}
+	else {
+		report_data_ptr_ = report_rich_data_ptr_;
+	}
+	
 }
 
 int XArmAPI::set_baud_checkset_enable(bool enable)
@@ -268,6 +276,15 @@ bool XArmAPI::is_connected(void) {
 
 bool XArmAPI::is_reported(void) {
 	return is_tcp_ ? (stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_ok() == 0) : false;
+}
+
+bool XArmAPI::_is_rich_reported(void) {
+	return is_tcp_ ? (stream_tcp_rich_report_ == NULL ? false : stream_tcp_rich_report_->is_ok() == 0) : false;
+}
+
+static void report_rich_thread_handle_(void *arg) {
+	XArmAPI *my_this = (XArmAPI *)arg;
+	my_this->_handle_report_rich_data();
 }
 
 static void report_thread_handle_(void *arg) {
@@ -502,11 +519,22 @@ int XArmAPI::connect(const std::string &port) {
 		sleep_milliseconds(200);
 		_check_version();
 
-		stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
-		_report_connect_changed_callback();
-		if (!is_reported()) { return -3; }
-		report_thread_ = std::thread(report_thread_handle_, this);
-		report_thread_.detach();
+		stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
+		if (report_type_ == "rich") {
+			stream_tcp_report_ = stream_tcp_rich_report_;
+			_report_connect_changed_callback();
+		}
+		if (!_is_rich_reported()) { return -3; }
+		report_rich_thread_ = std::thread(report_rich_thread_handle_, this);
+		report_rich_thread_.detach();
+
+		if (report_type_ != "rich") {
+			stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
+			_report_connect_changed_callback();
+			if (!is_reported()) { return -3; }
+			report_thread_ = std::thread(report_thread_handle_, this);
+			report_thread_.detach();
+		}
 	}
 	else {
 		is_tcp_ = false;
@@ -525,12 +553,19 @@ int XArmAPI::connect(const std::string &port) {
 void XArmAPI::disconnect(void) {
 	if (stream_tcp_ != NULL) {
 		stream_tcp_->close_port();
+		stream_tcp_ = NULL;
 	}
 	if (stream_ser_ != NULL) {
 		stream_ser_->close_port();
+		stream_ser_ = NULL;
 	}
-	if (stream_tcp_report_ != NULL) {
+	if (stream_tcp_rich_report_ != NULL) {
+		stream_tcp_rich_report_->close_port();
+		stream_tcp_rich_report_ = NULL;
+	}
+	if (stream_tcp_report_ != NULL && report_type_ != "rich") {
 		stream_tcp_report_->close_port();
+		stream_tcp_report_ = NULL;
 	}
 	_report_connect_changed_callback();
 	is_ready_ = false;
@@ -630,6 +665,21 @@ int XArmAPI::get_servo_angle(fp32 angs[7]) {
 				angs[i] = to_degree(angs[i]);
 			}
 			angles[i] = angs[i];
+		}
+	}
+	return ret;
+}
+
+int XArmAPI::get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]) {
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int ret = core->get_joint_states(position, velocity, effort);
+	ret = _check_code(ret);
+	if (ret == 0) {
+		for (int i = 0; i < 7; i++) {
+			if (!default_is_radian) {
+				position[i] = to_degree(position[i]);
+				velocity[i] = to_degree(velocity[i]);
+			}
 		}
 	}
 	return ret;
@@ -970,6 +1020,20 @@ int XArmAPI::calibrate_user_coordinate_offset(float rpy_ub[3], float pos_b_uorg[
 		rpy_ub_[i] = (float)(default_is_radian ? rpy_ub[i] : to_radian(rpy_ub[i]));
 	}
 	int ret = core->cali_user_pos(rpy_ub_, pos_b_uorg, ret_xyz);
+	return _check_code(ret);
+}
+
+int XArmAPI::set_cartesian_velo_continuous(bool on_off)
+{
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int ret = core->set_cartesian_velo_continuous((int)on_off);
+	return _check_code(ret);
+}
+
+int XArmAPI::set_allow_approx_motion(bool on_off)
+{
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int ret = core->set_allow_approx_motion((int)on_off);
 	return _check_code(ret);
 }
 

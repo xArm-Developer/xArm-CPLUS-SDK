@@ -70,13 +70,13 @@ __int cmd_num__
 
 
 __fp32 joints_torque[7]__
-> Joints torque, only available in socket way and  enable_report is true and report_type is 'rich'  
+> Joints torque, only available in socket way  
 >  
 > :return: fp32[7]{servo-1, ..., servo-7}
 
 
 __bool motor_brake_states[8]__
-> Motor brake state list, only available in socket way and  enable_report is true and report_type is 'rich'  
+> Motor brake state list, only available in socket way  
 > Note:  
 > &ensp;&ensp;&ensp;&ensp;For a robot with a number of axes n, only the first n states are valid, and the latter are reserved.  
 > 
@@ -84,7 +84,7 @@ __bool motor_brake_states[8]__
 
 
 __bool motor_enable_states[8]__
-> Motor enable state list, only available in socket way and  enable_report is true and report_type is 'rich'  
+> Motor enable state list, only available in socket way  
 > Note:  
 > &ensp;&ensp;&ensp;&ensp;For a robot with a number of axes n, only the first n states are valid, and the latter are reserved.
 >
@@ -100,25 +100,25 @@ __int warn_code__
 
 
 __fp32 tcp_load[4]__
-> xArm tcp load, only available in socket way and  enable_report is true and report_type is 'rich'  
+> xArm tcp load, only available in socket way  
 >
 > :return: fp32[4]{weight, x, y, z}
 
 
 __int collision_sensitivity__
-> The sensitivity value of collision, only available in socket way and  enable_report is true and report_type is 'rich'
+> The sensitivity value of collision, only available in socket way
 
 
 __int teach_sensitivity__
-> The sensitivity value of drag and teach, only available in socket way and enable_report is true and report_type is 'rich'
+> The sensitivity value of drag and teach, only available in socket way
 
 
 __int device_type__
-> Device type, only available in socket way and  enable_report is true and report_type is 'rich'
+> Device type, only available in socket way  
 
 
 __int axis__
-> Axis number, only available in socket way and enable_report is true and report_type is 'rich'
+> Axis number, only available in socket way  
 
 
 __unsigned char version[30]__
@@ -150,13 +150,13 @@ __fp32 max_rot_acc__
 
 
 __fp32 tcp_speed_limit[2]__
-> Joint acceleration limit, only available in socket way and enable_report is true and report_type is 'rich'  
+> Joint acceleration limit, only available in socket way   
 >
 > :return: fp32[2]{min, max}
 
 
 __fp32 tcp_acc_limit[2]__
-> Joint acceleration limit, only available in socket way and enable_report is true and report_type is 'rich' 
+> Joint acceleration limit, only available in socket way  
 > 
 > :return: fp32[2]{min, max}
 
@@ -182,13 +182,13 @@ __fp32 last_used_angles[7]__
 
 
 __fp32 joint_speed_limit[2]__
-> Joint speed limit,  only available in socket way and enable_report is true and report_type is 'rich'
+> Joint speed limit,  only available in socket way 
 >
 > :return: fp32[2]{min, max}
 
 
 __fp32 joint_acc_limit[2]__
-> Joint acceleration limit, only available in socket way and enable_report is true and report_type is 'rich' 
+> Joint acceleration limit, only available in socket way  
 >
 > :return: fp32[2]{min, max}
 
@@ -220,7 +220,7 @@ __fp32 tcp_offset[6]__
 
 
 __fp32 gravity_direction[3]__
-> gravity direction, only available in socket way and enable_report is true and report_type is 'rich'
+> gravity direction, only available in socket way 
 >
 >:return: fp32[3]{x_direction, y_direction, z_direction}
 
@@ -2041,4 +2041,35 @@ __int get_checkset_default_baud(int type, int *baud)__
 > &ensp;&ensp;&ensp;&ensp;4: linear track  
 > :param baud: checkset baud value, less than or equal to 0 means disable checkset  
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+
+__int set_cartesian_velo_continuous(bool on_off)__
+> Set cartesian motion velocity continuous  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
+> 
+> :param on_off: continuous or not, default is false     
+> :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+
+
+__int set_allow_approx_motion(bool on_off)__
+> Set allow to avoid overspeed near some singularities using approximate solutions  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
+> 
+> :param on_off: allow or not, default is false     
+> :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+
+__int get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7])__
+> Get the joint states  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
+>
+> :param position: the angles of the joints, like [angle-1, ..., angle-7]    
+> &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of angle-1/.../angle-7 should be in radians  
+> &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of angle-1/.../angle-7 should be in degrees  
+> :param velocity: the velocities of the joints, like [velo-1, ..., velo-7]    
+> &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of velo-1/.../velo-7 should be in radians  
+> &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of velo-1/.../velo-7 should be in degrees   
+> :param effort: the efforts of the joints, like [effort-1, ..., effort-7]  
+> :return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

@@ -529,4 +529,16 @@ namespace XArmWrapper
 	int __stdcall get_checkset_default_baud(int type, int *baud) {
 		return arm->get_checkset_default_baud(type, baud);
 	}
+
+	int __stdcall set_cartesian_velo_continuous(bool on_off) {
+		return arm->set_cartesian_velo_continuous(on_off);
+	}
+
+	int __stdcall set_allow_approx_motion(bool on_off) {
+		return arm->set_allow_approx_motion(on_off);
+	}
+
+	int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]) {
+		return arm->get_joint_states(position, velocity, effort);
+	}
 }

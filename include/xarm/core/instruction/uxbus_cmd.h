@@ -72,6 +72,7 @@ inline long long get_system_time()
 #else
 	struct timespec t;
 	clock_gettime(CLOCK_REALTIME, &t);
+	// clock_gettime(CLOCK_MONOTONIC, &t);
 	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
 #endif
 }
@@ -145,6 +146,7 @@ public:
 
 	int get_tcp_pose(float pose[6]);
 	int get_joint_pose(float angles[7]);
+	int get_joint_states(float position[7], float velocity[7], float effort[7]);
 	int get_ik(float pose[6], float angles[7]);
 	int get_fk(float angles[7], float pose[6]);
 	int is_joint_limit(float joint[7], int *value);
@@ -252,6 +254,9 @@ public:
 
 	int track_modbus_r16s(int addr, unsigned char *data, int len, unsigned char fcode = 0x03);
 	int track_modbus_w16s(int addr, unsigned char *send_data, int len, unsigned char *rx_data);
+
+	int set_cartesian_velo_continuous(int on_off);
+	int set_allow_approx_motion(int on_off);
 
 	virtual void close(void);
 	virtual int is_ok(void);

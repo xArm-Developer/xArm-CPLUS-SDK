@@ -671,3 +671,105 @@ int XArmReportData::check_data(unsigned char *rx_data)
     return _check_normal_data(rx_data);
   }
 }
+
+int XArmReportData::__flush_common_data(XArmReportData *report_data_ptr)
+{
+  // dev/normal/rich report data
+  state = report_data_ptr->state;
+  mode = report_data_ptr->mode;
+  cmdnum = report_data_ptr->cmdnum;
+  memcpy(angle, report_data_ptr->angle, sizeof(float) * 7);
+  memcpy(pose, report_data_ptr->pose, sizeof(float) * 6);
+  memcpy(tau, report_data_ptr->tau, sizeof(float) * 7);
+  return 0;
+}
+
+int XArmReportData::_flush_dev_data(XArmReportData *report_data_ptr)
+{
+  int ret = __flush_common_data(report_data_ptr);
+  memcpy(ft_ext_force, report_data_ptr->ft_ext_force, sizeof(float) * 6);
+  memcpy(ft_raw_force, report_data_ptr->ft_raw_force, sizeof(float) * 6);
+  return ret;
+}
+
+int XArmReportData::_flush_normal_data(XArmReportData *report_data_ptr)
+{
+  int ret = __flush_common_data(report_data_ptr);
+  mt_brake = report_data_ptr->mt_brake;
+  mt_able = report_data_ptr->mt_able;
+  err = report_data_ptr->err;
+  war = report_data_ptr->war;
+  memcpy(tcp_offset, report_data_ptr->tcp_offset, sizeof(float) * 6);
+  memcpy(tcp_load, report_data_ptr->tcp_load, sizeof(float) * 4);
+  collis_sens = report_data_ptr->collis_sens;
+  teach_sens = report_data_ptr->teach_sens;
+  memcpy(gravity_dir, report_data_ptr->gravity_dir, sizeof(float) * 3);
+  return ret;
+}
+
+int XArmReportData::_flush_rich_data(XArmReportData *report_data_ptr)
+{
+  int ret = _flush_normal_data(report_data_ptr);
+  arm_type = report_data_ptr->arm_type;
+  axis_num = report_data_ptr->axis_num;
+  master_id = report_data_ptr->master_id;
+  slave_id = report_data_ptr->slave_id;
+  motor_tid = report_data_ptr->motor_tid;
+  motor_fid = report_data_ptr->motor_fid;
+  memcpy(versions, report_data_ptr->versions, 30);
+  trs_jerk = report_data_ptr->trs_jerk;
+  trs_accmin = report_data_ptr->trs_accmin;
+  trs_accmax = report_data_ptr->trs_accmax;
+  trs_velomin = report_data_ptr->trs_velomin;
+  trs_velomax = report_data_ptr->trs_velomax;
+  p2p_jerk = report_data_ptr->p2p_jerk;
+  p2p_accmin = report_data_ptr->p2p_accmin;
+  p2p_accmax = report_data_ptr->p2p_accmax;
+  p2p_velomin = report_data_ptr->p2p_velomin;
+  p2p_velomax = report_data_ptr->p2p_velomax;
+  rot_jerk = report_data_ptr->rot_jerk;
+  rot_accmax = report_data_ptr->rot_accmax;
+  memcpy(sv3msg, report_data_ptr->sv3msg, 16);
+
+  memcpy(temperatures, report_data_ptr->temperatures, sizeof(int) * 7);
+  rt_tcp_spd = report_data_ptr->rt_tcp_spd;
+  memcpy(rt_joint_spds, report_data_ptr->rt_joint_spds, sizeof(float) * 7);
+  count = report_data_ptr->count;
+  memcpy(world_offset, report_data_ptr->world_offset, sizeof(float) * 6);
+  memcpy(gpio_reset_conf, report_data_ptr->gpio_reset_conf, sizeof(int) * 2);
+  simulation_mode = report_data_ptr->simulation_mode;
+  collision_detection = report_data_ptr->collision_detection;
+  collision_tool_type = report_data_ptr->collision_tool_type;
+  memcpy(collision_model_params, report_data_ptr->collision_model_params, sizeof(float) * 6);
+  memcpy(voltages, report_data_ptr->voltages, sizeof(float) * 7);
+  memcpy(currents, report_data_ptr->currents, sizeof(float) * 7);
+  
+  cgpio_state = report_data_ptr->cgpio_state;
+  cgpio_code = report_data_ptr->cgpio_code;
+  memcpy(cgpio_input_digitals, report_data_ptr->cgpio_input_digitals, sizeof(int) * 2);
+  memcpy(cgpio_output_digitals, report_data_ptr->cgpio_output_digitals, sizeof(int) * 2);
+  memcpy(cgpio_input_analogs, report_data_ptr->cgpio_input_analogs, sizeof(float) * 2);
+  memcpy(cgpio_output_analogs, report_data_ptr->cgpio_output_analogs, sizeof(float) * 2);
+  memcpy(cgpio_input_conf, report_data_ptr->cgpio_input_conf, 16);
+  memcpy(cgpio_output_conf, report_data_ptr->cgpio_output_conf, 16);
+
+  memcpy(ft_ext_force, report_data_ptr->ft_ext_force, sizeof(float) * 6);
+  memcpy(ft_raw_force, report_data_ptr->ft_raw_force, sizeof(float) * 6);
+  iden_progress = report_data_ptr->iden_progress;
+
+  memcpy(pose_aa, report_data_ptr->pose_aa, sizeof(float) * 6);
+  return ret;
+}
+
+int XArmReportData::flush_data(XArmReportData *report_data_ptr)
+{
+  if (report_data_ptr->report_type == "dev") {
+    return _flush_dev_data(report_data_ptr);
+  }
+  else if (report_data_ptr->report_type == "rich") {
+    return _flush_rich_data(report_data_ptr);
+  }
+  else {
+    return _flush_normal_data(report_data_ptr);
+  }
+}

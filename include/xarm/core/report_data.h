@@ -119,29 +119,35 @@ public:
   ~XArmReportData(void);
 
   int flush_data(unsigned char *rx_data);
+  int flush_data(XArmReportData *report_data_ptr);
   void print_data(void);
   int check_data(unsigned char *rx_data);
 
 private:
   int __check_common_data(unsigned char *rx_data);
   int __flush_common_data(unsigned char *rx_data);
+  int __flush_common_data(XArmReportData *report_data_ptr);
   void __print_common_data(void);
 
   int _check_dev_data(unsigned char *rx_data);
   int _flush_dev_data(unsigned char *rx_data);
+  int _flush_dev_data(XArmReportData *report_data_ptr);
   void _print_dev_data(void);
   
   int _check_normal_data(unsigned char *rx_data);
   int _flush_normal_data(unsigned char *rx_data);
+  int _flush_normal_data(XArmReportData *report_data_ptr);
   void _print_normal_data(void);
   
   int _check_rich_data(unsigned char *rx_data);
   int _flush_rich_data(unsigned char *rx_data);
+  int _flush_rich_data(XArmReportData *report_data_ptr);
   void _print_rich_data(void);
   
   void __flush_debug_data(int since_size);
 
 public:
+  std::string report_type;
   int total_num;
   // dev/normal/rich report data
   int state;
@@ -215,7 +221,6 @@ public:
   int debug_size;
   unsigned char *debug_data;
 private:
-  std::string report_type;
   unsigned char *data_fp;
   float trs_msg_[5];
   float p2p_msg_[5];

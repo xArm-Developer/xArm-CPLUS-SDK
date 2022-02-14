@@ -341,6 +341,12 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_checkset_default_baud(int type, ref int baud);
 
+        [DllImport("xarm.dll")]
+        public static extern int set_cartesian_velo_continuous(bool on_off);
+        [DllImport("xarm.dll")]
+        public static extern int set_allow_approx_motion(bool on_off);
+        [DllImport("xarm.dll")]
+        public static extern int get_joint_states(float[] position, float[] velocity, float[] effort);
 
         public static int set_position(float[] pose, float radius = -1,
             bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)

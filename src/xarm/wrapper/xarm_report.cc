@@ -90,17 +90,6 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
 			linear_track_status.is_enabled = 0;
 		}
 
-		// if ((error_code >= 10 && error_code <= 17) || error_code ==1 || error_code == 19 || error_code == 28) {
-		// 	modbus_baud_ = -1;
-		// 	robotiq_is_activated_ = false;
-		// 	gripper_is_enabled_ = false;
-		// 	bio_gripper_is_enabled_ = false;
-		// 	bio_gripper_speed_ = -1;
-		// 	gripper_version_numbers_[0] = -1;
-		// 	gripper_version_numbers_[1] = -1;
-		// 	gripper_version_numbers_[2] = -1;
-		// }
-
 		hex_to_nfp32(&data_fp[9], angles, 7);
 		for (int i = 0; i < 7; i++) {
 			angles[i] = (float)(default_is_radian ? angles[i] : to_degree(angles[i]));
@@ -183,12 +172,20 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		_update_old(rx_data);
 		return;
 	}
-	if (report_data_ptr_->flush_data(rx_data) != 0) return;
-	_report_data_callback();
+	if (report_rich_data_ptr_->flush_data(rx_data) != 0) return;
+	if (report_type_ != "rich") {
+		// use rich report data update to other report data
+		std::unique_lock<std::mutex> locker(report_mutex_);
+		report_data_ptr_->flush_data(report_rich_data_ptr_);
+		locker.unlock();
+	}
+	else {
+		_report_data_callback(report_rich_data_ptr_);
+	}
 	int sizeof_data = bin8_to_32(rx_data);
 	if (sizeof_data >= 87) {
 		int state_ = state;
-		state = report_data_ptr_->state;
+		state = report_rich_data_ptr_->state;
 		if (state != 3) {
 			std::unique_lock<std::mutex> locker(mutex_);
 			cond_.notify_all();
@@ -198,26 +195,26 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		if (sizeof_data < 133) is_ready_ = (state == 4 || state == 5) ? false : true;
 
 		int mode_ = mode;
-		mode = report_data_ptr_->mode;
+		mode = report_rich_data_ptr_->mode;
 		if (mode != mode_) _report_mode_changed_callback();
 		int cmdnum_ = cmd_num;
-		cmd_num = report_data_ptr_->cmdnum;
+		cmd_num = report_rich_data_ptr_->cmdnum;
 		if (cmd_num != cmdnum_) _report_cmdnum_changed_callback();
 
 		for (int i = 0; i < 7; i++) {
-			angles[i] = (float)(default_is_radian ? report_data_ptr_->angle[i] : to_degree(report_data_ptr_->angle[i]));
-			joints_torque[i] = report_data_ptr_->tau[i];
+			angles[i] = (float)(default_is_radian ? report_rich_data_ptr_->angle[i] : to_degree(report_rich_data_ptr_->angle[i]));
+			joints_torque[i] = report_rich_data_ptr_->tau[i];
 		}
 		for (int i = 0; i < 6; i++) {
-			position[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose[i] : to_degree(report_data_ptr_->pose[i]));
+			position[i] = (float)(default_is_radian || i < 3 ? report_rich_data_ptr_->pose[i] : to_degree(report_rich_data_ptr_->pose[i]));
 		}
 		_report_location_callback();
 	}
 	if (sizeof_data >= 133) {
 		int brake = mt_brake_;
 		int able = mt_able_;
-		mt_brake_ = report_data_ptr_->mt_brake;
-		mt_able_ = report_data_ptr_->mt_able;
+		mt_brake_ = report_rich_data_ptr_->mt_brake;
+		mt_able_ = report_rich_data_ptr_->mt_able;
 		if (brake != mt_brake_ || able != mt_able_) _report_mtable_mtbrake_changed_callback();
 		if (!is_first_report_) {
 			bool ready = true;
@@ -239,8 +236,8 @@ void XArmAPI::_update(unsigned char *rx_data) {
 
 		int err = error_code;
 		int warn = warn_code;
-		error_code = report_data_ptr_->err;
-		warn_code = report_data_ptr_->war;
+		error_code = report_rich_data_ptr_->err;
+		warn_code = report_rich_data_ptr_->war;
 		if (error_code != err || warn_code != warn) _report_error_warn_changed_callback();
 
 		bool reset_tgpio_params = false;
@@ -277,10 +274,10 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		}
 
 		for (int i = 0; i < 6; i++) {
-			tcp_offset[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->tcp_offset[i] : to_degree(report_data_ptr_->tcp_offset[i]));
+			tcp_offset[i] = (float)(default_is_radian || i < 3 ? report_rich_data_ptr_->tcp_offset[i] : to_degree(report_rich_data_ptr_->tcp_offset[i]));
 		}
 		for (int i = 0; i < 4; i++) {
-			tcp_load[i] = report_data_ptr_->tcp_load[i];
+			tcp_load[i] = report_rich_data_ptr_->tcp_load[i];
 		}
 
 		if (!compare_version(version_number, new int[3]{ 0, 2, 0 })) {
@@ -289,39 +286,39 @@ void XArmAPI::_update(unsigned char *rx_data) {
 			tcp_load[3] = tcp_load[3] * 1000;
 		}
 
-		collision_sensitivity = report_data_ptr_->collis_sens;
-		teach_sensitivity = report_data_ptr_->teach_sens;
+		collision_sensitivity = report_rich_data_ptr_->collis_sens;
+		teach_sensitivity = report_rich_data_ptr_->teach_sens;
 		for (int i = 0; i < 3; i++) {
-			gravity_direction[i] = report_data_ptr_->gravity_dir[i];
+			gravity_direction[i] = report_rich_data_ptr_->gravity_dir[i];
 		}
 	}
 	if (sizeof_data >= 245) {
-		device_type = report_data_ptr_->arm_type;
-		int _axis = report_data_ptr_->axis_num;
-		master_id = report_data_ptr_->master_id;
-		slave_id = report_data_ptr_->slave_id;
-		motor_tid = report_data_ptr_->motor_tid;
-		motor_fid = report_data_ptr_->motor_fid;
+		device_type = report_rich_data_ptr_->arm_type;
+		int _axis = report_rich_data_ptr_->axis_num;
+		master_id = report_rich_data_ptr_->master_id;
+		slave_id = report_rich_data_ptr_->slave_id;
+		motor_tid = report_rich_data_ptr_->motor_tid;
+		motor_fid = report_rich_data_ptr_->motor_fid;
 
 		axis = (_axis >= 5 && _axis <= 7) ? _axis : axis;
 
-		memcpy(version, report_data_ptr_->versions, 30);
+		memcpy(version, report_rich_data_ptr_->versions, 30);
 
-		tcp_jerk = report_data_ptr_->trs_jerk;
-		min_tcp_acc_ = report_data_ptr_->trs_accmin;
-		max_tcp_acc_ = report_data_ptr_->trs_accmax;
-		min_tcp_speed_ = report_data_ptr_->trs_velomin;
-		max_tcp_speed_ = report_data_ptr_->trs_velomax;
+		tcp_jerk = report_rich_data_ptr_->trs_jerk;
+		min_tcp_acc_ = report_rich_data_ptr_->trs_accmin;
+		max_tcp_acc_ = report_rich_data_ptr_->trs_accmax;
+		min_tcp_speed_ = report_rich_data_ptr_->trs_velomin;
+		max_tcp_speed_ = report_rich_data_ptr_->trs_velomax;
 		tcp_speed_limit[0] = min_tcp_speed_;
 		tcp_speed_limit[1] = max_tcp_speed_;
 		tcp_acc_limit[0] = min_tcp_acc_;
 		tcp_acc_limit[1] = max_tcp_acc_;
 
-		joint_jerk = default_is_radian ? report_data_ptr_->p2p_jerk : to_degree(report_data_ptr_->p2p_jerk);
-		min_joint_acc_ = report_data_ptr_->p2p_accmin;
-		max_joint_acc_ = report_data_ptr_->p2p_accmax;
-		min_joint_speed_ = report_data_ptr_->p2p_velomin;
-		max_joint_speed_ = report_data_ptr_->p2p_velomax;
+		joint_jerk = default_is_radian ? report_rich_data_ptr_->p2p_jerk : to_degree(report_rich_data_ptr_->p2p_jerk);
+		min_joint_acc_ = report_rich_data_ptr_->p2p_accmin;
+		max_joint_acc_ = report_rich_data_ptr_->p2p_accmax;
+		min_joint_speed_ = report_rich_data_ptr_->p2p_velomin;
+		max_joint_speed_ = report_rich_data_ptr_->p2p_velomax;
 		if (default_is_radian) {
 			joint_speed_limit[0] = min_joint_acc_;
 			joint_speed_limit[1] = max_joint_acc_;
@@ -335,87 +332,87 @@ void XArmAPI::_update(unsigned char *rx_data) {
 			joint_acc_limit[1] = to_degree(max_joint_speed_);
 		}
 
-		rot_jerk = report_data_ptr_->rot_jerk;
-		max_rot_acc = report_data_ptr_->rot_accmax;
+		rot_jerk = report_rich_data_ptr_->rot_jerk;
+		max_rot_acc = report_rich_data_ptr_->rot_accmax;
 
-		memcpy(sv3msg_, report_data_ptr_->sv3msg, 17);
+		memcpy(sv3msg_, report_rich_data_ptr_->sv3msg, 17);
 
 		if (sizeof_data >= 252) {
 			bool isChange = false;
 			for (int i = 0; i < 7; i++) {
-				isChange = (temperatures[i] != report_data_ptr_->temperatures[i]) ? true : isChange;
-				temperatures[i] = (float)(report_data_ptr_->temperatures[i]);
+				isChange = (temperatures[i] != report_rich_data_ptr_->temperatures[i]) ? true : isChange;
+				temperatures[i] = (float)(report_rich_data_ptr_->temperatures[i]);
 			}
 			if (isChange) {
 				_report_temperature_changed_callback();
 			}
 		}
 		if (sizeof_data >= 284) {
-			realtime_tcp_speed = report_data_ptr_->rt_tcp_spd;
+			realtime_tcp_speed = report_rich_data_ptr_->rt_tcp_spd;
 			for (int i = 0; i < 7; i++) {
-				realtime_joint_speeds[i] = report_data_ptr_->rt_joint_spds[i];
+				realtime_joint_speeds[i] = report_rich_data_ptr_->rt_joint_spds[i];
 			}
 		}
 		if (sizeof_data >= 288) {
-			if (count != -1 && count != report_data_ptr_->count) {
-				count = report_data_ptr_->count;
+			if (count != -1 && count != report_rich_data_ptr_->count) {
+				count = report_rich_data_ptr_->count;
 				_report_count_changed_callback();
 			}
-			count = report_data_ptr_->count;
+			count = report_rich_data_ptr_->count;
 		}
 		if (sizeof_data >= 312) {
 			for (int i = 0; i < 6; i++) {
-				world_offset[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->world_offset[i] : to_degree(report_data_ptr_->world_offset[i]));
+				world_offset[i] = (float)(default_is_radian || i < 3 ? report_rich_data_ptr_->world_offset[i] : to_degree(report_rich_data_ptr_->world_offset[i]));
 			}
 		}
 		if (sizeof_data >= 314) {
-			gpio_reset_config[0] = report_data_ptr_->gpio_reset_conf[0];
-			gpio_reset_config[1] = report_data_ptr_->gpio_reset_conf[1];
+			gpio_reset_config[0] = report_rich_data_ptr_->gpio_reset_conf[0];
+			gpio_reset_config[1] = report_rich_data_ptr_->gpio_reset_conf[1];
 		}
 		if (sizeof_data >= 417) {
-			is_simulation_robot = report_data_ptr_->simulation_mode;
-			is_collision_detection = report_data_ptr_->collision_detection;
-			collision_tool_type = report_data_ptr_->collision_tool_type;
+			is_simulation_robot = report_rich_data_ptr_->simulation_mode;
+			is_collision_detection = report_rich_data_ptr_->collision_detection;
+			collision_tool_type = report_rich_data_ptr_->collision_tool_type;
 			for (int i = 0; i < 6; i++) {
-				collision_model_params[i] = report_data_ptr_->collision_model_params[i];
+				collision_model_params[i] = report_rich_data_ptr_->collision_model_params[i];
 			}
 
 			for (int i = 0; i < 7; i++) {
-				voltages[i] = report_data_ptr_->voltages[i];
-				currents[i] = report_data_ptr_->currents[i];
+				voltages[i] = report_rich_data_ptr_->voltages[i];
+				currents[i] = report_rich_data_ptr_->currents[i];
 			}
 
-			cgpio_state = report_data_ptr_->cgpio_state;
-			cgpio_code = report_data_ptr_->cgpio_code;
-			cgpio_input_digitals[0] = report_data_ptr_->cgpio_input_digitals[0];
-			cgpio_input_digitals[1] = report_data_ptr_->cgpio_input_digitals[1];
-			cgpio_output_digitals[0] = report_data_ptr_->cgpio_output_digitals[0];
-			cgpio_output_digitals[1] = report_data_ptr_->cgpio_output_digitals[1];
-			cgpio_intput_anglogs[0] = report_data_ptr_->cgpio_input_analogs[0];
-			cgpio_intput_anglogs[1] = report_data_ptr_->cgpio_input_analogs[1];
-			cgpio_output_anglogs[0] = report_data_ptr_->cgpio_output_analogs[0];
-			cgpio_output_anglogs[1] = report_data_ptr_->cgpio_output_analogs[1];
+			cgpio_state = report_rich_data_ptr_->cgpio_state;
+			cgpio_code = report_rich_data_ptr_->cgpio_code;
+			cgpio_input_digitals[0] = report_rich_data_ptr_->cgpio_input_digitals[0];
+			cgpio_input_digitals[1] = report_rich_data_ptr_->cgpio_input_digitals[1];
+			cgpio_output_digitals[0] = report_rich_data_ptr_->cgpio_output_digitals[0];
+			cgpio_output_digitals[1] = report_rich_data_ptr_->cgpio_output_digitals[1];
+			cgpio_intput_anglogs[0] = report_rich_data_ptr_->cgpio_input_analogs[0];
+			cgpio_intput_anglogs[1] = report_rich_data_ptr_->cgpio_input_analogs[1];
+			cgpio_output_anglogs[0] = report_rich_data_ptr_->cgpio_output_analogs[0];
+			cgpio_output_anglogs[1] = report_rich_data_ptr_->cgpio_output_analogs[1];
 			for (int i = 0; i < 16; i++) {
-				cgpio_input_conf[i] = report_data_ptr_->cgpio_input_conf[i];
-				cgpio_output_conf[i] = report_data_ptr_->cgpio_output_conf[i];
+				cgpio_input_conf[i] = report_rich_data_ptr_->cgpio_input_conf[i];
+				cgpio_output_conf[i] = report_rich_data_ptr_->cgpio_output_conf[i];
 			}
 		}
 		if (sizeof_data >= 481) {
 			for (int i = 0; i < 6; i++) {
-				ft_ext_force[i] = report_data_ptr_->ft_ext_force[i];
-				ft_raw_force[i] = report_data_ptr_->ft_raw_force[i];
+				ft_ext_force[i] = report_rich_data_ptr_->ft_ext_force[i];
+				ft_raw_force[i] = report_rich_data_ptr_->ft_raw_force[i];
 			}
 		}
 		if (sizeof_data >= 482) {
-			if (iden_progress != report_data_ptr_->iden_progress) {
-				iden_progress = report_data_ptr_->iden_progress;
+			if (iden_progress != report_rich_data_ptr_->iden_progress) {
+				iden_progress = report_rich_data_ptr_->iden_progress;
 				_report_iden_progress_changed_callback();
 			}
-			iden_progress = report_data_ptr_->iden_progress;
+			iden_progress = report_rich_data_ptr_->iden_progress;
 		}
 		if (sizeof_data >= 494) {
 			for (int i = 0; i < 6; i++) {
-				position_aa[i] = (float)(default_is_radian || i < 3 ? report_data_ptr_->pose_aa[i] : to_degree(report_data_ptr_->pose_aa[i]));
+				position_aa[i] = (float)(default_is_radian || i < 3 ? report_rich_data_ptr_->pose_aa[i] : to_degree(report_rich_data_ptr_->pose_aa[i]));
 			}
 		}
 	}
@@ -429,6 +426,68 @@ void XArmAPI::_handle_report_data(void) {
 	int connect_fail_count = 0;
 
     bool reported = is_reported();
+	int max_reconnect_cnts = 10;
+
+	while (is_connected()) {
+		if (ret != 0)
+			sleep_milliseconds(1);
+		if (!is_reported()) {
+            if (reported) {
+                reported = false;
+				printf("Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
+                _report_connect_changed_callback();
+            }
+            stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
+			if (stream_tcp_report_ == NULL) {
+				connect_fail_count += 1;
+				if (is_connected())
+					sleep_milliseconds(2000);
+				continue;
+			}
+			else {
+				connect_fail_count = 0;
+			}
+		}
+        if (!reported) {
+            reported = true;
+			printf("Report[%s] is connected\n", report_type_.c_str());
+            _report_connect_changed_callback();
+        }
+		memset(rx_data, 0, REPORT_BUF_SIZE);
+		ret = stream_tcp_report_->read_frame(rx_data);
+		connect_fail_count = 0;
+		if (ret != 0) continue;
+		if (size == 0) size = bin8_to_32(rx_data + 4);
+		if (is_old_protocol_) {
+			// _update(rx_data);
+		}
+		else {
+			// wait first rich report
+			if (is_first_report_) continue;
+			ret = report_data_ptr_->check_data(rx_data);
+			if (ret == 0) {
+				std::unique_lock<std::mutex> locker(report_mutex_);		
+				if (report_data_ptr_->flush_data(rx_data) == 0) {
+					_report_data_callback(report_data_ptr_);
+				}
+				locker.unlock();
+			}
+			else {
+				printf("check report data[%s] failed, ret=%d\n", report_type_.c_str(), ret);
+			}
+		}
+	}
+	printf("xarm report2 thread is quit.\n");
+}
+
+void XArmAPI::_handle_report_rich_data(void) {
+	unsigned char rx_data[REPORT_BUF_SIZE];
+	
+	int ret = 0;
+	int size = 0;
+	int connect_fail_count = 0;
+
+    bool reported = _is_rich_reported();
 	int max_reconnect_cnts = 10;
 	long long last_send_ms = 0;
 	long long curr_ms = 0;
@@ -448,13 +507,14 @@ void XArmAPI::_handle_report_data(void) {
 				break;
 			}
 		}
-		if (!is_reported()) {
+		if (!_is_rich_reported()) {
             if (reported) {
                 reported = false;
-                _report_connect_changed_callback();
+				if (report_type_ == "rich")
+                	_report_connect_changed_callback();
             }
-            stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
-			if (stream_tcp_report_ == NULL) {
+            stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
+			if (stream_tcp_rich_report_ == NULL) {
 				connect_fail_count += 1;
 				if (is_connected() && (connect_fail_count <= max_reconnect_cnts || prot_flag == 3))
 					sleep_milliseconds(2000);
@@ -471,10 +531,11 @@ void XArmAPI::_handle_report_data(void) {
 		}
         if (!reported) {
             reported = true;
-            _report_connect_changed_callback();
+            if (report_type_ == "rich")
+                _report_connect_changed_callback();
         }
 		memset(rx_data, 0, REPORT_BUF_SIZE);
-		ret = stream_tcp_report_->read_frame(rx_data);
+		ret = stream_tcp_rich_report_->read_frame(rx_data);
 		connect_fail_count = 0;
 		if (ret != 0) continue;
 		if (size == 0) size = bin8_to_32(rx_data + 4);
@@ -485,16 +546,16 @@ void XArmAPI::_handle_report_data(void) {
 			_update(rx_data);
 		}
 		else {
-			ret = report_data_ptr_->check_data(rx_data);
+			ret = report_rich_data_ptr_->check_data(rx_data);
 			if (ret == 0)  {
 				_update(rx_data);
 			}
 			else {
-				printf("flush report data failed, ret=%d\n", ret);
+				printf("check report data failed, ret=%d\n", ret);
 			}
 		}
 	}
-	disconnect();
 	printf("xarm report thread is quit.\n");
+	disconnect();
 	pool_.stop();
 }

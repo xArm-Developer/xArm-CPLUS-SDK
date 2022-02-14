@@ -183,5 +183,8 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall set_baud_checkset_enable(bool enable);
 	extern "C" __declspec(dllexport) int __stdcall set_checkset_default_baud(int type, int baud);
 	extern "C" __declspec(dllexport) int __stdcall get_checkset_default_baud(int type, int *baud);
+	extern "C" __declspec(dllexport) int __stdcall set_cartesian_velo_continuous(bool on_off);
+	extern "C" __declspec(dllexport) int __stdcall set_allow_approx_motion(bool on_off);
+	extern "C" __declspec(dllexport) int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]);
 }
 

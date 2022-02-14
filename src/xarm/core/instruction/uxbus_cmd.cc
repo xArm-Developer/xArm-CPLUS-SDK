@@ -544,6 +544,16 @@ int UxbusCmd::get_joint_pose(float angles[7]) {
 	return get_nfp32(UXBUS_RG::GET_JOINT_POS, angles, 7);
 }
 
+int UxbusCmd::get_joint_states(float position[7], float velocity[7], float effort[7]) {
+	float fp_tmp[21];
+	unsigned char u8_tmp = 3;
+	int ret = get_nfp32_with_bytes(UXBUS_RG::GET_JOINT_POS, &u8_tmp, 1, fp_tmp, 21);
+	memcpy(position, fp_tmp, sizeof(float) * 7);
+	memcpy(velocity, fp_tmp + 7, sizeof(float) * 7);
+	memcpy(effort, fp_tmp + 14, sizeof(float) * 7);
+	return ret;
+}
+
 int UxbusCmd::get_ik(float pose[6], float angles[7]) {
 	return swop_nfp32(UXBUS_RG::GET_IK, pose, 6, angles, 7);
 }
@@ -1492,5 +1502,17 @@ int UxbusCmd::track_modbus_w16s(int addr, unsigned char *send_data, int len, uns
 	int ret = tgpio_set_modbus(txdata, len * 2 + 7, rx_data, UXBUS_CONF::LINEAR_TRACK_HOST_ID, (float)0.001);
 	delete[] txdata;
 	return ret;
+}
+
+int UxbusCmd::set_cartesian_velo_continuous(int on_off)
+{
+	int txdata[1] = { on_off };
+	return set_nu8(UXBUS_RG::SET_CARTV_CONTINUE, txdata, 1);
+}
+
+int UxbusCmd::set_allow_approx_motion(int on_off)
+{
+	int txdata[1] = { on_off };
+	return set_nu8(UXBUS_RG::ALLOW_APPROX_MOTION, txdata, 1);
 }
 

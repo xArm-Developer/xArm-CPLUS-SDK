@@ -670,14 +670,14 @@ int XArmAPI::get_servo_angle(fp32 angs[7]) {
 	return ret;
 }
 
-int XArmAPI::get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]) {
+int XArmAPI::get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7]) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int ret = core->get_joint_states(position, velocity, effort);
+	int ret = core->get_joint_states(jposition, velocity, effort);
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 7; i++) {
 			if (!default_is_radian) {
-				position[i] = to_degree(position[i]);
+				jposition[i] = to_degree(jposition[i]);
 				velocity[i] = to_degree(velocity[i]);
 			}
 		}

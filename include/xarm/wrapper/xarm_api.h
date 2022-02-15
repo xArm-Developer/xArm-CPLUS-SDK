@@ -310,7 +310,7 @@ public:
 	* @param effort: the efforts of the joints, like [effort-1, ..., effort-7]
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]);
+	int get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7]);
 
 	/*
 	* Motion enable

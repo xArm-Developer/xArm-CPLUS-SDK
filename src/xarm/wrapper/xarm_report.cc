@@ -279,8 +279,8 @@ void XArmAPI::_update(unsigned char *rx_data) {
 		for (int i = 0; i < 4; i++) {
 			tcp_load[i] = report_rich_data_ptr_->tcp_load[i];
 		}
-
-		if (!compare_version(version_number, new int[3]{ 0, 2, 0 })) {
+		int v2[3] = {0, 2, 0};
+		if (!compare_version(version_number, v2)) {
 			tcp_load[1] = tcp_load[1] * 1000;
 			tcp_load[2] = tcp_load[2] * 1000;
 			tcp_load[3] = tcp_load[3] * 1000;

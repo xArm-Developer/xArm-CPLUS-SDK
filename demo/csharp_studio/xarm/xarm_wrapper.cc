@@ -541,4 +541,8 @@ namespace XArmWrapper
 	int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]) {
 		return arm->get_joint_states(position, velocity, effort);
 	}
+
+	int __stdcall iden_joint_friction(int *result) {
+		return arm->iden_joint_friction(result);
+	}
 }

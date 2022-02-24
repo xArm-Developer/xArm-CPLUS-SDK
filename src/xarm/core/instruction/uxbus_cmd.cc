@@ -28,6 +28,8 @@ UxbusCmd::UxbusCmd(void) {
 
 UxbusCmd::~UxbusCmd(void) {}
 
+int UxbusCmd::get_prot_flag(void) { return 0; }
+
 int UxbusCmd::set_prot_flag(int prot_flag) { return -11; }
 
 int UxbusCmd::check_xbus_prot(unsigned char *data, int funcode) { return -11; }
@@ -1294,6 +1296,11 @@ int UxbusCmd::cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[
 int UxbusCmd::iden_load(int iden_type, float *rx_data, int num_get, int timeout)
 {
     return get_nfp32_with_bytes(UXBUS_RG::IDEN_LOAD, (unsigned char *)&iden_type, 1, rx_data, num_get, timeout);
+}
+
+int UxbusCmd::iden_joint_friction(float *rx_data)
+{
+    return get_nfp32_with_bytes(UXBUS_RG::IDEN_FRIC, 0, 0, rx_data, 1, 500000);
 }
 
 int UxbusCmd::set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6])

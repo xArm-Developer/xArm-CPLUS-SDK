@@ -116,6 +116,7 @@ public:
 	static const unsigned char CALI_TCP_ORIENT = 112;
 	static const unsigned char CALI_WRLD_ORIENT = 113;
 	static const unsigned char CALI_WRLD_POSE = 114;
+	static const unsigned char IDEN_FRIC = 115;
 
 	static const unsigned char TGPIO_MB_TIOUT = 123;
 	static const unsigned char TGPIO_MODBUS = 124;

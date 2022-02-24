@@ -53,7 +53,12 @@ int XArmAPI::ft_sensor_set_zero(void)
 int XArmAPI::ft_sensor_iden_load(float result[10])
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int prot_flag = core->get_prot_flag();
+	core->set_prot_flag(2);
+	keep_heart_ = false;
 	int ret = core->ft_sensor_iden_load(result);
+	core->set_prot_flag(prot_flag);
+	keep_heart_ = true;
 	return _check_code(ret);
 }
 
@@ -124,6 +129,25 @@ int XArmAPI::get_ft_sensor_error(int *err)
 int XArmAPI::iden_tcp_load(float result[4])
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int prot_flag = core->get_prot_flag();
+	core->set_prot_flag(2);
+	keep_heart_ = false;
 	int ret = core->iden_tcp_load(result);
+	core->set_prot_flag(prot_flag);
+	keep_heart_ = true;
+	return _check_code(ret);
+}
+
+int XArmAPI::iden_joint_friction(int *result)
+{
+	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	int prot_flag = core->get_prot_flag();
+	core->set_prot_flag(2);
+	keep_heart_ = false;
+	float tmp;
+	int ret = core->iden_joint_friction(&tmp);
+	*result = tmp >= 0 ? 0 : -1;
+	core->set_prot_flag(prot_flag);
+	keep_heart_ = true;
 	return _check_code(ret);
 }

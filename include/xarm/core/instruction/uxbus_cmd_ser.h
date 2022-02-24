@@ -22,6 +22,9 @@ public:
 	void close(void);
 	int is_ok(void);
 
+	int get_prot_flag(void) { return 0; }
+	int set_prot_flag(int prot_flag = 2) { return 0; }
+
 private:
 	SerialPort *arm_port_;
 };

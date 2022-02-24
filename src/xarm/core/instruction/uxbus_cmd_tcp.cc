@@ -19,6 +19,11 @@ UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
 
 UxbusCmdTcp::~UxbusCmdTcp(void) {}
 
+int UxbusCmdTcp::get_prot_flag(void)
+{
+	return prot_flag_;
+}
+
 int UxbusCmdTcp::set_prot_flag(int prot_flag)
 {
 	std::lock_guard<std::mutex> locker(mutex_);

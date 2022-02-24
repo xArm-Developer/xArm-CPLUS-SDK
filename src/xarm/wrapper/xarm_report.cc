@@ -498,15 +498,18 @@ void XArmAPI::_handle_report_rich_data(void) {
 		if (ret != 0)
 			sleep_milliseconds(1);
 		curr_ms = get_system_time();
-		if (prot_flag != 3 && _version_is_ge(1, 8, 6) && core->set_prot_flag(3) == 0) prot_flag = 3;
-		if (prot_flag == 3 && curr_ms - last_send_ms > 10000 && curr_ms - core->last_recv_ms > 30000) {
-			if (get_state(&state) >= 0) last_send_ms = curr_ms;
-			// printf("send heart beat\n");
-			if (curr_ms - core->last_recv_ms > 90000) {
-				printf("client timeout over 90s, disconnect.\n");
-				break;
+		if (keep_heart_) {
+			if (prot_flag != 3 && _version_is_ge(1, 8, 6) && core->set_prot_flag(3) == 0) prot_flag = 3;
+			if (prot_flag == 3 && curr_ms - last_send_ms > 10000 && curr_ms - core->last_recv_ms > 30000) {
+				if (get_state(&state) >= 0) last_send_ms = curr_ms;
+				// printf("send heart beat\n");
+				if (curr_ms - core->last_recv_ms > 90000) {
+					printf("client timeout over 90s, disconnect.\n");
+					break;
+				}
 			}
 		}
+		
 		if (!_is_rich_reported()) {
             if (reported) {
                 reported = false;

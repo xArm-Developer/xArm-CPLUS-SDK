@@ -186,5 +186,6 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall set_cartesian_velo_continuous(bool on_off);
 	extern "C" __declspec(dllexport) int __stdcall set_allow_approx_motion(bool on_off);
 	extern "C" __declspec(dllexport) int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]);
+	extern "C" __declspec(dllexport) int __stdcall iden_joint_friction(int *result);
 }
 

@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.8.7"
+#define SDK_VERSION "1.8.8"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2049,6 +2049,19 @@ public:
 	* return: See the code documentation for details.
 	*/
 	int set_allow_approx_motion(bool on_off);
+	
+	/*
+    * Identification the friction
+    *   Note: only available if firmware_version >= 1.9.0
+
+    * @param result: the result of identification.
+		0: success
+		-1: failure
+
+    * return: See the code documentation for details.
+    */
+	int iden_joint_friction(int *result);
+
 private:
 	void _init(void);
 	void _sync(void);
@@ -2186,6 +2199,8 @@ private:
 	int default_robotiq_baud_;
 	int default_linear_track_baud_;
 	bool baud_checkset_flag_;
+
+	bool keep_heart_;
 
 	std::vector<std::function<void (XArmReportData *)>> report_data_functions_;
 	std::vector<std::function<void (const fp32*, const fp32*)>> report_location_functions_;

@@ -2051,7 +2051,6 @@ __int set_cartesian_velo_continuous(bool on_off)__
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-
 __int set_allow_approx_motion(bool on_off)__
 > Set allow to avoid overspeed near some singularities using approximate solutions  
 > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
@@ -2072,4 +2071,14 @@ __int get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7])__
 > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of velo-1/.../velo-7 should be in degrees   
 > :param effort: the efforts of the joints, like [effort-1, ..., effort-7]  
 > :return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+
+__int iden_joint_friction(int *result)__
+> Identification the friction  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
+> 
+> :param result: the result of identification
+> &ensp;&ensp;&ensp;&ensp;0: success  
+> &ensp;&ensp;&ensp;&ensp;-1: failure     
+> :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

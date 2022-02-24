@@ -258,8 +258,11 @@ public:
 	int set_cartesian_velo_continuous(int on_off);
 	int set_allow_approx_motion(int on_off);
 
+	int iden_joint_friction(float *result);
+
 	virtual void close(void);
 	virtual int is_ok(void);
+	virtual int get_prot_flag(void);
 	virtual int set_prot_flag(int prot_flag = 2);
 
 private:

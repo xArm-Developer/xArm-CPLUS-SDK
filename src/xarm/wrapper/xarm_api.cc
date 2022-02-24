@@ -99,6 +99,7 @@ void XArmAPI::_init(void) {
 	max_joint_acc_ = 20.0;   // rad/s^2
 	count = -1;
 	iden_progress = 0;
+	keep_heart_ = true;
 
 	sleep_finish_time_ = get_system_time();
 

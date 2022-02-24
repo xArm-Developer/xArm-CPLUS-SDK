@@ -347,6 +347,8 @@ namespace xarm_csharp_demo
         public static extern int set_allow_approx_motion(bool on_off);
         [DllImport("xarm.dll")]
         public static extern int get_joint_states(float[] position, float[] velocity, float[] effort);
+        [DllImport("xarm.dll")]
+        public static extern int iden_joint_friction(ref int result)
 
         public static int set_position(float[] pose, float radius = -1,
             bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)

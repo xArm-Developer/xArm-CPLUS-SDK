@@ -24,8 +24,8 @@ int UxbusCmdSer::check_xbus_prot(unsigned char *datas, int funcode) {
 
 int UxbusCmdSer::send_pend(int funcode, int num, int timeout, unsigned char *ret_data) {
 	int ret;
-	// unsigned char rx_data[arm_port_->que_maxlen_] = {0};
-	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen_];
+	// unsigned char rx_data[arm_port_->que_maxlen] = {0};
+	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen];
 	long long expired = get_system_time() + (long long)timeout;
 	while (get_system_time() < expired) {
 		ret = arm_port_->read_frame(rx_data);
@@ -35,8 +35,7 @@ int UxbusCmdSer::send_pend(int funcode, int num, int timeout, unsigned char *ret
 			delete[] rx_data;
 			return ret;
 		}
-		sleep_nanoseconds(500000);
-		// sleep_milliseconds(1);
+		sleep_us(500);
 	}
 	delete[] rx_data;
 	return UXBUS_STATE::ERR_TOUT;

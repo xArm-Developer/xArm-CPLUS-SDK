@@ -62,6 +62,9 @@ public:
 	static const unsigned short DIGITAL_OUT = 0x0A15;
 	static const unsigned short ANALOG_IO1 = 0x0A16;
 	static const unsigned short ANALOG_IO2 = 0x0A17;
+
+	static const unsigned short BACK_ORIGIN = 0x0A0A;
+	static const unsigned short STOP_TRACK = 0x0A0E;
 };
 
 #endif

@@ -1,13 +1,14 @@
 /*
 # Software License Agreement (MIT License)
 #
-# Copyright (c) 2019, UFACTORY, Inc.
+# Copyright (c) 2021, UFACTORY, Inc.
 # All rights reserved.
 #
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
 */
 
 #include "xarm/wrapper/xarm_api.h"
+
 
 int main(int argc, char **argv) {
 	if (argc < 2) {
@@ -28,24 +29,16 @@ int main(int argc, char **argv) {
 	printf("=========================================\n");
 
 	int ret;
-	arm->reset(true);
-	fp32 poses[6][6] = {
-		{ 300, 0, 200, 180, 0, 0 },
-		{ 300, 200, 200, 180, 0, 0 },
-		{ 500, 200, 200, 180, 0, 0 },
-		{ 500, -200, 200, 180, 0, 0 },
-		{ 300, -200, 200, 180, 0, 0 },
-		{ 300, 0, 200, 180, 0, 0 },
-	};
-	fp32 radius = 0;
-	arm->set_pause_time(0.2);
-	for (int j = 0; j < 10; j++) {
-		for (int i = 0; i < 6; i++) {
-			ret = arm->set_position(poses[i], radius, false);
-			printf("set_position, ret=%d\n", ret);
-		}
-	}
 
-	arm->reset(true);
+	ret = arm->ft_sensor_enable(1);
+	printf("ft_sensor_enable, ret=%d\n", ret);
+	ret = arm->ft_sensor_set_zero();
+	printf("ft_sensor_set_zero, ret=%d\n", ret);
+	sleep_milliseconds(200);
+
+	arm->save_conf();
+
+	arm->disconnect();
+
 	return 0;
 }

@@ -22,6 +22,9 @@ public:
 	void close(void);
 	int is_ok(void);
 
+	int get_prot_flag(void);
+	int set_prot_flag(int prot_flag = 2);
+
 private:
 	SocketPort *arm_port_;
 	int bus_flag_;

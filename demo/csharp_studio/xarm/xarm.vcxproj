@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{64DB8C68-8120-405D-9893-1459CAC5DCCA}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>xarm</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.dll</TargetExt>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)..\..\..\include</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.dll</TargetExt>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)..\..\..\include</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XARM_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;XARM_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\serial\impl\unix.h" />
+    <ClInclude Include="..\..\..\include\serial\impl\win.h" />
+    <ClInclude Include="..\..\..\include\serial\serial.h" />
+    <ClInclude Include="..\..\..\include\serial\v8stdint.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\common\crc16.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\common\data_type.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\common\queue_memcpy.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\connect.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\debug\debug_print.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\instruction\servo3_config.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\instruction\uxbus_cmd.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\instruction\uxbus_cmd_config.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\instruction\uxbus_cmd_ser.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\instruction\uxbus_cmd_tcp.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\os\network.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\port\ser.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\port\socket.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\report_data.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\xarm_config.h" />
+    <ClInclude Include="..\..\..\include\xarm\wrapper\common\timer.h" />
+    <ClInclude Include="..\..\..\include\xarm\wrapper\common\utils.h" />
+    <ClInclude Include="..\..\..\include\xarm\wrapper\xarm_api.h" />
+    <ClInclude Include="xarm_wrapper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\serial\impl\list_ports\list_ports_linux.cc" />
+    <ClCompile Include="..\..\..\src\serial\impl\list_ports\list_ports_osx.cc" />
+    <ClCompile Include="..\..\..\src\serial\impl\list_ports\list_ports_win.cc" />
+    <ClCompile Include="..\..\..\src\serial\impl\unix.cc" />
+    <ClCompile Include="..\..\..\src\serial\impl\win.cc" />
+    <ClCompile Include="..\..\..\src\serial\serial.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\common\crc16.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\common\queue_memcpy.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\connect.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\debug\debug_print.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd_ser.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd_tcp.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\os\network.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\port\ser.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\port\socket.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\report_data.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_api.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_bio.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_events.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_ft_sensor.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_gpio.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_gripper.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_motion.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_params.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_record.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_report.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_robotiq.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_servo.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_track.cc" />
+    <ClCompile Include="xarm_wrapper.cc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

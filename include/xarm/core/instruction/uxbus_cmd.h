@@ -23,9 +23,36 @@
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
 
+inline long long get_us() {
+#ifdef _WIN32
+#define EPOCHFILETIME   (116444736000000000UL)
+	FILETIME ft;
+	LARGE_INTEGER li;
+	GetSystemTimeAsFileTime(&ft);
+	li.LowPart = ft.dwLowDateTime;
+	li.HighPart = ft.dwHighDateTime;
+	return (li.QuadPart - EPOCHFILETIME) / 10;
+#else
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	return (t.tv_sec * 1000000000 + t.tv_nsec) * 0.001;
+#endif
+}
 
-inline void sleep_nanoseconds(unsigned long nanoseconds) {
-	std::this_thread::sleep_for(std::chrono::nanoseconds(nanoseconds));
+inline void sleep_ns(unsigned long long ns) {
+	std::this_thread::sleep_for(std::chrono::nanoseconds(ns));
+}
+
+inline void sleep_us(unsigned long long us) {
+	std::this_thread::sleep_for(std::chrono::microseconds(us));
+}
+
+inline void sleep_ms(unsigned long long ms) {
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+inline void sleep_seconds(unsigned long long sec) {
+	std::this_thread::sleep_for(std::chrono::seconds(sec));
 }
 
 inline void sleep_milliseconds(unsigned long milliseconds) {
@@ -45,6 +72,7 @@ inline long long get_system_time()
 #else
 	struct timespec t;
 	clock_gettime(CLOCK_REALTIME, &t);
+	// clock_gettime(CLOCK_MONOTONIC, &t);
 	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
 #endif
 }
@@ -89,13 +117,13 @@ public:
 	int clean_war(void);
 	int set_brake(int axis, int en);
 	int set_mode(int value);
-	int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime);
+	int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
-		float mvradii);
-	int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
-	int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii);
-	int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime);
-	int move_gohome(float mvvelo, float mvacc, float mvtime);
+		float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
 	int move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime);
 	int set_servot(float jnt_taus[7]);
@@ -103,7 +131,7 @@ public:
 	int set_safe_level(int level);
 	int get_safe_level(int *level);
 	int sleep_instruction(float sltime);
-	int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent);
+	int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int set_tcp_jerk(float jerk);
 	int set_tcp_maxacc(float maxacc);
 	int set_joint_jerk(float jerk);
@@ -118,6 +146,7 @@ public:
 
 	int get_tcp_pose(float pose[6]);
 	int get_joint_pose(float angles[7]);
+	int get_joint_states(float position[7], float velocity[7], float effort[7]);
 	int get_ik(float pose[6], float angles[7]);
 	int get_fk(float angles[7], float pose[6]);
 	int is_joint_limit(float joint[7], int *value);
@@ -135,10 +164,10 @@ public:
 	int gripper_get_errcode(int rx_data[2]);
 	int gripper_clean_err(void);
 
-	int tgpio_addr_w16(int addr, float value);
-	int tgpio_addr_r16(int addr, float *value);
-	int tgpio_addr_w32(int addr, float value);
-	int tgpio_addr_r32(int addr, float *value);
+	int tgpio_addr_w16(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int tgpio_addr_r16(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int tgpio_addr_w32(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+	int tgpio_addr_r32(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
 	int tgpio_get_digital(int *io1, int *io2);
 	int tgpio_set_digital(int ionum, int value);
 	int tgpio_get_analog1(float *value);
@@ -146,7 +175,7 @@ public:
 
 	int set_modbus_timeout(int value);
 	int set_modbus_baudrate(int baud);
-	int tgpio_set_modbus(unsigned char *send_data, int length, unsigned char *recv_data);
+	int tgpio_set_modbus(unsigned char *send_data, int length, unsigned char *recv_data, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID, float limit_sec = 0.0);
 	int gripper_modbus_w16s(int addr, float value, int len);
 	int gripper_modbus_r16s(int addr, int len, unsigned char *rx_data);
 	int gripper_modbus_set_en(int value);
@@ -178,8 +207,9 @@ public:
 
 	int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in=0, int orient_type_out=0);
 	int get_position_aa(float pose[6]);
-	int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0);
+	int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
+	int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_angle_axis = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 
 	int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
 	int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
@@ -195,16 +225,45 @@ public:
 	int set_collision_tool_model(int tool_type, int n = 0, float *argv = NULL);
 	int set_simulation_robot(int on_off);
 
-	int vc_set_jointv(float jnt_v[7], int jnt_sync);
-	int vc_set_linev(float line_v[6], int coord);
+	int vc_set_jointv(float jnt_v[7], int jnt_sync, float duration = -1.0);
+	int vc_set_linev(float line_v[6], int coord, float duration = -1.0);
 
 	int cali_tcp_pose(float four_pnts[4][6], float ret_xyz[3]);
 	int cali_user_orient(float three_pnts[3][6], float ret_rpy[3], int mode = 0, int trust_ind = 0);
 	int cali_tcp_orient(float rpy_be[3], float rpy_bt[3], float ret_rpy[3]);
 	int cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
 
+	int iden_load(int iden_type, float *rx_data, int num_get, int timeout=500000);
+	int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6]);
+	int set_impedance_mbk(float M[6], float K[6], float B[6]);
+	int set_impedance_config(int coord, int c_axis[6]);
+	int config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6]);
+	int set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6]);
+	int ft_sensor_set_zero(void);
+	int ft_sensor_iden_load(float result[10]);
+	int ft_sensor_cali_load(float load[10]);
+	int ft_sensor_enable(int on_off);
+	int ft_sensor_app_set(int app_code);
+	int ft_sensor_app_get(int *app_code);
+	int ft_sensor_get_data(float ft_data[6], bool is_new = true);
+	int ft_sensor_get_config(int *ft_app_status = NULL, int *ft_is_started = NULL, int *ft_type = NULL, int *ft_id = NULL, int *ft_freq = NULL, 
+		float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL,
+		int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
+	int ft_sensor_get_error(int *err);
+	int iden_tcp_load(float result[4]);
+
+	int track_modbus_r16s(int addr, unsigned char *data, int len, unsigned char fcode = 0x03);
+	int track_modbus_w16s(int addr, unsigned char *send_data, int len, unsigned char *rx_data);
+
+	int set_cartesian_velo_continuous(int on_off);
+	int set_allow_approx_motion(int on_off);
+
+	int iden_joint_friction(unsigned char sn[14], float *result);
+
 	virtual void close(void);
 	virtual int is_ok(void);
+	virtual int get_prot_flag(void);
+	virtual int set_prot_flag(int prot_flag = 2);
 
 private:
 	virtual int check_xbus_prot(unsigned char *data, int funcode);
@@ -214,6 +273,7 @@ private:
 	int set_nu8(int funcode, int *datas, int num);
 	int get_nu8(int funcode, int *rx_data, int num);
 	int get_nu8(int funcode, unsigned char *rx_data, int num);
+	int getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
 	int set_nu16(int funcode, int *datas, int num);
 	int get_nu16(int funcode, int *rx_data, int num);
 	int set_nfp32(int funcode, float *datas, int num);
@@ -221,15 +281,21 @@ private:
 	int get_nfp32(int funcode, float *rx_data, int num);
 	int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
 	int is_nfp32(int funcode, float datas[], int txn, int *value);
-	int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0);
+	int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT);
+	int get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
 
 public:
 	bool state_is_ready;
+	long long last_recv_ms;
+
+protected:
+	std::mutex mutex_;
 
 private:
-	std::mutex mutex_;
 	int GET_TIMEOUT_ = UXBUS_CONF::GET_TIMEOUT;
 	int SET_TIMEOUT_ = UXBUS_CONF::SET_TIMEOUT;
+
+	long long last_modbus_comm_us_;
 };
 
 #endif

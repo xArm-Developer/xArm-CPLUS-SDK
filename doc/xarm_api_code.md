@@ -1,6 +1,17 @@
 # xArmSDK API code description
+<!-- TOC --> 
+[Contents](#xarmsdk-api-code-description)
+  - [API Code](#api-code)
+  - [Controller Warn Code](#controller-warn-code)
+  - [Controller Error Code](#controller-error-code)
+  - [Servo Error Code](#servo-error-code)
+  - [Gripper Error Code](#gripper-error-code)
+  - [Bio Gripper Error Code](#bio-gripper-error-code)
+  - [Linear Motor Error Code](#linear-motor-error-code)
+  - [Six-axis Force Torque Sensor Error Code](#six-axis-force-torque-sensor-error-code)
 
-## API return value status code
+
+## API Code
 - -12: run blockly app exception
 - -11: convert blockly app to pythen exception
 - -9: emergency stop
@@ -25,7 +36,7 @@
 - 10: the result is invalid
 - 11: other error
 - 12: parameter error
-- 20: tgpio id error
+- 20: host id error
 - 21: modbus baudrate not supported
 - 22: modbus baudrate not correct
 - 23: modbus reply length error
@@ -33,18 +44,22 @@
 - 32: trajectory read/write timeout
 - 33: playback trajectory timeout
 - 41: wait to set suction cup timeout
+- 80: linear track has error
+- 81: linear track sci is low
+- 82: linear track is not init
 - 100: wait finish timeout
 - 101: too many consecutive failed tests
 - 102: end effector has error
-- 103: end effector is not endabled
+- 103: end effector is not enabled
 
-## Controller warning code
+## Controller Warn Code
 - 11: uxbux que is full
 - 12: parameter error
 - 13: the instruction does not exist
 - 14: command has no solution
+- 15: modbus cmd full
 
-## Controller error code
+## Controller Error Code
 - 1: The Emergency Stop Button is pushed
 - 2: The Emergency IO of the Control Box is triggered
 - 3: The Emergency Stop Button of the Three-state Switch is pressed
@@ -56,7 +71,8 @@
 - 15: Servo motor 5 error
 - 16: Servo motor 6 error
 - 17: Servo motor 7 error
-- 19: Gripper Communication Error
+- 18: Force Torque Sensor Communication Error
+- 19: End Module Communication Error
 - 21: Kinematic Error
 - 22: Self-Collision Error
 - 23: Joints Angle Exceed Limit
@@ -76,6 +92,12 @@
 - 37: Abnormal movement in Manual Mode
 - 38: Abnormal Joint Angle
 - 39: Abnormal Communication Between Master and Slave IC of Power Board
+- 50: Six-axis Force Torque Sensor read error
+- 51: Six-axis Force Torque Sensor set mode error
+- 52: Six-axis Force Torque Sensor set zero error
+- 53: Six-axis Force Torque Sensor is overloaded or the reading exceeds the limit
+- 110: Robot Arm Base Board Communication Error
+- 111: Control Box External 485 Device Communication Error
 
 ## Servo Error Code
 
@@ -120,3 +142,38 @@
 - 34: Gripper Motor Overload
 - 36: Gripper Driver Type Error
 
+## Bio Gripper Error Code
+
+- 11: BIO Gripper Current Overlimit
+- 12: The object slipped from the BIO Gripper
+
+## Linear Motor Error Code
+
+- 10: Linear Motor Current Detection Error
+- 11: Linear Motor Current Overlimit
+- 12: Linear Motor Speed Overlimit
+- 13: Linear Motor Large Motor Position Deviation
+- 14: Linear Motor Position Command Overlimit
+- 20: Linear Motor Driver IC Hardware Error
+- 21: Linear Motor Driver IC Initialization Error
+- 25: Linear Motor Command Over Software Limit
+- 26: Linear Motor Feedback Position Software Limit
+- 33: Linear Motor Drive Overloaded
+- 34: Linear Motor Motor Overload
+- 35: Linear Motor type error
+- 36: Linear Motor Driver Type Error
+- 39: Linear Motor over voltage
+- 40: Linear Moter undervoltage
+- 49: Linear Motor EEPROM Read and Write Error
+  
+## Six-axis Force Torque Sensor Error Code
+
+- 64: Six-axis Force Torque Sensor Communication Failure
+- 65: The Data Collected by the Six-axis Force Torque Sensor is Abnormal
+- 66: Six-axis Force Torque Sensor X-direction Torque Exceeds Limit
+- 67: Six-axis Force Torque Sensor Y-direction Torque Exceeds Limit
+- 68: Six-axis Force Torque Sensor Z-direction Torque Exceeds Limitrection
+- 69: Six-axis Force Torque Sensor Tx Torque Exceeds Limit
+- 70: Six-axis Force Torque Sensor Ty direction Torque Exceeds Limit
+- 71: Six-axis Force Torque Sensor Tz direction Torque Exceeds Limit
+- 73: Six-axis Force Torque Sensor Failed to Initialize

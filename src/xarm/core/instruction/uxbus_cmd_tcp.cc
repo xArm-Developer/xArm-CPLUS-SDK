@@ -19,11 +19,27 @@ UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
 
 UxbusCmdTcp::~UxbusCmdTcp(void) {}
 
+int UxbusCmdTcp::get_prot_flag(void)
+{
+	return prot_flag_;
+}
+
+int UxbusCmdTcp::set_prot_flag(int prot_flag)
+{
+	std::lock_guard<std::mutex> locker(mutex_);
+	if (prot_flag_ != prot_flag || TX2_PROT_CON_ != prot_flag) {
+		TX2_PROT_CON_ = prot_flag;
+		prot_flag_ = prot_flag;
+		printf("change prot_flag to %d\n", prot_flag_);
+	}
+	return 0;
+}
+
 int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 	unsigned char *data_fp = &datas[4];
 
 	int sizeof_data = bin8_to_32(datas);
-	if (sizeof_data < 8 || sizeof_data >= arm_port_->que_maxlen_)
+	if (sizeof_data < 8 || sizeof_data >= arm_port_->que_maxlen)
 	{
 		return UXBUS_STATE::ERR_LENG;
 	}
@@ -60,18 +76,19 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 	int i;
 	int ret = UXBUS_STATE::ERR_TOUT;
 	int ret2;
-	// unsigned char rx_data[arm_port_->que_maxlen_] = {0};
-	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen_];
+	// unsigned char rx_data[arm_port_->que_maxlen] = {0};
+	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen];
 	long long expired = get_system_time() + (long long)timeout;
 	while (get_system_time() < expired) {
 		ret2 = arm_port_->read_frame(rx_data);
 		if (ret2 != -1) {
-			// print_hex("recv:", rx_data, arm_port_->que_maxlen_);
+			// print_hex("recv:", rx_data, arm_port_->que_maxlen);
+			last_recv_ms = get_system_time();
 			ret = check_xbus_prot(rx_data, funcode);
 			if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
 				int n = num;
 				if (num == -1) {
-					n = rx_data[9] - 2;
+					n = bin8_to_16(&rx_data[8]) - 2;
 				}
 				for (i = 0; i < n; i++) { ret_data[i] = rx_data[i + 8 + 4]; }
 				// print_hex(" 3", rx_data, num + 8 + 4);
@@ -81,8 +98,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 				break;
 			}
 		}
-		sleep_nanoseconds(500000);
-		// sleep_milliseconds(1);
+		sleep_us(500);
 	}
 	delete[] rx_data;
 	return ret;

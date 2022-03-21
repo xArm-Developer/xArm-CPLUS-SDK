@@ -10,6 +10,7 @@
 #include <errno.h>
 #include "xarm/core/port/socket.h"
 #include "xarm/core/os/network.h"
+#include "xarm/core/xarm_config.h"
 
 #ifdef _WIN32
 #include <ws2tcpip.h>
@@ -42,14 +43,140 @@ static bool is_ignore_errno(int fp, int port)
 #endif
 
 
+// inline unsigned long long get_ms()
+// {
+// #ifdef _WIN32
+// 	struct timeb t;
+// 	ftime(&t);
+// 	return 1000 * t.time + t.millitm; // milliseconds
+// #else
+// 	struct timespec t;
+// 	clock_gettime(CLOCK_REALTIME, &t);
+// 	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
+// #endif
+// }
+
+void SocketPort::recv_report_proc(void) {
+	int ret;
+	int size = 0;
+	int num = 0, data_num = 0;
+	unsigned char *recv_data = new unsigned char[que_maxlen];
+	unsigned char *tmp_data = new unsigned char[que_maxlen];
+	bool size_is_not_confirm = false;
+
+	unsigned long long recv_prev_ms = 0;
+	unsigned long long recv_curr_ms = 0;
+	unsigned long long recv_interval_ms = 0;
+	unsigned long long recv_max_interval_ms = 0;
+	unsigned long long recv_over_ms = 300;
+	unsigned long recv_over_cnts = 0;
+
+	unsigned long long data_prev_us = 0;
+	unsigned long long data_curr_us = 0;
+	unsigned long long data_interval_us = 0;
+	unsigned long long data_max_interval_us = 0;
+	unsigned long long data_over_us = 205 * 1000;
+	unsigned long data_over_cnts = 0;
+
+	bool print_log = false;
+
+	while (state_ == 0)
+	{
+		num = recv(fp_, (char *)(&recv_data[4] + data_num), (size == 0 ? 4 : size) - data_num, 0);
+		if (num <= 0) {
+			if (is_ignore_errno(fp_, port_)) {
+				continue;
+			}
+			else {
+				close_port();
+				break;
+			}
+		}
+		if (size == 0) {
+			// get report size at first
+			data_num += num;
+			if (data_num != 4) continue;
+			size = bin8_to_32(&recv_data[4]);
+			if (size == 233) {
+				size_is_not_confirm = true;
+				size = 245;
+			}
+			printf("report_data_size: %d, size_is_not_confirm: %d\n", size, size_is_not_confirm);
+		}
+		else {
+			data_num += num;
+			if (data_num < size) continue;
+			if (size_is_not_confirm) {
+				size_is_not_confirm = false;
+				if (bin8_to_32(&recv_data[237]) == 233) {
+					size = 233;
+					continue;
+				}
+			}
+			if (bin8_to_32(&recv_data[4]) != size) {
+				printf("report data error, close_port, length=%d, size=%d\n", bin8_to_32(&recv_data[4]), size);
+				close_port();
+				break;
+			}
+
+			// data_curr_us = bin8_to_64(&recv_data[size-4]);
+			// recv_curr_ms = get_ms();
+			// if (data_prev_us != 0 && recv_prev_ms != 0) {
+			// 	data_interval_us = data_curr_us - data_prev_us;
+			// 	data_over_cnts += data_interval_us > data_over_us ? 1 : 0;
+			// 	recv_interval_ms = recv_curr_ms - recv_prev_ms;
+			// 	recv_over_cnts += recv_interval_ms > recv_over_ms ? 1 : 0;
+
+			// 	print_log = false;
+
+			// 	if (data_interval_us > data_max_interval_us) {
+			// 		data_max_interval_us = data_interval_us;
+			// 		print_log = true;
+			// 	}
+			// 	else if (data_interval_us > data_over_us) {
+			// 		print_log = true;
+			// 	}
+
+			// 	if (recv_interval_ms > recv_max_interval_ms) {
+			// 		recv_max_interval_ms = recv_interval_ms;
+			// 		print_log = true;
+			// 	}
+			// 	else if (recv_interval_ms > recv_over_ms) {
+			// 		print_log = true;
+			// 	}
+
+			// 	if (print_log) {
+			// 		printf("[RECV] Di=%f, Dmax=%f, Dncts=%ld, Ri=%lld, Rmax=%lld, Rcnts=%ld\n",
+			// 			data_interval_us / 1000.0, data_max_interval_us / 1000.0, data_over_cnts,
+			// 			recv_interval_ms, recv_max_interval_ms, recv_over_cnts
+			// 		);
+			// 	}
+
+			// }
+			// data_prev_us = data_curr_us;
+			// recv_prev_ms = recv_curr_ms;
+
+			bin32_to_8(data_num, &recv_data[0]);
+			if (rx_que_->is_full()) {
+				rx_que_->pop(tmp_data);
+			}
+			ret = rx_que_->push(recv_data);
+			data_num = 0;
+			memset(recv_data, 0, que_maxlen);
+		}
+	}
+	delete[] recv_data;
+	delete rx_que_;
+}
+
 void SocketPort::recv_proc(void) {
 	int ret;
 	int failed_cnt = 0;
-	int num;
-	unsigned char *recv_data = new unsigned char[que_maxlen_];
+	int num = 0;
+	unsigned char *recv_data = new unsigned char[que_maxlen];
 	while (state_ == 0) {
-		memset(recv_data, 0, que_maxlen_);
-		num = recv(fp_, (char *)&recv_data[4], que_maxlen_ - 4, 0);
+		memset(recv_data, 0, que_maxlen);
+		num = recv(fp_, (char *)&recv_data[4], que_maxlen - 4, 0);
 		if (num <= 0) {
 			if (is_ignore_errno(fp_, port_)) {
 				continue;
@@ -81,17 +208,21 @@ void SocketPort::recv_proc(void) {
 
 static void *recv_proc_(void *arg) {
 	SocketPort *my_this = (SocketPort *)arg;
-
-	my_this->recv_proc();
+	if (my_this->is_report) {
+		my_this->recv_report_proc();
+	}
+	else {
+		my_this->recv_proc();
+	}
 	return (void *)0;
 }
 
-SocketPort::SocketPort(char *server_ip, int server_port, int que_num,
-	int que_maxlen) {
+SocketPort::SocketPort(char *server_ip, int server_port, int que_num,int que_maxlen_, int tcp_type) {
 	que_num_ = que_num;
-	que_maxlen_ = que_maxlen;
+	que_maxlen = que_maxlen_;
 	state_ = -1;
-	rx_que_ = new QueueMemcpy(que_num_, que_maxlen_);
+	is_report = tcp_type == 1 ? true : false;
+	rx_que_ = new QueueMemcpy(que_num_, que_maxlen);
 	fp_ = socket_init((char *)" ", 0, 0);
 	if (fp_ == -1) { 
 		delete rx_que_;
@@ -135,6 +266,5 @@ int SocketPort::write_frame(unsigned char *data, int len) {
 
 void SocketPort::close_port(void) {
 	state_ = -1;
-	flush();
 	close(fp_);
 }

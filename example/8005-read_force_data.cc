@@ -1,7 +1,7 @@
 /*
 # Software License Agreement (MIT License)
 #
-# Copyright (c) 2019, UFACTORY, Inc.
+# Copyright (c) 2021, UFACTORY, Inc.
 # All rights reserved.
 #
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
@@ -27,22 +27,23 @@ int main(int argc, char **argv) {
 	sleep_milliseconds(500);
 
 	printf("=========================================\n");
-	int ret;
-	arm->reset(true);
-	arm->set_mode(2);
-	arm->set_state(0);
-	ret = arm->start_record_trajectory();
-	printf("start_record_trajectory, ret=%d\n", ret);
-	sleep_milliseconds(1000 * 20);
-	arm->stop_record_trajectory();
-	printf("stop_record_trajectory, ret=%d\n", ret);
-	std::string filename("test.traj");
-	arm->save_record_trajectory((char *)filename.data());
-	printf("save_record_trajectory, ret=%d\n", ret);
-	sleep_milliseconds(1000);
 
-	arm->set_mode(0);
-	arm->set_state(0);
+	int ret;
+	ret = arm->ft_sensor_enable(1);
+	printf("ft_sensor_enable, ret=%d\n", ret);
+	int err;
+
+	while (arm->is_connected() && arm->error_code == 0) {
+		print_nvect("raw_force: ", arm->ft_raw_force, 6);
+		print_nvect("ext_force: ", arm->ft_ext_force, 6);
+		sleep_milliseconds(200);
+	}
+
+
+	ret = arm->ft_sensor_enable(0);
+	printf("ft_sensor_enable, ret=%d\n", ret);
+
+	arm->disconnect();
 
 	return 0;
 }

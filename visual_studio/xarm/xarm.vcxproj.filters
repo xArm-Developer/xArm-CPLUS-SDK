@@ -175,5 +175,11 @@
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_servo.cc">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_ft_sensor.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_track.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

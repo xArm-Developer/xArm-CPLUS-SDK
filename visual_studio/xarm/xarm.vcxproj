@@ -182,6 +182,7 @@
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_api.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_bio.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_events.cc" />
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_ft_sensor.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_gpio.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_gripper.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_motion.cc" />
@@ -190,6 +191,7 @@
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_report.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_robotiq.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_servo.cc" />
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_track.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

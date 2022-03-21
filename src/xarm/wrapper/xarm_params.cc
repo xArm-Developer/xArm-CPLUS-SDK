@@ -10,19 +10,19 @@
 
 
 int XArmAPI::set_collision_sensitivity(int sensitivity) {
-	_check_is_pause();
+	_wait_until_not_pause();
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_collis_sens(sensitivity);
 }
 
 int XArmAPI::set_teach_sensitivity(int sensitivity) {
-	_check_is_pause();
+	_wait_until_not_pause();
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_teach_sens(sensitivity);
 }
 
 int XArmAPI::set_gravity_direction(fp32 gravity_dir[3]) {
-	_check_is_pause();
+	_wait_until_not_pause();
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	return core->set_gravity_dir(gravity_dir);
 }
@@ -37,22 +37,24 @@ int XArmAPI::save_conf(void) {
 	return core->save_conf();
 }
 
-int XArmAPI::set_tcp_offset(fp32 pose_offset[6]) {
-	_check_is_pause();
+int XArmAPI::set_tcp_offset(fp32 pose_offset[6], bool wait) {
+	_wait_until_not_pause();
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 offset[6];
 	for (int i = 0; i < 6; i++) {
-		offset[i] = (float)(default_is_radian || i < 3 ? pose_offset[i] : pose_offset[i] / RAD_DEGREE);
+		offset[i] = (float)(default_is_radian || i < 3 ? pose_offset[i] : to_radian(pose_offset[i]));
 	}
-	_wait_move(NO_TIMEOUT);
+	if (wait) {
+		_wait_move(NO_TIMEOUT);
+	}
 	return core->set_tcp_offset(offset);
 }
 
 int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
-	_check_is_pause();
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	float _gravity[3];
 	if (compare_version(version_number, new int[3]{ 0, 2, 0 })) {
 		_gravity[0] = center_of_gravity[0];
@@ -68,31 +70,35 @@ int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
 }
 
 int XArmAPI::set_tcp_jerk(fp32 jerk) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	return core->set_tcp_jerk(jerk);
 }
 
 int XArmAPI::set_tcp_maxacc(fp32 acc) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
 	return core->set_tcp_maxacc(acc);
 }
 
 int XArmAPI::set_joint_jerk(fp32 jerk) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
-	return core->set_joint_jerk(default_is_radian ? jerk : (float)(jerk / RAD_DEGREE));
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
+	return core->set_joint_jerk(default_is_radian ? jerk : to_radian(jerk));
 }
 
 int XArmAPI::set_joint_maxacc(fp32 acc) {
-	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int wait_code = _wait_until_cmdnum_lt_max();
-	if (wait_code != 0) return wait_code;
-	return core->set_joint_maxacc(default_is_radian ? acc : (float)(acc / RAD_DEGREE));
+	_wait_until_not_pause();
+	_wait_until_cmdnum_lt_max();
+	int code = _xarm_is_ready();
+	if (code != 0) return code;
+	return core->set_joint_maxacc(default_is_radian ? acc : to_radian(acc));
 }
 
 int XArmAPI::get_reduced_mode(int *mode) {
@@ -104,12 +110,12 @@ int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float 
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fense_is_on, collision_rebound_is_on, _version_is_ge() ? 79 : 21);
 	if (!default_is_radian) {
-		*joint_speed = (float)(*joint_speed * RAD_DEGREE);
+		*joint_speed = to_degree(*joint_speed);
 	}
 	if (_version_is_ge()) {
 		if (jrange != NULL && !default_is_radian) {
 			for (int i = 0; i < 14; i++) {
-				jrange[i] = (float)(jrange[i] * RAD_DEGREE);
+				jrange[i] = to_degree(jrange[i]);
 			}
 		}
 	}
@@ -128,7 +134,7 @@ int XArmAPI::set_reduced_max_tcp_speed(float speed) {
 
 int XArmAPI::set_reduced_max_joint_speed(float speed) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	return core->set_reduced_jointspeed(default_is_radian ? speed : (float)(speed / RAD_DEGREE));
+	return core->set_reduced_jointspeed(default_is_radian ? speed : to_radian(speed));
 }
 
 
@@ -141,7 +147,7 @@ int XArmAPI::set_reduced_joint_range(float jrange[14]) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	float joint_range[14];
 	for (int i = 0; i < 14; i++) {
-		joint_range[i] = default_is_radian ? jrange[i] : (float)(jrange[i] / RAD_DEGREE);
+		joint_range[i] = default_is_radian ? jrange[i] : to_radian(jrange[i]);
 	}
 	return core->set_reduced_jrange(joint_range);
 }
@@ -157,11 +163,11 @@ int XArmAPI::set_collision_rebound(bool on) {
 }
 
 int XArmAPI::set_world_offset(float pose_offset[6]) {
-	_check_is_pause();
+	_wait_until_not_pause();
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	fp32 offset[6];
 	for (int i = 0; i < 6; i++) {
-		offset[i] = default_is_radian || i < 3 ? pose_offset[i] : (float)(pose_offset[i] / RAD_DEGREE);
+		offset[i] = default_is_radian || i < 3 ? pose_offset[i] : to_radian(pose_offset[i]);
 	}
 	return core->set_world_offset(offset);
 }

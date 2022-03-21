@@ -1,7 +1,7 @@
 /*
 # Software License Agreement (MIT License)
 #
-# Copyright (c) 2019, UFACTORY, Inc.
+# Copyright (c) 2021, UFACTORY, Inc.
 # All rights reserved.
 #
 # Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
@@ -9,6 +9,9 @@
 
 #include "xarm/wrapper/xarm_api.h"
 
+void iden_progress_changed_callback(int progress) {
+    printf("progress: %d\n", progress);
+}
 
 int main(int argc, char **argv) {
 	if (argc < 2) {
@@ -27,22 +30,16 @@ int main(int argc, char **argv) {
 	sleep_milliseconds(500);
 
 	printf("=========================================\n");
+
+    arm->register_iden_progress_changed_callback(iden_progress_changed_callback);
+
+    printf("start iden tcp load\n");
 	int ret;
-	int io0 = -1, io1 = -1, prev_io0 = -1, prev_io1 = -1;
-	while (arm->is_connected() && arm->error_code == 0) {
-		ret = arm->get_tgpio_digital(&io0, &io1);
-		if (ret == 0) {
-			if (io0 == 1 && io0 != prev_io0) {
-				printf("IO0 input high level\n");
-			}
-			if (io1 == 1 && io1 != prev_io1) {
-				printf("IO1 input high level\n");
-			}
-			prev_io0 = io0;
-			prev_io1 = io1;
-		}
-		sleep_milliseconds(100);
-	}
+    float result[4] = {0};
+	ret = arm->iden_tcp_load(result);
+    printf("ret=%d, result=[%f, %f, %f, %f]\n", ret, result[0], result[1], result[2], result[3]);
+
+    arm->release_iden_progress_changed_callback(true);
 
 	return 0;
 }

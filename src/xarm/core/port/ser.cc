@@ -49,11 +49,10 @@ static void recv_proc_(void *arg) {
 	my_this->recv_proc();
 }
 
-SerialPort::SerialPort(const char *port, int baud, int que_num,
-	int que_maxlen) {
+SerialPort::SerialPort(const char *port, int baud, int que_num, int que_maxlen_) {
 	que_num_ = que_num;
-	que_maxlen_ = que_maxlen;
-	rx_que_ = new QueueMemcpy(que_num_, que_maxlen_);
+	que_maxlen = que_maxlen_;
+	rx_que_ = new QueueMemcpy(que_num_, que_maxlen);
 
 	int ret = init_serial(port, baud);
 	if (ret == -1)
@@ -171,7 +170,7 @@ void SerialPort::parse_put(unsigned char *data, int len) {
 			break;
 
 		case UXBUS_STATE_LENGTH:
-			if (0 < ch && ch < (que_maxlen_ - 5)) {
+			if (0 < ch && ch < (que_maxlen - 5)) {
 				rx_buf_[2] = ch;
 				rx_length_ = ch;
 				rx_data_idx_ = 3;

@@ -2,7 +2,7 @@
 
 
 ## Overview
-- The current version supports Linux and windows, but the source code structure has changed.
+- The current version supports Linux/windows/MacOS(beta), but the source code structure has changed.
 
 ## Caution
 - During use, people should stay away from the robot arm to avoid accidental injury or damage to other items by the robot arm.
@@ -11,6 +11,27 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.9.0 
+  - Support friction parameter identification interface
+  - Support relative motion
+  - Repair time-consuming interface (identification) failure due to heartbeat mechanism
+  - Fix several bugs
+
+- > ### 1.8.4
+  - Support the Six-axis Force Torque Sensor (not a third party)
+  - Modify the reporting processing logic and optimize the processing of sticky packets
+  - Fixed frequent switching of the pause state causing the program to hang
+  - Fix the program hangs when setting the mechanical claw position in speed mode
+
+
+- > ### 1.8.0
+
+  - The Velocity interface supports the duration parameter (requires firmware 1.8.0 or higher)
+  - Added identification interface (current identification and torque identification) (requires firmware 1.8.0 or higher)
+  - Support linear track interface (requires firmware 1.8.0 or higher)
+  - Fix the problem of not waiting when the timeout parameter of the motion interface is greater than 0
+  - Support macos compilation
+  - Fix some bugs
 
 - > ### 1.6.9
   - Support velocity control
@@ -72,6 +93,7 @@
 - Build all (build library and build all example)
 
     ```bash
+    make clean
     make # make xarm && make test
     ```
 
@@ -232,11 +254,27 @@
 
 - ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
 
-- ##### [7002-servo_j](example/7001-servo_j.cc)
+- ##### [7001-servo_j](example/7001-servo_j.cc)
 
 - ##### [7002-servo_cartesian](example/7002-servo_cartesian.cc)
 
 - ##### [7003-servo_cartesian_aa](example/7003-servo_cartesian_aa.cc)
+
+- ##### [8000-load_identify_current](example/8000-load_identify_current.cc)
+
+- ##### [8001-force_tech](example/8001-force_tech.cc)
+
+- ##### [8002-impedance](example/8002-impedance.cc)
+
+- ##### [8003-force_control](example/8003-force_control.cc)
+
+- ##### [8004-load_identify](example/8004-load_identify.cc)
+
+- ##### [8005-read_force_data](example/8005-read_force_data.cc)
+
+- ##### [8006-save_force_zero](example/8006-save_force_zero.cc)
+
+- ##### [8010-get_ft_sensor_config](example/8010-get_ft_sensor_config.cc)
 
 - ##### [thirdparty-set_robotiq_gripper](example/thirdparty-set_robotiq_gripper.cc)
 

@@ -44,8 +44,7 @@ int main(int argc, char **argv) {
         return 0;
     }
     std::string port(argv[1]);
-
-    XArmAPI *arm = new XArmAPI(port, false, true);
+    XArmAPI *arm = new XArmAPI(port, false, true, true, true, true, false, true, true, 0);
 
     printf("register events\n");
     arm->register_report_location_callback(report_location_callback);
@@ -71,6 +70,6 @@ int main(int argc, char **argv) {
     arm->release_error_warn_changed_callback(error_warn_changed_callback);
     arm->release_cmdnum_changed_callback(cmdnum_changed_callback);
 
-    sleep_milliseconds(30000);
+    // sleep_milliseconds(30000);
     return 0;
 }

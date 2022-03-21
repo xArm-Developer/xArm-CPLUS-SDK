@@ -81,6 +81,7 @@ public:
 	static const unsigned char LOAD_TRAJ = 63;
 	static const unsigned char PLAY_TRAJ = 64;
 	static const unsigned char GET_TRAJ_RW_STATUS = 65;
+	static const unsigned char ALLOW_APPROX_MOTION = 66;
 
 	static const unsigned char REPORT_TAU_OR_I = 70;
 	static const unsigned char SET_TIMER = 71;
@@ -94,9 +95,11 @@ public:
 	static const unsigned char SET_SELF_COLLIS_CHECK = 77;
 	static const unsigned char SET_COLLIS_TOOL = 78;
 	static const unsigned char SET_SIMULATION_ROBOT = 79;
+	static const unsigned char SET_CARTV_CONTINUE = 80;
 
 	static const unsigned char VC_SET_JOINTV = 81;
 	static const unsigned char VC_SET_CARTV = 82;
+	static const unsigned char MOVE_RELATIVE = 83;
 
 	static const unsigned char GET_TCP_POSE_AA = 91;
 	static const unsigned char MOVE_LINE_AA = 92;
@@ -113,6 +116,7 @@ public:
 	static const unsigned char CALI_TCP_ORIENT = 112;
 	static const unsigned char CALI_WRLD_ORIENT = 113;
 	static const unsigned char CALI_WRLD_POSE = 114;
+	static const unsigned char IDEN_FRIC = 115;
 
 	static const unsigned char TGPIO_MB_TIOUT = 123;
 	static const unsigned char TGPIO_MODBUS = 124;
@@ -141,11 +145,12 @@ public:
 	static const unsigned char SET_IO_STOP_RESET = 146;
 	static const unsigned char POSITION_CGPIO_SET_ANALOG = 147;
 
-	static const unsigned char GET_EXE_FT = 150;
+	static const unsigned char FTSENSOR_GET_DATA_OLD = 150;  // only available in firmware version < 1.8.3
+	static const unsigned char FTSENSOR_GET_DATA = 200;
     static const unsigned char FTSENSOR_ENABLE = 201;
     static const unsigned char FTSENSOR_SET_APP = 202;
     static const unsigned char FTSENSOR_GET_APP = 203;
-    static const unsigned char FTSENSOR_IDEN_LOAD = 204;
+    static const unsigned char IDEN_LOAD = 204;
     static const unsigned char FTSENSOR_CALI_LOAD_OFFSET = 205;
     static const unsigned char FTSENSOR_SET_ZERO = 206;
     static const unsigned char IMPEDANCE_CONFIG = 207;
@@ -153,6 +158,9 @@ public:
     static const unsigned char FORCE_CTRL_CONFIG = 209;
     static const unsigned char IMPEDANCE_CTRL_MBK = 210;
     static const unsigned char IMPEDANCE_CTRL_CONFIG = 211;
+	static const unsigned char FTSENSOR_GET_CONFIG = 212;
+
+	static const unsigned char GET_MAX_JOINT_VELOCITY = 231;
 };
 
 class UXBUS_STATE {
@@ -194,8 +202,13 @@ public:
 
 	static const int SET_TIMEOUT = 2000;  // ms
 	static const int GET_TIMEOUT = 2000;  // ms
+
+	static const int TRACK_ID = 1;
 	static const int GRIPPER_ID = 8;
-	static const int TGPIO_ID = 9;
+	
+	static const int TGPIO_HOST_ID = 9;
+	static const int LINEAR_TRACK_HOST_ID = 11;
+	
 	static const int MASTER_ID = 0xAA;
 	static const int SLAVE_ID = 0x55;
 };
@@ -252,7 +265,7 @@ public:
 	static const int OTHER = UXBUS_STATE::ERR_OTHER;
 	static const int PARAM_ERROR = UXBUS_STATE::ERR_PARAM;
 
-	static const int TGPIO_ID_ERR = 20;
+	static const int HOST_ID_ERR = 20;
 	static const int MODBUS_BAUD_NOT_SUPPORT = 21;
 	static const int MODBUS_BAUD_NOT_CORRECT = 22;
 	static const int MODBUS_ERR_LENG = 23;
@@ -260,6 +273,13 @@ public:
 	static const int TRAJ_RW_TOUT = 32;
 	static const int TRAJ_PLAYBACK_TOUT = 33;
 	static const int SUCTION_CUP_TOUT = 41;
+
+	static const int MODE_IS_NOT_CORRECT = 51;
+
+	static const int LINEAR_TRACK_HAS_FAULT = 80;
+	static const int LINEAR_TRACK_SCI_IS_LOW = 81;
+	static const int LINEAR_TRACK_NOT_INIT = 82;
+
 	static const int WAIT_FINISH_TIMEOUT = 100;
 	static const int CHECK_FAILED = 101;
 	static const int END_EFFECTOR_HAS_FAULT = 102;

@@ -10,8 +10,8 @@
 
 int XArmAPI::get_gripper_version(unsigned char versions[3]) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	unsigned char val1[5], val2[5], val3[5];
-	int code;
+	unsigned char val1[6], val2[6], val3[6];
+	int code = 0;
 	versions[0] = 0;
 	versions[1] = 0;
 	versions[2] = 0;
@@ -42,7 +42,7 @@ int XArmAPI::get_gripper_version(unsigned char versions[3]) {
 
 int XArmAPI::set_gripper_enable(bool enable) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_en(int(enable));
 	int err;
 	get_gripper_err_code(&err);
@@ -53,7 +53,7 @@ int XArmAPI::set_gripper_enable(bool enable) {
 
 int XArmAPI::set_gripper_mode(int mode) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_mode(mode);
 	int err;
 	get_gripper_err_code(&err);
@@ -63,7 +63,7 @@ int XArmAPI::set_gripper_mode(int mode) {
 
 int XArmAPI::set_gripper_speed(fp32 speed) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_posspd(speed);
 	int err;
 	get_gripper_err_code(&err);
@@ -73,7 +73,7 @@ int XArmAPI::set_gripper_speed(fp32 speed) {
 
 int XArmAPI::get_gripper_position(fp32 *pos) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_get_pos(pos);
 	int err;
 	get_gripper_err_code(&err);
@@ -83,7 +83,7 @@ int XArmAPI::get_gripper_position(fp32 *pos) {
 
 int XArmAPI::get_gripper_err_code(int *err) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_get_errcode(err);
 	ret = _check_modbus_code(ret);
 	if (ret == 0) {
@@ -107,7 +107,7 @@ bool XArmAPI::_gripper_is_support_status(void) {
 }
 
 int XArmAPI::_get_gripper_status(int *status) {
-	unsigned char val[5];
+	unsigned char val[6];
 	int ret = core->gripper_modbus_r16s(0x0000, 1, val);
 	ret = _check_modbus_code(ret);
 	if (ret == 0) {
@@ -218,15 +218,17 @@ int XArmAPI::_check_gripper_status(fp32 timeout) {
 	return code;
 }
 
-int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
+int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout, bool wait_motion) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	bool has_error = error_code != 0;
-	bool is_stop = state == 4 || state == 5;
-	int code = _wait_move(NO_TIMEOUT);
-	if (!(code == 0 || (is_stop && code == API_CODE::EMERGENCY_STOP) || (has_error && code == API_CODE::HAS_ERROR))) {
-		return code;
+	if (wait_motion) {
+		bool has_error = error_code != 0;
+		bool is_stop = state == 4 || state == 5;
+		int code = _wait_move(NO_TIMEOUT);
+		if (!(code == 0 || (is_stop && code == API_CODE::EMERGENCY_STOP) || (has_error && code == API_CODE::HAS_ERROR))) {
+			return code;
+		}
 	}
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_set_pos(pos);
 	int err;
 	get_gripper_err_code(&err);
@@ -245,7 +247,7 @@ int XArmAPI::set_gripper_position(fp32 pos, bool wait, fp32 timeout) {
 
 int XArmAPI::clean_gripper_error(void) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	if (_checkset_modbus_baud(2000000) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
+	if (baud_checkset_flag_ && _checkset_modbus_baud(default_gripper_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
 	int ret = core->gripper_modbus_clean_err();
 	int err;
 	get_gripper_err_code(&err);

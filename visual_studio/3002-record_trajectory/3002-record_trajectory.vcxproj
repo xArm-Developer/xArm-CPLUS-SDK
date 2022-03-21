@@ -117,7 +117,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="3002-record_trajectory.cc" />
+    <ClCompile Include="..\..\example\3002-record_trajectory.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

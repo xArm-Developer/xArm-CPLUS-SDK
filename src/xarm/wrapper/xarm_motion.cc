@@ -12,6 +12,7 @@
 int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, bool relative) {
 	_wait_until_not_pause();
 	_wait_until_cmdnum_lt_max();
+	only_check_result = 0;
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	int ret = 0;
@@ -22,7 +23,7 @@ int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 
 		for (int i = 0; i < 6; i++) {
 			mvpose[i] = (float)(default_is_radian || i < 3 ? pose[i] : to_radian(pose[i]));
 		}
-		ret = core->move_relative(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, 0, 0);
+		ret = core->move_relative(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, 0, 0, only_check_type_, &only_check_result);
 	} 
 	else {
 		fp32 mvpose[6];
@@ -31,13 +32,19 @@ int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 
 			mvpose[i] = (float)(default_is_radian || i < 3 ? last_used_position[i] : to_radian(last_used_position[i]));
 		}
 		if (radius >= 0) {
-			ret = core->move_lineb(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius);
+			ret = core->move_lineb(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, only_check_type_, &only_check_result);
 		}
 		else {
-			ret = core->move_line(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
+			ret = core->move_line(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, only_check_type_, &only_check_result);
 		}
 	}
 	ret = _check_code(ret, true);
+	if (ret == 0 && only_check_type_ > 0) {
+		return only_check_result != 0 ? API_CODE::HAS_ERROR : ret;
+	}
+	else {
+		only_check_result = 0;
+	}
 	if (wait && ret == 0) {
 		ret = _wait_move(timeout);
 		_sync();
@@ -57,6 +64,7 @@ int XArmAPI::set_position(fp32 pose[6], bool wait, fp32 timeout, bool relative) 
 int XArmAPI::set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_wait_until_not_pause();
 	_wait_until_cmdnum_lt_max();
+	only_check_result = 0;
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
@@ -65,9 +73,15 @@ int XArmAPI::set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, 
 	for (int i = 0; i < 6; i++) {
 		mvpose[i] = (float)(default_is_radian || i < 3 ? pose[i] : to_radian(pose[i]));
 	}
-	int ret = core->move_line_tool(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime);
+	int ret = core->move_line_tool(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, only_check_type_, &only_check_result);
 
 	ret = _check_code(ret, true);
+	if (ret == 0 && only_check_type_ > 0) {
+		return only_check_result != 0 ? API_CODE::HAS_ERROR : ret;
+	}
+	else {
+		only_check_result = 0;
+	}
 	if (wait && ret == 0) {
 		ret = _wait_move(timeout);
 		_sync();
@@ -84,6 +98,7 @@ int XArmAPI::set_tool_position(fp32 pose[6], bool wait, fp32 timeout) {
 int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius, bool relative) {
 	_wait_until_not_pause();
 	_wait_until_cmdnum_lt_max();
+	only_check_result = 0;
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	last_used_joint_speed = speed > 0 ? speed : last_used_joint_speed;
@@ -96,7 +111,7 @@ int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bo
 		for (int i = 0; i < 7; i++) {
 			mvjoint[i] = (float)(default_is_radian ? angs[i] : to_radian(angs[i]));
 		}
-		ret = core->move_relative(mvjoint, speed_, acc_, mvtime, radius, 1, 0);
+		ret = core->move_relative(mvjoint, speed_, acc_, mvtime, radius, 1, 0, only_check_type_, &only_check_result);
 	}
 	else {
 		for (int i = 0; i < 7; i++) {
@@ -104,13 +119,19 @@ int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bo
 			mvjoint[i] = (float)(default_is_radian ? last_used_angles[i] : to_radian(last_used_angles[i]));
 		}
 		if (_version_is_ge(1, 5, 20) && radius >= 0) {
-			ret = core->move_jointb(mvjoint, speed_, acc_, radius);
+			ret = core->move_jointb(mvjoint, speed_, acc_, radius, only_check_type_, &only_check_result);
 		}
 		else {
-			ret = core->move_joint(mvjoint, speed_, acc_, mvtime);
+			ret = core->move_joint(mvjoint, speed_, acc_, mvtime, only_check_type_, &only_check_result);
 		}
 	}
 	ret = _check_code(ret, true);
+	if (ret == 0 && only_check_type_ > 0) {
+		return only_check_result != 0 ? API_CODE::HAS_ERROR : ret;
+	}
+	else {
+		only_check_result = 0;
+	}
 	if (wait && ret == 0) {
 		ret = _wait_move(timeout);
 		_sync();
@@ -158,6 +179,7 @@ int XArmAPI::set_servo_cartesian(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime
 int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_wait_until_not_pause();
 	_wait_until_cmdnum_lt_max();
+	only_check_result = 0;
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
@@ -168,8 +190,14 @@ int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed,
 		pose_1[i] = (float)(default_is_radian || i < 3 ? pose1[i] : to_radian(pose1[i]));
 		pose_2[i] = (float)(default_is_radian || i < 3 ? pose2[i] : to_radian(pose2[i]));
 	}
-	int ret = core->move_circle(pose_1, pose_2, last_used_tcp_speed, last_used_tcp_acc, mvtime, percent);
+	int ret = core->move_circle(pose_1, pose_2, last_used_tcp_speed, last_used_tcp_acc, mvtime, percent, only_check_type_, &only_check_result);
 	ret = _check_code(ret, true);
+	if (ret == 0 && only_check_type_ > 0) {
+		return only_check_result != 0 ? API_CODE::HAS_ERROR : ret;
+	}
+	else {
+		only_check_result = 0;
+	}
 	if (wait && ret == 0) {
 		ret = _wait_move(timeout);
 		_sync();
@@ -181,14 +209,21 @@ int XArmAPI::move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed,
 int XArmAPI::move_gohome(fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 	_wait_until_not_pause();
 	_wait_until_cmdnum_lt_max();
+	only_check_result = 0;
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	fp32 speed_ = (float)(default_is_radian ? speed : to_radian(speed));
 	fp32 acc_ = (float)(default_is_radian ? acc : to_radian(acc));
 	speed_ = speed_ > 0 ? speed_ : (float)0.8726646259971648; // 50 °/s
 	acc_ = acc_ > 0 ? acc_ : (float)17.453292519943297; // 1000 °/s^2
-	int ret = core->move_gohome(speed_, acc_, mvtime);
+	int ret = core->move_gohome(speed_, acc_, mvtime, only_check_type_, &only_check_result);
 	ret = _check_code(ret, true);
+	if (ret == 0 && only_check_type_ > 0) {
+		return only_check_result != 0 ? API_CODE::HAS_ERROR : ret;
+	}
+	else {
+		only_check_result = 0;
+	}
 	if (wait && ret == 0) {
 		ret = _wait_move(timeout);
 		_sync();
@@ -228,6 +263,7 @@ void XArmAPI::reset(bool wait, fp32 timeout) {
 int XArmAPI::set_position_aa(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool is_tool_coord, bool relative, bool wait, fp32 timeout) {
 	_wait_until_not_pause();
 	_wait_until_cmdnum_lt_max();
+	only_check_result = 0;
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	last_used_tcp_speed = speed > 0 ? speed : last_used_tcp_speed;
@@ -236,8 +272,14 @@ int XArmAPI::set_position_aa(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bo
 	for (int i = 0; i < 6; i++) {
 		mvpose[i] = (float)(default_is_radian || i < 3 ? pose[i] : to_radian(pose[i]));
 	}
-	int ret = core->move_line_aa(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, (int)is_tool_coord, (int)relative);
+	int ret = core->move_line_aa(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, (int)is_tool_coord, (int)relative, only_check_type_, &only_check_result);
 	ret = _check_code(ret, true);
+	if (ret == 0 && only_check_type_ > 0) {
+		return only_check_result != 0 ? API_CODE::HAS_ERROR : ret;
+	}
+	else {
+		only_check_result = 0;
+	}
 	if (wait && ret == 0) {
 		ret = _wait_move(timeout);
 		_sync();

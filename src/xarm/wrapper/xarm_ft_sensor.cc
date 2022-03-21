@@ -138,14 +138,33 @@ int XArmAPI::iden_tcp_load(float result[4])
 	return _check_code(ret);
 }
 
-int XArmAPI::iden_joint_friction(int *result)
+int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
 {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	
+	unsigned char r_sn[14];
+	if (sn == NULL) {
+		unsigned char tmp_sn[40];
+		int code = get_robot_sn(tmp_sn);
+		if (code != 0) {
+			printf("iden_joint_friction -> get_robot_sn failed, code=%d\n", code);
+			return API_CODE::API_EXCEPTION;
+		}
+		memcpy(r_sn, tmp_sn, 14);
+	}
+	else {
+		memcpy(r_sn, sn, 14);
+	}
+	if (r_sn[0] != 'X' || (axis == 5 && r_sn[1] != 'F') || (axis == 6 && r_sn[1] != 'I') || (axis == 7 && r_sn[1] != 'S')) {
+		printf("iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
+		return API_CODE::API_EXCEPTION;
+	}
+	
 	int prot_flag = core->get_prot_flag();
 	core->set_prot_flag(2);
 	keep_heart_ = false;
 	float tmp;
-	int ret = core->iden_joint_friction(&tmp);
+	int ret = core->iden_joint_friction(r_sn, &tmp);
 	*result = tmp >= 0 ? 0 : -1;
 	core->set_prot_flag(prot_flag);
 	keep_heart_ = true;

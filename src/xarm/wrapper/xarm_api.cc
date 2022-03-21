@@ -201,6 +201,9 @@ void XArmAPI::_init(void) {
 	default_robotiq_baud_ = 115200;
 	default_linear_track_baud_ = 2000000;
 
+	only_check_type_ = 0;
+	only_check_result = 0;
+
 	report_rich_data_ptr_ = new XArmReportData("rich");
 	if (report_type_ != "rich") {
 		report_data_ptr_ = new XArmReportData(report_type_);
@@ -1036,6 +1039,12 @@ int XArmAPI::set_allow_approx_motion(bool on_off)
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int ret = core->set_allow_approx_motion((int)on_off);
 	return _check_code(ret);
+}
+
+int XArmAPI::set_only_check_type(unsigned char only_check_type)
+{
+	only_check_type_ = (only_check_type >= 0 && only_check_type <= 3) ? only_check_type : 0;
+	return 0;
 }
 
 

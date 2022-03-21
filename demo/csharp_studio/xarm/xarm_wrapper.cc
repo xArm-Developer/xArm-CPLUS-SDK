@@ -542,7 +542,11 @@ namespace XArmWrapper
 		return arm->get_joint_states(position, velocity, effort);
 	}
 
-	int __stdcall iden_joint_friction(int *result) {
-		return arm->iden_joint_friction(result);
+	int __stdcall iden_joint_friction(int *result, unsigned char *sn) {
+		return arm->iden_joint_friction(result, sn);
+	}
+
+	int __stdcall set_only_check_type(unsigned char only_check_type) {
+		return arm->set_only_check_type(only_check_type);
 	}
 }

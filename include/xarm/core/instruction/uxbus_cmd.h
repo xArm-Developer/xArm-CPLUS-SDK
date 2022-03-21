@@ -117,13 +117,13 @@ public:
 	int clean_war(void);
 	int set_brake(int axis, int en);
 	int set_mode(int value);
-	int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime);
+	int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
-		float mvradii);
-	int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
-	int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii);
-	int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime);
-	int move_gohome(float mvvelo, float mvacc, float mvtime);
+		float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
 	int move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime);
 	int set_servot(float jnt_taus[7]);
@@ -131,7 +131,7 @@ public:
 	int set_safe_level(int level);
 	int get_safe_level(int *level);
 	int sleep_instruction(float sltime);
-	int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent);
+	int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int set_tcp_jerk(float jerk);
 	int set_tcp_maxacc(float maxacc);
 	int set_joint_jerk(float jerk);
@@ -207,9 +207,9 @@ public:
 
 	int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in=0, int orient_type_out=0);
 	int get_position_aa(float pose[6]);
-	int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0);
+	int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
-	int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_angle_axis = false);
+	int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_angle_axis = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 
 	int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
 	int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
@@ -258,7 +258,7 @@ public:
 	int set_cartesian_velo_continuous(int on_off);
 	int set_allow_approx_motion(int on_off);
 
-	int iden_joint_friction(float *result);
+	int iden_joint_friction(unsigned char sn[14], float *result);
 
 	virtual void close(void);
 	virtual int is_ok(void);
@@ -281,7 +281,7 @@ private:
 	int get_nfp32(int funcode, float *rx_data, int num);
 	int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
 	int is_nfp32(int funcode, float datas[], int txn, int *value);
-	int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0);
+	int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT);
 	int get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
 
 public:

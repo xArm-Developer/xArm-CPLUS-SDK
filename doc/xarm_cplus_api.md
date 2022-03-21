@@ -2073,12 +2073,13 @@ __int get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7])__
 > :return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-__int iden_joint_friction(int *result)__
+__int iden_joint_friction(int *result, unsigned char *sn = NULL)__
 > Identification the friction  
 > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
 > 
 > :param result: the result of identification
 > &ensp;&ensp;&ensp;&ensp;0: success  
 > &ensp;&ensp;&ensp;&ensp;-1: failure     
+> :param sn: robot sn    
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

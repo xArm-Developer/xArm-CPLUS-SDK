@@ -11,6 +11,12 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.9.0 
+  - Support friction parameter identification interface
+  - Support relative motion
+  - Repair time-consuming interface (identification) failure due to heartbeat mechanism
+  - Fix several bugs
+
 - > ### 1.8.4
   - Support the Six-axis Force Torque Sensor (not a third party)
   - Modify the reporting processing logic and optimize the processing of sticky packets

@@ -13,8 +13,8 @@
 #include <mutex>
 #include <iostream>
 #include <vector>
-#include <sys/timeb.h>
 #ifdef _WIN32
+#include <sys/timeb.h>
 #include <windows.h>
 #else
 #include <unistd.h>

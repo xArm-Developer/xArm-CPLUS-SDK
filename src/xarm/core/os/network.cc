@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <netinet/tcp.h>
+#include <netinet/in.h>
 #include <sys/ioctl.h>
 #endif
 

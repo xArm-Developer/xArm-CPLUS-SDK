@@ -14,7 +14,6 @@
 #include <windows.h>
 #include <sys/timeb.h>
 #else
-#include <sys/shm.h>
 #include <unistd.h>
 #include <termios.h>
 #include <unistd.h>

@@ -126,13 +126,17 @@ int XArmAPI::get_ft_sensor_error(int *err)
 	return _check_code(ret);
 }
 
-int XArmAPI::iden_tcp_load(float result[4])
+int XArmAPI::iden_tcp_load(float result[4], float estimated_mass)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	int prot_flag = core->get_prot_flag();
 	core->set_prot_flag(2);
 	keep_heart_ = false;
-	int ret = core->iden_tcp_load(result);
+	float mass = estimated_mass;
+	if (_version_is_ge(1, 9, 100) && estimated_mass <= 0) {
+		mass = 0.5;
+	}
+	int ret = core->iden_tcp_load(result, mass);
 	core->set_prot_flag(prot_flag);
 	keep_heart_ = true;
 	return _check_code(ret);
@@ -155,7 +159,7 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
 	else {
 		memcpy(r_sn, sn, 14);
 	}
-	if (r_sn[0] != 'X' || (axis == 5 && r_sn[1] != 'F') || (axis == 6 && r_sn[1] != 'I') || (axis == 7 && r_sn[1] != 'S')) {
+	if (r_sn[0] != (is_lite6() ? 'L' : 'X') || (axis == 5 && r_sn[1] != 'F') || (axis == 6 && r_sn[1] != 'I') || (axis == 7 && r_sn[1] != 'S')) {
 		printf("iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
 		return API_CODE::API_EXCEPTION;
 	}

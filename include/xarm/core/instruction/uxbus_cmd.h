@@ -146,7 +146,7 @@ public:
 
 	int get_tcp_pose(float pose[6]);
 	int get_joint_pose(float angles[7]);
-	int get_joint_states(float position[7], float velocity[7], float effort[7]);
+	int get_joint_states(float position[7], float velocity[7], float effort[7], int num = 3);
 	int get_ik(float pose[6], float angles[7]);
 	int get_fk(float angles[7], float pose[6]);
 	int is_joint_limit(float joint[7], int *value);
@@ -209,7 +209,7 @@ public:
 	int get_position_aa(float pose[6]);
 	int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
-	int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_angle_axis = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 
 	int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
 	int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
@@ -233,7 +233,7 @@ public:
 	int cali_tcp_orient(float rpy_be[3], float rpy_bt[3], float ret_rpy[3]);
 	int cali_user_pos(float rpy_ub[3], float pos_b_uorg[3], float ret_xyz[3]);
 
-	int iden_load(int iden_type, float *rx_data, int num_get, int timeout=500000);
+	int iden_load(int iden_type, float *rx_data, int num_get, int timeout=500000, float estimated_mass = 0.0);
 	int set_impedance(int coord, int c_axis[6], float M[6], float K[6], float B[6]);
 	int set_impedance_mbk(float M[6], float K[6], float B[6]);
 	int set_impedance_config(int coord, int c_axis[6]);
@@ -250,7 +250,7 @@ public:
 		float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL,
 		int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
 	int ft_sensor_get_error(int *err);
-	int iden_tcp_load(float result[4]);
+	int iden_tcp_load(float result[4], float estimated_mass = 0.5);
 
 	int track_modbus_r16s(int addr, unsigned char *data, int len, unsigned char fcode = 0x03);
 	int track_modbus_w16s(int addr, unsigned char *send_data, int len, unsigned char *rx_data);
@@ -259,6 +259,9 @@ public:
 	int set_allow_approx_motion(int on_off);
 
 	int iden_joint_friction(unsigned char sn[14], float *result);
+
+	int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+	int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 
 	virtual void close(void);
 	virtual int is_ok(void);

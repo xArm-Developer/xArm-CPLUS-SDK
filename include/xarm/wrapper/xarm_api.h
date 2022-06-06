@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.9.0"
+#define SDK_VERSION "1.9.10"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -210,6 +210,11 @@ public:
 	bool is_connected(void);
 
 	/*
+	* Robot is lite6 or not
+	*/
+	bool is_lite6(void);
+
+	/*
 	* xArm is reported or not, only available in socket way
 	*/
 	bool is_reported(void);
@@ -297,7 +302,7 @@ public:
 		if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int get_servo_angle(fp32 angles[7]);
+	int get_servo_angle(fp32 angles[7], bool is_real = false);
 
 	/*
 	* Get the joint states
@@ -312,7 +317,7 @@ public:
 	* @param effort: the efforts of the joints, like [effort-1, ..., effort-7]
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7]);
+	int get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7], int num = 3);
 
 	/*
 	* Motion enable
@@ -1843,7 +1848,7 @@ public:
 
     * return: See the code documentation for details.
     */
-	int iden_tcp_load(float result[4]);
+	int iden_tcp_load(float result[4], float estimated_mass = 0.0);
 
 	/*
     * Get all status of the linear track
@@ -2065,6 +2070,36 @@ public:
 	int iden_joint_friction(int *result, unsigned char *sn = NULL);
 
 	int set_only_check_type(unsigned char only_check_type = 0);
+
+	/*
+	* Open the gripper of Lite6 series robotics arms
+	* Note:
+	*	1. only available if firmware_version >= 1.10.0
+	*   2. this API can only be used on Lite6 series robotic arms
+
+	* return: See the code documentation for details.
+	*/
+	int open_lite6_gripper(void);
+
+	/*
+	* Close the gripper of Lite6 series robotics arms
+	* Note:
+	*	1. only available if firmware_version >= 1.10.0
+	*   2. this API can only be used on Lite6 series robotic arms
+
+	* return: See the code documentation for details.
+	*/
+	int close_lite6_gripper(void);
+
+	/*
+	* Stop the gripper of Lite6 series robotics arms
+	* Note:
+	*	1. only available if firmware_version >= 1.10.0
+	*   2. this API can only be used on Lite6 series robotic arms
+
+	* return: See the code documentation for details.
+	*/
+	int stop_lite6_gripper(void);
 
 private:
 	void _init(void);

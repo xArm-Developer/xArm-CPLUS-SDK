@@ -11,6 +11,10 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.9.10 
+  - Support Lite6 Model
+  - Fix several bugs
+
 - > ### 1.9.0 
   - Support friction parameter identification interface
   - Support relative motion

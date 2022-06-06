@@ -1871,11 +1871,13 @@ __int get_ft_sensor_error(int *err)__
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-__int iden_tcp_load(float result[4])__
+__int iden_tcp_load(float result[4], float estimated_mass = 0.0)__
 > Identification the tcp load with current  
 > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.0
 > 
 > :param result: the result of identification. [mass，x_centroid，y_centroid，z_centroid]
+> :param estimated_mass: estimated mass  
+> &ensp;&ensp;&ensp;&ensp;Note: this parameter is only available on the Lite6 model manipulator, and this parameter must be specified for the Lite6 model manipulator  
 > 
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -2083,3 +2085,29 @@ __int iden_joint_friction(int *result, unsigned char *sn = NULL)__
 > :param sn: robot sn    
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
+
+__int open_lite6_gripper(void)__
+> Open the gripper of Lite6 series robotics arms  
+> &ensp;&ensp;&ensp;&ensp;Note:   
+>  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
+>  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. this API can only be used on Lite6 series robotic arms    
+>    
+> :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+
+__int close_lite6_gripper(void)__
+> Close the gripper of Lite6 series robotics arms  
+> &ensp;&ensp;&ensp;&ensp;Note:   
+>  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
+>  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. this API can only be used on Lite6 series robotic arms    
+>    
+> :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+
+__int stop_lite6_gripper(void)__
+> Stop the gripper of Lite6 series robotics arms  
+> &ensp;&ensp;&ensp;&ensp;Note:   
+>  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
+>  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. this API can only be used on Lite6 series robotic arms    
+>    
+> :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.

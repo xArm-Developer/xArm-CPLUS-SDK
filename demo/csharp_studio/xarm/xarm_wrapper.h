@@ -87,7 +87,7 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall get_cmdnum(int *cmdnum);
 	extern "C" __declspec(dllexport) int __stdcall get_err_warn_code(int err_warn[2]);
 	extern "C" __declspec(dllexport) int __stdcall get_position(fp32 pose[6]);
-	extern "C" __declspec(dllexport) int __stdcall get_servo_angle(fp32 angles[7]);
+	extern "C" __declspec(dllexport) int __stdcall get_servo_angle(fp32 angles[7], bool is_real = false);
 
 	extern "C" __declspec(dllexport) int __stdcall get_inverse_kinematics(fp32 pose[6], fp32 angles[7]);
 	extern "C" __declspec(dllexport) int __stdcall get_forward_kinematics(fp32 angles[7], fp32 pose[6]);
@@ -163,7 +163,7 @@ namespace XArmWrapper {
 		float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL,
 		int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
 	extern "C" __declspec(dllexport) int __stdcall get_ft_sensor_error(int *err);
-	extern "C" __declspec(dllexport) int __stdcall iden_tcp_load(float result[4]);
+	extern "C" __declspec(dllexport) int __stdcall iden_tcp_load(float result[4], float estimated_mass = 0.0);
 
 	extern "C" __declspec(dllexport) int __stdcall get_linear_track_error(int *err);
 	extern "C" __declspec(dllexport) int __stdcall get_linear_track_status(int *status);
@@ -185,7 +185,7 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) int __stdcall get_checkset_default_baud(int type, int *baud);
 	extern "C" __declspec(dllexport) int __stdcall set_cartesian_velo_continuous(bool on_off);
 	extern "C" __declspec(dllexport) int __stdcall set_allow_approx_motion(bool on_off);
-	extern "C" __declspec(dllexport) int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]);
+	extern "C" __declspec(dllexport) int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7], int num = 3);
 	extern "C" __declspec(dllexport) int __stdcall iden_joint_friction(int *result, unsigned char *sn = NULL);
 	extern "C" __declspec(dllexport) int __stdcall set_only_check_type(unsigned char only_check_type = 0);
 }

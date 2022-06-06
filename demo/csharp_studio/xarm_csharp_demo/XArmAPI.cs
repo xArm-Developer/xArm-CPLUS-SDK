@@ -164,7 +164,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_position(float[] pose);
         [DllImport("xarm.dll")]
-        public static extern int get_servo_angle(float[] angles);
+        public static extern int get_servo_angle(float[] angles, bool is_real = false);
 
         [DllImport("xarm.dll")]
         public static extern int get_suction_cup(ref int val);
@@ -303,7 +303,7 @@ namespace xarm_csharp_demo
         public static extern int get_ft_sensor_error(ref int err);
 
         [DllImport("xarm.dll")]
-        public static extern int iden_tcp_load(float[] result);
+        public static extern int iden_tcp_load(float[] result, float estimated_mass = 0.0);
 
         [DllImport("xarm.dll")]
         public static extern int get_linear_track_error(ref int err);
@@ -346,7 +346,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_allow_approx_motion(bool on_off);
         [DllImport("xarm.dll")]
-        public static extern int get_joint_states(float[] position, float[] velocity, float[] effort);
+        public static extern int get_joint_states(float[] position, float[] velocity, float[] effort, int num = 3);
         [DllImport("xarm.dll")]
         public static extern int iden_joint_friction(ref int result, byte[] sn);
 

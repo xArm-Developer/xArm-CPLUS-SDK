@@ -278,6 +278,10 @@ bool XArmAPI::is_connected(void) {
 	return is_tcp_ ? (stream_tcp_ == NULL ? false : stream_tcp_->is_ok() == 0) : (stream_ser_ == NULL ? false : stream_ser_->is_ok() == 0);
 }
 
+bool XArmAPI::is_lite6(void) {
+	return axis == 6 && device_type == 9;
+}
+
 bool XArmAPI::is_reported(void) {
 	return is_tcp_ ? (stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_ok() == 0) : false;
 }
@@ -659,9 +663,15 @@ int XArmAPI::get_position(fp32 pose[6]) {
 	return ret;
 }
 
-int XArmAPI::get_servo_angle(fp32 angs[7]) {
+int XArmAPI::get_servo_angle(fp32 angs[7], bool is_real) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int ret = core->get_joint_pose(angs);
+	int ret = 0;
+	if (is_real && _version_is_ge(1, 9, 100)) {
+		ret = core->get_joint_states(angs, NULL, NULL, 1);
+	}
+	else {
+		ret = core->get_joint_pose(angs);
+	}
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 7; i++) {
@@ -674,15 +684,17 @@ int XArmAPI::get_servo_angle(fp32 angs[7]) {
 	return ret;
 }
 
-int XArmAPI::get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7]) {
+int XArmAPI::get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7], int num) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int ret = core->get_joint_states(jposition, velocity, effort);
+	if (num < 1 || num > 3) return API_CODE::PARAM_ERROR;
+	int ret = core->get_joint_states(jposition, velocity, effort, num);
 	ret = _check_code(ret);
 	if (ret == 0) {
 		for (int i = 0; i < 7; i++) {
 			if (!default_is_radian) {
 				jposition[i] = to_degree(jposition[i]);
-				velocity[i] = to_degree(velocity[i]);
+				if (num >= 2)
+					velocity[i] = to_degree(velocity[i]);
 			}
 		}
 	}

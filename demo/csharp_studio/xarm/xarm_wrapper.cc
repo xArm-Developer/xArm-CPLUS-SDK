@@ -255,8 +255,8 @@ namespace XArmWrapper
 	int __stdcall get_position(fp32 pose[6]) {
 		return arm->get_position(pose);
 	}
-	int __stdcall get_servo_angle(fp32 angles[7]) {
-		return arm->get_servo_angle(angles);
+	int __stdcall get_servo_angle(fp32 angles[7], bool is_real) {
+		return arm->get_servo_angle(angles, is_real);
 	}
 
 	int __stdcall get_suction_cup(int *val) {
@@ -470,8 +470,8 @@ namespace XArmWrapper
 		return arm->get_ft_sensor_error(err);
 	}
 	
-	int __stdcall iden_tcp_load(float result[4]) {
-		return arm->iden_tcp_load(result);
+	int __stdcall iden_tcp_load(float result[4], float estimated_mass) {
+		return arm->iden_tcp_load(result, estimated_mass);
 	}
 
 	int __stdcall get_linear_track_error(int *err) {
@@ -538,8 +538,8 @@ namespace XArmWrapper
 		return arm->set_allow_approx_motion(on_off);
 	}
 
-	int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7]) {
-		return arm->get_joint_states(position, velocity, effort);
+	int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7], int num) {
+		return arm->get_joint_states(position, velocity, effort, num);
 	}
 
 	int __stdcall iden_joint_friction(int *result, unsigned char *sn) {

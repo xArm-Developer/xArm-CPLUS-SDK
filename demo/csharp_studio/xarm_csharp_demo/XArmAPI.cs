@@ -303,7 +303,7 @@ namespace xarm_csharp_demo
         public static extern int get_ft_sensor_error(ref int err);
 
         [DllImport("xarm.dll")]
-        public static extern int iden_tcp_load(float[] result, float estimated_mass = 0.0);
+        public static extern int iden_tcp_load(float[] result, float estimated_mass = 0);
 
         [DllImport("xarm.dll")]
         public static extern int get_linear_track_error(ref int err);

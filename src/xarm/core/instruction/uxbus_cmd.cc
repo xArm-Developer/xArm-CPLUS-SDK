@@ -367,9 +367,15 @@ int UxbusCmd::set_brake(int axis, int en) {
 	return set_nu8(UXBUS_RG::SET_BRAKE, txdata, 2);
 }
 
-int UxbusCmd::set_mode(int value) {
-	int txdata[1] = { value };
-	return set_nu8(UXBUS_RG::SET_MODE, txdata, 1);
+int UxbusCmd::set_mode(int value, int detection_param) {
+	if (detection_param > 0) {
+		int txdata[2] = { value, detection_param };
+		return set_nu8(UXBUS_RG::SET_MODE, txdata, 2);
+	}
+	else {
+		int txdata[1] = { value };
+		return set_nu8(UXBUS_RG::SET_MODE, txdata, 1);
+	}
 }
 
 /*******************************************************

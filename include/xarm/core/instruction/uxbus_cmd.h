@@ -116,7 +116,7 @@ public:
 	int clean_err(void);
 	int clean_war(void);
 	int set_brake(int axis, int en);
-	int set_mode(int value);
+	int set_mode(int value, int detection_param = -1);
 	int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 	int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
 		float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);

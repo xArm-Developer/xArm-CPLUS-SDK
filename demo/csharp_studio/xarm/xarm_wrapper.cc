@@ -99,8 +99,8 @@ namespace XArmWrapper
 	int __stdcall motion_enable(bool enable, int servo_id) {
 		return arm->motion_enable(enable, servo_id);
 	}
-	int __stdcall set_mode(int mode) {
-		return arm->set_mode(mode);
+	int __stdcall set_mode(int mode, int detection_param) {
+		return arm->set_mode(mode, detection_param);
 	}
 	int __stdcall set_state(int state) {
 		return arm->set_state(state);

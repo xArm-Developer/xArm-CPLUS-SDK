@@ -47,7 +47,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int motion_enable(bool enable, int servo_id = 8);
         [DllImport("xarm.dll")]
-        public static extern int set_mode(int mode);
+        public static extern int set_mode(int mode, int detection_param = 0);
         [DllImport("xarm.dll")]
         public static extern int set_state(int state);
         [DllImport("xarm.dll")]

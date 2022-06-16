@@ -32,7 +32,7 @@ namespace XArmWrapper {
 	extern "C" __declspec(dllexport) void __stdcall disconnect(void);
 	
 	extern "C" __declspec(dllexport) int __stdcall motion_enable(bool enable, int servo_id=8);
-	extern "C" __declspec(dllexport) int __stdcall set_mode(int mode);
+	extern "C" __declspec(dllexport) int __stdcall set_mode(int mode, int detection_param = 0);
 	extern "C" __declspec(dllexport) int __stdcall set_state(int state);
 	extern "C" __declspec(dllexport) int __stdcall clean_warn(void);
 	extern "C" __declspec(dllexport) int __stdcall clean_error(void);

@@ -744,9 +744,13 @@ int XArmAPI::set_state(int state_) {
 	return ret;
 }
 
-int XArmAPI::set_mode(int mode_) {
+int XArmAPI::set_mode(int mode_, int detection_param) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	int ret = core->set_mode(mode_);
+	
+	int detection_param_ = -1;
+	if (_version_is_ge(1, 10, 0))
+		detection_param_ = detection_param >= 0 ? detection_param : 0;
+	int ret = core->set_mode(mode_, detection_param_);
 	return _check_code(ret);
 }
 

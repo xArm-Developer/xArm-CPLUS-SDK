@@ -822,8 +822,8 @@ int XArmAPI::_wait_move(fp32 timeout) {
 		if (error_code != 0) {
 			return API_CODE::HAS_ERROR;
 		}
-		// no wait in velocity mode
-		if (mode == 4 || mode == 5) return 0;
+		// only wait in position mode
+		if (mode != 0) return 0;
 		if (state == 4 || state == 5) {
 			ret = get_state(&state_);
 			if (ret != 0 || (state_ != 4 && state_ != 5)) {

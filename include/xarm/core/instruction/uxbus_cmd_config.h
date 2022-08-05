@@ -224,6 +224,8 @@ public:
 	static const int TEACH_CART = 3;
 	static const int VELO_JOINT = 4;
 	static const int VELO_CART = 5;
+	static const int ONLINE_JOINT = 6;
+	static const int ONLINE_CART = 7;
 };
 
 class XARM_STATE {

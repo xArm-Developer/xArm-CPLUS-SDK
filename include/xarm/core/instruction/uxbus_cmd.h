@@ -71,8 +71,8 @@ inline long long get_system_time()
 	return 1000 * t.time + t.millitm; // milliseconds
 #else
 	struct timespec t;
-	clock_gettime(CLOCK_REALTIME, &t);
-	// clock_gettime(CLOCK_MONOTONIC, &t);
+	// clock_gettime(CLOCK_REALTIME, &t);
+	clock_gettime(CLOCK_MONOTONIC, &t);
 	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
 #endif
 }

@@ -1505,7 +1505,7 @@ __int clean_bio_gripper_error(void)__
 __int set_tgpio_modbus_timeout(int timeout, bool is_transparent_transmission = false)__
 > Set the modbus timeout of the tool gpio
 > 
-> :param timeout: timeout, seconds  
+> :param timeout: timeout, milliseconds  
 > :param is_transparent_transmission: whether the set timeout is the timeout of transparent transmission   
 > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.0
 > 

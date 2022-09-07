@@ -71,6 +71,8 @@ XArmAPI::~XArmAPI() {
 void XArmAPI::_init(void) {
 	core = NULL;
 	stream_tcp_ = NULL;
+	core503_ = NULL;
+	stream_tcp503_ = NULL;
 	stream_tcp_report_ = NULL;
 	stream_tcp_rich_report_ = NULL;
 	stream_ser_ = NULL;
@@ -276,6 +278,10 @@ bool XArmAPI::has_warn(void) {
 
 bool XArmAPI::is_connected(void) {
 	return is_tcp_ ? (stream_tcp_ == NULL ? false : stream_tcp_->is_ok() == 0) : (stream_ser_ == NULL ? false : stream_ser_->is_ok() == 0);
+}
+
+bool XArmAPI::_is_connected_503(void) {
+	return stream_tcp503_ == NULL ? false : stream_tcp503_->is_ok() == 0;
 }
 
 bool XArmAPI::is_lite6(void) {
@@ -558,10 +564,24 @@ int XArmAPI::connect(const std::string &port) {
 	return 0;
 }
 
+int XArmAPI::_connect_503(void)
+{
+	stream_tcp503_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL + 1, 3, 320);
+	if (stream_tcp503_->is_ok() != 0) {
+		return -2;
+	}
+	core503_ = new UxbusCmdTcp((SocketPort *)stream_tcp503_);
+	return 0;
+}
+
 void XArmAPI::disconnect(void) {
 	if (stream_tcp_ != NULL) {
 		stream_tcp_->close_port();
 		stream_tcp_ = NULL;
+	}
+	if (stream_tcp503_ != NULL) {
+		stream_tcp503_->close_port();
+		stream_tcp503_ = NULL;
 	}
 	if (stream_ser_ != NULL) {
 		stream_ser_->close_port();

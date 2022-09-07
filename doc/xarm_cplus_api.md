@@ -1502,10 +1502,12 @@ __int clean_bio_gripper_error(void)__
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-__int set_tgpio_modbus_timeout(int timeout)__
+__int set_tgpio_modbus_timeout(int timeout, bool is_transparent_transmission = false)__
 > Set the modbus timeout of the tool gpio
 > 
-> :param timeout: timeout, seconds
+> :param timeout: timeout, seconds  
+> :param is_transparent_transmission: whether the set timeout is the timeout of transparent transmission   
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.0
 > 
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -1526,13 +1528,21 @@ __int get_tgpio_modbus_baudrate(int *baud)__
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-__int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length)__
+__int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id = 9, bool is_transparent_transmission = false)__
 > Send the modbus data to the tool gpio
 > 
 > :param modbus_data: send data  
 > :param modbus_length: the length of the modbus_data  
 > :param ret_data: the response data of the modbus  
-> :param ret_length: the length of the response data
+> :param ret_length: the length of the response data  
+> :param host_id: host id  
+> &ensp;&ensp;&ensp;&ensp;9: END RS485  
+> &ensp;&ensp;&ensp;&ensp;10: Controller RS485  
+> :param is_transparent_transmission: whether to choose transparent transmission, default is false  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.0 
+> :param use_503_port: whether to use port 503 for communication, default is false  
+> &ensp;&ensp;&ensp;&ensp;Note: if it is true, it will connect to 503 port for communication when it is used for the first time, which is generally only useful for transparent transmission  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.0  
 > 
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -1748,22 +1758,22 @@ __int ft_sensor_set_zero(void)__
 
 __int ft_sensor_iden_load(float result[10])__
 > Identification the tcp load with the the Six-axis Force Torque Sensor  
-> &ensp;&ensp;&ensp;&ensp;Note:  
-> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.8.3  
-> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.3  
+> &ensp;&ensp;&ensp;&ensp;Note: the Six-axis Force Torque Sensor is required (the third party is not currently supported)  
+> &ensp;&ensp;&ensp;&ensp;Note: tstarting from SDK v1.11.0, the centroid unit is millimeters (originally meters)  
 > 
-> :param result: the result of identification, ([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
+> :param result: the result of identification, ([mass(kg)，x_centroid(mm)，y_centroid(mm)，z_centroid(mm)，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
 > 
 > :return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
 __int ft_sensor_cali_load(float load[10], bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8)__
 > Write the load offset parameters identified by the Six-axis Force Torque Sensor  
-> &ensp;&ensp;&ensp;&ensp;Note:  
-> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.8.3  
-> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. the Six-axis Force Torque Sensor is required (the third party is not currently supported) 
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.3  
+> &ensp;&ensp;&ensp;&ensp;Note: the Six-axis Force Torque Sensor is required (the third party is not currently supported)  
+> &ensp;&ensp;&ensp;&ensp;Note: tstarting from SDK v1.11.0, the centroid unit is millimeters (originally meters)  
 > 
-> :param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])  
+> :param load: iden result([mass(kg)，x_centroid(mm)，y_centroid(mm)，z_centroid(mm)，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])  
 > :param association_setting_tcp_load: whether to convert the paramster to the corresponding tcp load and set, default is false  
 > &ensp;&ensp;&ensp;&ensp;if true, the value of tcp load will be modified
 

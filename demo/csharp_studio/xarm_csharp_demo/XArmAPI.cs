@@ -255,13 +255,13 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int clean_bio_gripper_error();
         [DllImport("xarm.dll")]
-        public static extern int set_tgpio_modbus_timeout(int timeout);
+        public static extern int set_tgpio_modbus_timeout(int timeout, bool is_transparent_transmission = false);
         [DllImport("xarm.dll")]
         public static extern int set_tgpio_modbus_baudrate(int baud);
         [DllImport("xarm.dll")]
         public static extern int get_tgpio_modbus_baudrate(ref int baud);
         [DllImport("xarm.dll")]
-        public static extern int getset_tgpio_modbus_data(byte[] modbus_data, int modbus_length, byte[] ret_data, int ret_length);
+        public static extern int getset_tgpio_modbus_data(byte[] modbus_data, int modbus_length, byte[] ret_data, int ret_length, byte host_id = 9, bool is_transparent_transmission = false, bool use_503_port = false);
         [DllImport("xarm.dll")]
         public static extern int set_self_collision_detection(bool on);
         [DllImport("xarm.dll")]

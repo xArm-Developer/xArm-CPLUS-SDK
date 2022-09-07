@@ -337,9 +337,9 @@ int XArmAPI::_checkset_modbus_baud(int baudrate, bool check, unsigned char host_
 	}
 }
 
-int XArmAPI::set_tgpio_modbus_timeout(int timeout) {
+int XArmAPI::set_tgpio_modbus_timeout(int timeout, bool is_transparent_transmission) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
-	return core->set_modbus_timeout(timeout);
+	return core->set_modbus_timeout(timeout, is_transparent_transmission);
 }
 
 int XArmAPI::set_tgpio_modbus_baudrate(int baud) {
@@ -355,10 +355,26 @@ int XArmAPI::get_tgpio_modbus_baudrate(int *baud) {
 	return ret;
 }
 
-int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length) {
+int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id, bool is_transparent_transmission, bool use_503_port) {
 	if (!is_connected()) return API_CODE::NOT_CONNECTED;
 	unsigned char *rx_data = new unsigned char[ret_length + 1];
-	int ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data);
+	int ret = 0;
+	if (is_transparent_transmission) {
+		if (use_503_port) {
+			if (!_is_connected_503() && _connect_503() != 0) {
+				delete[] rx_data;
+				return API_CODE::NOT_CONNECTED;
+			}
+			ret = core503_->tgpio_set_modbus(modbus_data, modbus_length, rx_data, host_id, 0.0, true);
+			
+		}
+		else {
+			ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data, host_id, 0.0, true);
+		}
+	}
+	else {
+		ret = core->tgpio_set_modbus(modbus_data, modbus_length, rx_data, host_id);
+	}
 	ret = _check_modbus_code(ret, rx_data);
 	memcpy(ret_data, rx_data + 1, ret_length);
 	delete[] rx_data;

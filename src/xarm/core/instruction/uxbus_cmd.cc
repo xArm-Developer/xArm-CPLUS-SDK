@@ -845,8 +845,8 @@ int UxbusCmd::tgpio_get_analog2(float * value) {
  * tgpio modbus
  *******************************************************/
 
-int UxbusCmd::set_modbus_timeout(int value) {
-	return set_nu16(UXBUS_RG::TGPIO_MB_TIOUT, &value, 1);
+int UxbusCmd::set_modbus_timeout(int value, bool is_transparent_transmission) {
+	return set_nu16(is_transparent_transmission ? UXBUS_RG::TGPIO_COM_TIOUT : UXBUS_RG::TGPIO_MB_TIOUT, &value, 1);
 }
 
 int UxbusCmd::set_modbus_baudrate(int baud) {
@@ -866,7 +866,7 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 	return ret;
 }
 
-int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id, float limit_sec) {
+int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id, float limit_sec, bool is_transparent_transmission) {
 	unsigned char *txdata = new unsigned char[len_t + 1];
 	txdata[0] = host_id;
 	for (int i = 0; i < len_t; i++) { txdata[i + 1] = modbus_t[i]; }
@@ -877,7 +877,7 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
 		long long limit_us = (long long)(limit_sec * 1000000);
 		if (diff_us < limit_us) sleep_us(limit_us - diff_us);
 	}
-	int ret = send_xbus(UXBUS_RG::TGPIO_MODBUS, txdata, len_t + 1);
+	int ret = send_xbus(is_transparent_transmission ? UXBUS_RG::TGPIO_COM_DATA : UXBUS_RG::TGPIO_MODBUS, txdata, len_t + 1);
 	delete[] txdata;
 	if (0 != ret) { 
 		last_modbus_comm_us_ = get_us();

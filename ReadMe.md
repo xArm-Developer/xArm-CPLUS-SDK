@@ -11,6 +11,10 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.11.0
+  - Support transparent transmission (240/241)
+  - Modified the centroid unit of `ft_sensor_iden_load` and `ft_sensor_cali_load` interfaces to millimeters (originally meters)
+
 - > ### 1.9.10 
   - Support Lite6 Model
   - Fix several bugs

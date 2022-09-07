@@ -57,14 +57,24 @@ int XArmAPI::ft_sensor_iden_load(float result[10])
 	core->set_prot_flag(2);
 	keep_heart_ = false;
 	int ret = core->ft_sensor_iden_load(result);
+	if (ret == 0) {
+		result[1] = result[1] * 1000.0; // x_centroid, m to mm
+		result[2] = result[2] * 1000.0; // y_centroid, m to mm
+		result[3] = result[3] * 1000.0; // z_centroid, m to mm
+	}
 	core->set_prot_flag(prot_flag);
 	keep_heart_ = true;
 	return _check_code(ret);
 }
 
-int XArmAPI::ft_sensor_cali_load(float load[10], bool association_setting_tcp_load, float m, float x, float y, float z)
+int XArmAPI::ft_sensor_cali_load(float load2[10], bool association_setting_tcp_load, float m, float x, float y, float z)
 {
     if (!is_connected()) return API_CODE::NOT_CONNECTED;
+	float load[10];
+	memcpy(load, load2, sizeof(float) * 10);
+	load[1] = load[1] / 1000.0; // x_centroid, mm to m
+	load[2] = load[2] / 1000.0; // y_centroid, mm to m
+	load[3] = load[3] / 1000.0; // z_centroid, mm to m
 	int ret = core->ft_sensor_cali_load(load);
 	ret = _check_code(ret);
 	if (ret == 0 && association_setting_tcp_load) {

@@ -40,7 +40,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.10.0"
+#define SDK_VERSION "1.11.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1437,10 +1437,12 @@ public:
 	* Set the modbus timeout of the tool gpio
 
 	* @param timeout: timeout, seconds
+	* @param is_transparent_transmission: whether the set timeout is the timeout of transparent transmission
+		Note: only available if firmware_version >= 1.11.0
 
 	* return: See the code documentation for details.
 	*/
-	int set_tgpio_modbus_timeout(int timeout);
+	int set_tgpio_modbus_timeout(int timeout, bool is_transparent_transmission = false);
 
 	/*
 	* Set the modbus baudrate of the tool gpio
@@ -1467,10 +1469,18 @@ public:
 	* @param modbus_length: the length of the modbus_data
 	* @param ret_data: the response data of the modbus
 	* @param ret_length: the length of the response data
+	* @param host_id: host id, default is 9
+		9: END RS485
+		10: Controller RS485
+	* @param is_transparent_transmission: whether to choose transparent transmission, default is false
+		Note: only available if firmware_version >= 1.11.0
+	* @param use_503_port: whether to use port 503 for communication, default is false
+		Note: if it is true, it will connect to 503 port for communication when it is used for the first time, which is generally only useful for transparent transmission
+		Note: only available if firmware_version >= 1.11.0
 
 	* return: See the code documentation for details.
 	*/
-	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length);
+	int getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id = 9, bool is_transparent_transmission = false, bool use_503_port = false);
 
 	/*
 	* Set the reported torque or electric current
@@ -1711,8 +1721,9 @@ public:
 	/*
     * Identification the tcp load with the the Six-axis Force Torque Sensor
     *   Note: only available if firmware_version >= 1.8.3
+	* 	Note: starting from SDK v1.11.0, the centroid unit is millimeters (originally meters)
 
-    * @param result: the result of identification
+    * @param result: the result of identification, [mass(kg)，x_centroid(mm)，y_centroid(mm)，z_centroid(mm)，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset]
 
     * return: See the code documentation for details.
     */
@@ -1720,11 +1731,11 @@ public:
 
 	/*
     * Write the load offset parameters identified by the Six-axis Force Torque Sensor
-    *   Note: 
-		* 		1. only available if firmware_version >= 1.8.3
-		*  		2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
+    *   Note: only available if firmware_version >= 1.8.3
+	*  	Note: the Six-axis Force Torque Sensor is required (the third party is not currently supported)
+	* 	Note: starting from SDK v1.11.0, the centroid unit is millimeters (originally meters)
 
-    * @param load: iden result([mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
+    * @param load: iden result([mass(kg)，x_centroid(mm)，y_centroid(mm)，z_centroid(mm)，Fx_offset，Fy_offset，Fz_offset，Tx_offset，Ty_offset，Tz_ffset])
 	* @param association_setting_tcp_load: whether to convert the paramster to the corresponding tcp load and set, default is false
 		if true, the value of tcp load will be modified
 
@@ -2161,6 +2172,9 @@ private:
 	int _wait_linear_track_back_origin(fp32 timeout = 10);
 
 	bool _is_rich_reported(void);
+
+	int _connect_503(void);
+	bool _is_connected_503(void);
 private:
 	std::string port_;
 	bool check_tcp_limit_;
@@ -2223,6 +2237,9 @@ private:
 	long long max_report_interval_;
 
 	fp32 cmd_timeout_;
+
+	UxbusCmd *core503_;
+	SocketPort *stream_tcp503_;
 
 	SerialPort *stream_ser_;
 	SocketPort *stream_tcp_;

@@ -398,8 +398,8 @@ namespace XArmWrapper
 		return arm->clean_bio_gripper_error();
 	}
 
-	int __stdcall set_tgpio_modbus_timeout(int timeout) {
-		return arm->set_tgpio_modbus_timeout(timeout);
+	int __stdcall set_tgpio_modbus_timeout(int timeout, bool is_transparent_transmission) {
+		return arm->set_tgpio_modbus_timeout(timeout, is_transparent_transmission);
 	}
 	int __stdcall set_tgpio_modbus_baudrate(int baud) {
 		return arm->set_tgpio_modbus_baudrate(baud);
@@ -407,8 +407,8 @@ namespace XArmWrapper
 	int __stdcall get_tgpio_modbus_baudrate(int *baud) {
 		return arm->get_tgpio_modbus_baudrate(baud);
 	}
-	int __stdcall getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length) {
-		return arm->getset_tgpio_modbus_data(modbus_data, modbus_length, ret_data, ret_length);
+	int __stdcall getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id, bool is_transparent_transmission, bool use_503_port) {
+		return arm->getset_tgpio_modbus_data(modbus_data, modbus_length, ret_data, ret_length, host_id, is_transparent_transmission, use_503_port);
 	}
 	int __stdcall set_self_collision_detection(bool on) {
 		return arm->set_self_collision_detection(on);

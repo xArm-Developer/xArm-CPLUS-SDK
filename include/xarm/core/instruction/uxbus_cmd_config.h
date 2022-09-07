@@ -161,6 +161,9 @@ public:
 	static const unsigned char FTSENSOR_GET_CONFIG = 212;
 
 	static const unsigned char GET_MAX_JOINT_VELOCITY = 231;
+
+	static const unsigned char TGPIO_COM_TIOUT = 240;
+	static const unsigned char TGPIO_COM_DATA = 241;
 };
 
 class UXBUS_STATE {

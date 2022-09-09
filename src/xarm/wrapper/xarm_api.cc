@@ -8,19 +8,6 @@
 */
 #include "xarm/wrapper/xarm_api.h"
 
-
-bool compare_version(int v1[3], int v2[3]) {
-	for (int i = 0; i < 3; i++) {
-		if (v1[i] > v2[i]) {
-			return true;
-		}
-		else if (v1[i] < v2[i]) {
-			return false;
-		}
-	}
-	return false;
-}
-
 fp32 to_radian(fp32 val) {
 	return (fp32)(val / RAD_DEGREE);
 }

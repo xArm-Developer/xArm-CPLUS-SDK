@@ -56,7 +56,7 @@ int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
 	int code = _xarm_is_ready();
 	if (code != 0) return code;
 	float _gravity[3];
-	if (compare_version(version_number, new int[3]{ 0, 2, 0 })) {
+	if (_version_is_ge(0, 2, 1)) {
 		_gravity[0] = center_of_gravity[0];
 		_gravity[1] = center_of_gravity[1];
 		_gravity[2] = center_of_gravity[2];

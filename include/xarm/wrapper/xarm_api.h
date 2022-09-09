@@ -67,8 +67,6 @@ struct LinearTrackStatus {
 	unsigned char sco[2];
 };
 
-bool compare_version(int v1[3], int v2[3]);
-
 fp32 to_radian(fp32 val);
 fp32 to_degree(fp32 val);
 

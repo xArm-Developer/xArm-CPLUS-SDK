@@ -884,7 +884,7 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
 		return UXBUS_STATE::ERR_NOTTCP;
 	}
 
-	ret = send_pend(UXBUS_RG::TGPIO_MODBUS, -1, SET_TIMEOUT_, rx_data);
+	ret = send_pend(is_transparent_transmission ? UXBUS_RG::TGPIO_COM_DATA : UXBUS_RG::TGPIO_MODBUS, -1, SET_TIMEOUT_, rx_data);
 	last_modbus_comm_us_ = get_us();
 	return ret;
 }

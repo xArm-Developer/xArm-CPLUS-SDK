@@ -294,15 +294,15 @@ int XArmAPI::_checkset_modbus_baud(int baudrate, bool check, unsigned char host_
 					if (error_code == 19 || error_code == 28) {
 						clean_error();
 						if (ignore_state_) set_state(state_ >= 3 ? state_ : 0);
-						sleep_milliseconds(1000);
 					}
+					sleep_milliseconds(1000);
 				}
 				else {
 					if (error_code == 100 + host_id) {
 						clean_error();
 						if (ignore_state_) set_state(state_ >= 3 ? state_ : 0);
-						sleep_milliseconds(1000);
 					}
+					sleep_milliseconds(1000);
 				}
 			}
 			catch (...) {

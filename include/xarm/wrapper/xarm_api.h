@@ -437,8 +437,8 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
-	int set_position(fp32 pose[6], fp32 radius = -1, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
-	int set_position(fp32 pose[6], bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
+	int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false);
+	int set_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false);
 
 	/*
 	* Movement relative to the tool coordinate system
@@ -453,7 +453,7 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_tool_position(fp32 pose[6], bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int set_tool_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT);
 
 	/*
 	* Set the servo angle
@@ -479,9 +479,9 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_angle(fp32 angles[7], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
-	int set_servo_angle(fp32 angles[7], bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
+	int set_servo_angle(fp32 angles[7], bool wait, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
 	int set_servo_angle(int servo_id, fp32 angle, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
-	int set_servo_angle(int servo_id, fp32 angle, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
+	int set_servo_angle(int servo_id, fp32 angle, bool wait, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, bool relative = false);
 
 	/*
 	* Servo_j motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))
@@ -545,7 +545,7 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int move_gohome(fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int move_gohome(bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int move_gohome(bool wait, fp32 timeout = NO_TIMEOUT);
 
 	/*
 	* Reset
@@ -1237,7 +1237,7 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_position_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
 
 	/*
 	* Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))
@@ -1252,7 +1252,7 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_servo_cartesian_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, bool is_tool_coord = false, bool relative = false);
-	int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord = false, bool relative = false);
+	int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord, bool relative = false);
 
 	/*
 	* Calculate the pose offset of two given points
@@ -1293,8 +1293,8 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = NULL);
-	int robotiq_set_activate(bool wait = true, unsigned char ret_data[6] = NULL);
-	int robotiq_set_activate(unsigned char ret_data[6] = NULL);
+	int robotiq_set_activate(bool wait, unsigned char ret_data[6]);
+	int robotiq_set_activate(unsigned char ret_data[6]);
 
 	/*
 	* Go to the position with determined speed and force.
@@ -1307,9 +1307,9 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_set_position(unsigned char pos, bool wait, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_set_position(unsigned char pos, bool wait, unsigned char ret_data[6], bool wait_motion = true);
+	int robotiq_set_position(unsigned char pos, unsigned char ret_data[6], bool wait_motion = true);
 
 	/*
 	* Open the robotiq gripper
@@ -1321,9 +1321,9 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_open(unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_open(bool wait, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_open(bool wait, unsigned char ret_data[6], bool wait_motion = true);
+	int robotiq_open(unsigned char ret_data[6], bool wait_motion = true);
 
 	/*
 	* Close the robotiq gripper
@@ -1335,9 +1335,9 @@ public:
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-	int robotiq_close(unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_close(bool wait, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+	int robotiq_close(bool wait, unsigned char ret_data[6], bool wait_motion = true);
+	int robotiq_close(unsigned char ret_data[6], bool wait_motion = true);
 
 	/*
 	* Reading the status of robotiq gripper
@@ -1385,7 +1385,7 @@ public:
 	* return: See the code documentation for details.
 	*/
 	int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
-	int open_bio_gripper(bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+	int open_bio_gripper(bool wait, fp32 timeout = 5, bool wait_motion = true);
 	
 	/*
 	* Close the bio gripper
@@ -1397,7 +1397,7 @@ public:
 	* return: See the code documentation for details.
 	*/
 	int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
-	int close_bio_gripper(bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+	int close_bio_gripper(bool wait, fp32 timeout = 5, bool wait_motion = true);
 	
 	/*
 	* Get the status of the bio gripper

@@ -418,7 +418,7 @@ __int set_state(int state)__
 > :return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-__int set_mode(int mode)__
+__int set_mode(int mode, int detection_param = 0)__
 > Set the xArm mode
 >
 > :param mode: mode  
@@ -428,6 +428,14 @@ __int set_mode(int mode)__
 > &ensp;&ensp;&ensp;&ensp;3: cartesian teaching mode (invalid)  
 > &ensp;&ensp;&ensp;&ensp;4: joint velocity control mode  
 > &ensp;&ensp;&ensp;&ensp;5: cartesian velocity control mode  
+> &ensp;&ensp;&ensp;&ensp;6: joint online trajectory planning mode  
+> &ensp;&ensp;&ensp;&ensp;7: cartesian online trajectory planning mode  
+> :param detection_param: teaching detection parameters, default is 0  
+> &ensp;&ensp;&ensp;&ensp;0: turn on motion detection  
+> &ensp;&ensp;&ensp;&ensp;1: trun off motion detection  
+> &ensp;&ensp;&ensp;&ensp;Note:  
+> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.1  
+> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. only available if set_mode(2)  
 > :return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 

@@ -98,8 +98,8 @@ void XArmAPI::_init(void) {
 	if (default_is_radian) {
 		joint_speed_limit = new fp32[2]{ min_joint_speed_, max_joint_speed_ };
 		joint_acc_limit = new fp32[2]{ min_joint_acc_, max_joint_acc_ };
-		last_used_joint_speed = (float)0.3490658503988659; // rad/s (20°/s);
-		last_used_joint_acc = (float)8.726646259971648;    // rad/s^2 (500°/s^2);
+		last_used_joint_speed = (fp32)0.3490658503988659; // rad/s (20°/s);
+		last_used_joint_acc = (fp32)8.726646259971648;    // rad/s^2 (500°/s^2);
 		position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
 		position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
 		last_used_position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
@@ -107,11 +107,11 @@ void XArmAPI::_init(void) {
 	else {
 		joint_speed_limit = new fp32[2]{ to_degree(min_joint_speed_), to_degree(max_joint_speed_) };
 		joint_acc_limit = new fp32[2]{ to_degree(min_joint_acc_), to_degree(max_joint_acc_) };
-		last_used_joint_speed = to_degree(0.3490658503988659); // rad/s (20°/s);
-		last_used_joint_acc = to_degree(8.726646259971648);    // rad/s^2 (500°/s^2);
-		position = new fp32[6]{ 201.5, 0, 140.5, to_degree(3.1415926), 0, 0 };
+		last_used_joint_speed = to_degree((fp32)0.3490658503988659); // rad/s (20°/s);
+		last_used_joint_acc = to_degree((fp32)8.726646259971648);    // rad/s^2 (500°/s^2);
+		position = new fp32[6]{ 201.5, 0, 140.5, to_degree((fp32)3.1415926), 0, 0 };
 		position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
-		last_used_position = new fp32[6]{ 201.5, 0, 140.5, to_degree(3.1415926), 0, 0 };
+		last_used_position = new fp32[6]{ 201.5, 0, 140.5, to_degree((fp32)3.1415926), 0, 0 };
 	}
 
 	state = 4;
@@ -132,7 +132,7 @@ void XArmAPI::_init(void) {
 	motor_tid = 0;
 	motor_fid = 0;
 	tcp_jerk = 1000;        // mm/s^3
-	joint_jerk = default_is_radian ? 20.0 : to_degree(20.0); // 20 rad/s^3
+	joint_jerk = default_is_radian ? (fp32)20.0 : to_degree((fp32)20.0); // 20 rad/s^3
 	rot_jerk = (float)2.3;
 	max_rot_acc = (float)2.7;
 	tcp_speed_limit = new fp32[2]{ min_tcp_speed_, max_tcp_speed_ };
@@ -308,18 +308,28 @@ void XArmAPI::_check_version(void) {
 		cnt -= 1;
 	}
 	std::string v((const char *)version_);
-	std::regex pattern_new(".*(\\d+),(\\d+),(\\S+),(\\S+),.*[vV](\\d+)\\.(\\d+)\\.(\\d+).*");
-	std::regex pattern(".*[vV](\\d+)\\.(\\d+)\\.(\\d+).*");
+	// std::regex pattern_new(".*(\\d+),(\\d+),(\\S+),(\\S+),.*[vV](\\d+)\\.(\\d+)\\.(\\d+).*");
+	std::regex pattern_new(".*(\\d+),(\\d+),(.*),(.*),.*[vV]*(\\d+)\\.(\\d+)\\.(\\d+).*");
+	std::regex pattern(".*[vV]*(\\d+)\\.(\\d+)\\.(\\d+).*");
 	// std::regex pattern(".*[vV](\\d+)[.](\\d+)[.](\\d+).*");
 	std::smatch result;
 	int arm_type = 0;
 	int control_type = 0;
 	if (std::regex_match(v, result, pattern_new)) {
 		auto it = result.begin();
-		sscanf(std::string(*++it).data(), "%d", &axis);
-		sscanf(std::string(*++it).data(), "%d", &device_type);
-		sscanf(std::string(*++it).substr(2, 4).data(), "%d", &arm_type);
-		sscanf(std::string(*++it).substr(2, 4).data(), "%d", &control_type);
+		auto str_axis = std::string(*++it);
+		auto str_device_type = std::string(*++it);
+		auto str_arm_type = std::string(*++it);
+		auto str_control_type = std::string(*++it);
+
+		sscanf(str_axis.data(), "%d", &axis);
+		sscanf(str_device_type.data(), "%d", &device_type);
+		if (str_arm_type.size() >= 6) {
+			sscanf(str_arm_type.substr(2, 4).data(), "%d", &arm_type);
+		}
+		if (str_control_type.size() >= 6) {
+			sscanf(str_control_type.substr(2, 4).data(), "%d", &control_type);
+		}
 
 		arm_type_is_1300_ = arm_type >= 1300;
 		control_box_type_is_1300_ = control_type >= 1300;
@@ -362,7 +372,6 @@ void XArmAPI::_check_version(void) {
 	version_number[0] = major_version_number_;
 	version_number[1] = minor_version_number_;
 	version_number[2] = revision_version_number_;
-	printf("FIRMWARE_VERSION: v%d.%d.%d, PROTOCOL: V%d, DETAIL: %s\n", major_version_number_, minor_version_number_, revision_version_number_, is_old_protocol_ ? 0 : 1, version_);
 	if (check_robot_sn_) {
 		cnt = 5;
 		int err_warn[2];
@@ -375,6 +384,7 @@ void XArmAPI::_check_version(void) {
 		}
 		printf("ROBOT_SN: %s\n", sn);
 	}
+	printf("ROBOT_IP: %s, VERSION: v%d.%d.%d, PROTOCOL: V%d, DETAIL: %s, TYPE1300: [%d, %d]\n", port_.c_str(), major_version_number_, minor_version_number_, revision_version_number_, is_old_protocol_ ? 0 : 1, version_, control_box_type_is_1300_, arm_type_is_1300_);
 }
 
 void XArmAPI::_wait_until_not_pause(void) {
@@ -608,8 +618,10 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
 		int arm_type = 0;
 		int control_type = 0;
 		char *control_box_sn = strchr(str, '\0') + 1;
-		sscanf(std::string(str).substr(2, 4).data(), "%d", &arm_type);
-		sscanf(std::string(control_box_sn).substr(2, 4).data(), "%d", &control_type);
+		if (strlen(str) >= 6)
+			sscanf(std::string(str).substr(2, 4).data(), "%d", &arm_type);
+		if (strlen(control_box_sn) >= 6)
+			sscanf(std::string(control_box_sn).substr(2, 4).data(), "%d", &control_type);
 		arm_type_is_1300_ = arm_type >= 1300;
 		control_box_type_is_1300_ = control_type >= 1300;
 		memcpy(robot_sn, sn, 40);
@@ -817,54 +829,95 @@ int XArmAPI::_wait_move(fp32 timeout) {
 	long long expired = timeout <= 0 ? 0 : (get_system_time() + (long long)(timeout * 1000) + (sleep_finish_time_ > start_time ? sleep_finish_time_ : 0));
 	int cnt = 0;
 	int state_;
-	int err_warn[2];
 	int ret = get_state(&state_);
-	int max_cnt = (ret == 0 && state_ == 1) ? 4 : 10;
+	int max_cnt = (ret == 0 && state_ == 1) ? 1 : 10;
 	while (timeout <= 0 || get_system_time() < expired) {
 		if (!is_connected()) return API_CODE::NOT_CONNECTED;
-		if (get_system_time() - last_report_time_ > 400) {
-			get_state(&state_);
-			get_err_warn_code(err_warn);
-		}
-		if (error_code != 0) {
-			return API_CODE::HAS_ERROR;
-		}
+		if (error_code != 0) return API_CODE::HAS_ERROR;
 		// only wait in position mode
 		if (mode != 0) return 0;
-		if (state == 4 || state == 5) {
-			ret = get_state(&state_);
-			if (ret != 0 || (state_ != 4 && state_ != 5)) {
-				sleep_milliseconds(20);
-				continue;
-			}
+		ret = get_state(&state_);
+		if (ret != 0) return ret;
+
+		if (state_ >= 4) {
 			sleep_finish_time_ = 0;
 			return API_CODE::EMERGENCY_STOP;
 		}
-		if (get_system_time() < sleep_finish_time_ || state == 3) {
-			sleep_milliseconds(20);
+		if (get_system_time() < sleep_finish_time_ || state_ == 3) {
 			cnt = 0;
+			max_cnt = state_ == 3 ? 2 : max_cnt;
+			sleep_milliseconds(50);
 			continue;
 		}
-		if (state != 1) {
-			cnt += 1;
-			if (cnt >= max_cnt) {
-				ret = get_state(&state_);
-				get_err_warn_code(err_warn);
-				if (ret == 0 && state_ != 1) {
-					return 0;
-				}
-				else {
-					cnt = 0;
-				}
-			}
+		if (state_ == 1) {
+			cnt = 0;
+			max_cnt = 2;
+			sleep_milliseconds(50);
+			continue;
 		}
 		else {
-			cnt = 0;
+			cnt += 1;
+			if (cnt >= max_cnt)
+				return 0;
+			sleep_milliseconds(50);
 		}
-		sleep_milliseconds(50);
 	}
 	return API_CODE::WAIT_FINISH_TIMEOUT;
 }
+
+// int XArmAPI::_wait_move(fp32 timeout) {
+// 	long long start_time = get_system_time();
+// 	long long expired = timeout <= 0 ? 0 : (get_system_time() + (long long)(timeout * 1000) + (sleep_finish_time_ > start_time ? sleep_finish_time_ : 0));
+// 	int cnt = 0;
+// 	int state_;
+// 	int err_warn[2];
+// 	int ret = get_state(&state_);
+// 	int max_cnt = (ret == 0 && state_ == 1) ? 4 : 10;
+// 	while (timeout <= 0 || get_system_time() < expired) {
+// 		if (!is_connected()) return API_CODE::NOT_CONNECTED;
+// 		if (get_system_time() - last_report_time_ > 400) {
+// 			get_state(&state_);
+// 			get_err_warn_code(err_warn);
+// 		}
+// 		if (error_code != 0) {
+// 			return API_CODE::HAS_ERROR;
+// 		}
+// 		// only wait in position mode
+// 		if (mode != 0) return 0;
+// 		if (state == 4 || state == 5) {
+// 			ret = get_state(&state_);
+// 			if (ret != 0 || (state_ != 4 && state_ != 5)) {
+// 				sleep_milliseconds(20);
+// 				continue;
+// 			}
+// 			sleep_finish_time_ = 0;
+// 			return API_CODE::EMERGENCY_STOP;
+// 		}
+// 		if (get_system_time() < sleep_finish_time_ || state == 3) {
+// 			sleep_milliseconds(20);
+// 			cnt = 0;
+// 			continue;
+// 		}
+// 		if (state != 1) {
+// 			cnt += 1;
+// 			if (cnt >= max_cnt) {
+// 				ret = get_state(&state_);
+// 				get_err_warn_code(err_warn);
+// 				if (ret == 0 && state_ != 1) {
+// 					return 0;
+// 				}
+// 				else {
+// 					cnt = 0;
+// 				}
+// 			}
+// 		}
+// 		else {
+// 			cnt = 0;
+// 		}
+// 		sleep_milliseconds(50);
+// 	}
+// 	return API_CODE::WAIT_FINISH_TIMEOUT;
+// }
 
 void XArmAPI::emergency_stop(void) {
 	long long start_time = get_system_time();

@@ -381,20 +381,27 @@ int UxbusCmd::set_mode(int value, int detection_param) {
 /*******************************************************
  * controler motion
  *******************************************************/
-int UxbusCmd::move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type, unsigned char *only_check_result) {
+int UxbusCmd::move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type, unsigned char *only_check_result, unsigned char ik) {
 	float txdata[9] = { 0 };
 	for (int i = 0; i < 6; i++) { txdata[i] = mvpose[i]; }
 	txdata[6] = mvvelo;
 	txdata[7] = mvacc;
 	txdata[8] = mvtime;
-	if (only_check_type <= 0) {
+	if (only_check_type <= 0 && ik == 0) {
 		return set_nfp32(UXBUS_RG::MOVE_LINE, txdata, 9);
 	}
 	else {
-		char additional[1] = { (char)only_check_type };
 		unsigned char rx_data[3];
-		int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 9, additional, 1, rx_data, 3, 10000);
-		if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+		int ret = 0;
+		if (ik == 0) {
+			char additional[1] = { (char)only_check_type };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 9, additional, 1, rx_data, 3, 10000);
+		}
+		else {
+			char additional[2] = { (char)only_check_type, (char)ik };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 9, additional, 2, rx_data, 3, 10000);
+		}
+		if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
 		return ret;
 	}
 	// return set_nfp32(UXBUS_RG::MOVE_LINE, txdata, 9);
@@ -460,20 +467,27 @@ int UxbusCmd::move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvr
 	// return set_nfp32(UXBUS_RG::MOVE_JOINTB, txdata, 10);
 }
 
-int UxbusCmd::move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type, unsigned char *only_check_result) {
+int UxbusCmd::move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type, unsigned char *only_check_result, unsigned char ik) {
 	float txdata[9] = { 0 };
 	for (int i = 0; i < 6; i++) { txdata[i] = mvpose[i]; }
 	txdata[6] = mvvelo;
 	txdata[7] = mvacc;
 	txdata[8] = mvtime;
-	if (only_check_type <= 0) {
+	if (only_check_type <= 0 && ik == 0) {
 		return set_nfp32(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9);
 	}
 	else {
-		char additional[1] = { (char)only_check_type };
 		unsigned char rx_data[3];
-		int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9, additional, 1, rx_data, 3, 10000);
-		if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+		int ret = 0;
+		if (ik == 0) {
+			char additional[1] = { (char)only_check_type };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9, additional, 1, rx_data, 3, 10000);
+		}
+		else {
+			char additional[2] = { (char)only_check_type, (char)ik };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9, additional, 2, rx_data, 3, 10000);
+		}
+		if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
 		return ret;
 	}
 	// return set_nfp32(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9);
@@ -1174,21 +1188,28 @@ int UxbusCmd::get_position_aa(float pose[6]) {
 	return get_nfp32(UXBUS_RG::GET_TCP_POSE_AA, pose, 6);
 }
 
-int UxbusCmd::move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord, int relative, unsigned char only_check_type, unsigned char *only_check_result) {
+int UxbusCmd::move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord, int relative, unsigned char only_check_type, unsigned char *only_check_result, unsigned char ik) {
 	float txdata[9] = { 0 };
 	for (int i = 0; i < 6; i++) { txdata[i] = mvpose[i]; }
 	txdata[6] = mvvelo;
 	txdata[7] = mvacc;
 	txdata[8] = mvtime;
-	if (only_check_type <= 0) {
+	if (only_check_type <= 0 && ik == 0) {
 		char additional[2] = { (char)mvcoord, (char)relative };
 		return set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional, 2);
 	}
 	else {
-		char additional[3] = { (char)mvcoord, (char)relative, (char)only_check_type };
 		unsigned char rx_data[3];
-		int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional, 3, rx_data, 3, 10000);
-		if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+		int ret = 0;
+		if (ik == 0) {
+			char additional[3] = { (char)mvcoord, (char)relative, (char)only_check_type };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional, 3, rx_data, 3, 10000);
+		}
+		else {
+			char additional[4] = { (char)mvcoord, (char)relative, (char)only_check_type, (char)ik };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional, 4, rx_data, 3, 10000);
+		}
+		if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
 		return ret;
 	}
 	// char additional[2] = { (char)mvcoord, (char)relative };
@@ -1205,7 +1226,7 @@ int UxbusCmd::move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int
 	return set_nfp32_with_bytes(UXBUS_RG::MOVE_SERVO_CART_AA, txdata, 9, additional, 1);
 }
 
-int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result)
+int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, unsigned char ik)
 {
 	float txdata[11] = { 0 };
 	for (int i = 0; i < 7; i++) { txdata[i] = mvpose[i]; }
@@ -1213,15 +1234,22 @@ int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mv
 	txdata[8] = mvacc;
 	txdata[9] = mvtime;
 	txdata[10] = radius;
-	if (only_check_type <= 0) {
+	if (only_check_type <= 0 && ik == 0) {
 		char additional[2] = { (char)is_joint_motion, (char)is_axis_angle  };
 		return set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 2);
 	}
 	else {
-		char additional[3] = { (char)is_joint_motion, (char)is_axis_angle , (char)only_check_type };
 		unsigned char rx_data[3];
-		int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 3, rx_data, 3, 10000);
-		if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+		int ret = 0;
+		if (ik == 0) {
+			char additional[3] = { (char)is_joint_motion, (char)is_axis_angle , (char)only_check_type };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 3, rx_data, 3, 10000);
+		}
+		else {
+			char additional[4] = { (char)is_joint_motion, (char)is_axis_angle , (char)only_check_type, (char)ik };
+			ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 4, rx_data, 3, 10000);
+		}
+		if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
 		return ret;
 	}
 	// char additional[2] = { (char)is_joint_motion, (char)is_axis_angle };
@@ -1626,18 +1654,26 @@ int UxbusCmd::set_allow_approx_motion(int on_off)
 	return set_nu8(UXBUS_RG::ALLOW_APPROX_MOTION, txdata, 1);
 }
 
-int UxbusCmd::move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius, int coord, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result)
+int UxbusCmd::move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius, int coord, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, unsigned char ik)
 {
-	float txdata[9] = { 0 };
+	float txdata[10] = { 0 };
 	for (int i = 0; i < 6; i++) { txdata[i] = mvpose[i]; }
 	txdata[6] = mvvelo;
 	txdata[7] = mvacc;
 	txdata[8] = mvtime;
+	txdata[9] = radius;
 
-	char additional[3] = { (char)coord, (char)is_axis_angle, (char)only_check_type };
+	int ret = 0;
 	unsigned char rx_data[3];
-	int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 9, additional, 3, rx_data, 3, 10000);
-	if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+	if (ik == 0) {
+		char additional[3] = { (char)coord, (char)is_axis_angle, (char)only_check_type };
+		ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 3, rx_data, 3, 10000);
+	}
+	else {
+		char additional[4] = { (char)coord, (char)is_axis_angle, (char)only_check_type, (char)ik };
+		ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 4, rx_data, 3, 10000);
+	}
+	if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
 	return ret;
 }
 

@@ -111,11 +111,11 @@ namespace XArmWrapper
 	int __stdcall clean_error(void) {
 		return arm->clean_error();
 	}
-	int __stdcall set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, bool relative) {
-		return arm->set_position(pose, radius, speed, acc, mvtime, wait, timeout, relative);
+	int __stdcall set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, bool relative, unsigned char ik) {
+		return arm->set_position(pose, radius, speed, acc, mvtime, wait, timeout, relative, ik);
 	}
-	int __stdcall set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
-		return arm->set_tool_position(pose, speed, acc, mvtime, wait, timeout);
+	int __stdcall set_tool_position(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius, unsigned char ik) {
+		return arm->set_tool_position(pose, speed, acc, mvtime, wait, timeout, radius, ik);
 	}
 	int __stdcall set_servo_angle(fp32 angles[7], fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius, bool relative) {
 		return arm->set_servo_angle(angles, speed, acc, mvtime, wait, timeout, radius, relative);
@@ -126,8 +126,8 @@ namespace XArmWrapper
 	int __stdcall set_servo_cartesian(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool is_tool_coord) {
 		return arm->set_servo_cartesian(pose, speed, acc, mvtime, is_tool_coord);
 	}
-	int __stdcall move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
-		return arm->move_circle(pose1, pose2, percent, speed, acc, mvtime, wait, timeout);
+	int __stdcall move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, bool is_tool_coord, bool is_axis_angle) {
+		return arm->move_circle(pose1, pose2, percent, speed, acc, mvtime, wait, timeout, is_tool_coord, is_axis_angle);
 	}
 	int __stdcall move_gohome(fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout) {
 		return arm->move_gohome(speed, acc, mvtime, wait, timeout);
@@ -350,8 +350,8 @@ namespace XArmWrapper
 	int __stdcall is_tcp_limit(fp32 pose[6], int *limit) {
 		return arm->is_tcp_limit(pose, limit);
 	}
-	int __stdcall set_position_aa(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool is_tool_coord, bool relative, bool wait, fp32 timeout) {
-		return arm->set_position_aa(pose, speed, acc, mvtime, is_tool_coord, relative, wait, timeout);
+	int __stdcall set_position_aa(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bool is_tool_coord, bool relative, bool wait, fp32 timeout, fp32 radius, unsigned char ik) {
+		return arm->set_position_aa(pose, speed, acc, mvtime, is_tool_coord, relative, wait, timeout, radius, ik);
 	}
 	int __stdcall set_servo_cartesian_aa(fp32 pose[6], fp32 speed, fp32 acc, bool is_tool_coord, bool relative) {
 		return arm->set_servo_cartesian_aa(pose, speed, acc, is_tool_coord, relative);

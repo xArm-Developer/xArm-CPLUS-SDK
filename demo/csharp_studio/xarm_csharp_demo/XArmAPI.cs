@@ -57,11 +57,11 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_position(float[] pose, float radius = -1,
             float speed = 0, float acc = 0, float mvtime = 0,
-            bool wait = false, float timeout = NO_TIMEOUT, bool relative = false);
+            bool wait = false, float timeout = NO_TIMEOUT, bool relative = false, byte ik = 0);
         [DllImport("xarm.dll")]
         public static extern int set_tool_position(float[] pose,
             float speed = 0, float acc = 0, float mvtime = 0,
-            bool wait = false, float timeout = NO_TIMEOUT);
+            bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, byte ik = 0);
         [DllImport("xarm.dll")]
         public static extern int set_servo_angle(float[] angles,
             float speed = 0, float acc = 0, float mvtime = 0,
@@ -75,7 +75,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int move_circle(float[] pose1, float[] pose2, float percent,
             float speed = 0, float acc = 0, float mvtime = 0,
-            bool wait = false, float timeout = NO_TIMEOUT);
+            bool wait = false, float timeout = NO_TIMEOUT, bool is_tool_coord = false, bool is_axis_angle = false);
         [DllImport("xarm.dll")]
         public static extern int move_gohome(
             float speed = 0, float acc = 0, float mvtime = 0,
@@ -224,7 +224,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int is_tcp_limit(float[] pose, ref int limit);
         [DllImport("xarm.dll")]
-        public static extern int set_position_aa(float[] pose, float speed = 0, float acc = 0, float mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT);
+        public static extern int set_position_aa(float[] pose, float speed = 0, float acc = 0, float mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, byte ik = 0);
         [DllImport("xarm.dll")]
         public static extern int set_servo_cartesian_aa(float[] pose, float speed = 0, float acc = 0, bool is_tool_coord = false, bool relative = false);
         

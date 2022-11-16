@@ -344,6 +344,14 @@ public:
 		3: cartesian teaching mode (invalid)
 		4: joint velocity control mode
 		5: cartesian velocity control mode
+		6: joint online trajectory planning mode
+		7: cartesian online trajectory planning mode
+	* @param detection_param: teaching detection parameters, default is 0
+		0: turn on motion detection
+		1: trun off motion detection
+		Note: 
+			1. only available if firmware_version >= 1.10.1
+			2. only available if set_mode(2)
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
 	int set_mode(int mode, int detection_param = 0);
@@ -436,9 +444,9 @@ public:
 	*   Note: only available if firmware_version >= 1.8.100
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false);
-	int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false);
-	int set_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false);
+	int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
+	int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
+	int set_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
 
 	/*
 	* Movement relative to the tool coordinate system
@@ -452,8 +460,8 @@ public:
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_tool_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT);
+	int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
+	int set_tool_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
 
 	/*
 	* Set the servo angle
@@ -529,7 +537,7 @@ public:
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is True
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool is_tool_coord = false, bool is_axis_angle = false);
 
 	/*
 	* Move to go home (Back to zero)
@@ -1236,8 +1244,8 @@ public:
 	* @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
 	* return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 	*/
-	int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
-	int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT);
+	int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
+	int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
 
 	/*
 	* Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))

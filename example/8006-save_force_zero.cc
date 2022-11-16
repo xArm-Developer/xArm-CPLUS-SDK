@@ -1,44 +1,45 @@
-/*
-# Software License Agreement (MIT License)
-#
-# Copyright (c) 2021, UFACTORY, Inc.
-# All rights reserved.
-#
-# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
-*/
+/**
+ * Software License Agreement (MIT License)
+ * 
+ * Copyright (c) 2022, UFACTORY, Inc.
+ * 
+ * All rights reserved.
+ * 
+ * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+ */
 
 #include "xarm/wrapper/xarm_api.h"
 
 
 int main(int argc, char **argv) {
-	if (argc < 2) {
-		printf("Please enter IP address\n");
-		return 0;
-	}
-	std::string port(argv[1]);
+  if (argc < 2) {
+    printf("Please enter IP address\n");
+    return 0;
+  }
+  std::string port(argv[1]);
 
-	XArmAPI *arm = new XArmAPI(port);
-	sleep_milliseconds(500);
-	if (arm->error_code != 0) arm->clean_error();
-	if (arm->warn_code != 0) arm->clean_warn();
-	arm->motion_enable(true);
-	arm->set_mode(0);
-	arm->set_state(0);
-	sleep_milliseconds(500);
+  XArmAPI *arm = new XArmAPI(port);
+  sleep_milliseconds(500);
+  if (arm->error_code != 0) arm->clean_error();
+  if (arm->warn_code != 0) arm->clean_warn();
+  arm->motion_enable(true);
+  arm->set_mode(0);
+  arm->set_state(0);
+  sleep_milliseconds(500);
 
-	printf("=========================================\n");
+  printf("=========================================\n");
 
-	int ret;
+  int ret;
 
-	ret = arm->ft_sensor_enable(1);
-	printf("ft_sensor_enable, ret=%d\n", ret);
-	ret = arm->ft_sensor_set_zero();
-	printf("ft_sensor_set_zero, ret=%d\n", ret);
-	sleep_milliseconds(200);
+  ret = arm->ft_sensor_enable(1);
+  printf("ft_sensor_enable, ret=%d\n", ret);
+  ret = arm->ft_sensor_set_zero();
+  printf("ft_sensor_set_zero, ret=%d\n", ret);
+  sleep_milliseconds(200);
 
-	arm->save_conf();
+  arm->save_conf();
 
-	arm->disconnect();
+  arm->disconnect();
 
-	return 0;
+  return 0;
 }

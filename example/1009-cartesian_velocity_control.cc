@@ -1,19 +1,20 @@
-/*
-# Software License Agreement (MIT License)
-#
-# Copyright (c) 2019, UFACTORY, Inc.
-# All rights reserved.
-#
-# Author: Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
-*/
+/**
+ * Software License Agreement (MIT License)
+ * 
+ * Copyright (c) 2022, UFACTORY, Inc.
+ * 
+ * All rights reserved.
+ * 
+ * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+ */
 
 #include "xarm/wrapper/xarm_api.h"
 
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        printf("Please enter IP address\n");
-        return 0;
+      printf("Please enter IP address\n");
+      return 0;
     }
     std::string port(argv[1]);
 

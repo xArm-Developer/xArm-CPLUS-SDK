@@ -1,9 +1,14 @@
-/* Copyright 2017 UFACTORY Inc. All Rights Reserved.
- *
- * Software License Agreement (BSD License)
- *
- * Author: Jimy Zhang <jimy92@163.com>
- ============================================================================*/
+/**
+ * Software License Agreement (MIT License)
+ * 
+ * @copyright Copyright (c) 2022, UFACTORY, Inc.
+ * 
+ * All rights reserved.
+ * 
+ * @author Zhang <jimy92@163.com>
+ * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
+ */
+
 #ifndef XARM_CONNECT_H_
 #define XARM_CONNECT_H_
 

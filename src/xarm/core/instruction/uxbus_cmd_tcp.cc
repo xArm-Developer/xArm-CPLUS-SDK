@@ -75,17 +75,18 @@ int UxbusCmdTcp::check_xbus_prot(unsigned char *datas, int funcode) {
 int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret_data) {
 	int i;
 	int ret = UXBUS_STATE::ERR_TOUT;
-	int ret2;
+	int code;
 	// unsigned char rx_data[arm_port_->que_maxlen] = {0};
 	unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen];
 	long long expired = get_system_time() + (long long)timeout;
 	while (get_system_time() < expired) {
-		ret2 = arm_port_->read_frame(rx_data);
-		if (ret2 != -1) {
+		code = arm_port_->read_frame(rx_data);
+		if (code != -1) {
 			// print_hex("recv:", rx_data, arm_port_->que_maxlen);
 			last_recv_ms = get_system_time();
-			ret = check_xbus_prot(rx_data, funcode);
-			if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
+			code = check_xbus_prot(rx_data, funcode);
+			if (code == 0 || code == UXBUS_STATE::ERR_CODE || code == UXBUS_STATE::WAR_CODE) {
+				ret = code;
 				int n = num;
 				if (num == -1) {
 					n = bin8_to_16(&rx_data[8]) - 2;
@@ -95,6 +96,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 				break;
 			}
 			else if (ret != UXBUS_STATE::ERR_NUM) {
+				ret = code;
 				break;
 			}
 		}

@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.11.0"
+#define SDK_VERSION "1.11.4"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -77,9 +77,9 @@ class XArmAPI {
 public:
   /**
    * @param port: ip-address(such as "192.168.1.185")
-   *  Note: this parameter is required if parameter do_not_open is False
-   * @param is_radian: set the default unit is radians or not, default is False
-   * @param do_not_open: do not open, default is False, if true, you need to manually call the connect interface.
+   *  Note: this parameter is required if parameter do_not_open is false
+   * @param is_radian: set the default unit is radians or not, default is false
+   * @param do_not_open: do not open, default is false, if true, you need to manually call the connect interface.
    * @param check_tcp_limit: reversed, whether checking tcp limit, default is true
    * @param check_joint_limit: reversed, whether checking joint limit, default is true
    * @param check_cmdnum_limit: whether checking command num limit, default is true
@@ -463,10 +463,15 @@ public:
    * @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
    * @param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
    * @param mvtime: reserved, 0
-   * @param wait: whether to wait for the arm to complete, default is False
+   * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @param relative: relative move or not
    *  Note: only available if firmware_version >= 1.8.100
+   * @param ik: whether to convert to joint planning through IK
+   *  Note: 
+   *    1. only available if firmware_version >= 1.11.100
+   *    2. the specified radius is not supported, that is, the radius can only be -1 
+   *    3. if there is no suitable IK, a C40 error will be triggered
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
   int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
@@ -475,6 +480,8 @@ public:
 
   /**
    * @brief Movement relative to the tool coordinate system
+   *  MoveToolLine: Linear motion
+   *  MoveToolArcLine: Linear arc motion with interpolation
    * 
    * @param pose: the coordinate relative to the current tool coordinate systemion, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
    *  if default_is_radian is true, the value of roll/pitch/yaw should be in radians
@@ -482,8 +489,15 @@ public:
    * @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
    * @param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
    * @param mvtime: reserved, 0
-   * @param wait: whether to wait for the arm to complete, default is False
+   * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+   * @param radius: move radius, if radius less than 0, will MoveToolLine, else MoveToolArcLine
+   *  Note: only available if firmware_version >= 1.11.100
+   * @param ik: whether to convert to joint planning through IK
+   *  Note: 
+   *    1. only available if firmware_version >= 1.11.100
+   *    2. the specified radius is not supported, that is, the radius can only be -1 
+   *    3. if there is no suitable IK, a C40 error will be triggered
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
   int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
@@ -504,7 +518,7 @@ public:
    *  if default_is_radian is true, the value of acc should be in radians
    *  if default_is_radian is false, The value of acc should be in degrees
    * @param mvtime: reserved, 0
-   * @param wait: whether to wait for the arm to complete, default is False
+   * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @param radius: move radius, if radius less than 0, will MoveJoint, else MoveArcJoint
    *  Note: the blending radius cannot be greater than the track length.
@@ -563,8 +577,10 @@ public:
    * @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
    * @param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
    * @param mvtime: 0, reserved
-   * @param wait: whether to wait for the arm to complete, default is False
-   * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is True
+   * @param wait: whether to wait for the arm to complete, default is false
+   * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+   * @param is_tool_coord: is tool coord or not, default is false, only available if firmware_version >= 1.11.100
+   * @param is_axis_angle: is axis angle or not, default is false, only available if firmware_version >= 1.11.100
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
   int move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool is_tool_coord = false, bool is_axis_angle = false);
@@ -579,7 +595,7 @@ public:
    *  if default_is_radian is true, the value of acc should be in radians
    *  if default_is_radian is false, The value of acc should be in degrees
    * @param mvtime: reserved, 0
-   * @param wait: whether to wait for the arm to complete, default is False
+   * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
@@ -589,7 +605,7 @@ public:
   /**
    * @brief Reset
    * 
-   * @param wait: whether to wait for the arm to complete, default is False
+   * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
@@ -1245,7 +1261,7 @@ public:
    * @param times: number of playbacks.
    * @param filename: the name of the trajectory to play back
    *  if filename is None, you need to manually call the `load_trajectory` to load the trajectory.
-   * @param wait: whether to wait for the arm to complete, default is False.
+   * @param wait: whether to wait for the arm to complete, default is false.
    * @param double_speed: double speed, only support 1/2/4, default is 1, only available if version > 1.2.11
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
@@ -1331,6 +1347,8 @@ public:
 
   /**
    * @brief Set the pose represented by the axis angle pose
+   *  MoveLineAA: Linear motion
+   *  MoveArcLineAA: Linear arc motion with interpolation
    * 
    * @param pose: the axis angle pose, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]
    *  if default_is_radian is true, the value of rx/ry/rz should be in radians
@@ -1340,8 +1358,15 @@ public:
    * @param mvtime: reserved, 0
    * @param is_tool_coord: is tool coordinate or not
    * @param relative: relative move or not
-   * @param wait: whether to wait for the arm to complete, default is False
+   * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
+   * @param radius: move radius, if radius less than 0, will MoveLineAA, else MoveArcLineAA
+   *  Note: only available if firmware_version >= 1.11.100
+   * @param ik: whether to convert to joint planning through IK
+   *  Note: 
+   *    1. only available if firmware_version >= 1.11.100
+   *    2. the specified radius is not supported, that is, the radius can only be -1 
+   *    3. if there is no suitable IK, a C40 error will be triggered
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
   int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
@@ -1475,7 +1500,7 @@ public:
    * @brief If not already enabled. Enable the bio gripper
    * 
    * @param enable: enable or not
-   * @param wait: whether to wait for the bio gripper enable complete, default is True
+   * @param wait: whether to wait for the bio gripper enable complete, default is true
    * @param timeout: maximum waiting time(unit: second), default is 3, only available if wait=true
    * @return: See the code documentation for details.
    */
@@ -1493,7 +1518,7 @@ public:
    * @brief Open the bio gripper
    * 
    * @param speed: speed value, default is 0 (not set the speed)
-   * @param wait: whether to wait for the bio gripper motion complete, default is True
+   * @param wait: whether to wait for the bio gripper motion complete, default is true
    * @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true     
    * @return: See the code documentation for details.
    */
@@ -1504,7 +1529,7 @@ public:
    * @brief Close the bio gripper
    * 
    * @param speed: speed value, default is 0 (not set the speed)
-   * @param wait: whether to wait for the bio gripper motion complete, default is True
+   * @param wait: whether to wait for the bio gripper motion complete, default is true
    * @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
    * @return: See the code documentation for details.
    */
@@ -2050,8 +2075,8 @@ public:
    *    1. only available if firmware_version >= 1.8.0
    *    2. only useful when powering on for the first time
    *    3. this operation must be performed at the first power-on
-   * @param wait: wait to motion finish or not, default is True
-   * @param auto_enable: enable after back to origin or not, default is True
+   * @param wait: wait to motion finish or not, default is true
+   * @param auto_enable: enable after back to origin or not, default is true
    * @return: See the code documentation for details.
    */
   int set_linear_track_back_origin(bool wait = true, bool auto_enable = true);
@@ -2065,7 +2090,7 @@ public:
    *  If the SN of the linear track is start with AL1301, the position range is 0~1000mm.
    *  If the SN of the linear track is start with AL1302, the position range is 0~1500mm.
    * @param speed: auto set the speed of the linear track if the speed is changed, Integer between of 1 and 1000mm/s, default is -1(not set)
-   * @param wait: wait to motion finish or not, default is True
+   * @param wait: wait to motion finish or not, default is true
    * @param timeout: wait timeout, seconds, default is 100s.
    * @param auto_enable: auto enable if not enabled, default is true
    * @return: See the code documentation for details.
@@ -2132,7 +2157,7 @@ public:
   int set_allow_approx_motion(bool on_off);
   
   /**
-   * Identification the friction
+   * @brief Identification the friction
    *  Note: only available if firmware_version >= 1.9.0
    * 
    * @param result: the result of identification.
@@ -2142,6 +2167,47 @@ public:
    */
   int iden_joint_friction(int *result, unsigned char *sn = NULL);
 
+  /** 
+   * @brief Set the motion process detection type (valid for all motion interfaces of the current SDK instance)
+   *  Note:
+   *    1. only available if firmware_version >= 1.11.100
+   *    2. This interface is a global configuration item of the current SDK, and affects all motion-related interfaces
+   *    3. Generally, you only need to call when you don't want to move the robotic arm and only check whether some paths will have self-collision/angle-limit/cartesian-limit/overspeed.
+   *    4. Currently only self-collision/angle-limit/cartesian-limit/overspeed are detected
+   *    5. If only_check_type is set to be greater than 0, and the return value of calling the motion interface is not 0, you can view arm->only_check_result to view the specific error code
+   *  Example: (Common scenarios, here is an example of the set_position interface)
+   *    1. Check whether the process from point A to point B is normal (no self-collision and overspeed triggered)
+   *      1.1 Move to point A
+   *        arm->set_only_check_type(0)
+   *        code = arm->set_position(A)
+   *      1.2 Check if the process from point A to point B is normal (no self-collision and overspeed triggered)
+   *        arm->set_only_check_type(1)
+   *        code = arm->set_position(B)
+   *        // If code is not equal to 0, it means that the path does not pass. You can check the specific error code through arm->only_check_result
+   *        arm->set_only_check_type(0)
+   *    2. Check whether the process from point A to point B, C, and D to point E is normal (no self-collision and overspeed are triggered)
+   *      2.1 Move to point A
+   *        arm->set_only_check_type(0)
+   *        code = arm->set_position(A)
+   *      2.2 Check whether the process of point A passing through points B, C, D to point E is normal (no self-collision and overspeed are triggered)
+   *        arm->set_only_check_type(3)
+   *        code = arm->set_position(B)
+   *        // If code is not equal to 0, it means that the path does not pass. You can check the specific error code through arm->only_check_result
+   *        code = arm->set_position(C)
+   *        // If code is not equal to 0, it means that the path does not pass. You can check the specific error code through arm->only_check_result
+   *        code = arm->set_position(D)
+   *        // If code is not equal to 0, it means that the path does not pass. You can check the specific error code through arm->only_check_result
+   *        code = arm->set_position(E)
+   *        // If code is not equal to 0, it means that the path does not pass. You can check the specific error code through arm->only_check_result
+   *        arm->set_only_check_type(0)
+   * 
+   * @param only_check_type: Motion Detection Type
+   *  only_check_type == 0: Restore the original function of the motion interface, it will move, the default is 0
+   *  only_check_type == 1: Only check the self-collision without moving, take the actual state of the manipulator as the initial planned path, and check whether the path has self-collision (the intermediate state will be updated at this time)
+   *  only_check_type == 2: Only check the self-collision without moving, use the intermediate state as the starting planning path, check whether the path has self-collision (the intermediate state will be updated at this time), and restore the intermediate state to the actual state after the end
+   *  only_check_type == 3: Only check the self-collision without moving, use the intermediate state as the starting planning path, and check whether the path has self-collision (the intermediate state will be updated at this time)
+   * @return: See the code documentation for details.
+   */
   int set_only_check_type(unsigned char only_check_type = 0);
 
   /**

@@ -11,6 +11,11 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.11.4
+  - Optimization pause time is too long (wait=true)
+  - Add common motion api (Enabled after firmware version 1.11.100)
+  - The Cartesian motion-related interface adds IK parameters to find an IK value for the given target position for joint planning (Enabled after firmware version 1.11.100)
+
 - > ### 1.11.0
   - Support transparent transmission (240/241)
   - Modified the centroid unit of `ft_sensor_iden_load` and `ft_sensor_cali_load` interfaces to millimeters (originally meters)

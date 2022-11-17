@@ -433,12 +433,12 @@ void XArmAPI::_handle_report_data(void) {
     if (ret != 0)
       sleep_milliseconds(1);
     if (!is_reported()) {
-            if (reported) {
-                reported = false;
+      if (reported) {
+        reported = false;
         printf("Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
-                _report_connect_changed_callback();
-            }
-            stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
+        _report_connect_changed_callback();
+      }
+      stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
       if (stream_tcp_report_ == NULL) {
         connect_fail_count += 1;
         if (is_connected())
@@ -512,12 +512,12 @@ void XArmAPI::_handle_report_rich_data(void) {
     }
     
     if (!_is_rich_reported()) {
-            if (reported) {
-                reported = false;
+      if (reported) {
+        reported = false;
         if (report_type_ == "rich")
-                  _report_connect_changed_callback();
-            }
-            stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
+          _report_connect_changed_callback();
+      }
+      stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
       if (stream_tcp_rich_report_ == NULL) {
         connect_fail_count += 1;
         if (is_connected() && (connect_fail_count <= max_reconnect_cnts || prot_flag == 3))
@@ -533,11 +533,11 @@ void XArmAPI::_handle_report_rich_data(void) {
         connect_fail_count = 0;
       }
     }
-        if (!reported) {
-            reported = true;
-            if (report_type_ == "rich")
-                _report_connect_changed_callback();
-        }
+    if (!reported) {
+      reported = true;
+      if (report_type_ == "rich")
+        _report_connect_changed_callback();
+    }
     memset(rx_data, 0, REPORT_BUF_SIZE);
     ret = stream_tcp_rich_report_->read_frame(rx_data);
     connect_fail_count = 0;

@@ -2,7 +2,7 @@ xArm-C++-SDK API Documentation
 
 # class __XArmAPI__
 ************************************
-- __XArmAPI(const std::string &port="", 
+__XArmAPI(const std::string &port="", 
     bool is_radian=DEFAULT_IS_RADIAN,
     bool do_not_open=false,
     bool check_tcp_limit=true,
@@ -16,28 +16,29 @@ xArm-C++-SDK API Documentation
     int init_axis = 7,
     bool debug = false,
     std::string report_type = "rich",
-    bool baud_checkset = true)__
-  > @param port: ip-address(such as "192.168.1.185")  
-  > &ensp;&ensp;&ensp;&ensp;Note: this parameter is required if parameter do_not_open is false  
-  > @param is_radian: set the default unit is radians or not, default is false  
-  > @param do_not_open: do not open, default is false, if true, you need to manually call the connect interface.  
-  > @param check_tcp_limit: reversed, whether checking tcp limit, default is true  
-  > @param check_joint_limit: reversed, whether checking joint limit, default is true  
-  > @param check_cmdnum_limit: whether checking command num limit, default is true  
-  > @param check_robot_sn: whether checking robot sn, default is false  
-  > @param check_is_ready: check robot is ready to move or not, default is true   
-  > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version < 1.5.20  
-  > @param check_is_pause: check robot is pause or not, default is true  
-  > @param max_callback_thread_count: max callback thread count, default is -1  
-  > &ensp;&ensp;&ensp;&ensp;Note: greater than 0 means the maximum number of threads that can be used to process callbacks  
-  > &ensp;&ensp;&ensp;&ensp;Note: equal to 0 means no thread is used to process the callback  
-  > &ensp;&ensp;&ensp;&ensp;Note: less than 0 means no limit on the number of threads used for callback  
-  > @param max_cmdnum: max cmdnum, default is 512  
-  > &ensp;&ensp;&ensp;&ensp;Note: only available in the param `check_cmdnum_limit` is true  
-  > @param init_axis: init axis variable  
-  > @param debug:  reversed  
-  > @param report_type: report type   
-  > @param baud_checkset: auto check set the baud when use the gripper/bio/robotiq/lineartrack api or not
+    bool baud_checkset = true)__  
+> @param port: ip-address(such as "192.168.1.185")  
+> &ensp;&ensp;&ensp;&ensp;Note: this parameter is required if parameter do_not_open is false  
+> @param is_radian: set the default unit is radians or not, default is false  
+> @param do_not_open: do not open, default is false, if true, you need to manually call the connect interface.  
+> @param check_tcp_limit: reversed, whether checking tcp limit, default is true  
+> @param check_joint_limit: reversed, whether checking joint limit, default is true  
+> @param check_cmdnum_limit: whether checking command num limit, default is true  
+> @param check_robot_sn: whether checking robot sn, default is false  
+> @param check_is_ready: check robot is ready to move or not, default is true   
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version < 1.5.20  
+> @param check_is_pause: check robot is pause or not, default is true  
+> @param max_callback_thread_count: max callback thread count, default is -1  
+> &ensp;&ensp;&ensp;&ensp;Note: greater than 0 means the maximum number of threads that can be used to process callbacks  
+> &ensp;&ensp;&ensp;&ensp;Note: equal to 0 means no thread is used to process the callback  
+> &ensp;&ensp;&ensp;&ensp;Note: less than 0 means no limit on the number of threads used for callback  
+> @param max_cmdnum: max cmdnum, default is 512  
+> &ensp;&ensp;&ensp;&ensp;Note: only available in the param `check_cmdnum_limit` is true  
+> @param init_axis: init axis variable  
+> @param debug:  reversed  
+> @param report_type: report type   
+> @param baud_checkset: auto check set the baud when use the gripper/bio/robotiq/lineartrack api or not  
+
 ************************************
 
 ## Property

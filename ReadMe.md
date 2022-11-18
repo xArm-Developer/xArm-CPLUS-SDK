@@ -11,10 +11,10 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
-- > ### 1.11.4
+- > ### 1.11.5
   - Optimization pause time is too long (wait=true)
   - Add common motion api (Enabled after firmware version 1.11.100)
-  - The Cartesian motion-related interface adds IK parameters to find an IK value for the given target position for joint planning (Enabled after firmware version 1.11.100)
+  - The Cartesian motion-related interface adds the motion_type parameter to determine the planning method (Enabled after firmware version 1.11.100)
 
 - > ### 1.11.0
   - Support transparent transmission (240/241)

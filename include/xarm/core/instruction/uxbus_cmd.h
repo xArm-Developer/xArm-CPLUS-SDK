@@ -121,12 +121,12 @@ public:
   int clean_war(void);
   int set_brake(int axis, int en);
   int set_mode(int value, int detection_param = -1);
-  int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char ik = 0);
+  int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
-    float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+    float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
   int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
-  int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char ik = 0);
+  int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
   int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
   int move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime);
@@ -211,9 +211,9 @@ public:
 
   int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in=0, int orient_type_out=0);
   int get_position_aa(float pose[6]);
-  int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char ik = 0);
+  int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
-  int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char ik = 0);
+  int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
 
   int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
   int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
@@ -264,7 +264,7 @@ public:
 
   int iden_joint_friction(unsigned char sn[14], float *result);
 
-  int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char ik = 0);
+  int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 
   virtual void close(void);

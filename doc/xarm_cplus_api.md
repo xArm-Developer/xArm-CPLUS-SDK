@@ -514,9 +514,9 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_position(fp32 pose[6], fp32 radius=-1, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, bool relative = false, unsigned char ik=0)__
-- __int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout=NO_TIMEOUT, bool relative=false, unsigned char ik=0)__
-- __int set_position(fp32 pose[6], bool wait, fp32 timeout=NO_TIMEOUT, bool relative=false, unsigned char ik=0)__
+- __int set_position(fp32 pose[6], fp32 radius=-1, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, bool relative = false, unsigned char motion_type=0)__
+- __int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout=NO_TIMEOUT, bool relative=false, unsigned char motion_type=0)__
+- __int set_position(fp32 pose[6], bool wait, fp32 timeout=NO_TIMEOUT, bool relative=false, unsigned char motion_type=0)__
   > Set the position  
   > &ensp;&ensp;&ensp;&ensp;MoveLine: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveArcLine: Linear arc motion with interpolation  
@@ -532,16 +532,23 @@ __XArmAPI(const std::string &port="",
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  
   > @param relative: relative move or not  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.100  
-  > @param ik: whether to convert to joint planning through IK    
-  > &ensp;&ensp;&ensp;&ensp;Note1: only available if firmware_version >= 1.11.100  
-  > &ensp;&ensp;&ensp;&ensp;Note2: the specified radius is not supported, that is, the radius can only be -1   
-  > &ensp;&ensp;&ensp;&ensp;Note3: if there is no suitable IK, a C40 error will be triggered   
+  > @param motion_type: motion planning type, default is 0    
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning   
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible  
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 2: direct transfer to IK using joint planning  
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.11.100  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. when motion_type is 1 or 2, linear motion cannot be guaranteed  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`speed = speed / max_tcp_speed * max_joint_speed`  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`acc = acc / max_tcp_acc * max_joint_acc`  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered     
   >
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.   
 
 
-- __int set_tool_position(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, unsigned char ik=0)__
-- __int set_tool_position(fp32 pose[6], bool wait, fp32 timeout=NO_TIMEOUT, unsigned char ik=0)__
+- __int set_tool_position(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, unsigned char motion_type=0)__
+- __int set_tool_position(fp32 pose[6], bool wait, fp32 timeout=NO_TIMEOUT, unsigned char motion_type=0)__
   > Movement relative to the tool coordinate system  
   > &ensp;&ensp;&ensp;&ensp;MoveToolLine: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveToolArcLine: Linear arc motion with interpolation  
@@ -556,10 +563,17 @@ __XArmAPI(const std::string &port="",
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  
   > @param radius: move radius, if radius less than 0, will MoveToolLine, else MoveToolArcLine  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.100  
-  > @param ik: whether to convert to joint planning through IK  
-  > &ensp;&ensp;&ensp;&ensp;Note1: only available if firmware_version >= 1.11.100  
-  > &ensp;&ensp;&ensp;&ensp;Note2: the specified radius is not supported, that is, the radius can only be -1   
-  > &ensp;&ensp;&ensp;&ensp;Note3: if there is no suitable IK, a C40 error will be triggered  
+  > @param motion_type: motion planning type, default is 0    
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning   
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible  
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 2: direct transfer to IK using joint planning  
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.11.100  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. when motion_type is 1 or 2, linear motion cannot be guaranteed  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`speed = speed / max_tcp_speed * max_joint_speed`  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`acc = acc / max_tcp_acc * max_joint_acc`  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered  
   >  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -1313,8 +1327,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, unsigned char ik = 0)__
-- __int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, unsigned char ik = 0)__
+- __int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
+- __int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
   > Set the pose represented by the axis angle pose  
   > &ensp;&ensp;&ensp;&ensp;MoveLineAA: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveArcLineAA: Linear arc motion with interpolation  
@@ -1331,10 +1345,17 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  
   > @param radius: move radius, if radius less than 0, will MoveLineAA, else MoveArcLineAA  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.100
-  > @param ik: whether to convert to joint planning through IK  
-  > &ensp;&ensp;&ensp;&ensp;Note1: only available if firmware_version >= 1.11.100  
-  > &ensp;&ensp;&ensp;&ensp;Note2: the specified radius is not supported, that is, the radius can only be -1   
-  > &ensp;&ensp;&ensp;&ensp;Note3: if there is no suitable IK, a C40 error will be triggered  
+  > @param motion_type: motion planning type, default is 0    
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning   
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible  
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 2: direct transfer to IK using joint planning  
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.11.100  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. when motion_type is 1 or 2, linear motion cannot be guaranteed  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`speed = speed / max_tcp_speed * max_joint_speed`  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`acc = acc / max_tcp_acc * max_joint_acc`  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

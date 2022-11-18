@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.11.4"
+#define SDK_VERSION "1.11.5"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -467,16 +467,22 @@ public:
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @param relative: relative move or not
    *  Note: only available if firmware_version >= 1.8.100
-   * @param ik: whether to convert to joint planning through IK
+   * @param motion_type: motion planning type, default is 0
+   *  motion_type == 0: default, linear planning
+   *  motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible
+   *  motion_type == 2: direct transfer to IK using joint planning
    *  Note: 
    *    1. only available if firmware_version >= 1.11.100
-   *    2. the specified radius is not supported, that is, the radius can only be -1 
-   *    3. if there is no suitable IK, a C40 error will be triggered
+   *    2. when motion_type is 1 or 2, linear motion cannot be guaranteed
+   *    3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage
+   *      speed = speed / max_tcp_speed * max_joint_speed
+   *      acc = acc / max_tcp_acc * max_joint_acc
+   *    4. if there is no suitable IK, a C40 error will be triggered
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
-  int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
-  int set_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char ik = 0);
+  int set_position(fp32 pose[6], fp32 radius = -1, fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char motion_type = 0);
+  int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char motion_type = 0);
+  int set_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, bool relative = false, unsigned char motion_type = 0);
 
   /**
    * @brief Movement relative to the tool coordinate system
@@ -493,15 +499,21 @@ public:
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @param radius: move radius, if radius less than 0, will MoveToolLine, else MoveToolArcLine
    *  Note: only available if firmware_version >= 1.11.100
-   * @param ik: whether to convert to joint planning through IK
+   * @param motion_type: motion planning type, default is 0
+   *  motion_type == 0: default, linear planning
+   *  motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible
+   *  motion_type == 2: direct transfer to IK using joint planning
    *  Note: 
    *    1. only available if firmware_version >= 1.11.100
-   *    2. the specified radius is not supported, that is, the radius can only be -1 
-   *    3. if there is no suitable IK, a C40 error will be triggered
+   *    2. when motion_type is 1 or 2, linear motion cannot be guaranteed
+   *    3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage
+   *      speed = speed / max_tcp_speed * max_joint_speed
+   *      acc = acc / max_tcp_acc * max_joint_acc
+   *    4. if there is no suitable IK, a C40 error will be triggered
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
-  int set_tool_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
+  int set_tool_position(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char motion_type = 0);
+  int set_tool_position(fp32 pose[6], bool wait, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char motion_type = 0);
 
   /**
    * @brief Set the servo angle
@@ -1362,15 +1374,21 @@ public:
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true
    * @param radius: move radius, if radius less than 0, will MoveLineAA, else MoveArcLineAA
    *  Note: only available if firmware_version >= 1.11.100
-   * @param ik: whether to convert to joint planning through IK
+   * @param motion_type: motion planning type, default is 0
+   *  motion_type == 0: default, linear planning
+   *  motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible
+   *  motion_type == 2: direct transfer to IK using joint planning
    *  Note: 
    *    1. only available if firmware_version >= 1.11.100
-   *    2. the specified radius is not supported, that is, the radius can only be -1 
-   *    3. if there is no suitable IK, a C40 error will be triggered
+   *    2. when motion_type is 1 or 2, linear motion cannot be guaranteed
+   *    3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage
+   *      speed = speed / max_tcp_speed * max_joint_speed
+   *      acc = acc / max_tcp_acc * max_joint_acc
+   *    4. if there is no suitable IK, a C40 error will be triggered
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
-  int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char ik = 0);
+  int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char motion_type = 0);
+  int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, fp32 radius = -1, unsigned char motion_type = 0);
 
   /**
    * @brief Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))

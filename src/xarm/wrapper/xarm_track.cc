@@ -26,7 +26,7 @@ int XArmAPI::get_linear_track_registers(LinearTrackStatus *status, int addr, int
 {
   if (!((addr == 0x0A20 && number_of_registers >= 2) || (addr >= 0x0A22 && addr <= 0x0A27 && number_of_registers >= 1)))
     return API_CODE::PARAM_ERROR;
-  unsigned char *rx_data = new unsigned char[4 + 2 * number_of_registers];
+  unsigned char *rx_data = new unsigned char[4 + 2 * number_of_registers]();
   int ret = _get_linear_track_registers(rx_data, addr, number_of_registers);
   if (ret == 0) {
     if (addr == 0x0A20 && number_of_registers >= 2) {

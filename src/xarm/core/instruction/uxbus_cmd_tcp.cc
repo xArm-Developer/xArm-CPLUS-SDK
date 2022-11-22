@@ -78,7 +78,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
   int ret = UXBUS_STATE::ERR_TOUT;
   int code;
   // unsigned char rx_data[arm_port_->que_maxlen] = {0};
-  unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen];
+  unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen]();
   long long expired = get_system_time() + (long long)timeout;
   while (get_system_time() < expired) {
     code = arm_port_->read_frame(rx_data);
@@ -110,7 +110,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
 int UxbusCmdTcp::send_xbus(int funcode, unsigned char *datas, int num) {
   int len = num + 7;
   // unsigned char send_data[len];
-  unsigned char *send_data = new unsigned char[len];
+  unsigned char *send_data = new unsigned char[len]();
 
   bin16_to_8(bus_flag_, &send_data[0]);
   bin16_to_8(prot_flag_, &send_data[2]);

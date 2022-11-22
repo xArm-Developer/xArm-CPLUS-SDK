@@ -62,8 +62,8 @@ void SocketPort::recv_report_proc(void) {
   int ret;
   int size = 0;
   int num = 0, data_num = 0;
-  unsigned char *recv_data = new unsigned char[que_maxlen];
-  unsigned char *tmp_data = new unsigned char[que_maxlen];
+  unsigned char *recv_data = new unsigned char[que_maxlen]();
+  unsigned char *tmp_data = new unsigned char[que_maxlen]();
   bool size_is_not_confirm = false;
 
   unsigned long long recv_prev_ms = 0;
@@ -175,7 +175,7 @@ void SocketPort::recv_proc(void) {
   int ret;
   int failed_cnt = 0;
   int num = 0;
-  unsigned char *recv_data = new unsigned char[que_maxlen];
+  unsigned char *recv_data = new unsigned char[que_maxlen]();
   while (state_ == 0) {
     memset(recv_data, 0, que_maxlen);
     num = recv(fp_, (char *)&recv_data[4], que_maxlen - 4, 0);

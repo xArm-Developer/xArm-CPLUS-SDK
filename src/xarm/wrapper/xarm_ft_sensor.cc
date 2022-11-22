@@ -179,7 +179,7 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
   int prot_flag = core->get_prot_flag();
   core->set_prot_flag(2);
   keep_heart_ = false;
-  float tmp;
+  float tmp = 0;
   int ret = core->iden_joint_friction(r_sn, &tmp);
   *result = ((int)tmp) == 0 ? 0 : -1;
   core->set_prot_flag(prot_flag);

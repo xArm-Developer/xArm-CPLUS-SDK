@@ -302,7 +302,7 @@ void XArmAPI::_sync(void) {
 
 void XArmAPI::_check_version(void) {
   int cnt = 5;
-  unsigned char version_[40];
+  unsigned char version_[40] = { 0 };
   int ret = -1;
   while ((ret < 0 || ret > 2) && cnt > 0) {
     ret = get_version(version_);
@@ -376,7 +376,7 @@ void XArmAPI::_check_version(void) {
   version_number[2] = revision_version_number_;
   if (check_robot_sn_) {
     cnt = 5;
-    int err_warn[2];
+    int err_warn[2] = { 0 };
     ret = -1;
     while ((ret < 0 || ret > 2) && cnt > 0 && warn_code == 0) {
       ret = get_robot_sn(version_);
@@ -399,7 +399,7 @@ void XArmAPI::_wait_until_not_pause(void) {
 
 void XArmAPI::_wait_until_cmdnum_lt_max(void) {
   if (!check_cmdnum_limit_) return;
-  int cmdnum_;
+  int cmdnum_ = 0;
   while (is_connected() && cmd_num >= max_cmdnum_) {
     if (get_system_time() - last_report_time_ > 400) {
       get_cmdnum(&cmdnum_);
@@ -445,7 +445,7 @@ int XArmAPI::_check_code(int code, bool is_move_cmd, int mode_) {
 
 bool XArmAPI::_version_is_ge(int major, int minor, int revision) {
   if (major_version_number_ == 0 && minor_version_number_ == 0 && revision_version_number_ == 0) {
-    unsigned char version_[40];
+    unsigned char version_[40] = { 0 };
     get_version(version_);
 
     std::string v((const char *)version_);
@@ -613,7 +613,7 @@ int XArmAPI::get_version(unsigned char version_[40]) {
 
 int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  char str[40];
+  char str[40] = { 0 };
   int ret = core->get_robot_sn((unsigned char*)str);
   ret = _check_code(ret);
   if (ret == 0) {
@@ -830,7 +830,7 @@ int XArmAPI::_wait_move(fp32 timeout) {
   long long start_time = get_system_time();
   long long expired = timeout <= 0 ? 0 : (get_system_time() + (long long)(timeout * 1000) + (sleep_finish_time_ > start_time ? sleep_finish_time_ : 0));
   int cnt = 0;
-  int state_;
+  int state_ = state;
   int ret = get_state(&state_);
   int max_cnt = (ret == 0 && state_ == 1) ? 1 : 10;
   while (timeout <= 0 || get_system_time() < expired) {
@@ -941,7 +941,7 @@ int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7]) 
   for (int i = 0; i < 6; i++) {
     pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : to_radian(source_pose[i]));
   }
-  fp32 angs[7];
+  fp32 angs[7] = { 0 };
   int ret = core->get_ik(pose, angs);
   ret = _check_code(ret);
   if (ret == 0) {
@@ -958,7 +958,7 @@ int XArmAPI::get_forward_kinematics(fp32 source_angles[7], fp32 target_pose[6]) 
   for (int i = 0; i < 7; i++) {
     angs[i] = (float)(default_is_radian ? source_angles[i] : to_radian(source_angles[i]));
   }
-  fp32 pose[6];
+  fp32 pose[6] = { 0 };
   int ret = core->get_fk(angs, pose);
   ret = _check_code(ret);
   if (ret == 0) {

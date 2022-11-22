@@ -257,8 +257,8 @@ int XArmAPI::move_gohome(bool wait, fp32 timeout) {
 }
 
 void XArmAPI::reset(bool wait, fp32 timeout) {
-  int err_warn[2];
-  int state_;
+  int err_warn[2] = { error_code, warn_code };
+  int state_ = state;
   if (!is_tcp_) {
     get_err_warn_code(err_warn);
     get_state(&state_);

@@ -21,8 +21,8 @@ static int get_baud_inx(int baud) {
 
 int XArmAPI::get_tgpio_version(unsigned char versions[3]) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  float val1, val2, val3;
-  int code;
+  float val1 = 0, val2 = 0, val3 = 0;
+  int code = 0;
   versions[0] = 0;
   versions[1] = 0;
   versions[2] = 0;
@@ -71,7 +71,7 @@ int XArmAPI::get_tgpio_analog(int ionum, float *value) {
 
 int XArmAPI::get_cgpio_digital(int *digitals, int *digitals2) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int tmp;
+  int tmp = 0;
   int ret = core->cgpio_get_auxdigit(&tmp);
   for (int i = 0; i < 8; i++) {
     digitals[i] = tmp >> i & 0x0001;
@@ -142,7 +142,7 @@ int XArmAPI::get_cgpio_state(int *state_, int *digit_io, fp32 *analog, int *inpu
 
 
 int XArmAPI::get_suction_cup(int *val) {
-  int io1;
+  int io1 = 0;
   return get_tgpio_digital(val, &io1);
 }
 
@@ -163,7 +163,7 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec)
   code = code1 == 0 ? code2 : code1;
   if (code == 0 && wait) {
     long long start_time = get_system_time();
-    int val, ret;
+    int val = 0, ret = 0;
     code = API_CODE::SUCTION_CUP_TOUT;
     while (get_system_time() - start_time < timeout * 1000) {
       ret = get_suction_cup(&val);
@@ -239,7 +239,7 @@ int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data, unsigned char h
 
 int XArmAPI::_get_modbus_baudrate(int *baud_inx, unsigned char host_id) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  float val;
+  float val = 0;
   int ret = core->tgpio_addr_r16(SERVO3_RG::MODBUS_BAUDRATE & 0x0FFF, &val, host_id);
   *baud_inx = (int)val;
   if (ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
@@ -349,7 +349,7 @@ int XArmAPI::set_tgpio_modbus_baudrate(int baud) {
 }
 
 int XArmAPI::get_tgpio_modbus_baudrate(int *baud) {
-  int cur_baud_inx;
+  int cur_baud_inx = 0;
   int ret = _get_modbus_baudrate(&cur_baud_inx);
   if (ret == 0 && cur_baud_inx < 13) 
     modbus_baud_ = BAUDRATES[cur_baud_inx];
@@ -359,7 +359,7 @@ int XArmAPI::get_tgpio_modbus_baudrate(int *baud) {
 
 int XArmAPI::getset_tgpio_modbus_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id, bool is_transparent_transmission, bool use_503_port) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  unsigned char *rx_data = new unsigned char[ret_length + 1];
+  unsigned char *rx_data = new unsigned char[ret_length + 1]();
   int ret = 0;
   if (is_transparent_transmission) {
     if (use_503_port) {

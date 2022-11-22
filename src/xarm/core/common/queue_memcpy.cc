@@ -15,7 +15,7 @@
 QueueMemcpy::QueueMemcpy(long n, long n_size) {
   total_ = n;
   annode_size_ = n_size;
-  buf_ = new char[total_ * annode_size_];
+  buf_ = new char[total_ * annode_size_]();
   flush();
 }
 

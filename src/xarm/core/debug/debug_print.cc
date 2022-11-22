@@ -54,7 +54,7 @@ void print_nvect(const char *str, int vect[], int n) {
 
 void print_hex(const char *str, unsigned char *hex, int len) {
   // char buf[len * 3 + 1] = {'\0'};
-  char *buf = new char[len * 3 + 1];
+  char *buf = new char[len * 3 + 1]();
   long i;
   for (i = 0; i < len; ++i) { sprintf((char *)&buf[i * 3], "%02x ", hex[i]); }
 

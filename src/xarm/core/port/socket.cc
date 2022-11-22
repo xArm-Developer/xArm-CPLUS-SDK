@@ -24,10 +24,10 @@ static int close(int fd)
 static bool is_ignore_errno(int fp, int port)
 {
   if (WSAGetLastError() == WSAEINTR || WSAGetLastError() == WSAEWOULDBLOCK) {
-    printf("EINTR occured, port=%d, fp=%d, errno=%d\n", port, fp, WSAGetLastError());
+    fprintf(stderr, "EINTR occured, port=%d, fp=%d, errno=%d\n", port, fp, WSAGetLastError());
     return true;
   }
-  printf("socket read failed, port=%d, fp=%d, errno=%d, exit\n", port, fp, WSAGetLastError());
+  fprintf(stderr, "socket read failed, port=%d, fp=%d, errno=%d, exit\n", port, fp, WSAGetLastError());
   return false;
 }
 #else
@@ -36,10 +36,10 @@ static bool is_ignore_errno(int fp, int port)
 static bool is_ignore_errno(int fp, int port)
 {
   if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
-    printf("EINTR occured, port=%d, fp=%d, errno=%d\n", port, fp, errno);
+    fprintf(stderr, "EINTR occured, port=%d, fp=%d, errno=%d\n", port, fp, errno);
     return true;
   }
-  printf("socket read failed, port=%d, fp=%d, errno=%d, exit\n", port, fp, errno);
+  fprintf(stderr, "socket read failed, port=%d, fp=%d, errno=%d, exit\n", port, fp, errno);
   return false;
 }
 #endif
@@ -116,7 +116,7 @@ void SocketPort::recv_report_proc(void) {
         }
       }
       if (bin8_to_32(&recv_data[4]) != size) {
-        printf("report data error, close_port, length=%d, size=%d\n", bin8_to_32(&recv_data[4]), size);
+        fprintf(stderr, "report data error, close_port, length=%d, size=%d\n", bin8_to_32(&recv_data[4]), size);
         close_port();
         break;
       }
@@ -199,7 +199,7 @@ void SocketPort::recv_proc(void) {
     }
     if (ret != 0) {
       if (state_ == 0)
-        printf("socket push data failed, exit, port=%d, fp=%d\n", port_, fp_);
+        fprintf(stderr, "socket push data failed, exit, port=%d, fp=%d\n", port_, fp_);
       close_port();
       break;
     };

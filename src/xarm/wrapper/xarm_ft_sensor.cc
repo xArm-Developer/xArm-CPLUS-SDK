@@ -163,7 +163,7 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
     unsigned char tmp_sn[40] = {0};
     int code = get_robot_sn(tmp_sn);
     if (code != 0) {
-      printf("iden_joint_friction -> get_robot_sn failed, code=%d\n", code);
+      fprintf(stderr, "iden_joint_friction -> get_robot_sn failed, code=%d\n", code);
       return API_CODE::API_EXCEPTION;
     }
     memcpy(r_sn, tmp_sn, 14);
@@ -172,7 +172,7 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
     memcpy(r_sn, sn, 14);
   }
   if (r_sn[0] != (is_lite6() ? 'L' : 'X') || (axis == 5 && r_sn[1] != 'F') || (axis == 6 && r_sn[1] != 'I') || (axis == 7 && r_sn[1] != 'S')) {
-    printf("iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
+    fprintf(stderr, "iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
     return API_CODE::API_EXCEPTION;
   }
   

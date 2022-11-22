@@ -40,7 +40,7 @@ namespace XArmWrapper
       active_instance_id = iter->first;
       return 0;
     }
-    printf("[switch failed], no instance with id %d, ", instance_id);
+    fprintf(stderr, "[switch failed], no instance with id %d, ", instance_id);
     if (active_instance_id != 0) {
       printf("current active instance_id: %d\n", active_instance_id);
     }

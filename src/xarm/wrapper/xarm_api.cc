@@ -424,7 +424,7 @@ int XArmAPI::_check_code(int code, bool is_move_cmd, int mode_) {
     if (code == 0 || code == UXBUS_STATE::WAR_CODE) {
       if (core->state_is_ready) {
         if (mode_ >= 0 && mode != mode_) {
-          printf("The mode may be incorrect, just as a reminder, mode: %d (%d)\n", mode_, mode);
+          fprintf(stderr, "The mode may be incorrect, just as a reminder, mode: %d (%d)\n", mode_, mode);
         }
         return 0;
         // return (mode_ < 0 || mode == mode_) ? 0 : API_CODE::MODE_IS_NOT_CORRECT;
@@ -512,7 +512,7 @@ int XArmAPI::connect(const std::string &port) {
     port_ = port;
   }
   if (port_ == "") {
-    printf("can not connect to port/ip: %s\n", port_.data());
+    fprintf(stderr, "can not connect to port/ip: %s\n", port_.data());
     return API_CODE::NOT_CONNECTED;
   }
   // std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
@@ -522,7 +522,7 @@ int XArmAPI::connect(const std::string &port) {
     is_tcp_ = true;
     stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320);
     if (stream_tcp_->is_ok() != 0) {
-      printf("Error: Tcp control connection failed\n");
+      fprintf(stderr, "Error: Tcp control connection failed\n");
       return -2;
     }
     core = new UxbusCmdTcp((SocketPort *)stream_tcp_);

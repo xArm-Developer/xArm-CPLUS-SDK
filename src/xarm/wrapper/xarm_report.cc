@@ -435,7 +435,7 @@ void XArmAPI::_handle_report_data(void) {
     if (!is_reported()) {
       if (reported) {
         reported = false;
-        printf("Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
+        fprintf(stderr, "Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
         _report_connect_changed_callback();
       }
       stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
@@ -474,7 +474,7 @@ void XArmAPI::_handle_report_data(void) {
         locker.unlock();
       }
       else {
-        printf("check report data[%s] failed, ret=%d\n", report_type_.c_str(), ret);
+        fprintf(stderr, "check report data[%s] failed, ret=%d\n", report_type_.c_str(), ret);
       }
     }
   }
@@ -505,7 +505,7 @@ void XArmAPI::_handle_report_rich_data(void) {
         if (get_state(&state) >= 0) last_send_ms = curr_ms;
         // printf("send heart beat\n");
         if (curr_ms - core->last_recv_ms > 90000) {
-          printf("client timeout over 90s, disconnect.\n");
+          fprintf(stderr, "client timeout over 90s, disconnect.\n");
           break;
         }
       }
@@ -524,7 +524,7 @@ void XArmAPI::_handle_report_rich_data(void) {
           sleep_milliseconds(2000);
         else if (!is_connected() || prot_flag == 2)
         {
-          printf("report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+          fprintf(stderr, "report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
           break;
         }
         continue;
@@ -555,7 +555,7 @@ void XArmAPI::_handle_report_rich_data(void) {
         _update(rx_data);
       }
       else {
-        printf("check report data failed, ret=%d\n", ret);
+        fprintf(stderr, "check report data failed, ret=%d\n", ret);
       }
     }
   }

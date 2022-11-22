@@ -27,12 +27,12 @@ int main(int argc, char **argv) {
   printf("=========================================\n");
 
   int ret;
-  int ft_app_status, ft_is_started, ft_type, ft_id, ft_freq; 
-  float ft_mass, ft_dir_bias, ft_centroid[3], ft_zero[6];
-  int imp_coord, imp_c_axis[6];
-  float M[6], K[6], B[6];
-  int f_coord, f_c_axis[6];
-  float f_ref[6], f_limits[6], kp[6], ki[6], kd[6], xe_limit[6];
+  int ft_app_status = 0, ft_is_started = 0, ft_type = 0, ft_id = 0, ft_freq = 0; 
+  float ft_mass = 0, ft_dir_bias = 0, ft_centroid[3] = {0}, ft_zero[6] = {0};
+  int imp_coord = 0, imp_c_axis[6] = {0};
+  float M[6] = {0}, K[6] = {0}, B[6] = {0};
+  int f_coord = 0, f_c_axis[6] = {0};
+  float f_ref[6] = {0}, f_limits[6] = {0}, kp[6] = {0}, ki[6] = {0}, kd[6] = {0}, xe_limit[6] = {0};
   ret = arm->get_ft_sensor_config(&ft_app_status, &ft_is_started, &ft_type, &ft_id, &ft_freq,
     &ft_mass, &ft_dir_bias, ft_centroid, ft_zero, &imp_coord, imp_c_axis, M, K, B,
     &f_coord, f_c_axis, f_ref, f_limits, kp, ki, kd, xe_limit);

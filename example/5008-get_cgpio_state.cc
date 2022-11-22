@@ -29,13 +29,13 @@ int main(int argc, char **argv) {
 
   printf("=========================================\n");
   int ret;
-  int state[2];
-  int digit_io[4];
-  float analog[4];
-  int input_conf[8];
-  int output_conf[8];
-  int input_conf2[8];
-  int output_conf2[8];
+  int state[2] = {0};
+  int digit_io[4] = {0};
+  float analog[4] = {0};
+  int input_conf[8] = {0};
+  int output_conf[8] = {0};
+  int input_conf2[8] = {0};
+  int output_conf2[8] = {0};
   ret = arm->get_cgpio_state(state, digit_io, analog, input_conf, output_conf, input_conf2, output_conf2);
   printf("get_cgpio_state, ret=%d\n", ret);
   printf("* state=%d, err_code: %d\n", state[0], state[1]);

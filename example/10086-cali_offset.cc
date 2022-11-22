@@ -34,9 +34,9 @@ int main(int argc, char **argv) {
   arm->set_world_offset(zero_offset);
 
   int code, code1, code2;
-  float xyz[3];
-  float rpy[3];
-  float pose[6];
+  float xyz[3] = {0};
+  float rpy[3] = {0};
+  float pose[6] = {0};
   float rpy_bt[3] = {0, 0, 0};
 
   float four_points[4][6] = {

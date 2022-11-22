@@ -26,29 +26,29 @@ int main(int argc, char **argv) {
 
   printf("=========================================\n");
 
-  int ret;
-  unsigned char version[40];
+  int ret = 0;
+  unsigned char version[40] = {0};
   ret = arm->get_version(version);
   printf("ret=%d, version: %s\n", ret, version);
 
-  int state;
+  int state = 0;
   ret = arm->get_state(&state);
   printf("ret=%d, state: %d, mode: %d\n", ret, state, arm->mode);
 
-  int cmdnum;
+  int cmdnum = 0;
   ret = arm->get_cmdnum(&cmdnum);
   printf("ret=%d, cmdnum: %d\n", ret, cmdnum);
 
-  int err_warn[2];
+  int err_warn[2] = {0};
   ret = arm->get_err_warn_code(err_warn);
   printf("ret=%d, err: %d, warn: %d\n", ret, err_warn[0], err_warn[1]);
 
-  fp32 pose[6];
+  fp32 pose[6] = {0};
   ret = arm->get_position(pose);
   printf("ret=%d, ", ret);
   print_nvect("pose: ", pose, 6);
 
-  fp32 angles[7];
+  fp32 angles[7] = {0};
   ret = arm->get_servo_angle(angles);
   printf("ret=%d, ", ret);
   print_nvect("angles: ", angles, 7);

@@ -22,7 +22,6 @@ int main(int argc, char **argv) {
   sleep_milliseconds(500);
   
   int ret;
-  int int_val;
 
   ret = arm->clean_linear_track_error();
   printf("clean_linear_track_error, ret=%d\n", ret);

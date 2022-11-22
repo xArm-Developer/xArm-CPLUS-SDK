@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
   printf("start ft_sensor iden load\n");
   int ret;
-    float result[10] = {0};
+  float result[10] = {0};
   ret = arm->ft_sensor_enable(1);
   printf("ft_sensor_enable, ret=%d\n", ret);
   ret = arm->ft_sensor_iden_load(result);

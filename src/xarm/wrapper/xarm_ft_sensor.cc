@@ -160,7 +160,7 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
   
   unsigned char r_sn[14];
   if (sn == NULL) {
-    unsigned char tmp_sn[40];
+    unsigned char tmp_sn[40] = {0};
     int code = get_robot_sn(tmp_sn);
     if (code != 0) {
       printf("iden_joint_friction -> get_robot_sn failed, code=%d\n", code);

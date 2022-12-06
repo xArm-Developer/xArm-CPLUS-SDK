@@ -1,4 +1,4 @@
-xArm-C++-SDK API Documentation (V1.11.5)
+xArm-C++-SDK API Documentation (V1.11.6)
 
 # class __XArmAPI__
 ************************************
@@ -954,10 +954,10 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;analog[1]: analog-1 input value  
   > &ensp;&ensp;&ensp;&ensp;analog[2]: analog-0 output value  
   > &ensp;&ensp;&ensp;&ensp;analog[3]: analog-1 output value  
-  > param input_conf: digital(0-7) input functional info  
-  > param output_conf: digital(0-7) output functional info  
-  > param input_conf2: digital(8-15) input functional info  
-  > param output_conf2: digital(8-15) output functional info  
+  > @param input_conf: digital(0-7) input functional info  
+  > @param output_conf: digital(0-7) output functional info   
+  > @param input_conf2: digital(8-15) input functional info  
+  > @param output_conf2: digital(8-15) output functional info  
   >
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -1339,7 +1339,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed  
   > @param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc  
   > @param mvtime: reserved, 0  
-  > @param is_tool_coord: is tool coordinate or not  
+  > @param is_tool_coord: is tool coordinate or not, if it is true, the relative parameter is no longer valid  
   > @param relative: relative move or not  
   > @param wait: whether to wait for the arm to complete, default is false  
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  

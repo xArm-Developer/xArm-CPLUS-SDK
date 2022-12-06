@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.11.5"
+#define SDK_VERSION "1.11.6"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1368,7 +1368,7 @@ public:
    * @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
    * @param mvacc: move acceleration (mm/s^2, rad/s^2), default is this.last_used_tcp_acc
    * @param mvtime: reserved, 0
-   * @param is_tool_coord: is tool coordinate or not
+   * @param is_tool_coord: is tool coordinate or not, if it is true, the relative parameter is no longer valid
    * @param relative: relative move or not
    * @param wait: whether to wait for the arm to complete, default is false
    * @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true

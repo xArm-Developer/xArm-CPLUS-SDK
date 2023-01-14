@@ -41,7 +41,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int switch_xarm(int instance_id);
         [DllImport("xarm.dll")]
-        public static extern int connect(string port = "");
+        public static extern int robot_connect(string port = "");
         [DllImport("xarm.dll")]
         public static extern int disconnect();
         [DllImport("xarm.dll")]

@@ -29,7 +29,7 @@ namespace XArmWrapper {
     char* report_type = "rich",
     bool baud_checkset = true);
   extern "C" __declspec(dllexport) int __stdcall remove_instance(int instance_id);
-  extern "C" __declspec(dllexport) int __stdcall connect(char* port="");
+  extern "C" __declspec(dllexport) int __stdcall connect_robot(char* port="");  // rename from connect to connect_robot, LNK2005 (ws2_32.lib)
   extern "C" __declspec(dllexport) void __stdcall disconnect(void);
   
   extern "C" __declspec(dllexport) int __stdcall motion_enable(bool enable, int servo_id=8);

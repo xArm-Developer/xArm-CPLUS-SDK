@@ -30,11 +30,12 @@ namespace xarm_csharp_demo
             Console.WriteLine("set_mode: {0}", ret);
             ret = XArmAPI.set_state(0);
             Console.WriteLine("set_state: {0}", ret);
-            XArmAPI.reset(true);
-            // ret = XArmAPI.set_position(pose1, true);
-            // Console.WriteLine("set_position: {0}", ret);
-            ret = XArmAPI.move_gohome(0, 0, 0, true);
-            Console.WriteLine("move_gohome: {0}", ret);
+
+            // XArmAPI.reset(true);
+            // // ret = XArmAPI.set_position(pose1, true);
+            // // Console.WriteLine("set_position: {0}", ret);
+            // ret = XArmAPI.move_gohome(0, 0, 0, true);
+            // Console.WriteLine("move_gohome: {0}", ret);
 
             // continuous linear motion
             /*
@@ -55,21 +56,21 @@ namespace xarm_csharp_demo
             }
             */
 
-            // continuous joint motion
-            float[][] angles = new float[3][];
-            angles[0] = new float[] { 0, 14, -25, 0, (float)12.9, 0, 0 };
-            angles[1] = new float[] { -14, 40, -75, 0, (float)33.4, (float)-13.8, 0 };
-            angles[2] = new float[] { (float)21.9, 50, -80, 50, 37, 29, 0 };
-            float angle_radius = 60;
-            for (int i = 0; i < 100; i++)
-            {
-                for (int j = 0; j < angles.Length; j++)
-                {
-                    float[] angle = angles[j];
-                    ret = XArmAPI.set_servo_angle(angle, 40, 800, 0, false, -1, angle_radius);
-                    Console.WriteLine("set_servo_angle: {0}", ret);
-                }
-            }
+            // // continuous joint motion
+            // float[][] angles = new float[3][];
+            // angles[0] = new float[] { 0, 14, -25, 0, (float)12.9, 0, 0 };
+            // angles[1] = new float[] { -14, 40, -75, 0, (float)33.4, (float)-13.8, 0 };
+            // angles[2] = new float[] { (float)21.9, 50, -80, 50, 37, 29, 0 };
+            // float angle_radius = 60;
+            // for (int i = 0; i < 100; i++)
+            // {
+            //     for (int j = 0; j < angles.Length; j++)
+            //     {
+            //         float[] angle = angles[j];
+            //         ret = XArmAPI.set_servo_angle(angle, 40, 800, 0, false, -1, angle_radius);
+            //         Console.WriteLine("set_servo_angle: {0}", ret);
+            //     }
+            // }
 
 
             /*

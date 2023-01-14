@@ -91,7 +91,7 @@ namespace XArmWrapper
     return id;
   }
 
-  int __stdcall connect(char* port) {
+  int __stdcall connect_robot(char* port) {
     return arm->connect(port);
   }
   void __stdcall disconnect(void) {

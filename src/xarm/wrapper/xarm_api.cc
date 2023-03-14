@@ -1125,4 +1125,18 @@ int XArmAPI::set_only_check_type(unsigned char only_check_type)
   return 0;
 }
 
+int XArmAPI::get_dh_params(fp32 dh_params[28])
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->get_dh_params(dh_params);
+  return _check_code(ret);
+}
+
+int XArmAPI::set_dh_params(fp32 dh_params[28], unsigned char flag)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->set_dh_params(dh_params, flag);
+  return _check_code(ret);
+}
+
 

@@ -189,4 +189,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7], int num = 3);
   extern "C" __declspec(dllexport) int __stdcall iden_joint_friction(int *result, unsigned char *sn = NULL);
   extern "C" __declspec(dllexport) int __stdcall set_only_check_type(unsigned char only_check_type = 0);
+
+  extern "C" __declspec(dllexport) int __stdcall get_dh_params(fp32 dh_params[28]);
+  extern "C" __declspec(dllexport) int __stdcall set_dh_params(fp32 dh_params[28], unsigned char flag = 0);
 }

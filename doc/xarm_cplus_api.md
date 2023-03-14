@@ -2152,7 +2152,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Open the gripper of Lite6 series robotics arms  
   > &ensp;&ensp;&ensp;&ensp;Note:   
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. this API can only be used on Lite6 series robotic arms    
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms    
   >    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -2161,7 +2161,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Close the gripper of Lite6 series robotics arms  
   > &ensp;&ensp;&ensp;&ensp;Note:   
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. this API can only be used on Lite6 series robotic arms    
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms    
   >    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -2170,7 +2170,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Stop the gripper of Lite6 series robotics arms  
   > &ensp;&ensp;&ensp;&ensp;Note:   
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. this API can only be used on Lite6 series robotic arms    
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms    
   >    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -2214,4 +2214,31 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;__only_check_type == 2__: Only check the self-collision without moving, use the intermediate state as the starting planning path, check whether the path has self-collision (the intermediate state will be updated at this time), and restore the intermediate state to the actual state after the end  
   > &ensp;&ensp;&ensp;&ensp;__only_check_type == 3__: Only check the self-collision without moving, use the intermediate state as the starting planning path, and check whether the path has self-collision (the intermediate state will be updated at this time)  
   >    
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_dh_params(fp32 dh_params[28])__
+  > Stop the gripper of Lite6 series robotics arms  
+  > &ensp;&ensp;&ensp;&ensp;Note:   
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0  
+  >    
+  > @param dh_params: the result of DH parameters     
+  > &ensp;&ensp;&ensp;&ensp;dh_params[0:4]: DH parameters of Joint-1    
+  > &ensp;&ensp;&ensp;&ensp;dh_params[4:8]: DH parameters of Joint-2    
+  > &ensp;&ensp;&ensp;&ensp;...    
+  > &ensp;&ensp;&ensp;&ensp;dh_params[24:28]: DH parameters of Joint-7    
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_dh_params(fp32 dh_params[28], unsigned char flag = 0)__
+  > Set the DH parameters  
+  > &ensp;&ensp;&ensp;&ensp;Note:   
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0   
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this interface is only provided for users who need to use external DH parameters, ordinary users should not try to modify DH parameters.    
+  >    
+  > @param dh_params: DH parameters     
+  > @param flag:      
+  > &ensp;&ensp;&ensp;&ensp;0: Use the set DH parameters, but do not write to the configuration file
+  > &ensp;&ensp;&ensp;&ensp;1: Use the set DH parameters and write to the configuration file    
+  > &ensp;&ensp;&ensp;&ensp;2: Use the set DH parameters and delete the DH parameters of the configuration file    
+  > &ensp;&ensp;&ensp;&ensp;3: Use the default DH parameters, but will not delete the DH parameters of the configuration file    
+  > &ensp;&ensp;&ensp;&ensp;4: Use the default DH parameters and delete the DH parameters of the configuration file    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.

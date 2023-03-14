@@ -1702,3 +1702,14 @@ int UxbusCmd::move_circle_common(float pose1[6], float pose2[6], float mvvelo, f
   return ret;
 }
 
+int UxbusCmd::get_dh_params(float dh_params[28])
+{
+  return get_nfp32(UXBUS_RG::GET_DH, dh_params, 28);
+}
+
+int UxbusCmd::set_dh_params(float dh_params[28], unsigned char flag)
+{
+  char additional[1] = { (char)flag };
+  return set_nfp32_with_bytes(UXBUS_RG::SET_DH, dh_params, 16, additional, 1);
+}
+

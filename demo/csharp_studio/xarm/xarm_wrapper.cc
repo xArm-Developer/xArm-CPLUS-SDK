@@ -550,4 +550,14 @@ namespace XArmWrapper
   int __stdcall set_only_check_type(unsigned char only_check_type) {
     return arm->set_only_check_type(only_check_type);
   }
+
+  int __stdcall get_dh_params(fp32 dh_params[28])
+  {
+    return arm->get_dh_params(dh_params);
+  }
+  
+  int __stdcall set_dh_params(fp32 dh_params[28], unsigned char flag)
+  {
+    return arm->set_dh_params(dh_params, flag);
+  }
 }

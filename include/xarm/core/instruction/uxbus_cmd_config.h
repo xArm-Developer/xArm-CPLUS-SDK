@@ -86,6 +86,8 @@ public:
   static const unsigned char PLAY_TRAJ = 64;
   static const unsigned char GET_TRAJ_RW_STATUS = 65;
   static const unsigned char ALLOW_APPROX_MOTION = 66;
+  static const unsigned char GET_DH = 67;
+  static const unsigned char SET_DH = 68;
 
   static const unsigned char REPORT_TAU_OR_I = 70;
   static const unsigned char SET_TIMER = 71;

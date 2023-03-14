@@ -262,6 +262,9 @@ public:
   int set_cartesian_velo_continuous(int on_off);
   int set_allow_approx_motion(int on_off);
 
+  int get_dh_params(float dh_params[28]);
+  int set_dh_params(float dh_params[28], unsigned char flag = 0);
+
   int iden_joint_friction(unsigned char sn[14], float *result);
 
   int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);

@@ -353,6 +353,12 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_only_check_type(byte only_check_type);
 
+        [DllImport("xarm.dll")]
+        public static extern int get_dh_params(float[] dh_params);
+
+        [DllImport("xarm.dll")]
+        public static extern int set_dh_params(float[] dh_params, byte flag = 0);
+
         public static int set_position(float[] pose, float radius = -1,
             bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {

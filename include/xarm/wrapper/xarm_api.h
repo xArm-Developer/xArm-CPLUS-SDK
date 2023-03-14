@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.11.6"
+#define SDK_VERSION "1.11.7"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2257,6 +2257,37 @@ public:
    * @return: See the code documentation for details.
    */
   int stop_lite6_gripper(void);
+
+  /**
+   * @brief Get the DH parameters
+   *  Note:
+   *    1. only available if firmware_version >= 2.0.0
+   *  
+   * @param dh_params: the result of DH parameters
+   *  dh_params[0:4]: DH parameters of Joint-1
+   *  dh_params[4:8]: DH parameters of Joint-2
+   *  ...
+   *  dh_params[24:28]: DH parameters of Joint-7
+   * return: See the code documentation for details.
+   */
+  int get_dh_params(fp32 dh_params[28]);
+
+  /**
+   * @brief Set the DH parameters
+   *  Note:
+   *    1. only available if firmware_version >= 2.0.0
+   *    2. this interface is only provided for users who need to use external DH parameters, ordinary users should not try to modify DH parameters.
+   * 
+   * @param dh_params: DH parameters
+   * @param flag:
+   *  0: Use the set DH parameters, but do not write to the configuration file
+   *  1: Use the set DH parameters and write to the configuration file
+   *  2: Use the set DH parameters and delete the DH parameters of the configuration file
+   *  3: Use the default DH parameters, but will not delete the DH parameters of the configuration file
+   *  4: Use the default DH parameters and delete the DH parameters of the configuration file
+   * return: See the code documentation for details.
+   */
+  int set_dh_params(fp32 dh_params[28], unsigned char flag = 0);
 
 private:
   void _init(void);

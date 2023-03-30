@@ -1,5 +1,6 @@
 CC = gcc
 CXX = g++
+MKDIRS=@mkdir -p 
 C_DEFS = -DSOFT_VERSION=$(SOFT_VERSION)
 UNAME := $(shell uname -s)
 ifeq ($(UNAME), Darwin)
@@ -10,14 +11,14 @@ else
 	LIBS += -lm -lpthread -fPIC -shared
 endif
 
-BUILDDIR = ./build/
+BUILD_DIR = ./build/
 INC_DIR = ./include/
 SRC_DIR = ./src/
 EXAMPLE_DIR = ./example/
-BUILD_EXAMPLE_DIR = $(BUILDDIR)example/
-BUILD_LIB_DIR = $(BUILDDIR)lib/
-BUILD_OBJ_DIR = $(BUILDDIR)obj/
-BUILD_MAP_DIR = $(BUILDDIR)map/
+BUILD_EXAMPLE_DIR = $(BUILD_DIR)example/
+BUILD_LIB_DIR = $(BUILD_DIR)lib/
+BUILD_OBJ_DIR = $(BUILD_DIR)obj/
+BUILD_MAP_DIR = $(BUILD_DIR)map/
 
 SRC_SERIAL_DIR = $(SRC_DIR)serial/
 SRC_SERIAL_IMPL_DIR = $(SRC_SERIAL_DIR)impl/
@@ -48,7 +49,7 @@ SRC_XARM := $(wildcard $(SRC_SERIAL_DIR)*.cc \
 
 LIB_NAME = libxarm.so
 
-SRC_EXAMPLE := $(wildcard $(EXAMPLE_DIR)*.cc)
+SRC_EXAMPLE := $(sort $(wildcard $(EXAMPLE_DIR)*.cc))
 # OBJ_EXAMPLE := $(patsubst %.cc, %.o, $(SRC_EXAMPLE))
 
 XARM_OBJS = $(addprefix $(BUILD_OBJ_DIR), $(addsuffix .o, $(basename $(SRC_XARM))))
@@ -57,43 +58,36 @@ EXAMPLE_OBJS = $(addprefix $(BUILD_OBJ_DIR), $(addsuffix .o, $(basename $(SRC_EX
 all: xarm test
 
 test: $(EXAMPLE_OBJS)
-	mkdir -p $(BUILD_EXAMPLE_DIR)
-	mkdir -p $(BUILD_OBJ_DIR)
-	mkdir -p $(BUILD_MAP_DIR)
 	for file in $(SRC_EXAMPLE); do \
-		make test-`echo $$file | awk -F'/' '{print $$NF}' | awk -F'.cc' '{print $$1}'`; \
+		$(MAKE) test-`echo $$file | awk -F'/' '{print $$NF}' | awk -F'.cc' '{print $$1}'`; \
 	done
 
 ifeq ($(UNAME), Darwin)
 xarm: $(XARM_OBJS)
-	mkdir -p $(BUILD_LIB_DIR)
-	mkdir -p $(BUILD_OBJ_DIR)
-	mkdir -p $(BUILD_MAP_DIR)
-	$(CXX) -o $(C_FLAGS) $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl
-test-%:
-	mkdir -p $(BUILD_EXAMPLE_DIR)
-	mkdir -p $(BUILD_OBJ_DIR)
-	mkdir -p $(BUILD_MAP_DIR)
+	$(MKDIRS) $(BUILD_LIB_DIR)
+	$(MKDIRS) $(BUILD_MAP_DIR)
+	$(CXX) -o $(C_FLAGS) $^ -o $(BUILD_LIB_DIR)$(LIB_NAME) $(LIBS) -Wl
+test-%: $(BUILD_OBJ_DIR)example/%.o
+	$(MKDIRS) $(BUILD_EXAMPLE_DIR)
+	$(MKDIRS) $(BUILD_MAP_DIR)
 	$(CXX) -o $(C_FLAGS) $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl
 else
 xarm: $(XARM_OBJS)
-	mkdir -p $(BUILD_LIB_DIR)
-	mkdir -p $(BUILD_OBJ_DIR)
-	mkdir -p $(BUILD_MAP_DIR)
-	$(CXX) -o $(C_FLAGS) -s -fopenmp $^ -o $(BUILD_LIB_DIR)/$(LIB_NAME) $(LIBS) -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
-test-%:
-	mkdir -p $(BUILD_EXAMPLE_DIR)
-	mkdir -p $(BUILD_OBJ_DIR)
-	mkdir -p $(BUILD_MAP_DIR)
-	$(CXX) -o $(C_FLAGS) -s -fopenmp $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl,-Map,$(BUILD_MAP_DIR)/$@.map
+	$(MKDIRS) $(BUILD_LIB_DIR)
+	$(MKDIRS) $(BUILD_MAP_DIR)
+	$(CXX) -o $(C_FLAGS) -s -fopenmp $^ -o $(BUILD_LIB_DIR)$(LIB_NAME) $(LIBS) -Wl,-Map,$(BUILD_MAP_DIR)$@.map
+test-%: $(BUILD_OBJ_DIR)example/%.o
+	$(MKDIRS) $(BUILD_EXAMPLE_DIR)
+	$(MKDIRS) $(BUILD_MAP_DIR)
+	$(CXX) -o $(C_FLAGS) -s -fopenmp $(addprefix $(BUILD_OBJ_DIR)example/, $(subst test-, , $@)).o -o $(addprefix $(BUILD_EXAMPLE_DIR), $(subst test-, , $@)) -L$(BUILD_LIB_DIR) -lxarm -Wl,-Map,$(BUILD_MAP_DIR)$@.map
 endif
 
 $(BUILD_OBJ_DIR)%.o: %.c
-	mkdir -p $(dir $@)
+	$(MKDIRS) $(dir $@)
 	$(CC) -c $(C_FLAGS) $< -o $@
 
 $(BUILD_OBJ_DIR)%.o: %.cc
-	mkdir -p $(dir $@)
+	$(MKDIRS) $(dir $@)
 	$(CXX) -c $(C_FLAGS) $< -o $@
 
 install:
@@ -104,6 +98,8 @@ uninstall:
 	rm -rf /usr/include/serial
 	rm -rf /usr/include/xarm
 	rm -f /usr/lib/$(LIB_NAME)
+
+.PHONY: clean
 
 clean:
 	rm -rf ./build

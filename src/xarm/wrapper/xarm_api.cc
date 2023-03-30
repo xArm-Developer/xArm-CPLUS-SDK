@@ -10,6 +10,9 @@
 
 #include "xarm/wrapper/xarm_api.h"
 
+const int FEEDBACK_QUE_SIZE = 256;
+const int FEEDBACK_DATA_MAX_LEN = 256;
+
 fp32 to_radian(fp32 val) {
   return (fp32)(val / RAD_DEGREE);
 }
@@ -40,8 +43,10 @@ XArmAPI::XArmAPI(
   check_is_ready_(check_is_ready), check_is_pause_(check_is_pause), baud_checkset_flag_(baud_checkset) {
   // default_is_radian = is_radian;
   // check_tcp_limit_ = check_tcp_limit;
-  pool_.set_max_thread_count(max_callback_thread_count);
-  callback_in_thread_ = max_callback_thread_count != 0;
+  max_callback_thread_count_ = max_callback_thread_count;
+  if (max_callback_thread_count_ < 0) max_callback_thread_count_ = 100;
+  pool_.set_max_thread_count(max_callback_thread_count_);
+  callback_in_thread_ = max_callback_thread_count_ != 0;
   max_cmdnum_ = max_cmdnum > 0 ? max_cmdnum : 256;
   axis = init_axis;
   report_type_ = report_type;
@@ -55,6 +60,138 @@ XArmAPI::XArmAPI(
 
 XArmAPI::~XArmAPI() {
   disconnect();
+  _destroy();
+}
+
+void XArmAPI::_destroy(void) {
+  if (version_number != NULL) {
+    delete[] version_number;
+    version_number = NULL;
+  }
+  if (angles != NULL) {
+    delete[] angles;
+    angles = NULL;
+  }
+  if (last_used_angles != NULL) {
+    delete[] last_used_angles;
+    last_used_angles = NULL;
+  }
+  if (tcp_offset != NULL) {
+    delete[] tcp_offset;
+    tcp_offset = NULL;
+  }
+  if (joint_speed_limit != NULL) {
+    delete[] joint_speed_limit;
+    joint_speed_limit = NULL;
+  }
+  if (joint_acc_limit != NULL) {
+    delete[] joint_acc_limit;
+    joint_acc_limit = NULL;
+  }
+  if (position != NULL) {
+    delete[] position;
+    position = NULL;
+  }
+  if (position_aa != NULL) {
+    delete[] position_aa;
+    position_aa = NULL;
+  }
+  if (last_used_position != NULL) {
+    delete[] last_used_position;
+    last_used_position = NULL;
+  }
+  if (joints_torque != NULL) {
+    delete[] joints_torque;
+    joints_torque = NULL;
+  }
+  if (motor_brake_states != NULL) {
+    delete[] motor_brake_states;
+    motor_brake_states = NULL;
+  }
+  if (motor_enable_states != NULL) {
+    delete[] motor_enable_states;
+    motor_enable_states = NULL;
+  }
+  if (tcp_load != NULL) {
+    delete[] tcp_load;
+    tcp_load = NULL;
+  }
+  if (tcp_speed_limit != NULL) {
+    delete[] tcp_speed_limit;
+    tcp_speed_limit = NULL;
+  }
+  if (tcp_acc_limit != NULL) {
+    delete[] tcp_acc_limit;
+    tcp_acc_limit = NULL;
+  }
+  if (gravity_direction != NULL) {
+    delete[] gravity_direction;
+    gravity_direction = NULL;
+  }
+  if (realtime_joint_speeds != NULL) {
+    delete[] realtime_joint_speeds;
+    realtime_joint_speeds = NULL;
+  }
+  if (world_offset != NULL) {
+    delete[] world_offset;
+    world_offset = NULL;
+  }
+  if (temperatures != NULL) {
+    delete[] temperatures;
+    temperatures = NULL;
+  }
+  if (gpio_reset_config != NULL) {
+    delete[] gpio_reset_config;
+    gpio_reset_config = NULL;
+  }
+  if (ft_ext_force != NULL) {
+    delete[] ft_ext_force;
+    ft_ext_force = NULL;
+  }
+  if (ft_raw_force != NULL) {
+    delete[] ft_raw_force;
+    ft_raw_force = NULL;
+  }
+  if (voltages != NULL) {
+    delete[] voltages;
+    voltages = NULL;
+  }
+  if (currents != NULL) {
+    delete[] currents;
+    currents = NULL;
+  }
+  if (collision_model_params != NULL) {
+    delete[] collision_model_params;
+    collision_model_params = NULL;
+  }
+  if (cgpio_input_digitals != NULL) {
+    delete[] cgpio_input_digitals;
+    cgpio_input_digitals = NULL;
+  }
+  if (cgpio_output_digitals != NULL) {
+    delete[] cgpio_output_digitals;
+    cgpio_output_digitals = NULL;
+  }
+  if (cgpio_intput_anglogs != NULL) {
+    delete[] cgpio_intput_anglogs;
+    cgpio_intput_anglogs = NULL;
+  }
+  if (cgpio_output_anglogs != NULL) {
+    delete[] cgpio_output_anglogs;
+    cgpio_output_anglogs = NULL;
+  }
+  if (cgpio_input_conf != NULL) {
+    delete[] cgpio_input_conf;
+    cgpio_input_conf = NULL;
+  }
+  if (cgpio_output_conf != NULL) {
+    delete[] cgpio_output_conf;
+    cgpio_output_conf = NULL;
+  }
+  if (report_rich_data_ptr_ != NULL) {
+    delete report_rich_data_ptr_;
+    report_rich_data_ptr_ = NULL;
+  }
 }
 
 void XArmAPI::_init(void) {
@@ -202,7 +339,6 @@ void XArmAPI::_init(void) {
   else {
     report_data_ptr_ = report_rich_data_ptr_;
   }
-  
 }
 
 int XArmAPI::set_baud_checkset_enable(bool enable)
@@ -293,6 +429,11 @@ static void report_rich_thread_handle_(void *arg) {
 static void report_thread_handle_(void *arg) {
   XArmAPI *my_this = (XArmAPI *)arg;
   my_this->_handle_report_data();
+}
+
+static void feedback_thread_handle_(void *arg) {
+  XArmAPI *my_this = (XArmAPI *)arg;
+  my_this->_handle_feedback_data();
 }
 
 void XArmAPI::_sync(void) {
@@ -520,11 +661,14 @@ int XArmAPI::connect(const std::string &port) {
   is_ready_ = true;
   if (port_ == "localhost" || std::regex_match(port_, pattern)) {
     is_tcp_ = true;
-    stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320);
+    stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
     if (stream_tcp_->is_ok() != 0) {
       fprintf(stderr, "Error: Tcp control connection failed\n");
       return -2;
     }
+    feedback_thread_ = std::thread(feedback_thread_handle_, this);
+    feedback_thread_.detach();
+
     core = new UxbusCmdTcp((SocketPort *)stream_tcp_);
     printf("Tcp control connection successful\n");
     core->set_prot_flag();
@@ -1137,6 +1281,31 @@ int XArmAPI::set_dh_params(fp32 dh_params[28], unsigned char flag)
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int ret = core->set_dh_params(dh_params, flag);
   return _check_code(ret);
+}
+
+int XArmAPI::set_feedback_type(unsigned char feedback_type)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->set_feedback_type(feedback_type);
+  return _check_code(ret);
+}
+
+void XArmAPI::_handle_feedback_data(void)
+{
+  int ret;
+  int feedback_maxcount = std::max(max_callback_thread_count_ + 1, 1);
+  unsigned char (*feedback_datas)[FEEDBACK_DATA_MAX_LEN] = new unsigned char[feedback_maxcount][FEEDBACK_DATA_MAX_LEN];
+  int cnt = 0;
+  while (is_connected()) {
+    ret = stream_tcp_->read_feedback_frame(feedback_datas[cnt]);
+    if (ret == 0) {
+      _feedback_callback(feedback_datas[cnt]);
+      cnt = (cnt + 1) % feedback_maxcount;
+      memset(feedback_datas[cnt], 0, FEEDBACK_DATA_MAX_LEN);
+    }
+    sleep_ms(5);
+  }
+  delete[] feedback_datas;
 }
 
 

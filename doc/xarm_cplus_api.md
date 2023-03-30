@@ -1,4 +1,4 @@
-xArm-C++-SDK API Documentation (V1.11.6)
+xArm-C++-SDK API Documentation (V1.12.0)
 
 # class __XArmAPI__
 ************************************
@@ -963,43 +963,74 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
 
 
 - __int register_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles))__
+- __int register_report_location_callback(std::function<void (const fp32*, const fp32*)> callback)__
   > Register the report location callback
 
 
 - __int register_connect_changed_callback(void(*callback)(bool connected, bool reported))__
+- __int register_connect_changed_callback(std::function<void (bool, bool)> callback)__
   > Register the connect status changed callback
 
 
 - __int register_state_changed_callback(void(*callback)(int state))__
+- __int register_state_changed_callback(std::function<void (int)> callback)__
   > Register the state status changed callback
 
 
 - __int register_mode_changed_callback(void(*callback)(int mode))__
+- __int register_mode_changed_callback(std::function<void (int)> callback)__
   > Register the mode changed callback
 
 
 - __int register_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake))__
+- __int register_mtable_mtbrake_changed_callback(std::function<void (int, int)> callback)__
   > Register the motor enable states or motor brake states changed callback
 
 
 - __int register_error_warn_changed_callback(void(*callback)(int err_code, int warn_code))__
+- __int register_error_warn_changed_callback(std::function<void (int, int)> callback)__
   > Register the error code or warn code changed callback
 
 
 - __int register_cmdnum_changed_callback(void(*callback)(int cmdnum))__
+- __int register_cmdnum_changed_callback(std::function<void (int)> callback)__
   > Register the cmdnum changed callback
 
 
 - __int register_temperature_changed_callback(void(*callback)(const fp32 *temps))__
+- __int register_temperature_changed_callback(std::function<void (const fp32*)> callback)__
   > Register the temperature changed callback
 
 
 - __int register_count_changed_callback(void(*callback)(int count))__
+- __int register_count_changed_callback(std::function<void (int)> callback)__
   > Register the value of counter changed callback
 
 
 - __int register_iden_progress_changed_callback(void(*callback)(int progress))__
+- __int register_iden_progress_changed_callback(std::function<void (int)> callback)__
   > Register the progress of identification changed callback
+
+- __int register_feedback_callback(void(*callback)(unsigned char *feedback_data))__
+- __int register_feedback_callback(std::function<void (unsigned char *feedback_data)> callback)__
+  > Register the feedback data callback
+  > Note:    
+  > &ensp;&ensp;&ensp;&ensp;only available if firmware_version >= 2.1.0    
+  >    
+  > feedback_data: unsigned char data[]     
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[0:2]: cmdid, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish which instruction the feedback belongs to    
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)    
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[8]: feedback type    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1: the motion task starts executing    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2: the motion task execution ends    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4: the motion tasks are discarded (usually when the distance is too close to be planned)    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;8: the non-motion task is triggered    
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish what instruction the feedback belongs to    
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)    
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 65-bit integer data), time when feedback triggers (microseconds)    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this time is the corresponding controller system time when the feedback is triggered    
 
 
 - __int release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles)=NULL)__
@@ -1058,6 +1089,11 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
 
 - __int release_iden_progress_changed_callback(void(*callback)(int progress) = NULL)__
   > Release the progress of identification changed callback
+  > 
+  > @param callback: NULL means to release all callbacks for the same event
+
+- __int release_feedback_callback(void(*callback)(unsigned char *feedback_data) = NULL)__
+  > Release the feedback data callback    
   > 
   > @param callback: NULL means to release all callbacks for the same event
 
@@ -2241,4 +2277,20 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;2: Use the set DH parameters and delete the DH parameters of the configuration file    
   > &ensp;&ensp;&ensp;&ensp;3: Use the default DH parameters, but will not delete the DH parameters of the configuration file    
   > &ensp;&ensp;&ensp;&ensp;4: Use the default DH parameters and delete the DH parameters of the configuration file    
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_feedback_type(unsigned char feedback_type)__
+  > Set the feedback type    
+  > Note:     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.1.0    
+  > &ensp;&ensp;&ensp;&ensp;2. only works in position mode    
+  > &ensp;&ensp;&ensp;&ensp;3. only affects the feedback type of commands following this one    
+  > &ensp;&ensp;&ensp;&ensp;4. only valid for the current connection    
+  > 
+  > @param feedback_type: feedback type    
+  >    &ensp;&ensp;&ensp;&ensp;0: disable feedback    
+  >    &ensp;&ensp;&ensp;&ensp;1: feedback when the motion task starts executing    
+  >    &ensp;&ensp;&ensp;&ensp;2: feedback when the motion task execution ends    
+  >    &ensp;&ensp;&ensp;&ensp;4: feedback when the motion tasks are discarded (usually when the distance is too close to be planned)    
+  >    &ensp;&ensp;&ensp;&ensp;8: feedback when the non-motion task is triggered    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.

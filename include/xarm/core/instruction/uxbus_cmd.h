@@ -270,6 +270,8 @@ public:
   int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
 
+  int set_feedback_type(int value);
+
   virtual void close(void);
   virtual int is_ok(void);
   virtual int get_prot_flag(void);

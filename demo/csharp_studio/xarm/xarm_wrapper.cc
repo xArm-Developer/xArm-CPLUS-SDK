@@ -560,4 +560,9 @@ namespace XArmWrapper
   {
     return arm->set_dh_params(dh_params, flag);
   }
+
+  int __stdcall set_feedback_type(unsigned char feedback_type)
+  {
+    return arm->set_feedback_type(feedback_type);
+  }
 }

@@ -36,7 +36,7 @@ private:
   int TX2_PROT_CON_ = 2;         // tcp cmd prot
   int TX2_PROT_HEAT_ = 1;        // tcp heat prot
   int TX2_BUS_FLAG_MIN_ = 1;     // the min cmd num
-  int TX2_BUS_FLAG_MAX_ = 5000;  // the max cmd num
+  int TX2_BUS_FLAG_MAX_ = 65535;  // the max cmd num
 };
 
 #endif

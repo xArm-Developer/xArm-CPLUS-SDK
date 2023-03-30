@@ -170,6 +170,8 @@ public:
 
   static const unsigned char TGPIO_COM_TIOUT = 240;
   static const unsigned char TGPIO_COM_DATA = 241;
+
+  static const unsigned char SET_FEEDBACK_TYPE = 254;
 };
 
 class UXBUS_STATE {

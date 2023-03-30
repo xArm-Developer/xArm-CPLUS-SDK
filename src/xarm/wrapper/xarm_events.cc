@@ -17,7 +17,7 @@ void XArmAPI::_report_callback(CallableVector&& callbacks, FunctionVector&& func
     if (callback_in_thread_) pool_.dispatch(callbacks[i], std::forward<arguments>(args)...);
     else pool_.commit(callbacks[i], std::forward<arguments>(args)...);
   }
-    for (size_t i = 0; i < functions.size(); i++) {
+  for (size_t i = 0; i < functions.size(); i++) {
     if (callback_in_thread_) pool_.dispatch(functions[i], std::forward<arguments>(args)...);
     else pool_.commit(functions[i], std::forward<arguments>(args)...);
   }
@@ -108,6 +108,15 @@ void XArmAPI::_report_iden_progress_changed_callback(void) {
   // for (size_t i = 0; i < iden_progress_changed_callbacks_.size(); i++) {
   // 	if (callback_in_thread_) pool_.dispatch(iden_progress_changed_callbacks_[i], iden_progress);
   // 	else pool_.commit(iden_progress_changed_callbacks_[i], iden_progress);
+  // }
+}
+
+void XArmAPI::_feedback_callback(unsigned char *feedback_data)
+{
+  _report_callback(feedback_callbacks_, feedback_functions_, feedback_data);
+  // for (size_t i = 0; i < feedback_callbacks_.size(); i++) {
+  // 	if (callback_in_thread_) pool_.dispatch(feedback_callbacks_[i], feedback_data);
+  // 	else pool_.commit(feedback_callbacks_[i], feedback_data);
   // }
 }
 
@@ -228,6 +237,13 @@ int XArmAPI::register_iden_progress_changed_callback(std::function<void (int)> c
   return _register_event_function(iden_progress_changed_functions_, callback);
 }
 
+int XArmAPI::register_feedback_callback(void(*callback)(unsigned char *feedback_data)) {
+  return _register_event_callback(feedback_callbacks_, callback);
+}
+int XArmAPI::register_feedback_callback(std::function<void (unsigned char *feedback_data)> callback) {
+  return _register_event_function(feedback_functions_, callback);
+}
+
 int XArmAPI::release_report_data_callback(void(*callback)(XArmReportData *report_data_ptr)) {
   return _release_event_callback(report_data_callbacks_, callback);
 }
@@ -304,4 +320,11 @@ int XArmAPI::release_iden_progress_changed_callback(void(*callback)(int progress
 }
 int XArmAPI::release_iden_progress_changed_callback(bool clear_all) {
   return _clear_event_callback(iden_progress_changed_callbacks_, iden_progress_changed_functions_, clear_all);
+}
+
+int XArmAPI::release_feedback_callback(void(*callback)(unsigned char *feedback_data)) {
+  return _release_event_callback(feedback_callbacks_, callback);
+}
+int XArmAPI::release_feedback_callback(bool clear_all) {
+  return _clear_event_callback(feedback_callbacks_, feedback_functions_, clear_all);
 }

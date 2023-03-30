@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.11.7"
+#define SDK_VERSION "1.12.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -91,7 +91,7 @@ public:
    *  Note: greater than 0 means the maximum number of threads that can be used to process callbacks
    *  Note: equal to 0 means no thread is used to process the callback
    *  Note: less than 0 means no limit on the number of threads used for callback
-   * @param max_cmdnum: max cmdnum, default is 256
+   * @param max_cmdnum: max cmdnum, default is 512
    *	Note: only available in the param `check_cmdnum_limit` is true
    */
   XArmAPI(const std::string &port = "",
@@ -241,6 +241,7 @@ public:
 
   /* no use please */
   void _handle_report_data(void);
+  void _handle_feedback_data(void);
 
   /**
    * @brief Get the xArm version
@@ -985,6 +986,29 @@ public:
   int register_iden_progress_changed_callback(std::function<void (int)> callback);
 
   /**
+   * @brief Register the feedback data callback
+   *  Note:
+   *    1. only available if firmware_version >= 2.1.0
+   * 
+   *  feedback_data: unsigned char data[]
+   *    feedback_data[0:2]: cmdid, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions
+   *      Note: this can be used to distinguish which instruction the feedback belongs to
+   *    feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)
+   *    feedback_data[8]: feedback type
+   *      1: the motion task starts executing
+   *      2: the motion task execution ends
+   *      4: the motion tasks are discarded (usually when the distance is too close to be planned)
+   *      8: the non-motion task is triggered
+   *    feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions
+   *      Note: this can be used to distinguish what instruction the feedback belongs to
+   *    feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)
+   *    feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 65-bit integer data), time when feedback triggers (microseconds)
+   *      Note: this time is the corresponding controller system time when the feedback is triggered
+   */
+  int register_feedback_callback(void(*callback)(unsigned char *feedback_data));
+  int register_feedback_callback(std::function<void (unsigned char *feedback_data)> callback);
+
+  /**
    * @brief Release the report data callback
    * 
    * @param callback: NULL means to release all callbacks;
@@ -1071,6 +1095,14 @@ public:
    */
   int release_iden_progress_changed_callback(void(*callback)(int progress) = NULL);
   int release_iden_progress_changed_callback(bool clear_all);
+
+  /**
+   * @brief Release the feedback data callback
+   * 
+   * @param callback: NULL means to release all callbacks for the same event
+   */
+  int release_feedback_callback(void(*callback)(unsigned char *feedback_data) = NULL);
+  int release_feedback_callback(bool clear_all);
 
   /**
    * @brief Get suction cup state
@@ -2289,8 +2321,27 @@ public:
    */
   int set_dh_params(fp32 dh_params[28], unsigned char flag = 0);
 
+  /**
+   * @brief Set the feedback type
+   *  Note:
+   *    1. only available if firmware_version >= 2.1.0
+   *    2. only works in position mode
+   *    3. only affects the feedback type of commands following this one
+   *    4. only valid for the current connection
+   * 
+   * @param feedback_type:
+   *  0: disable feedback
+   *  1: feedback when the motion task starts executing
+   *  2: feedback when the motion task execution ends
+   *  4: feedback when the motion tasks are discarded (usually when the distance is too close to be planned)
+   *  8: feedback when the non-motion task is triggered
+   * return: See the code documentation for details.
+   */
+  int set_feedback_type(unsigned char feedback_type);
+
 private:
   void _init(void);
+  void _destroy(void);
   void _sync(void);
   void _check_version(void);
   bool _version_is_ge(int major = 1, int minor = 2, int revision = 11);
@@ -2324,6 +2375,7 @@ private:
   void _report_temperature_changed_callback(void);
   void _report_count_changed_callback(void);
   void _report_iden_progress_changed_callback(void);
+  void _feedback_callback(unsigned char *feedback_data);
   int _check_modbus_code(int ret, unsigned char *rx_data = NULL, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int _get_modbus_baudrate(int *baud_inx, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int _checkset_modbus_baud(int baudrate, bool check = true, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
@@ -2362,6 +2414,8 @@ private:
   bool check_is_pause_;
   bool callback_in_thread_;
   int max_cmdnum_;
+  int max_callback_thread_count_;
+  std::thread feedback_thread_;
   std::thread report_thread_;
   std::thread report_rich_thread_;
   std::mutex mutex_;
@@ -2447,6 +2501,7 @@ private:
   std::vector<std::function<void (const fp32*)>> temperature_changed_functions_;
   std::vector<std::function<void (int)>> count_changed_functions_;
   std::vector<std::function<void (int)>> iden_progress_changed_functions_;
+  std::vector<std::function<void (unsigned char *)>> feedback_functions_;
 
   std::vector<void(*)(XArmReportData *report_data_ptr)> report_data_callbacks_;
   std::vector<void(*)(const fp32*, const fp32*)> report_location_callbacks_;
@@ -2459,6 +2514,7 @@ private:
   std::vector<void(*)(const fp32*)> temperature_changed_callbacks_;
   std::vector<void(*)(int)> count_changed_callbacks_;
   std::vector<void(*)(int)> iden_progress_changed_callbacks_;
+  std::vector<void(*)(unsigned char *)> feedback_callbacks_;
 };
 
 #endif

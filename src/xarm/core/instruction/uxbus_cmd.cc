@@ -1713,3 +1713,8 @@ int UxbusCmd::set_dh_params(float dh_params[28], unsigned char flag)
   return set_nfp32_with_bytes(UXBUS_RG::SET_DH, dh_params, 16, additional, 1);
 }
 
+int UxbusCmd::set_feedback_type(int value)
+{
+  return set_nu8(UXBUS_RG::SET_FEEDBACK_TYPE, &value, 1);
+}
+

@@ -192,4 +192,5 @@ namespace XArmWrapper {
 
   extern "C" __declspec(dllexport) int __stdcall get_dh_params(fp32 dh_params[28]);
   extern "C" __declspec(dllexport) int __stdcall set_dh_params(fp32 dh_params[28], unsigned char flag = 0);
+  extern "C" __declspec(dllexport) int __stdcall set_feedback_type(unsigned char feedback_type);
 }

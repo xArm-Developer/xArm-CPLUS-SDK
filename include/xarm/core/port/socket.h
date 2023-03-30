@@ -19,7 +19,7 @@
 
 class SocketPort {
 public:
-  SocketPort(char *server_ip, int server_port, int que_num, int que_maxlen, int tcp_type = 0);
+  SocketPort(char *server_ip, int server_port, int que_num, int que_maxlen, int tcp_type = 0, int feedback_que_num = 0, int feedback_que_maxlen = 100);
   ~SocketPort(void);
   int is_ok(void);
   void flush(void);
@@ -28,6 +28,7 @@ public:
   int write_frame(unsigned char *data, int len);
   int read_frame(unsigned char *data);
   void close_port(void);
+  int read_feedback_frame(unsigned char *data);
   int que_maxlen;
   bool is_report;
 
@@ -36,7 +37,9 @@ private:
   int fp_;
   int state_;
   int que_num_;
+  int feedback_que_num_;
   QueueMemcpy *rx_que_;
+  QueueMemcpy *feedback_que_;
 };
 
 #endif

@@ -359,6 +359,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_dh_params(float[] dh_params, byte flag = 0);
 
+        [DllImport("xarm.dll")]
+        public static extern int set_feedback_type(byte feedback_type);
+
         public static int set_position(float[] pose, float radius = -1,
             bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {

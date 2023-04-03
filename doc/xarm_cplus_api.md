@@ -2267,8 +2267,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
 - __int set_dh_params(fp32 dh_params[28], unsigned char flag = 0)__
   > Set the DH parameters  
   > &ensp;&ensp;&ensp;&ensp;Note:   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this interface is only provided for users who need to use external DH parameters, ordinary users should not try to modify DH parameters.    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0   
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this interface is only provided for users who need to use external DH parameters, ordinary users should not try to modify DH parameters.    
   >    
   > @param dh_params: DH parameters     
   > @param flag:      
@@ -2294,3 +2294,107 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   >    &ensp;&ensp;&ensp;&ensp;4: feedback when the motion tasks are discarded (usually when the distance is too close to be planned)    
   >    &ensp;&ensp;&ensp;&ensp;8: feedback when the non-motion task is triggered    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Coils  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x01    
+  >    
+  > @param addr: the starting address of the register to be read     
+  > @param quantity: number of registers     
+  > @param bits: store result      
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Discrete Inputs  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x02    
+  >    
+  > @param addr: the starting address of the register to be read     
+  > @param quantity: number of registers     
+  > @param bits: store result      
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Holding Registers  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x03    
+  >    
+  > @param addr: the starting address of the register to be read     
+  > @param quantity: number of registers     
+  > @param regs: store result      
+  > @param is_signed: whether to convert the read register value into a signed form      
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Input Registers  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x04    
+  >    
+  > @param addr: the starting address of the register to be read     
+  > @param quantity: number of registers     
+  > @param regs: store result      
+  > @param is_signed: whether to convert the read register value into a signed form      
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int write_single_coil_bit(unsigned short addr, unsigned char bit_val)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Single Coil  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x05    
+  >    
+  > @param addr: register address     
+  > @param bit_val: the value to write (0/1)       
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int write_single_holding_register(unsigned short addr, int reg_val)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Single Holding Register  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x06    
+  >    
+  > @param addr: register address     
+  > @param reg_val: the value to write       
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Multiple Coils  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x0F    
+  >    
+  > @param addr: the starting address of the register to be written     
+  > @param quantity: the number of registers to be written       
+  > @param bits: array of values to write       
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Multiple Holding Registers  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x10    
+  >    
+  > @param addr: the starting address of the register to be written     
+  > @param quantity: the number of registers to be written       
+  > @param regs: array of values to write       
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Mask Write Holding Register  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x16    
+  >    
+  > @param addr: register address     
+  > @param and_mask: mask to be AND with       
+  > @param or_mask: mask to be OR with       
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+
+- __int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false)__
+  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Mask Write Holding Register  
+  > &ensp;&ensp;&ensp;&ensp;func_code: 0x17    
+  >    
+  > @param r_addr: the starting address of the register to be read     
+  > @param r_quantity: number of registers to read    
+  > @param r_regs: store result 
+  > @param w_addr: the starting address of the register to be written     
+  > @param w_quantity: number of registers to write 
+  > @param w_regs: array of values to write to the register       
+  > @param is_signed: whether to convert the read register value into a signed form       
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)

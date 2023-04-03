@@ -565,4 +565,55 @@ namespace XArmWrapper
   {
     return arm->set_feedback_type(feedback_type);
   }
+
+  /* modbus tcp func_code: 0x01 */
+  int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)
+  {
+    return arm->read_coil_bits(addr, quantity, bits);
+  }
+  /* modbus tcp func_code: 0x02 */
+  int __stdcall read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)
+  {
+    return arm->read_input_bits(addr, quantity, bits);
+  }
+  /* modbus tcp func_code: 0x03 */
+  int __stdcall read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed)
+  {
+    return arm->read_holding_registers(addr, quantity, regs, is_signed);
+  }
+  /* modbus tcp func_code: 0x04 */
+  int __stdcall read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed)
+  {
+    return arm->read_input_registers(addr, quantity, regs, is_signed);
+  }
+  /* modbus tcp func_code: 0x05 */
+  int __stdcall write_single_coil_bit(unsigned short addr, unsigned char bit_val)
+  {
+    return arm->write_single_coil_bit(addr, bit_val);
+  }
+  /* modbus tcp func_code: 0x06 */
+  int __stdcall write_single_holding_register(unsigned short addr, int reg_val)
+  {
+    return arm->write_single_holding_register(addr, reg_val);
+  }
+  /* modbus tcp func_code: 0x0F */
+  int __stdcall write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)
+  {
+    return arm->write_multiple_coil_bits(addr, quantity, bits);
+  }
+  /* modbus tcp func_code: 0x10 */
+  int __stdcall write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs)
+  {
+    return arm->write_multiple_holding_registers(addr, quantity, regs);
+  }
+  /* modbus tcp func_code: 0x16 */
+  int __stdcall mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask)
+  {
+    return arm->mask_write_holding_register(addr, and_mask, or_mask);
+  }
+  /* modbus tcp func_code: 0x17 */
+  int __stdcall write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed)
+  {
+    return arm->write_and_read_holding_registers(r_addr, r_quantity, r_regs, w_addr, w_quantity, w_regs, is_signed);
+  }
 }

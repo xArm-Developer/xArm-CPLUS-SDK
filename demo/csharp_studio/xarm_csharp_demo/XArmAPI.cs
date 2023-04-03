@@ -362,6 +362,46 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_feedback_type(byte feedback_type);
 
+        /* modbus tcp func_code: 0x01 */
+        [DllImport("xarm.dll")]
+        public static extern int read_coil_bits(UInt16 addr, UInt16 quantity, byte[] bits);
+        
+        /* modbus tcp func_code: 0x02 */
+        [DllImport("xarm.dll")]
+        public static extern int read_input_bits(UInt16 addr, UInt16 quantity, byte[] bits);
+        
+        /* modbus tcp func_code: 0x03 */
+        [DllImport("xarm.dll")]
+        public static extern int read_holding_registers(UInt16 addr, UInt16 quantity, int[] regs, bool is_signed = false);
+        
+        /* modbus tcp func_code: 0x04 */
+        [DllImport("xarm.dll")]
+        public static extern int read_input_registers(UInt16 addr, UInt16 quantity, int[] regs, bool is_signed = false);
+        
+        /* modbus tcp func_code: 0x05 */
+        [DllImport("xarm.dll")]
+        public static extern int write_single_coil_bit(UInt16 addr, byte bit_val);
+
+        /* modbus tcp func_code: 0x06 */
+        [DllImport("xarm.dll")]
+        public static extern int write_single_holding_register(UInt16 addr, int reg_val);
+        
+        /* modbus tcp func_code: 0x0F */
+        [DllImport("xarm.dll")]
+        public static extern int write_multiple_coil_bits(UInt16 addr, UInt16 quantity, byte[] bits);
+        
+        /* modbus tcp func_code: 0x10 */
+        [DllImport("xarm.dll")]
+        public static extern int write_multiple_holding_registers(UInt16 addr, UInt16 quantity, int[] regs);
+        
+        /* modbus tcp func_code: 0x16 */
+        [DllImport("xarm.dll")]
+        public static extern int mask_write_holding_register(UInt16 addr, UInt16 and_mask, UInt16 or_mask);
+        
+        /* modbus tcp func_code: 0x17 */
+        [DllImport("xarm.dll")]
+        public static extern int write_and_read_holding_registers(UInt16 r_addr, UInt16 r_quantity, int[] r_regs, UInt16 w_addr, UInt16 w_quantity, int[] w_regs, bool is_signed = false);
+
         public static int set_position(float[] pose, float radius = -1,
             bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {

@@ -193,4 +193,25 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_dh_params(fp32 dh_params[28]);
   extern "C" __declspec(dllexport) int __stdcall set_dh_params(fp32 dh_params[28], unsigned char flag = 0);
   extern "C" __declspec(dllexport) int __stdcall set_feedback_type(unsigned char feedback_type);
+
+  /* modbus tcp func_code: 0x01 */
+  extern "C" __declspec(dllexport) int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  /* modbus tcp func_code: 0x02 */
+  extern "C" __declspec(dllexport) int __stdcall read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  /* modbus tcp func_code: 0x03 */
+  extern "C" __declspec(dllexport) int __stdcall read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
+  /* modbus tcp func_code: 0x04 */
+  extern "C" __declspec(dllexport) int __stdcall read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
+  /* modbus tcp func_code: 0x05 */
+  extern "C" __declspec(dllexport) int __stdcall write_single_coil_bit(unsigned short addr, unsigned char bit_val);
+  /* modbus tcp func_code: 0x06 */
+  extern "C" __declspec(dllexport) int __stdcall write_single_holding_register(unsigned short addr, int reg_val);
+  /* modbus tcp func_code: 0x0F */
+  extern "C" __declspec(dllexport) int __stdcall write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  /* modbus tcp func_code: 0x10 */
+  extern "C" __declspec(dllexport) int __stdcall write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs);
+  /* modbus tcp func_code: 0x16 */
+  extern "C" __declspec(dllexport) int __stdcall mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask);
+  /* modbus tcp func_code: 0x17 */
+  extern "C" __declspec(dllexport) int __stdcall write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false);
 }

@@ -20,7 +20,7 @@
 - -6: cartesian pos limit
 - -5: revesed, no use
 - -4: command is not exist
-- -3: revesed, no use
+- -3: reversed, no use
 - -2: xArm is not ready, may be the motion is not enable or not set state
 - -1: xArm is disconnect or not connect
 - 0: success
@@ -51,6 +51,9 @@
 - 101: too many consecutive failed tests
 - 102: end effector has error
 - 103: end effector is not enabled
+- 129: (standard modbus tcp)illegal/unsupported function code
+- 130: (standard modbus tcp)illegal target address
+- 131: (standard modbus tcp)exception of requested data
 
 ## Controller Warn Code
 - 11: uxbux que is full

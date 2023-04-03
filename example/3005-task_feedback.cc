@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 
   int cycles = 100;
   for (int i = 0; i < cycles; ++i) {
-    arm->set_cgpio_digital(0, 0);
+    ret = arm->set_cgpio_digital(0, 0);
     if (ret != 0) {
       printf("set_cgpio_digital, ret=%d\n", ret);
       break;

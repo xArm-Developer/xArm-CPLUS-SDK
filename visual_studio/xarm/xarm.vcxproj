@@ -32,7 +32,7 @@
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -46,7 +46,7 @@
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -83,12 +83,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)..\..\src;$(SourcePath)</SourcePath>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)..\..\src;$(SourcePath)</SourcePath>
-    <TargetExt>.dll</TargetExt>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -185,6 +185,7 @@
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_ft_sensor.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_gpio.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_gripper.cc" />
+    <ClCompile Include="..\..\src\xarm\wrapper\xarm_modbus_tcp.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_motion.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_params.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_record.cc" />

@@ -198,6 +198,7 @@
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_ft_sensor.cc" />
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_gpio.cc" />
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_gripper.cc" />
+    <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_modbus_tcp.cc" />
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_motion.cc" />
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_params.cc" />
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_record.cc" />

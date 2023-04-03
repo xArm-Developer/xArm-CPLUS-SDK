@@ -298,7 +298,7 @@ public:
   static const int END_EFFECTOR_HAS_FAULT = 102;
   static const int END_EFFECTOR_NOT_ENABLED = 103;
 
-  // 129 ～ 144: 标准ModbusTCP异常，实际异常码为(api_code-0x80)
+  // 129 ~ 144: Standard ModbusTCP exception, the actual exception code is (api_code-0x80)
 };
 
 class BIO_STATE {

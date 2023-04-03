@@ -489,7 +489,7 @@ void XArmAPI::_check_version(void) {
   }
   else {
     std::vector<std::string> tmpList = split(v, "-");
-    int size = tmpList.size();
+    size_t size = tmpList.size();
     if (size >= 3) {
       int year = atoi(tmpList[size - 3].c_str());
       int month = atoi(tmpList[size - 2].c_str());
@@ -617,7 +617,7 @@ bool XArmAPI::_version_is_ge(int major, int minor, int revision) {
     }
     else {
       std::vector<std::string> tmpList = split(v, "-");
-      int size = tmpList.size();
+      size_t size = tmpList.size();
       if (size >= 3) {
         int year = atoi(tmpList[size - 3].c_str());
         int month = atoi(tmpList[size - 2].c_str());

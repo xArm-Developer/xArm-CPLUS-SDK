@@ -23,7 +23,6 @@ int UxbusCmdSer::is_ok(void) { return arm_port_->is_ok(); }
 
 int UxbusCmdSer::send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id)
 {
-  int i;
   // unsigned char send_data[pdu_len + 4];
   unsigned char *send_data = new unsigned char[pdu_len + 4]();
 

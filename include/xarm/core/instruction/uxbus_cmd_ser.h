@@ -20,14 +20,16 @@ public:
   UxbusCmdSer(SerialPort *arm_port);
   ~UxbusCmdSer(void);
 
-  int check_xbus_prot(unsigned char *datas, int funcode);
-  int send_pend(int funcode, int num, int timeout, unsigned char *ret_data);
-  int send_xbus(int funcode, unsigned char *datas, int num);
   void close(void);
   int is_ok(void);
 
-  int get_prot_flag(void) { return 0; }
-  int set_prot_flag(int prot_flag = 2) { return 0; }
+  int get_protocol_identifier(void) { return 0; }
+  int set_protocol_identifier(int protocol_identifier = 2) { return 0; }
+
+private:
+  int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
+  int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
+  int check_private_protocol(unsigned char *data);
 
 private:
   SerialPort *arm_port_;

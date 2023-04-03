@@ -55,8 +55,8 @@ int XArmAPI::ft_sensor_set_zero(void)
 int XArmAPI::ft_sensor_iden_load(float result[10])
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int prot_flag = core->get_prot_flag();
-  core->set_prot_flag(2);
+  int protocol_identifier = core->get_protocol_identifier();
+  core->set_protocol_identifier(2);
   keep_heart_ = false;
   int ret = core->ft_sensor_iden_load(result);
   if (ret == 0) {
@@ -64,7 +64,7 @@ int XArmAPI::ft_sensor_iden_load(float result[10])
     result[2] = result[2] * (float)1000.0; // y_centroid, m to mm
     result[3] = result[3] * (float)1000.0; // z_centroid, m to mm
   }
-  core->set_prot_flag(prot_flag);
+  core->set_protocol_identifier(protocol_identifier);
   keep_heart_ = true;
   return _check_code(ret);
 }
@@ -141,15 +141,15 @@ int XArmAPI::get_ft_sensor_error(int *err)
 int XArmAPI::iden_tcp_load(float result[4], float estimated_mass)
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int prot_flag = core->get_prot_flag();
-  core->set_prot_flag(2);
+  int protocol_identifier = core->get_protocol_identifier();
+  core->set_protocol_identifier(2);
   keep_heart_ = false;
   float mass = estimated_mass;
   if (_version_is_ge(1, 9, 100) && estimated_mass <= 0) {
     mass = 0.5;
   }
   int ret = core->iden_tcp_load(result, mass);
-  core->set_prot_flag(prot_flag);
+  core->set_protocol_identifier(protocol_identifier);
   keep_heart_ = true;
   return _check_code(ret);
 }
@@ -176,13 +176,13 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
     return API_CODE::API_EXCEPTION;
   }
   
-  int prot_flag = core->get_prot_flag();
-  core->set_prot_flag(2);
+  int protocol_identifier = core->get_protocol_identifier();
+  core->set_protocol_identifier(2);
   keep_heart_ = false;
   float tmp = 0;
   int ret = core->iden_joint_friction(r_sn, &tmp);
   *result = ((int)tmp) == 0 ? 0 : -1;
-  core->set_prot_flag(prot_flag);
+  core->set_protocol_identifier(protocol_identifier);
   keep_heart_ = true;
   return _check_code(ret);
 }

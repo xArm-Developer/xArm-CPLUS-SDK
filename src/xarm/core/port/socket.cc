@@ -310,6 +310,6 @@ void SocketPort::close_port(void) {
 
 int SocketPort::read_feedback_frame(unsigned char *data)
 {
-  if (state_ != 0) { return -1; }
+  if (state_ != 0 || feedback_que_num_ <= 0) { return -1; }
   return feedback_que_->pop(data);
 }

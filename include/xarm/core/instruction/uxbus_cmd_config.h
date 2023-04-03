@@ -297,6 +297,8 @@ public:
   static const int CHECK_FAILED = 101;
   static const int END_EFFECTOR_HAS_FAULT = 102;
   static const int END_EFFECTOR_NOT_ENABLED = 103;
+
+  // 129 ～ 144: 标准ModbusTCP异常，实际异常码为(api_code-0x80)
 };
 
 class BIO_STATE {

@@ -671,7 +671,7 @@ int XArmAPI::connect(const std::string &port) {
 
     core = new UxbusCmdTcp((SocketPort *)stream_tcp_);
     printf("Tcp control connection successful\n");
-    core->set_prot_flag();
+    core->set_protocol_identifier(2);
 
     sleep_milliseconds(200);
     _check_version();

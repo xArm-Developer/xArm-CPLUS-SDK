@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.12.2"
+#define SDK_VERSION "1.13.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2338,6 +2338,130 @@ public:
    * return: See the code documentation for details.
    */
   int set_feedback_type(unsigned char feedback_type);
+
+  /**
+   * @brief (Standard Modbus TCP) Read Coils
+   *  func_code: 0x01 
+   * 
+   * @param addr: the starting address of the register to be read
+   * @param quantity: number of registers
+   * @param bits: store result
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+
+  /**
+   * @brief (Standard Modbus TCP) Read Discrete Inputs
+   *  func_code: 0x02 
+   * 
+   * @param addr: the starting address of the register to be read
+   * @param quantity: number of registers
+   * @param bits: store result
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  
+  /**
+   * @brief (Standard Modbus TCP) Read Holding Registers
+   *  func_code: 0x03 
+   * 
+   * @param addr: the starting address of the register to be read
+   * @param quantity: number of registers
+   * @param regs: store result
+   * @param is_signed: whether to convert the read register value into a signed form
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
+  
+  /**
+   * @brief (Standard Modbus TCP) Read Input Registers
+   *  func_code: 0x04
+   * 
+   * @param addr: the starting address of the register to be read
+   * @param quantity: number of registers
+   * @param regs: store result
+   * @param is_signed: whether to convert the read register value into a signed form
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
+  
+  /**
+   * @brief (Standard Modbus TCP) Write Single Coil
+   *  func_code: 0x05 
+   * 
+   * @param addr: register address 
+   * @param bit_val: the value to write (0/1)
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int write_single_coil_bit(unsigned short addr, unsigned char bit_val);
+  
+  /**
+   * @brief (Standard Modbus TCP) Write Single Holding Register
+   *  func_code: 0x06 
+   * 
+   * @param addr: register address 
+   * @param reg_val: the value to write
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int write_single_holding_register(unsigned short addr, int reg_val);
+  
+  /**
+   * @brief (Standard Modbus TCP) Write Multiple Coils
+   *  func_code: 0x0F 
+   * 
+   * @param addr: the starting address of the register to be written
+   * @param quantity: the number of registers to be written
+   * @param bits: array of values to write
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  
+  /**
+   * @brief (Standard Modbus TCP) Write Multiple Holding Registers
+   *  func_code: 0x10 
+   * 
+   * @param addr: the starting address of the register to be written
+   * @param quantity: the number of registers to be written
+   * @param regs: array of values to write
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs);
+  
+  /**
+   * @brief (Standard Modbus TCP) Mask Write Holding Register
+   *  func_code: 0x16 
+   * 
+   * @param addr: register address 
+   * @param and_mask: mask to be AND with
+   * @param or_mask: mask to be OR with
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask);
+  
+  /**
+   * @brief (Standard Modbus TCP) Write and Read Holding Registers
+   *  func_code: 0x17 
+   * 
+   * @param r_addr: the starting address of the register to be read
+   * @param r_quantity: number of registers to read
+   * @param r_regs: store result
+   * @param w_addr: the starting address of the register to be written
+   * @param w_quantity: number of registers to write
+   * @param w_regs: array of values to write to the register
+   * @param is_signed: whether to convert the read register value into a signed form
+   * @return: See the code documentation for details.
+   *  Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+   */
+  int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false);
 
 private:
   void _init(void);

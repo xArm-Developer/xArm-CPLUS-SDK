@@ -274,13 +274,34 @@ public:
 
   virtual void close(void);
   virtual int is_ok(void);
-  virtual int get_prot_flag(void);
-  virtual int set_prot_flag(int prot_flag = 2);
+  virtual int get_protocol_identifier(void);
+  virtual int set_protocol_identifier(int protocol_identifier = 2);
+
+  /* modbus tcp func_code: 0x01 */
+  virtual int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits) { return -11; };
+  /* modbus tcp func_code: 0x02 */
+  virtual int read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits) { return -11; };
+  /* modbus tcp func_code: 0x03 */
+  virtual int read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false) { return -11; };
+  /* modbus tcp func_code: 0x04 */
+  virtual int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false) { return -11; };
+  /* modbus tcp func_code: 0x05 */
+  virtual int write_single_coil_bit(unsigned short addr, unsigned bit_val) { return -11; };
+  /* modbus tcp func_code: 0x06 */
+  virtual int write_single_holding_register(unsigned short addr, int reg_val) { return -11; };
+  /* modbus tcp func_code: 0x0F */
+  virtual int write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits) { return -11; };
+  /* modbus tcp func_code: 0x10 */
+  virtual int write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs) { return -11; };
+  /* modbus tcp func_code: 0x16 */
+  virtual int mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask) { return -11; };
+  /* modbus tcp func_code: 0x17 */
+  virtual int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false) { return -11; };
 
 private:
-  virtual int check_xbus_prot(unsigned char *data, int funcode);
-  virtual int send_pend(int funcode, int num, int timeout, unsigned char *rx_data);
-  virtual int send_xbus(int funcode, unsigned char *txdata, int num);
+  virtual int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
+  virtual int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
+  virtual int check_private_protocol(unsigned char *data);
   int set_nu8(int funcode, unsigned char *datas, int num);
   int set_nu8(int funcode, int *datas, int num);
   int get_nu8(int funcode, int *rx_data, int num);

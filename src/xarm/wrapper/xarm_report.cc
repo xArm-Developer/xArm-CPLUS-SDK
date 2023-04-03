@@ -493,15 +493,15 @@ void XArmAPI::_handle_report_rich_data(void) {
   long long last_send_ms = 0;
   long long curr_ms = 0;
   int state;
-  int prot_flag = 2;
+  int protocol_identifier = 2;
 
   while (is_connected()) {
     if (ret != 0)
       sleep_milliseconds(1);
     curr_ms = get_system_time();
     if (keep_heart_) {
-      if (prot_flag != 3 && _version_is_ge(1, 8, 6) && core->set_prot_flag(3) == 0) prot_flag = 3;
-      if (prot_flag == 3 && curr_ms - last_send_ms > 10000 && curr_ms - core->last_recv_ms > 30000) {
+      if (protocol_identifier != 3 && _version_is_ge(1, 8, 6) && core->set_protocol_identifier(3) == 0) protocol_identifier = 3;
+      if (protocol_identifier == 3 && curr_ms - last_send_ms > 10000 && curr_ms - core->last_recv_ms > 30000) {
         if (get_state(&state) >= 0) last_send_ms = curr_ms;
         // printf("send heart beat\n");
         if (curr_ms - core->last_recv_ms > 90000) {
@@ -520,9 +520,9 @@ void XArmAPI::_handle_report_rich_data(void) {
       stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
       if (stream_tcp_rich_report_ == NULL) {
         connect_fail_count += 1;
-        if (is_connected() && (connect_fail_count <= max_reconnect_cnts || prot_flag == 3))
+        if (is_connected() && (connect_fail_count <= max_reconnect_cnts || protocol_identifier == 3))
           sleep_milliseconds(2000);
-        else if (!is_connected() || prot_flag == 2)
+        else if (!is_connected() || protocol_identifier == 2)
         {
           fprintf(stderr, "report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
           break;

@@ -20,23 +20,48 @@ public:
   UxbusCmdTcp(SocketPort *arm_port);
   ~UxbusCmdTcp(void);
 
-  int check_xbus_prot(unsigned char *datas, int funcode);
-  int send_pend(int funcode, int num, int timeout, unsigned char *ret_data);
-  int send_xbus(int funcode, unsigned char *datas, int num);
   void close(void);
   int is_ok(void);
 
-  int get_prot_flag(void);
-  int set_prot_flag(int prot_flag = 2);
+  int get_protocol_identifier(void);
+  int set_protocol_identifier(int protocol_identifier = 2);
+
+  /* modbus tcp func_code: 0x01 */
+  int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  /* modbus tcp func_code: 0x02 */
+  int read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  /* modbus tcp func_code: 0x03 */
+  int read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
+  /* modbus tcp func_code: 0x04 */
+  int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
+  /* modbus tcp func_code: 0x05 */
+  int write_single_coil_bit(unsigned short addr, unsigned char bit_val);
+  /* modbus tcp func_code: 0x06 */
+  int write_single_holding_register(unsigned short addr, int reg_val);
+  /* modbus tcp func_code: 0x0F */
+  int write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
+  /* modbus tcp func_code: 0x10 */
+  int write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs);
+  /* modbus tcp func_code: 0x16 */
+  int mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask);
+  /* modbus tcp func_code: 0x17 */
+  int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false);
+
+private:
+  int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
+  int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
+  int check_private_protocol(unsigned char *data);
+  int _check_protocol_header(unsigned char *data, unsigned short t_trans_id, unsigned short t_prot_id, unsigned short t_unit_id);
+
+  int _standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, unsigned char unit_id = 0x01);
+  int _read_bits(unsigned short addr, unsigned short quantity, unsigned char *bits, unsigned char funcode = 0x01);
+  int _read_registers(unsigned short addr, unsigned short quantity, int *regs, unsigned char funcode = 0x03, bool is_signed = false);
 
 private:
   SocketPort *arm_port_;
-  int bus_flag_;
-  int prot_flag_;
-  int TX2_PROT_CON_ = 2;         // tcp cmd prot
-  int TX2_PROT_HEAT_ = 1;        // tcp heat prot
-  int TX2_BUS_FLAG_MIN_ = 1;     // the min cmd num
-  int TX2_BUS_FLAG_MAX_ = 65535;  // the max cmd num
+
+  unsigned short transaction_id_;       // transaction id 
+  unsigned short protocol_identifier_;  // protocol identifier
 };
 
 #endif

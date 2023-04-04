@@ -991,7 +991,7 @@ public:
    *    1. only available if firmware_version >= 2.1.0
    * 
    *  feedback_data: unsigned char data[]
-   *    feedback_data[0:2]: cmdid, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions
+   *    feedback_data[0:2]: transaction id, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions
    *      Note: this can be used to distinguish which instruction the feedback belongs to
    *    feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)
    *    feedback_data[8]: feedback type
@@ -2326,7 +2326,7 @@ public:
    *  Note:
    *    1. only available if firmware_version >= 2.1.0
    *    2. only works in position mode
-   *    3. only affects the feedback type of commands following this one
+   *    3. the setting will only affect subsequent tasks and will not affect previously cached tasks
    *    4. only valid for the current connection
    * 
    * @param feedback_type:
@@ -2340,8 +2340,7 @@ public:
   int set_feedback_type(unsigned char feedback_type);
 
   /**
-   * @brief (Standard Modbus TCP) Read Coils
-   *  func_code: 0x01 
+   * @brief (Standard Modbus TCP) Read Coils (0x01)
    * 
    * @param addr: the starting address of the register to be read
    * @param quantity: number of registers
@@ -2352,8 +2351,7 @@ public:
   int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
 
   /**
-   * @brief (Standard Modbus TCP) Read Discrete Inputs
-   *  func_code: 0x02 
+   * @brief (Standard Modbus TCP) Read Discrete Inputs (0x02)
    * 
    * @param addr: the starting address of the register to be read
    * @param quantity: number of registers
@@ -2364,8 +2362,7 @@ public:
   int read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
   
   /**
-   * @brief (Standard Modbus TCP) Read Holding Registers
-   *  func_code: 0x03 
+   * @brief (Standard Modbus TCP) Read Holding Registers (0x03) 
    * 
    * @param addr: the starting address of the register to be read
    * @param quantity: number of registers
@@ -2377,8 +2374,7 @@ public:
   int read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
   
   /**
-   * @brief (Standard Modbus TCP) Read Input Registers
-   *  func_code: 0x04
+   * @brief (Standard Modbus TCP) Read Input Registers (0x04)
    * 
    * @param addr: the starting address of the register to be read
    * @param quantity: number of registers
@@ -2390,8 +2386,7 @@ public:
   int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false);
   
   /**
-   * @brief (Standard Modbus TCP) Write Single Coil
-   *  func_code: 0x05 
+   * @brief (Standard Modbus TCP) Write Single Coil (0x05) 
    * 
    * @param addr: register address 
    * @param bit_val: the value to write (0/1)
@@ -2401,8 +2396,7 @@ public:
   int write_single_coil_bit(unsigned short addr, unsigned char bit_val);
   
   /**
-   * @brief (Standard Modbus TCP) Write Single Holding Register
-   *  func_code: 0x06 
+   * @brief (Standard Modbus TCP) Write Single Holding Register (0x06) 
    * 
    * @param addr: register address 
    * @param reg_val: the value to write
@@ -2412,8 +2406,7 @@ public:
   int write_single_holding_register(unsigned short addr, int reg_val);
   
   /**
-   * @brief (Standard Modbus TCP) Write Multiple Coils
-   *  func_code: 0x0F 
+   * @brief (Standard Modbus TCP) Write Multiple Coils (0x0F) 
    * 
    * @param addr: the starting address of the register to be written
    * @param quantity: the number of registers to be written
@@ -2424,8 +2417,7 @@ public:
   int write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
   
   /**
-   * @brief (Standard Modbus TCP) Write Multiple Holding Registers
-   *  func_code: 0x10 
+   * @brief (Standard Modbus TCP) Write Multiple Holding Registers (0x10) 
    * 
    * @param addr: the starting address of the register to be written
    * @param quantity: the number of registers to be written
@@ -2436,8 +2428,7 @@ public:
   int write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs);
   
   /**
-   * @brief (Standard Modbus TCP) Mask Write Holding Register
-   *  func_code: 0x16 
+   * @brief (Standard Modbus TCP) Mask Write Holding Register (0x16) 
    * 
    * @param addr: register address 
    * @param and_mask: mask to be AND with
@@ -2448,8 +2439,7 @@ public:
   int mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask);
   
   /**
-   * @brief (Standard Modbus TCP) Write and Read Holding Registers
-   *  func_code: 0x17 
+   * @brief (Standard Modbus TCP) Write and Read Holding Registers (0x17) 
    * 
    * @param r_addr: the starting address of the register to be read
    * @param r_quantity: number of registers to read

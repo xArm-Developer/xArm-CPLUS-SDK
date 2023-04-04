@@ -27,6 +27,12 @@
 
 - > ### [More](./ReleaseNotes.md)
 
+## Doc
+- #### [API Document](doc/xarm_cplus_api.md)
+
+- #### [API Code Document](doc/xarm_api_code.md)
+
+- #### [UFACTORY ModbusTCP Manual](doc/UF_ModbusTCP_Manual.md)
 
 ## Linux
 
@@ -255,12 +261,3 @@
 - ##### [thirdparty-set_robotiq_gripper](example/thirdparty-set_robotiq_gripper.cc)
 
 - ##### [thirdparty-set_yinshi_gripper](example/thirdparty-set_yinshi_gripper.cc)
-
-
-## Doc
-- #### [API Document](doc/xarm_cplus_api.md)
-
-- #### [API Code Document](doc/xarm_api_code.md)
-
-- #### [UFACTORY ModbusTCP Manual](doc/UF_ModbusTCP_Manual.md)
-

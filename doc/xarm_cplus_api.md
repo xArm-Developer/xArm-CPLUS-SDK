@@ -1,9 +1,9 @@
-xArm-C++-SDK API Documentation (V1.12.0)
+# xArm-C++-SDK API Documentation (V1.13.0)
 
-# class __XArmAPI__
+## class __XArmAPI__
 ************************************
-__XArmAPI(const std::string &port="", 
-    bool is_radian=DEFAULT_IS_RADIAN,
+__XArmAPI(const std::string &robot_ip="", 
+    bool is_radian=false,
     bool do_not_open=false,
     bool check_tcp_limit=true,
     bool check_joint_limit=true,
@@ -11,13 +11,13 @@ __XArmAPI(const std::string &port="",
     bool check_robot_sn=false,
     bool check_is_ready=false,
     bool check_is_pause=true,
-    int max_callback_thread_count=10,
+    int max_callback_thread_count=100,
     int max_cmdnum = 512,
     int init_axis = 7,
     bool debug = false,
     std::string report_type = "rich",
     bool baud_checkset = true)__  
-> @param port: ip-address(such as "192.168.1.185")  
+> @param robot_ip: ip-address(such as "192.168.1.185")  
 > &ensp;&ensp;&ensp;&ensp;Note: this parameter is required if parameter do_not_open is false  
 > @param is_radian: set the default unit is radians or not, default is false  
 > @param do_not_open: do not open, default is false, if true, you need to manually call the connect interface.  
@@ -25,7 +25,7 @@ __XArmAPI(const std::string &port="",
 > @param check_joint_limit: reversed, whether checking joint limit, default is true  
 > @param check_cmdnum_limit: whether checking command num limit, default is true  
 > @param check_robot_sn: whether checking robot sn, default is false  
-> @param check_is_ready: check robot is ready to move or not, default is true   
+> @param check_is_ready: check robot is ready to move or not, default is true  
 > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version < 1.5.20  
 > @param check_is_pause: check robot is pause or not, default is true  
 > @param max_callback_thread_count: max callback thread count, default is -1  
@@ -60,19 +60,21 @@ __XArmAPI(const std::string &port="",
   > &ensp;&ensp;&ensp;&ensp;0: position control mode  
   > &ensp;&ensp;&ensp;&ensp;1: servo motion mode  
   > &ensp;&ensp;&ensp;&ensp;2: joint teaching mode  
-  > &ensp;&ensp;&ensp;&ensp;3: cartesian teaching   mode (invalid)  
+  > &ensp;&ensp;&ensp;&ensp;3: cartesian teaching mode (invalid)  
   > &ensp;&ensp;&ensp;&ensp;4: joint velocity control mode  
-  > &ensp;&ensp;&ensp;&ensp;5: cartesian velocity control mode
+  > &ensp;&ensp;&ensp;&ensp;5: cartesian velocity control mode  
+  > &ensp;&ensp;&ensp;&ensp;6: joint online trajectory planning mode  
+  > &ensp;&ensp;&ensp;&ensp;7: cartesian online trajectory planning mode  
 
 
 - __int cmd_num__
   > Number of command caches in the controller
 
 
-- __fp32 joints_torque[7]__
+- __float joints_torque[7]__
   > Joints torque, only available in socket way  
   >  
-  > @return: fp32[7]{servo-1, ..., servo-7}
+  > @return: float[7]{servo-1, ..., servo-7}
 
 
 - __bool motor_brake_states[8]__
@@ -99,10 +101,10 @@ __XArmAPI(const std::string &port="",
   > Controller warn code. See the [Controller Warn Code Documentation](./xarm_api_code.md#controller-warn-code) for details.
 
 
-- __fp32 tcp_load[4]__
+- __float tcp_load[4]__
   > xArm tcp load, only available in socket way  
   >
-  > @return: fp32[4]{weight, x, y, z}
+  > @return: float[4]{weight, x, y, z}
 
 
 - __int collision_sensitivity__
@@ -133,123 +135,123 @@ __XArmAPI(const std::string &port="",
   > Frimware version number
 
 
-- __fp32 tcp_jerk__
+- __float tcp_jerk__
   > tcp jerk 
 
 
-- __fp32 joint_jerk__
+- __float joint_jerk__
   > joint jerk
 
 
-- __fp32 rot_jerk__
+- __float rot_jerk__
   > rot jerk
 
 
-- __fp32 max_rot_acc__
+- __float max_rot_acc__
   > max rot acc
 
 
-- __fp32 tcp_speed_limit[2]__
-  > Joint acceleration limit, only available in socket way   
+- __float tcp_speed_limit[2]__
+  > Joint acceleration limit, only available in socket way  
   >
-  > @return: fp32[2]{min, max}
+  > @return: float[2]{min, max}
 
 
-- __fp32 tcp_acc_limit[2]__
+- __float tcp_acc_limit[2]__
   > Joint acceleration limit, only available in socket way  
   > 
-  > @return: fp32[2]{min, max}
+  > @return: float[2]{min, max}
 
 
-- __fp32 last_used_tcp_speed__
+- __float last_used_tcp_speed__
   > The last used cartesion speed, default value of parameter speed of interface set_position/move_circle
 
 
-- __fp32 last_used_tcp_acc__
+- __float last_used_tcp_acc__
   > The last used cartesion acceleration, default value of parameter mvacc of interface set_position/move_circle
 
 
-- __fp32 angles[7]__
-  > Servo angles
+- __float angles[7]__
+  > Servo angles  
   >
-  > @return: fp32[7]{servo-1, ..., servo-7}
+  > @return: float[7]{servo-1, ..., servo-7}
 
 
-- __fp32 last_used_angles[7]__
+- __float last_used_angles[7]__
   > The last used servo angles, default value of parameter angle of interface set_servo_angle
   >
-  > @return: fp32[7]{servo-1, ..., servo-7}
+  > @return: float[7]{servo-1, ..., servo-7}
 
 
-- __fp32 joint_speed_limit[2]__
+- __float joint_speed_limit[2]__
   > Joint speed limit,  only available in socket way 
   >
-  > @return: fp32[2]{min, max}
+  > @return: float[2]{min, max}
 
 
-- __fp32 joint_acc_limit[2]__
+- __float joint_acc_limit[2]__
   > Joint acceleration limit, only available in socket way  
   >
-  > @return: fp32[2]{min, max}
+  > @return: float[2]{min, max}
 
 
-- __fp32 last_used_joint_speed__
+- __float last_used_joint_speed__
   > The last used joint speed, default value of parameter speed of interface set_servo_angle
 
 
-- __fp32 last_used_joint_acc__
+- __float last_used_joint_acc__
   > The last used joint acceleration, default value of parameter mvacc of interface set_servo_angle
 
 
-- __fp32 position[6]__
+- __float position[6]__
   > Cartesion position
   >
-  > @return: fp32[6]{x, y, z, roll, pitch, yaw}
+  > @return: float[6]{x, y, z, roll, pitch, yaw}
 
 
-- __fp32 last_used_position[6]__
+- __float last_used_position[6]__
   > The last used cartesion position, default value of parameter x/y/z/roll/pitch/yaw of interface set_position
   > 
-  > @return: fp32[6]{x, y, z, roll, pitch, yaw}
+  > @return: float[6]{x, y, z, roll, pitch, yaw}
 
 
-- __fp32 tcp_offset[6]__
+- __float tcp_offset[6]__
   > Cartesion position offset, only available in socket way and enable_report is true 
   >
-  > @return: fp32[6]{x, y, z, roll, pitch, yaw}
+  > @return: float[6]{x, y, z, roll, pitch, yaw}
 
 
-- __fp32 gravity_direction[3]__
+- __float gravity_direction[3]__
   > gravity direction, only available in socket way 
   >
-  >@return: fp32[3]{x_direction, y_direction, z_direction}
+  >@return: float[3]{x_direction, y_direction, z_direction}
 
 
-- __fp32 realtime_tcp_speed__
+- __float realtime_tcp_speed__
   > The real time speed of tcp motion, only available if version > 1.2.11
 
 
-- __fp32 realtime_joint_speeds[7]__
+- __float realtime_joint_speeds[7]__
   > The real time speed of joint motion, only available if version > 1.2.11
 
 
-- __fp32 world_offset[6]__
+- __float world_offset[6]__
   > Base coordinate offset, only available if version > 1.2.11
   >
   > Note:  
   > &ensp;&ensp;&ensp;&ensp;1. If self.default_is_radian is true, the returned value(roll_offset/pitch_offset/yaw_offset) is in radians
   >
-  > @return: fp32[6]{x_offset(mm), y_offset(mm), z_offset(mm), roll_offset(° or rad), pitch_offset(° or rad), yaw_offset(° or rad)}
+  > @return: float[6]{x_offset(mm), y_offset(mm), z_offset(mm), roll_offset(° or rad), pitch_offset(° or rad), yaw_offset(° or rad)}
 
 
 - __int count__
   > Counter value
 
 
-- __fp32 temperatures[7]__
+- __float temperatures[7]__
   > Motor temperature, only available if version > 1.2.11
   > 
-  > @return: fp32[7]{motor-1-temperature, ..., motor-7-temperature}
+  > @return: float[7]{motor-1-temperature, ..., motor-7-temperature}
 
 
 - __unsigned char gpio_reset_config[2]__
@@ -262,16 +264,16 @@ __XArmAPI(const std::string &port="",
   > The default unit is radians or not
 
 
-- __fp32 voltages[7]__
+- __float voltages[7]__
   > Servos voltage
   >         
-  > @return: fp32[7]{servo-1-voltage, ..., servo-7-voltage}
+  > @return: float[7]{servo-1-voltage, ..., servo-7-voltage}
 
 
-- __fp32 currents[7]__
+- __float currents[7]__
   > Servos electric current
   >
-  > @return: fp32[7]{servo-1-current, ..., servo-7-current}
+  > @return: float[7]{servo-1-current, ..., servo-7-current}
 
 
 - __int is_collision_detection__
@@ -282,7 +284,7 @@ __XArmAPI(const std::string &port="",
   > self collision tool type
 
 
-- __fp32 collision_model_params[6]__
+- __float collision_model_params[6]__
   > self collision model params
 
 
@@ -290,11 +292,11 @@ __XArmAPI(const std::string &port="",
   > the progress of identifition
 
 
-- __fp32 ft_ext_force[6]__
+- __float ft_ext_force[6]__
   > the ext force data of ft sensor
 
 
-- __fp32 ft_raw_force[6]__
+- __float ft_raw_force[6]__
   > the raw force data of ft sensor
 
 
@@ -329,12 +331,12 @@ __XArmAPI(const std::string &port="",
 - __int connect(const std::string &port="")__
   > Connect to xArm
   >
-  > @param port: port name or the ip address
-  >@return:  
+  > @param port: port name or the ip address  
+  > @return:  
   > &ensp;&ensp;&ensp;&ensp;0: success  
   > &ensp;&ensp;&ensp;&ensp;-1: port is empty  
   > &ensp;&ensp;&ensp;&ensp;-2: tcp control connect failed  
-  > &ensp;&ensp;&ensp;&ensp;-3: tcp report connect   failed
+  > &ensp;&ensp;&ensp;&ensp;-3: tcp report connect failed
 
 
 - __void disconnect(void)__
@@ -386,7 +388,7 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_position(fp32 pose[6])__
+- __int get_position(float pose[6])__
   > Get the cartesian position
   >
   > @param pose: the position of xArm, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
@@ -395,7 +397,7 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_servo_angle(fp32 angles[7])__
+- __int get_servo_angle(float angles[7])__
   > Get the servo angle
   >
   > @param angles: the angles of the servos, like [servo-1, ..., servo-7]  
@@ -469,7 +471,7 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_pause_time(fp32 sltime)__
+- __int set_pause_time(float sltime)__
   > Set the arm pause time, xArm will pause sltime second
   > 
   > @param sltime: sleep second  
@@ -490,7 +492,7 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_gravity_direction(fp32 gravity_dir[3])__
+- __int set_gravity_direction(float gravity_dir[3])__
   > Set the direction of gravity
   > 
   > @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]  
@@ -514,9 +516,9 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_position(fp32 pose[6], fp32 radius=-1, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, bool relative = false, unsigned char motion_type=0)__
-- __int set_position(fp32 pose[6], fp32 radius, bool wait, fp32 timeout=NO_TIMEOUT, bool relative=false, unsigned char motion_type=0)__
-- __int set_position(fp32 pose[6], bool wait, fp32 timeout=NO_TIMEOUT, bool relative=false, unsigned char motion_type=0)__
+- __int set_position(float pose[6], float radius=-1, float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, bool relative = false, unsigned char motion_type=0)__
+- __int set_position(float pose[6], float radius, bool wait, float timeout=NO_TIMEOUT, bool relative=false, unsigned char motion_type=0)__
+- __int set_position(float pose[6], bool wait, float timeout=NO_TIMEOUT, bool relative=false, unsigned char motion_type=0)__
   > Set the position  
   > &ensp;&ensp;&ensp;&ensp;MoveLine: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveArcLine: Linear arc motion with interpolation  
@@ -532,23 +534,23 @@ __XArmAPI(const std::string &port="",
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  
   > @param relative: relative move or not  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.100  
-  > @param motion_type: motion planning type, default is 0    
-  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning   
+  > @param motion_type: motion planning type, default is 0  
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning  
   > &ensp;&ensp;&ensp;&ensp;motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible  
   > &ensp;&ensp;&ensp;&ensp;motion_type == 2: direct transfer to IK using joint planning  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.11.100  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. when motion_type is 1 or 2, linear motion cannot be guaranteed  
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`speed = speed / max_tcp_speed * max_joint_speed`  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`acc = acc / max_tcp_acc * max_joint_acc`  
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered     
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered  
   >
-  > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.   
+  > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_tool_position(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, unsigned char motion_type=0)__
-- __int set_tool_position(fp32 pose[6], bool wait, fp32 timeout=NO_TIMEOUT, unsigned char motion_type=0)__
+- __int set_tool_position(float pose[6], float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, unsigned char motion_type=0)__
+- __int set_tool_position(float pose[6], bool wait, float timeout=NO_TIMEOUT, unsigned char motion_type=0)__
   > Movement relative to the tool coordinate system  
   > &ensp;&ensp;&ensp;&ensp;MoveToolLine: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveToolArcLine: Linear arc motion with interpolation  
@@ -563,14 +565,14 @@ __XArmAPI(const std::string &port="",
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  
   > @param radius: move radius, if radius less than 0, will MoveToolLine, else MoveToolArcLine  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.100  
-  > @param motion_type: motion planning type, default is 0    
+  > @param motion_type: motion planning type, default is 0  
   > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning   
   > &ensp;&ensp;&ensp;&ensp;motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible  
   > &ensp;&ensp;&ensp;&ensp;motion_type == 2: direct transfer to IK using joint planning  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.11.100  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. when motion_type is 1 or 2, linear motion cannot be guaranteed  
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`speed = speed / max_tcp_speed * max_joint_speed`  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`acc = acc / max_tcp_acc * max_joint_acc`  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered  
@@ -578,10 +580,10 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_servo_angle(fp32 angles[7], fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, fp32 radius = -1)__
-- __int set_servo_angle(fp32 angles[7], bool wait, fp32 timeout=NO_TIMEOUT, fp32 radius = -1, bool relative = false)__
-- __int set_servo_angle(int servo_id, fp32 angle, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, fp32 radius = -1, bool relative = false)__
-- __int set_servo_angle(int servo_id, fp32 angle, bool wait, fp32 timeout=NO_TIMEOUT, fp32 radius = -1, bool relative = false)__
+- __int set_servo_angle(float angles[7], float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, float radius = -1)__
+- __int set_servo_angle(float angles[7], bool wait, float timeout=NO_TIMEOUT, float radius = -1, bool relative = false)__
+- __int set_servo_angle(int servo_id, float angle, float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, float radius = -1, bool relative = false)__
+- __int set_servo_angle(int servo_id, float angle, bool wait, float timeout=NO_TIMEOUT, float radius = -1, bool relative = false)__
   > Set the servo angle
   > 
   > @param angles: angles, like [servo-1, ..., servo-7]  
@@ -606,7 +608,7 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_servo_angle_j(fp32 angles[7], fp32 speed=0, fp32 acc=0, fp32 mvtime=0)__
+- __int set_servo_angle_j(float angles[7], float speed=0, float acc=0, float mvtime=0)__
   > Set the servo angle, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))  
   > 
   > @param angles: angles, like [servo-1, ..., servo-7]  
@@ -623,7 +625,7 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_servo_cartesian(fp32 pose[6], fp32 speed=0, fp32 acc=0, fp32 mvtime=0,  bool is_tool_coord = false)__
+- __int set_servo_cartesian(float pose[6], float speed=0, float acc=0, float mvtime=0,  bool is_tool_coord = false)__
   > Servo cartesian motion, execute only the last instruction, need to be set to servo motion mode(this.set_mode(1))  
   > 
   > @param pose: position, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
@@ -633,11 +635,11 @@ __XArmAPI(const std::string &port="",
   > @param mvacc: reserved, move acceleration (mm/s^2)  
   > @param mvtime: reserved, 0  
   > @param is_tool_coord: is tool coordinate or not  
-  >    
+  > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int move_circle(fp32 pose1[6], fp32 pose2[6], fp32 percent, fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT, bool is_tool_coord=false, bool is_axis_angle=false)__
+- __int move_circle(float pose1[6], float pose2[6], float percent, float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, bool is_tool_coord=false, bool is_axis_angle=false)__
   > The motion calculates the trajectory of the space circle according to the three-point coordinates.  
   > Note:  
   > &ensp;&ensp;&ensp;&ensp;The three-point coordinates are (current starting point, pose1, pose2).  
@@ -660,8 +662,8 @@ __XArmAPI(const std::string &port="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int move_gohome(fp32 speed=0, fp32 acc=0, fp32 mvtime=0, bool wait=false, fp32 timeout=NO_TIMEOUT)__
-__int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
+- __int move_gohome(float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT)__
+__int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > Move to go home (Back to zero)  
   >
   > @param speed: move speed (rad/s or °/s), default is 50 °/s  
@@ -677,7 +679,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __void reset(bool wait=false, fp32 timeout=NO_TIMEOUT)__
+- __void reset(bool wait=false, float timeout=NO_TIMEOUT)__
   > Reset  
   > 
   > @param wait: whether to wait for the arm to complete, default is false  
@@ -688,7 +690,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Emergency stop
 
 
-- __int set_tcp_offset(fp32 pose_offset[6])__
+- __int set_tcp_offset(float pose_offset[6])__
   > Set the tool coordinate system offset at the end  
   > 
   > @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
@@ -698,7 +700,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
 
 
-- __int set_tcp_load(fp32 weight, fp32 center_of_gravity[3])__
+- __int set_tcp_load(float weight, float center_of_gravity[3])__
   > Set the tcp load
   > 
   > @param weight: load weight (unit: kg)  
@@ -706,21 +708,21 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
 
 
-- __int set_tcp_jerk(fp32 jerk)__
+- __int set_tcp_jerk(float jerk)__
   > Set the translational jerk of Cartesian space  
   > 
   > @param jerk: jerk (mm/s^3)  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_tcp_maxacc(fp32 acc)__
+- __int set_tcp_maxacc(float acc)__
   > Set the max translational acceleration of Cartesian space  
   > 
   > @param acc: max acceleration (mm/s^2)  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_joint_jerk(fp32 jerk)__
+- __int set_joint_jerk(float jerk)__
   > Set the jerk of Joint space  
   > 
   > @param jerk: jerk (°/s^3 or rad/s^3)  
@@ -729,7 +731,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_joint_maxacc(fp32 acc)__
+- __int set_joint_maxacc(float acc)__
   > Set the max acceleration of Joint space
   > 
   > @param acc: max acceleration (°/s^2 or rad/s^2)  
@@ -738,20 +740,20 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_inverse_kinematics(fp32 pose[6], fp32 angles[7])__
+- __int get_inverse_kinematics(float pose[6], float angles[7])__
   > Get inverse kinematics
   > 
   > @param pose: source pose, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of roll/pitch/yaw should be in radians  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of roll/pitch/yaw should be in degrees  
   > @param angles: target angles, like [servo-1, ..., servo-7]  
-  > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
-      if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees  
+  > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians  
+  > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_forward_kinematics(fp32 angles[7], fp32 pose[6])__
+- __int get_forward_kinematics(float angles[7], float pose[6])__
   > Get forward kinematics
   > 
   > @param angles: source angles, like [servo-1, ..., servo-7]  
@@ -764,7 +766,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int is_tcp_limit(fp32 pose[6], int *limit)__
+- __int is_tcp_limit(float pose[6], int *limit)__
   > Check the tcp pose is in limit
   > 
   > @param pose: pose, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
@@ -775,7 +777,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int is_joint_limit(fp32 angles[7], int *limit)__
+- __int is_joint_limit(float angles[7], int *limit)__
   > Check the joint is in limit
   > 
   > @param angles: angles, like [servo-1, ..., servo-7]  
@@ -803,14 +805,14 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_gripper_position(fp32 *pos)__
+- __int get_gripper_position(float *pos)__
   > Get the gripper position
   > 
   > @param pos: used to store the results obtained  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_gripper_position(fp32 pos, bool wait=false, fp32 timeout=10, bool wait_motion = true)__
+- __int set_gripper_position(float pos, bool wait=false, float timeout=10, bool wait_motion = true)__
   > Set the gripper position
   > 
   > @param pos: gripper position  
@@ -820,7 +822,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_gripper_speed(fp32 speed)__
+- __int set_gripper_speed(float speed)__
   > Set the gripper speed
   > 
   > @param speed:  
@@ -857,7 +859,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_tgpio_analog(int ionum, fp32 *value)__
+- __int get_tgpio_analog(int ionum, float *value)__
   > Get the analog value of the specified Tool GPIO
   > 
   > @param ionum: ionum, 0 or 1  
@@ -872,7 +874,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_cgpio_analog(int ionum, fp32 *value)__
+- __int get_cgpio_analog(int ionum, float *value)__
   > Get the analog value of the specified Controller GPIO
   > 
   > @param ionum: ionum, 0 or 1  
@@ -933,7 +935,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf, int *input_conf2 = NULL, int *output_conf2 = NULL)__
+- __int get_cgpio_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2 = NULL, int *output_conf2 = NULL)__
   > Get the state of the Controller GPIO
   > 
   > @param state: contorller gpio module state and controller gpio module error code  
@@ -962,8 +964,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int register_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles))__
-- __int register_report_location_callback(std::function<void (const fp32*, const fp32*)> callback)__
+- __int register_report_location_callback(void(*callback)(const float *pose, const float *angles))__
+- __int register_report_location_callback(std::function<void (const float*, const float*)> callback)__
   > Register the report location callback
 
 
@@ -997,8 +999,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Register the cmdnum changed callback
 
 
-- __int register_temperature_changed_callback(void(*callback)(const fp32 *temps))__
-- __int register_temperature_changed_callback(std::function<void (const fp32*)> callback)__
+- __int register_temperature_changed_callback(void(*callback)(const float *temps))__
+- __int register_temperature_changed_callback(std::function<void (const float*)> callback)__
   > Register the temperature changed callback
 
 
@@ -1013,27 +1015,27 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
 
 - __int register_feedback_callback(void(*callback)(unsigned char *feedback_data))__
 - __int register_feedback_callback(std::function<void (unsigned char *feedback_data)> callback)__
-  > Register the feedback data callback
-  > Note:    
-  > &ensp;&ensp;&ensp;&ensp;only available if firmware_version >= 2.1.0    
+  > Register the feedback data callback  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;only available if firmware_version >= 2.1.0  
   >    
-  > feedback_data: unsigned char data[]     
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[0:2]: cmdid, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish which instruction the feedback belongs to    
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)    
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[8]: feedback type    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1: the motion task starts executing    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2: the motion task execution ends    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4: the motion tasks are discarded (usually when the distance is too close to be planned)    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;8: the non-motion task is triggered    
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish what instruction the feedback belongs to    
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)    
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 65-bit integer data), time when feedback triggers (microseconds)    
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this time is the corresponding controller system time when the feedback is triggered    
+  > feedback_data: unsigned char data[]  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[0:2]: transaction id, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish which instruction the feedback belongs to  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[8]: feedback type  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1: the motion task starts executing  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2: the motion task execution ends  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4: the motion tasks are discarded (usually when the distance is too close to be planned)  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;8: the non-motion task is triggered  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish what instruction the feedback belongs to  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 65-bit integer data), time when feedback triggers (microseconds)  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this time is the corresponding controller system time when the feedback is triggered  
 
 
-- __int release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles)=NULL)__
+- __int release_report_location_callback(void(*callback)(const float *pose, const float *angles)=NULL)__
   > Release the location report callback
   > 
   > @param callback: NULL means to release all callbacks
@@ -1075,7 +1077,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @param callback: NULL means to release all callbacks for the same event
 
 
-- __int release_temperature_changed_callback(void(*callback)(const fp32 *temps)=NULL)__
+- __int release_temperature_changed_callback(void(*callback)(const float *temps)=NULL)__
   > Release the temperature changed callback
   > 
   > @param callback: NULL means to release all callbacks for the same event
@@ -1248,10 +1250,9 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Stop trajectory recording
   > 
   > @param filename: the name to save  
-  > &ensp;&ensp;&ensp;&ensp;If the filename is NULL, just stop recording, do not save, you need to manually call `save_record_trajectory` save before changing the mode. otherwise it will be lost    
-      the trajectory is saved in the controller box.  
+  > &ensp;&ensp;&ensp;&ensp;If the filename is NULL, just stop recording, do not save, you need to manually call `save_record_trajectory` save before changing the mode. otherwise it will be lost the trajectory is saved in the controller box.  
   > &ensp;&ensp;&ensp;&ensp;This action will overwrite the trajectory with the same name
-      empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.
+      empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -1261,8 +1262,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > 
   > @param filename: the name to save  
   > &ensp;&ensp;&ensp;&ensp;The trajectory is saved in the controller box.  
-  > &ensp;&ensp;&ensp;&ensp;This action will overwrite the trajectory with the same name
-      empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.   
+  > &ensp;&ensp;&ensp;&ensp;This action will overwrite the trajectory with the same name empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -1317,7 +1317,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
 - __int set_tgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r)__
   > Set the digital value of the specified Tool GPIO when the robot has reached the specified xyz position
   > 
-  > @param ionum: 0 or 1   
+  > @param ionum: 0 or 1  
   > @param value: value  
   > @param xyz: position xyz, as [x, y, z]  
   > @param tol_r: fault tolerance radius
@@ -1363,8 +1363,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_position_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, fp32 mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
-- __int set_position_aa(fp32 pose[6], bool is_tool_coord, bool relative = false, bool wait = false, fp32 timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
+- __int set_position_aa(float pose[6], float speed = 0, float acc = 0, float mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
+- __int set_position_aa(float pose[6], bool is_tool_coord, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
   > Set the pose represented by the axis angle pose  
   > &ensp;&ensp;&ensp;&ensp;MoveLineAA: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveArcLineAA: Linear arc motion with interpolation  
@@ -1380,15 +1380,15 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @param wait: whether to wait for the arm to complete, default is false  
   > @param timeout: maximum waiting time(unit: second), default is no timeout, only valid if wait is true  
   > @param radius: move radius, if radius less than 0, will MoveLineAA, else MoveArcLineAA  
-  > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.100
-  > @param motion_type: motion planning type, default is 0    
-  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning   
+  > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.100  
+  > @param motion_type: motion planning type, default is 0  
+  > &ensp;&ensp;&ensp;&ensp;motion_type == 0: default, linear planning  
   > &ensp;&ensp;&ensp;&ensp;motion_type == 1: prioritize linear planning, and turn to IK for joint planning when linear planning is not possible  
   > &ensp;&ensp;&ensp;&ensp;motion_type == 2: direct transfer to IK using joint planning  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.11.100  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. when motion_type is 1 or 2, linear motion cannot be guaranteed  
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage    
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. once IK is transferred to joint planning, the given Cartesian velocity and acceleration are converted into joint velocity and acceleration according to the percentage  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`speed = speed / max_tcp_speed * max_joint_speed`  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;`acc = acc / max_tcp_acc * max_joint_acc`  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;4. if there is no suitable IK, a C40 error will be triggered  
@@ -1396,8 +1396,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_servo_cartesian_aa(fp32 pose[6], fp32 speed = 0, fp32 acc = 0, bool is_tool_coord = false, bool relative = false)__
-- __int set_servo_cartesian_aa(fp32 pose[6], bool is_tool_coord, bool relative = false)__
+- __int set_servo_cartesian_aa(float pose[6], float speed = 0, float acc = 0, bool is_tool_coord = false, bool relative = false)__
+- __int set_servo_cartesian_aa(float pose[6], bool is_tool_coord, bool relative = false)__
   > Set the servo cartesian represented by the axis angle pose, execute only the last instruction, need to be set to servo motion mode(self.set_mode(1))  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.4.7
   > 
@@ -1428,7 +1428,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_position_aa(fp32 pose[6])__
+- __int get_position_aa(float pose[6])__
   > Get the pose represented by the axis angle pose
   > 
   > @param pose: the pose represented by the axis angle pose of xArm, like [x(mm), y(mm), z(mm), rx(rad or °), ry(rad or °), rz(rad or °)]  
@@ -1446,7 +1446,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = NULL)__
+- __int robotiq_set_activate(bool wait = true, float timeout = 3, unsigned char ret_data[6] = NULL)__
 - __int robotiq_set_activate(bool wait = true, unsigned char ret_data[6] = NULL)__
 - __int robotiq_set_activate(unsigned char ret_data[6] = NULL)__
   > If not already activated. Activate the robotiq gripper
@@ -1458,8 +1458,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5,  unsigned char ret_data[6] = NULL)__
-- __int robotiq_set_position(unsigned char pos, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
+- __int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5,  unsigned char ret_data[6] = NULL)__
+- __int robotiq_set_position(unsigned char pos, bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
 - __int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL)__
 - __int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL)__
   > Go to the position with determined speed and force.
@@ -1474,8 +1474,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_open(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
+- __int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
+- __int robotiq_open(bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
 - __int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL)__
 - __int robotiq_open(unsigned char ret_data[6] = NULL)__
   > Open the robotiq gripper
@@ -1489,8 +1489,8 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_close(bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL)__
+- __int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
+- __int robotiq_close(bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
 - __int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL)__
 - __int robotiq_close(unsigned char ret_data[6] = NULL)__
   > Close the robotiq gripper
@@ -1521,7 +1521,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_bio_gripper_enable(bool enable, bool wait = true, fp32 timeout = 3)__
+- __int set_bio_gripper_enable(bool enable, bool wait = true, float timeout = 3)__
   > If not already enabled. Enable the bio gripper
   > 
   > @param enable: enable or not  
@@ -1539,19 +1539,19 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5)__
-- __int open_bio_gripper(bool wait = true, fp32 timeout = 5)__
+- __int open_bio_gripper(int speed = 0, bool wait = true, float timeout = 5)__
+- __int open_bio_gripper(bool wait = true, float timeout = 5)__
   > Open the bio gripper
   > 
   > @param speed: speed value, default is 0 (not set the speed)  
   > @param wait: whether to wait for the bio gripper motion complete, default is true  
   > @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
-  >         
+  > 
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5)__
-- __int close_bio_gripper(bool wait = true, fp32 timeout = 5)__
+- __int close_bio_gripper(int speed = 0, bool wait = true, float timeout = 5)__
+- __int close_bio_gripper(bool wait = true, float timeout = 5)__
   > Close the bio gripper
   > 
   > @param speed: speed value, default is 0 (not set the speed)  
@@ -1594,7 +1594,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Set the modbus timeout of the tool gpio
   > 
   > @param timeout: timeout, milliseconds  
-  > @param is_transparent_transmission: whether the set timeout is the timeout of transparent transmission   
+  > @param is_transparent_transmission: whether the set timeout is the timeout of transparent transmission  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.11.0
   > 
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
@@ -1680,14 +1680,14 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;@param x: the length of the cuboid in the x coordinate direction, (unit: mm)  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;@param y: the length of the cuboid in the y coordinate direction, (unit: mm)  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;@param z: the length of the cuboid in the z coordinate direction, (unit: mm)  
-  >        
+  > 
   > @param n: the count of the additional parameters  
   > @param ...: additional parameters  
   > 
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int vc_set_joint_velocity(fp32 speeds[7], bool is_sync = true, fp32 duration = -1.0)__
+- __int vc_set_joint_velocity(float speeds[7], bool is_sync = true, float duration = -1.0)__
   > Joint velocity control, need to be set to joint velocity control mode(this.set_mode(4))
   > 
   > @param speeds: [spd_J1, spd_J2, ..., spd_J7]  
@@ -1703,7 +1703,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int vc_set_cartesian_velocity(fp32 speeds[6], bool is_tool_coord = false, fp32 duration = -1.0)__
+- __int vc_set_cartesian_velocity(float speeds[6], bool is_tool_coord = false, float duration = -1.0)__
   > Cartesian velocity control, need to be set to cartesian velocity control mode(self.set_mode(5))
   > 
   > @param speeds: [spd_x, spd_y, spd_z, spd_rx, spd_ry, spd_rz]  
@@ -1885,7 +1885,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.8.3  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
   > 
-  > @param app_code: force mode.   
+  > @param app_code: force mode.  
   > &ensp;&ensp;&ensp;&ensp;0: non-force mode  
   > &ensp;&ensp;&ensp;&ensp;1: impendance control  
   > &ensp;&ensp;&ensp;&ensp;2: force control
@@ -1973,7 +1973,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Identification the tcp load with current  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.0
   > 
-  > @param result: the result of identification. [mass，x_centroid，y_centroid，z_centroid]
+  > @param result: the result of identification. [mass，x_centroid，y_centroid，z_centroid]  
   > @param estimated_mass: estimated mass  
   > &ensp;&ensp;&ensp;&ensp;Note: this parameter is only available on the Lite6 model manipulator, and this parameter must be specified for the Lite6 model manipulator  
   > 
@@ -2080,7 +2080,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;Note:  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.8.0  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. only useful when powering on for the first time  
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. this operation must be performed at the first power-on 
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;3. this operation must be performed at the first power-on  
   > 
   > @param wait: wait to motion finish or not, default is true  
   > @param auto_enable: enable after back to origin or not, default is true
@@ -2088,7 +2088,7 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_linear_track_pos(int pos, int speed = 0, bool wait = true, fp32 timeout = 100, bool auto_enable = true)__
+- __int set_linear_track_pos(int pos, int speed = 0, bool wait = true, float timeout = 100, bool auto_enable = true)__
   > Set the position of the linear track  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.8.0
   > 
@@ -2155,20 +2155,20 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > Set allow to avoid overspeed near some singularities using approximate solutions  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
   > 
-  > @param on_off: allow or not, default is false     
+  > @param on_off: allow or not, default is false  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7])__
+- __int get_joint_states(float position[7], float velocity[7], float effort[7])__
   > Get the joint states  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
   >
-  > @param position: the angles of the joints, like [angle-1, ..., angle-7]    
+  > @param position: the angles of the joints, like [angle-1, ..., angle-7]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of angle-1/.../angle-7 should be in radians  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of angle-1/.../angle-7 should be in degrees  
-  > @param velocity: the velocities of the joints, like [velo-1, ..., velo-7]    
+  > @param velocity: the velocities of the joints, like [velo-1, ..., velo-7]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of velo-1/.../velo-7 should be in radians  
-  > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of velo-1/.../velo-7 should be in degrees   
+  > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of velo-1/.../velo-7 should be in degrees  
   > @param effort: the efforts of the joints, like [effort-1, ..., effort-7]  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -2179,40 +2179,40 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > 
   > @param result: the result of identification
   > &ensp;&ensp;&ensp;&ensp;0: success  
-  > &ensp;&ensp;&ensp;&ensp;-1: failure     
-  > @param sn: robot sn    
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.   
+  > &ensp;&ensp;&ensp;&ensp;-1: failure  
+  > @param sn: robot sn  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
 - __int open_lite6_gripper(void)__
   > Open the gripper of Lite6 series robotics arms  
-  > &ensp;&ensp;&ensp;&ensp;Note:   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms    
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms  
   >    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
 - __int close_lite6_gripper(void)__
   > Close the gripper of Lite6 series robotics arms  
-  > &ensp;&ensp;&ensp;&ensp;Note:   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms    
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms  
   >    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
 - __int stop_lite6_gripper(void)__
   > Stop the gripper of Lite6 series robotics arms  
-  > &ensp;&ensp;&ensp;&ensp;Note:   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0   
-  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms    
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
+  >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms  
   >    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
 - __int set_only_check_type(unsigned char only_check_type = 0)__
-  > Set the motion process detection type (valid for all motion interfaces of the current SDK instance)   
+  > Set the motion process detection type (valid for all motion interfaces of the current SDK instance)  
   > &ensp;&ensp;&ensp;&ensp;Note1: only available if firmware_version >= 1.11.100   
   > &ensp;&ensp;&ensp;&ensp;Note2: This interface is a global configuration item of the current SDK, and affects all motion-related interfaces  
   > &ensp;&ensp;&ensp;&ensp;Note3: Generally, you only need to call when you don't want to move the robotic arm and only check whether some paths will have self-collision/angle-limit/cartesian-limit/overspeed. motion-related interfaces  
@@ -2249,152 +2249,142 @@ __int move_gohome(bool wait=false, fp32 timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;__only_check_type == 1__: Only check the self-collision without moving, take the actual state of the manipulator as the initial planned path, and check whether the path has self-collision (the intermediate state will be updated at this time)  
   > &ensp;&ensp;&ensp;&ensp;__only_check_type == 2__: Only check the self-collision without moving, use the intermediate state as the starting planning path, check whether the path has self-collision (the intermediate state will be updated at this time), and restore the intermediate state to the actual state after the end  
   > &ensp;&ensp;&ensp;&ensp;__only_check_type == 3__: Only check the self-collision without moving, use the intermediate state as the starting planning path, and check whether the path has self-collision (the intermediate state will be updated at this time)  
-  >    
+  > 
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int get_dh_params(fp32 dh_params[28])__
+- __int get_dh_params(float dh_params[28])__
   > Stop the gripper of Lite6 series robotics arms  
-  > &ensp;&ensp;&ensp;&ensp;Note:   
+  > &ensp;&ensp;&ensp;&ensp;Note:  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0  
   >    
-  > @param dh_params: the result of DH parameters     
-  > &ensp;&ensp;&ensp;&ensp;dh_params[0:4]: DH parameters of Joint-1    
-  > &ensp;&ensp;&ensp;&ensp;dh_params[4:8]: DH parameters of Joint-2    
-  > &ensp;&ensp;&ensp;&ensp;...    
-  > &ensp;&ensp;&ensp;&ensp;dh_params[24:28]: DH parameters of Joint-7    
+  > @param dh_params: the result of DH parameters  
+  > &ensp;&ensp;&ensp;&ensp;dh_params[0:4]: DH parameters of Joint-1  
+  > &ensp;&ensp;&ensp;&ensp;dh_params[4:8]: DH parameters of Joint-2  
+  > &ensp;&ensp;&ensp;&ensp;...  
+  > &ensp;&ensp;&ensp;&ensp;dh_params[24:28]: DH parameters of Joint-7  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int set_dh_params(fp32 dh_params[28], unsigned char flag = 0)__
+- __int set_dh_params(float dh_params[28], unsigned char flag = 0)__
   > Set the DH parameters  
-  > &ensp;&ensp;&ensp;&ensp;Note:   
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0   
-  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this interface is only provided for users who need to use external DH parameters, ordinary users should not try to modify DH parameters.    
+  > &ensp;&ensp;&ensp;&ensp;Note:  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0  
+  > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this interface is only provided for users who need to use external DH parameters, ordinary users should not try to modify DH parameters.  
   >    
-  > @param dh_params: DH parameters     
-  > @param flag:      
-  > &ensp;&ensp;&ensp;&ensp;0: Use the set DH parameters, but do not write to the configuration file
-  > &ensp;&ensp;&ensp;&ensp;1: Use the set DH parameters and write to the configuration file    
-  > &ensp;&ensp;&ensp;&ensp;2: Use the set DH parameters and delete the DH parameters of the configuration file    
-  > &ensp;&ensp;&ensp;&ensp;3: Use the default DH parameters, but will not delete the DH parameters of the configuration file    
-  > &ensp;&ensp;&ensp;&ensp;4: Use the default DH parameters and delete the DH parameters of the configuration file    
+  > @param dh_params: DH parameters  
+  > @param flag:  
+  > &ensp;&ensp;&ensp;&ensp;0: Use the set DH parameters, but do not write to the configuration file  
+  > &ensp;&ensp;&ensp;&ensp;1: Use the set DH parameters and write to the configuration file  
+  > &ensp;&ensp;&ensp;&ensp;2: Use the set DH parameters and delete the DH parameters of the configuration file  
+  > &ensp;&ensp;&ensp;&ensp;3: Use the default DH parameters, but will not delete the DH parameters of the configuration file  
+  > &ensp;&ensp;&ensp;&ensp;4: Use the default DH parameters and delete the DH parameters of the configuration file  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int set_feedback_type(unsigned char feedback_type)__
-  > Set the feedback type    
-  > Note:     
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.1.0    
-  > &ensp;&ensp;&ensp;&ensp;2. only works in position mode    
-  > &ensp;&ensp;&ensp;&ensp;3. only affects the feedback type of commands following this one    
-  > &ensp;&ensp;&ensp;&ensp;4. only valid for the current connection    
+  > Set the feedback type  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.1.0  
+  > &ensp;&ensp;&ensp;&ensp;2. only works in position mode  
+  > &ensp;&ensp;&ensp;&ensp;3. the setting will only affect subsequent tasks and will not affect previously cached tasks  
+  > &ensp;&ensp;&ensp;&ensp;4. only valid for the current connection  
   > 
-  > @param feedback_type: feedback type    
-  >    &ensp;&ensp;&ensp;&ensp;0: disable feedback    
-  >    &ensp;&ensp;&ensp;&ensp;1: feedback when the motion task starts executing    
-  >    &ensp;&ensp;&ensp;&ensp;2: feedback when the motion task execution ends    
-  >    &ensp;&ensp;&ensp;&ensp;4: feedback when the motion tasks are discarded (usually when the distance is too close to be planned)    
-  >    &ensp;&ensp;&ensp;&ensp;8: feedback when the non-motion task is triggered    
+  > @param feedback_type: feedback type  
+  >    &ensp;&ensp;&ensp;&ensp;0: disable feedback  
+  >    &ensp;&ensp;&ensp;&ensp;1: feedback when the motion task starts executing  
+  >    &ensp;&ensp;&ensp;&ensp;2: feedback when the motion task execution ends  
+  >    &ensp;&ensp;&ensp;&ensp;4: feedback when the motion tasks are discarded (usually when the distance is too close to be planned)  
+  >    &ensp;&ensp;&ensp;&ensp;8: feedback when the non-motion task is triggered  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Coils  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x01    
-  >    
-  > @param addr: the starting address of the register to be read     
-  > @param quantity: number of registers     
-  > @param bits: store result      
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Read Coils (0x01)  
+  > 
+  > @param addr: the starting address of the register to be read  
+  > @param quantity: number of registers  
+  > @param bits: store result  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int read_input_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Discrete Inputs  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x02    
-  >    
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Read Discrete Inputs (0x02)  
+  > 
   > @param addr: the starting address of the register to be read     
-  > @param quantity: number of registers     
-  > @param bits: store result      
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > @param quantity: number of registers  
+  > @param bits: store result  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int read_holding_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Holding Registers  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x03    
-  >    
-  > @param addr: the starting address of the register to be read     
-  > @param quantity: number of registers     
-  > @param regs: store result      
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Read Holding Registers (0x03)  
+  > 
+  > @param addr: the starting address of the register to be read  
+  > @param quantity: number of registers  
+  > @param regs: store result  
   > @param is_signed: whether to convert the read register value into a signed form      
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Read Input Registers  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x04    
-  >    
-  > @param addr: the starting address of the register to be read     
-  > @param quantity: number of registers     
-  > @param regs: store result      
-  > @param is_signed: whether to convert the read register value into a signed form      
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Read Input Registers (0x04)  
+  > 
+  > @param addr: the starting address of the register to be read  
+  > @param quantity: number of registers  
+  > @param regs: store result  
+  > @param is_signed: whether to convert the read register value into a signed form  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int write_single_coil_bit(unsigned short addr, unsigned char bit_val)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Single Coil  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x05    
-  >    
-  > @param addr: register address     
-  > @param bit_val: the value to write (0/1)       
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Write Single Coil (0x05)  
+  > 
+  > @param addr: register address  
+  > @param bit_val: the value to write (0/1)  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int write_single_holding_register(unsigned short addr, int reg_val)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Single Holding Register  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x06    
-  >    
-  > @param addr: register address     
-  > @param reg_val: the value to write       
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Write Single Holding Register (0x06)  
+  > 
+  > @param addr: register address  
+  > @param reg_val: the value to write  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Multiple Coils  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x0F    
-  >    
-  > @param addr: the starting address of the register to be written     
-  > @param quantity: the number of registers to be written       
-  > @param bits: array of values to write       
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Write Multiple Coils (0x0F)  
+  > 
+  > @param addr: the starting address of the register to be written  
+  > @param quantity: the number of registers to be written  
+  > @param bits: array of values to write  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Write Multiple Holding Registers  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x10    
-  >    
-  > @param addr: the starting address of the register to be written     
-  > @param quantity: the number of registers to be written       
-  > @param regs: array of values to write       
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Write Multiple Holding Registers (0x10)  
+  > 
+  > @param addr: the starting address of the register to be written  
+  > @param quantity: the number of registers to be written  
+  > @param regs: array of values to write  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int mask_write_holding_register(unsigned short addr, unsigned short and_mask, unsigned short or_mask)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Mask Write Holding Register  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x16    
-  >    
-  > @param addr: register address     
-  > @param and_mask: mask to be AND with       
-  > @param or_mask: mask to be OR with       
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Mask Write Holding Register (0x16)  
+  > 
+  > @param addr: register address  
+  > @param and_mask: mask to be AND with  
+  > @param or_mask: mask to be OR with  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means Modbus TCP exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false)__
-  > [Standard Modbus TCP](./UF_ModbusTCP_Manual.md) Mask Write Holding Register  
-  > &ensp;&ensp;&ensp;&ensp;func_code: 0x17    
-  >    
-  > @param r_addr: the starting address of the register to be read     
-  > @param r_quantity: number of registers to read    
-  > @param r_regs: store result 
-  > @param w_addr: the starting address of the register to be written     
-  > @param w_quantity: number of registers to write 
-  > @param w_regs: array of values to write to the register       
-  > @param is_signed: whether to convert the read register value into a signed form       
-  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.    
-  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80)
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Mask Write Holding Register (0x17)  
+  > 
+  > @param r_addr: the starting address of the register to be read  
+  > @param r_quantity: number of registers to read  
+  > @param r_regs: store result  
+  > @param w_addr: the starting address of the register to be written  
+  > @param w_quantity: number of registers to write  
+  > @param w_regs: array of values to write to the register  
+  > @param is_signed: whether to convert the read register value into a signed form  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
+  > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means modbus tcp exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)

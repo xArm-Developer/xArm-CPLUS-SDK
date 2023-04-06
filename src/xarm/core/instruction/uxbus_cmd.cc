@@ -544,11 +544,12 @@ int UxbusCmd::move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, f
   return set_nfp32(UXBUS_RG::MOVE_SERVO_CART, txdata, 9);
 }
 
-int UxbusCmd::set_servot(float jnt_taus[7]) {
-  float txdata[7] = { 0 };
-  for (int i = 0; i < 7; i++) { txdata[i] = jnt_taus[i]; }
-  return set_nfp32(UXBUS_RG::SET_SERVOT, txdata, 7);
-}
+// // this interface is no longer supported
+// int UxbusCmd::set_servot(float jnt_taus[7]) {
+//   float txdata[7] = { 0 };
+//   for (int i = 0; i < 7; i++) { txdata[i] = jnt_taus[i]; }
+//   return set_nfp32(UXBUS_RG::SET_SERVOT, txdata, 7);
+// }
 
 int UxbusCmd::get_joint_tau(float jnt_taus[7]) {
   return get_nfp32(UXBUS_RG::GET_JOINT_TAU, jnt_taus, 7);

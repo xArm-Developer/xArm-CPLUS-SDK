@@ -1002,7 +1002,7 @@ public:
    *    feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions
    *      Note: this can be used to distinguish what instruction the feedback belongs to
    *    feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)
-   *    feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 65-bit integer data), time when feedback triggers (microseconds)
+   *    feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 64-bit integer data), time when feedback triggers (microseconds)
    *      Note: this time is the corresponding controller system time when the feedback is triggered
    */
   int register_feedback_callback(void(*callback)(unsigned char *feedback_data));

@@ -1031,7 +1031,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this can be used to distinguish what instruction the feedback belongs to  
   > &ensp;&ensp;&ensp;&ensp;feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)  
-  > &ensp;&ensp;&ensp;&ensp;feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 65-bit integer data), time when feedback triggers (microseconds)  
+  > &ensp;&ensp;&ensp;&ensp;feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 64-bit integer data), time when feedback triggers (microseconds)  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this time is the corresponding controller system time when the feedback is triggered  
 
 

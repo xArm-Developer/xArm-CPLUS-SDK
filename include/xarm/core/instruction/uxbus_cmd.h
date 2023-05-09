@@ -17,6 +17,7 @@
 #include <mutex>
 #include <iostream>
 #include <vector>
+#include <functional>
 #ifdef _WIN32
 #include <sys/timeb.h>
 #include <windows.h>
@@ -84,6 +85,7 @@ inline long long get_system_time()
 class UxbusCmd {
 public:
   UxbusCmd(void);
+  UxbusCmd(std::function<void (std::string, int, unsigned char)> set_feedback_uuid_transid);
   ~UxbusCmd(void);
 
   int set_timeout(float timeout);
@@ -93,9 +95,9 @@ public:
   int check_verification(int *rx_data);
   int shutdown_system(int value);
   int set_record_traj(int value);
-  int save_traj(char filename[81]);
-  int load_traj(char filename[81]);
-  int playback_traj(int times, int spdx = 1);
+  int save_traj(char filename[81], std::string feedback_key = "");
+  int load_traj(char filename[81], std::string feedback_key = "");
+  int playback_traj(int times, int spdx = 1, std::string feedback_key = "");
   int playback_traj_old(int times);
   int get_traj_rw_status(int *rx_data);
   int set_reduced_mode(int on_off);
@@ -124,10 +126,10 @@ public:
   int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
     float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
-  int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
-  int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+  int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
+  int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
   int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
-  int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+  int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
   int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
   int move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime);
   // // this interface is no longer supported
@@ -214,7 +216,7 @@ public:
   int get_position_aa(float pose[6]);
   int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
   int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
-  int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
+  int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0, std::string feedback_key = "");
 
   int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
   int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
@@ -268,10 +270,10 @@ public:
 
   int iden_joint_friction(unsigned char sn[14], float *result);
 
-  int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
-  int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+  int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0, std::string feedback_key = "");
+  int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
 
-  int set_feedback_type(int value);
+  int set_feedback_type(unsigned char feedback_type);
 
   virtual void close(void);
   virtual int is_ok(void);
@@ -303,20 +305,22 @@ private:
   virtual int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
   virtual int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
   virtual int check_private_protocol(unsigned char *data);
-  int set_nu8(int funcode, unsigned char *datas, int num);
-  int set_nu8(int funcode, int *datas, int num);
+  int set_nu8(int funcode, unsigned char *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int set_nu8(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int get_nu8(int funcode, int *rx_data, int num);
   int get_nu8(int funcode, unsigned char *rx_data, int num);
   int getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
   int set_nu16(int funcode, int *datas, int num);
   int get_nu16(int funcode, int *rx_data, int num);
-  int set_nfp32(int funcode, float *datas, int num);
-  int set_nint32(int funcode, int *datas, int num);
+  int set_nfp32(int funcode, float *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int set_nint32(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int get_nfp32(int funcode, float *rx_data, int num);
   int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
   int is_nfp32(int funcode, float datas[], int txn, int *value);
-  int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT);
+  int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
+  int _set_feedback_type_no_lock(unsigned char feedback_type);
+  virtual int _get_trans_id() { return 0; }
 
 public:
   bool state_is_ready;
@@ -330,6 +334,9 @@ private:
   int SET_TIMEOUT_ = UXBUS_CONF::SET_TIMEOUT;
 
   long long last_modbus_comm_us_;
+  unsigned char feedback_type_;
+  bool has_feedback_key_transid_func_;
+  std::function<void (std::string, int, unsigned char)> set_feedback_key_transid_;
 };
 
 #endif

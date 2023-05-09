@@ -113,6 +113,16 @@ void XArmAPI::_report_iden_progress_changed_callback(void) {
 
 void XArmAPI::_feedback_callback(unsigned char *feedback_data)
 {
+  unsigned short trans_id = bin8_to_16(&feedback_data[0]);
+  int feedback_type = -1;
+  if (fb_transid_type_map_.count(trans_id)) {
+    feedback_type = fb_transid_type_map_[trans_id];
+    fb_transid_type_map_.erase(trans_id);
+  }
+  if (feedback_type != -1) {
+    fb_transid_result_map_[trans_id] = feedback_data[12];
+  }
+  if ((feedback_type & feedback_data[8]) == 0) return;
   _report_callback(feedback_callbacks_, feedback_functions_, feedback_data);
   // for (size_t i = 0; i < feedback_callbacks_.size(); i++) {
   // 	if (callback_in_thread_) pool_.dispatch(feedback_callbacks_[i], feedback_data);

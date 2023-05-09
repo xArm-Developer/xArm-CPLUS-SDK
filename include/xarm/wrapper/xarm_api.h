@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <cmath>
 #include <regex>
+#include <map>
 #include <string>
 #include <stdarg.h>
 #include <string.h>
@@ -42,7 +43,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.0"
+#define SDK_VERSION "1.13.1"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -996,13 +997,13 @@ public:
    *    feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)
    *    feedback_data[8]: feedback type
    *      1: the motion task starts executing
-   *      2: the motion task execution ends
-   *      4: the motion tasks are discarded (usually when the distance is too close to be planned)
-   *      8: the non-motion task is triggered
+   *      2: the motion task execution ends or motion task is discarded(usually when the distance is too close to be planned)
+   *      4: the non-motion task is triggered
    *    feedback_data[9]: feedback funcode, command code corresponding to feedback, consistent with issued instructions
    *      Note: this can be used to distinguish what instruction the feedback belongs to
    *    feedback_data[10:12]: feedback taskid, (Big-endian conversion to unsigned 16-bit integer data)
-   *    feedback_data[12:20]: feedback us, (Big-endian conversion to unsigned 64-bit integer data), time when feedback triggers (microseconds)
+   *    feedback_data[12]: feedback code, execution status code, generally only meaningful when the feedback type is end, normally 0, 2 means motion task is discarded
+   *    feedback_data[13:21]: feedback us, (Big-endian conversion to unsigned 64-bit integer data), time when feedback triggers (microseconds)
    *      Note: this time is the corresponding controller system time when the feedback is triggered
    */
   int register_feedback_callback(void(*callback)(unsigned char *feedback_data));
@@ -1288,7 +1289,7 @@ public:
    *  empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int save_record_trajectory(char* filename, float timeout = 10);
+  int save_record_trajectory(char* filename, float timeout = 5);
 
   /**
    * @brief Load the trajectory
@@ -1297,7 +1298,7 @@ public:
    * @param timeout: the maximum timeout waiting for loading to complete, default is 10 seconds.
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int load_trajectory(char* filename, float timeout = 10);
+  int load_trajectory(char* filename, float timeout = NO_TIMEOUT);
 
   /**
    * @brief Playback trajectory
@@ -2332,9 +2333,8 @@ public:
    * @param feedback_type:
    *  0: disable feedback
    *  1: feedback when the motion task starts executing
-   *  2: feedback when the motion task execution ends
-   *  4: feedback when the motion tasks are discarded (usually when the distance is too close to be planned)
-   *  8: feedback when the non-motion task is triggered
+   *  2: feedback when the motion task execution ends or motion task is discarded(usually when the distance is too close to be planned)
+   *  4: feedback when the non-motion task is triggered
    * return: See the code documentation for details.
    */
   int set_feedback_type(unsigned char feedback_type);
@@ -2463,7 +2463,11 @@ private:
   void _wait_until_cmdnum_lt_max(void);
   int _xarm_is_ready(void);
   int _check_code(int code, bool is_move_cmd = false, int mode = -1);
-  int _wait_move(fp32 timeout);
+  int _wait_move(fp32 timeout, int trans_id = -1);
+  int _wait_feedback(fp32 timeout, int trans_id = -1, int *feedback_code = NULL);
+  void _set_feedback_key_transid(std::string feedback_key, int trans_id, unsigned char feedback_type);
+  std::string _gen_feedback_key(bool wait);
+  int _get_feedback_transid(std::string feedback_key);
   void _update_old(unsigned char *data);
   void _update(unsigned char *data);	
   template<typename CallableVector, typename Callable>
@@ -2518,6 +2522,12 @@ private:
 
   int _connect_503(void);
   bool _is_connected_503(void);
+
+  int _check_traj_status(int status, std::string filename = "unknown");
+  int _wait_traj_op(fp32 timeout, int trans_id, std::string filename = "unknown", std::string op = "Load");
+  int _wait_load_traj(fp32 timeout, int trans_id, std::string filename = "unknown");
+  int _wait_save_traj(fp32 timeout, int trans_id, std::string filename = "unknown");
+  int _wait_play_traj(fp32 timeout, int trans_id, int times = 1);
 private:
   std::string port_;
   bool check_tcp_limit_;
@@ -2603,6 +2613,10 @@ private:
 
   bool keep_heart_;
   unsigned char only_check_type_;
+  bool support_feedback_;
+  std::map<std::string, int> fb_key_transid_map_;
+  std::map<int, unsigned char> fb_transid_type_map_;
+  std::map<int, unsigned char> fb_transid_result_map_;
 
   std::vector<std::function<void (XArmReportData *)>> report_data_functions_;
   std::vector<std::function<void (const fp32*, const fp32*)>> report_location_functions_;

@@ -285,6 +285,7 @@ public:
   static const int TRAJ_RW_FAILED = 31;
   static const int TRAJ_RW_TOUT = 32;
   static const int TRAJ_PLAYBACK_TOUT = 33;
+  static const int TRAJ_PLAYBACK_FAILED = 34;
   static const int SUCTION_CUP_TOUT = 41;
 
   static const int MODE_IS_NOT_CORRECT = 51;
@@ -329,6 +330,28 @@ public:
   static const int USE_PRIMITIVES = 20;
   static const int CYLINDER = 21;
   static const int BOX = 22;
+};
+
+class FeedbackType {
+public:
+  FeedbackType(void) {}
+  ~FeedbackType(void) {}
+
+  static const unsigned char MOTION_START = 1;
+  static const unsigned char MOTION_FINISH = 2;
+  static const unsigned char TRIGGER = 4;
+  static const unsigned char OTHER_START = 32;
+  static const unsigned char OTHER_FINISH = 64;
+};
+
+class FeedbackCode {
+public:
+  FeedbackCode(void) {}
+  ~FeedbackCode(void) {}
+
+  static const unsigned char SUCCESS = 0;
+  static const unsigned char FAILURE = 1;
+  static const unsigned char DISCARD = 2;
 };
 
 #endif

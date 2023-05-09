@@ -25,6 +25,15 @@ UxbusCmd::UxbusCmd(void) {
   state_is_ready = false;
   last_modbus_comm_us_ = get_us();
   last_recv_ms = get_system_time();
+  has_feedback_key_transid_func_ = false;
+}
+
+UxbusCmd::UxbusCmd(std::function<void (std::string, int, unsigned char)> set_feedback_uuid_transid) {
+  state_is_ready = false;
+  last_modbus_comm_us_ = get_us();
+  last_recv_ms = get_system_time();
+  has_feedback_key_transid_func_ = true;
+  set_feedback_key_transid_ = set_feedback_uuid_transid;
 }
 
 UxbusCmd::~UxbusCmd(void) {}
@@ -63,19 +72,30 @@ int UxbusCmd::check_private_protocol(unsigned char *data)
  * Uxbus generic protocol function
  *******************************************************/
 
-int UxbusCmd::set_nu8(int funcode, unsigned char *datas, int num) {
+int UxbusCmd::set_nu8(int funcode, unsigned char *datas, int num, std::string feedback_key, unsigned char feedback_type) {
   std::lock_guard<std::mutex> locker(mutex_);
+  bool need_set_fb = feedback_type != 0 && (feedback_type_ & feedback_type) != feedback_type;
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_ | feedback_type);
+  }
+  unsigned short trans_id = _get_trans_id();
+  if (has_feedback_key_transid_func_ && feedback_key != "") {
+    set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
+  }
   int ret = send_modbus_request(funcode, datas, num);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   int timeout = (funcode != UXBUS_RG::MOTION_EN || (funcode == UXBUS_RG::MOTION_EN && SET_TIMEOUT_ >= 2)) ? SET_TIMEOUT_ : 2000;
   ret = recv_modbus_response(funcode, ret, NULL, 0, timeout);
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_);
+  }
   return ret;
 }
 
-int UxbusCmd::set_nu8(int funcode, int *datas, int num) {
+int UxbusCmd::set_nu8(int funcode, int *datas, int num, std::string feedback_key, unsigned char feedback_type) {
   unsigned char *send_data = new unsigned char[num]();
   for (int i = 0; i < num; i++) { send_data[i] = (unsigned char)datas[i]; }
-  int ret = set_nu8(funcode, send_data, num);
+  int ret = set_nu8(funcode, send_data, num, feedback_key, feedback_type);
   delete[] send_data;
   return ret;
 }
@@ -125,27 +145,50 @@ int UxbusCmd::get_nu16(int funcode, int *rx_data, int num) {
   return ret;
 }
 
-int UxbusCmd::set_nfp32(int funcode, float *datas, int num) {
+int UxbusCmd::set_nfp32(int funcode, float *datas, int num, std::string feedback_key, unsigned char feedback_type) {
   unsigned char *send_data = new unsigned char[num * 4]();
   nfp32_to_hex(datas, send_data, num);
 
   std::lock_guard<std::mutex> locker(mutex_);
+  bool need_set_fb = feedback_type != 0 && (feedback_type_ & feedback_type) != feedback_type;
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_ | feedback_type);
+  }
+  unsigned short trans_id = _get_trans_id();
+  if (has_feedback_key_transid_func_ && feedback_key != "") {
+    set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
+  }
   int ret = send_modbus_request(funcode, send_data, num * 4);
   delete[] send_data;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = recv_modbus_response(funcode, ret, NULL, 0, SET_TIMEOUT_);
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_);
+  }
   return ret;
 }
 
-int UxbusCmd::set_nint32(int funcode, int *datas, int num) {
+int UxbusCmd::set_nint32(int funcode, int *datas, int num, std::string feedback_key, unsigned char feedback_type) {
   unsigned char *send_data = new unsigned char[num * 4]();
   nint32_to_hex(datas, send_data, num);
 
   std::lock_guard<std::mutex> locker(mutex_);
+  bool need_set_fb = feedback_type != 0 && (feedback_type_ & feedback_type) != feedback_type;
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_ | feedback_type);
+  }
+  unsigned short trans_id = _get_trans_id();
+  if (has_feedback_key_transid_func_ && feedback_key != "") {
+    set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
+  }
   int ret = send_modbus_request(funcode, send_data, num * 4);
   delete[] send_data;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return recv_modbus_response(funcode, ret, NULL, 0, SET_TIMEOUT_);
+  ret = recv_modbus_response(funcode, ret, NULL, 0, SET_TIMEOUT_);
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_);
+  }
+  return ret;
 }
 
 int UxbusCmd::get_nfp32(int funcode, float *rx_data, int num) {
@@ -189,16 +232,27 @@ int UxbusCmd::is_nfp32(int funcode, float tx_datas[], int txn, int *value) {
   return ret;
 }
 
-int UxbusCmd::set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data, int rx_len, int timeout) {
+int UxbusCmd::set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data, int rx_len, int timeout, std::string feedback_key, unsigned char feedback_type) {
   unsigned char *send_data = new unsigned char[tx_num * 4 + add_len]();
   nfp32_to_hex(tx_data, send_data, tx_num);
   for (int i = 0; i < add_len; i++) { send_data[tx_num * 4 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
+  bool need_set_fb = feedback_type != 0 && (feedback_type_ & feedback_type) != feedback_type;
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_ | feedback_type);
+  }
+  unsigned short trans_id = _get_trans_id();
+  if (has_feedback_key_transid_func_ && feedback_key != "") {
+    set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
+  }
   int ret = send_modbus_request(funcode, send_data, tx_num * 4 + add_len);
   delete[] send_data;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = recv_modbus_response(funcode, ret, rx_data, rx_len, timeout);
+  if (need_set_fb && feedback_key != "") {
+    _set_feedback_type_no_lock(feedback_type_);
+  }
   return ret;
 }
 
@@ -239,9 +293,9 @@ int UxbusCmd::set_record_traj(int value) {
   return set_nu8(UXBUS_RG::SET_TRAJ_RECORD, txdata, 1);
 }
 
-int UxbusCmd::playback_traj(int times, int spdx) {
+int UxbusCmd::playback_traj(int times, int spdx, std::string feedback_key) {
   int txdata[2] = { times, spdx };
-  return set_nint32(UXBUS_RG::PLAY_TRAJ, txdata, 2);
+  return set_nint32(UXBUS_RG::PLAY_TRAJ, txdata, 2, feedback_key, FeedbackType::OTHER_FINISH);
 }
 
 int UxbusCmd::playback_traj_old(int times) {
@@ -249,16 +303,16 @@ int UxbusCmd::playback_traj_old(int times) {
   return set_nint32(UXBUS_RG::PLAY_TRAJ, txdata, 1);
 }
 
-int UxbusCmd::save_traj(char filename[81]) {
-  return set_nu8(UXBUS_RG::SAVE_TRAJ, (unsigned char*)filename, 81);
+int UxbusCmd::save_traj(char filename[81], std::string feedback_key) {
+  return set_nu8(UXBUS_RG::SAVE_TRAJ, (unsigned char*)filename, 81, feedback_key, FeedbackType::OTHER_FINISH);
 }
 
-int UxbusCmd::load_traj(char filename[81]) {
+int UxbusCmd::load_traj(char filename[81], std::string feedback_key) {
   // std::lock_guard<std::mutex> locker(mutex_);
   // int ret = send_modbus_request(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81);
   // if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   // return recv_modbus_response(UXBUS_RG::LOAD_TRAJ, ret, NULL, 0, SET_TIMEOUT_);
-  return set_nu8(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81);
+  return set_nu8(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81, feedback_key, FeedbackType::OTHER_FINISH);
 }
 
 int UxbusCmd::get_traj_rw_status(int *rx_data) {
@@ -444,38 +498,38 @@ int UxbusCmd::move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtim
 }
 
 int UxbusCmd::move_joint(float mvjoint[7], float mvvelo, float mvacc,
-  float mvtime, unsigned char only_check_type, unsigned char *only_check_result) {
+  float mvtime, unsigned char only_check_type, unsigned char *only_check_result, std::string feedback_key) {
   float txdata[10] = { 0 };
   for (int i = 0; i < 7; i++) { txdata[i] = mvjoint[i]; }
   txdata[7] = mvvelo;
   txdata[8] = mvacc;
   txdata[9] = mvtime;
   if (only_check_type <= 0) {
-    return set_nfp32(UXBUS_RG::MOVE_JOINT, txdata, 10);
+    return set_nfp32(UXBUS_RG::MOVE_JOINT, txdata, 10, feedback_key);
   }
   else {
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
-    int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_JOINT, txdata, 10, additional, 1, rx_data, 3, 10000);
+    int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_JOINT, txdata, 10, additional, 1, rx_data, 3, 10000, feedback_key);
     if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
     return ret;
   }
   // return set_nfp32(UXBUS_RG::MOVE_JOINT, txdata, 10);
 }
 
-int UxbusCmd::move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type, unsigned char *only_check_result) {
+int UxbusCmd::move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type, unsigned char *only_check_result, std::string feedback_key) {
   float txdata[10] = { 0 };
   for (int i = 0; i < 7; i++) { txdata[i] = mvjoint[i]; }
   txdata[7] = mvvelo;
   txdata[8] = mvacc;
   txdata[9] = mvradii;
   if (only_check_type <= 0) {
-    return set_nfp32(UXBUS_RG::MOVE_JOINTB, txdata, 10);
+    return set_nfp32(UXBUS_RG::MOVE_JOINTB, txdata, 10, feedback_key);
   }
   else {
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
-    int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_JOINTB, txdata, 10, additional, 1, rx_data, 3, 10000);
+    int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_JOINTB, txdata, 10, additional, 1, rx_data, 3, 10000, feedback_key);
     if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
     return ret;
   }
@@ -508,18 +562,18 @@ int UxbusCmd::move_line_tool(float mvpose[6], float mvvelo, float mvacc, float m
   // return set_nfp32(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9);
 }
 
-int UxbusCmd::move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type, unsigned char *only_check_result) {
+int UxbusCmd::move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type, unsigned char *only_check_result, std::string feedback_key) {
   float txdata[3] = { 0 };
   txdata[0] = mvvelo;
   txdata[1] = mvacc;
   txdata[2] = mvtime;
   if (only_check_type <= 0) {
-    return set_nfp32(UXBUS_RG::MOVE_HOME, txdata, 3);
+    return set_nfp32(UXBUS_RG::MOVE_HOME, txdata, 3, feedback_key);
   }
   else {
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
-    int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_HOME, txdata, 3, additional, 1, rx_data, 3, 10000);
+    int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_HOME, txdata, 3, additional, 1, rx_data, 3, 10000, feedback_key);
     if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
     return ret;
   }
@@ -1241,7 +1295,7 @@ int UxbusCmd::move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int
   return set_nfp32_with_bytes(UXBUS_RG::MOVE_SERVO_CART_AA, txdata, 9, additional, 1);
 }
 
-int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, unsigned char motion_type)
+int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, unsigned char motion_type, std::string feedback_key)
 {
   float txdata[11] = { 0 };
   for (int i = 0; i < 7; i++) { txdata[i] = mvpose[i]; }
@@ -1251,18 +1305,18 @@ int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mv
   txdata[10] = radius;
   if (only_check_type <= 0 && motion_type == 0) {
     char additional[2] = { (char)is_joint_motion, (char)is_axis_angle  };
-    return set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 2);
+    return set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 2, NULL, 0, 2000, feedback_key);
   }
   else {
     unsigned char rx_data[3] = { 0 };
     int ret = 0;
     if (motion_type == 0) {
       char additional[3] = { (char)is_joint_motion, (char)is_axis_angle , (char)only_check_type };
-      ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 3, rx_data, 3, 10000);
+      ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 3, rx_data, 3, 10000, feedback_key);
     }
     else {
       char additional[4] = { (char)is_joint_motion, (char)is_axis_angle , (char)only_check_type, (char)motion_type };
-      ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 4, rx_data, 3, 10000);
+      ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 4, rx_data, 3, 10000, feedback_key);
     }
     if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
     return ret;
@@ -1669,7 +1723,7 @@ int UxbusCmd::set_allow_approx_motion(int on_off)
   return set_nu8(UXBUS_RG::ALLOW_APPROX_MOTION, txdata, 1);
 }
 
-int UxbusCmd::move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius, int coord, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, unsigned char motion_type)
+int UxbusCmd::move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius, int coord, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, unsigned char motion_type, std::string feedback_key)
 {
   float txdata[10] = { 0 };
   for (int i = 0; i < 6; i++) { txdata[i] = mvpose[i]; }
@@ -1682,17 +1736,17 @@ int UxbusCmd::move_line_common(float mvpose[6], float mvvelo, float mvacc, float
   unsigned char rx_data[3] = { 0 };
   if (motion_type == 0) {
     char additional[3] = { (char)coord, (char)is_axis_angle, (char)only_check_type };
-    ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 3, rx_data, 3, 10000);
+    ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 3, rx_data, 3, 10000, feedback_key);
   }
   else {
     char additional[4] = { (char)coord, (char)is_axis_angle, (char)only_check_type, (char)motion_type };
-    ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 4, rx_data, 3, 10000);
+    ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 4, rx_data, 3, 10000, feedback_key);
   }
   if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
   return ret;
 }
 
-int UxbusCmd::move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result)
+int UxbusCmd::move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord, bool is_axis_angle, unsigned char only_check_type, unsigned char *only_check_result, std::string feedback_key)
 {
   float txdata[16] = { 0 };
   for (int i = 0; i < 6; i++) {
@@ -1705,7 +1759,7 @@ int UxbusCmd::move_circle_common(float pose1[6], float pose2[6], float mvvelo, f
   txdata[15] = percent;
   char additional[3] = { (char)coord, (char)is_axis_angle, (char)only_check_type };
   unsigned char rx_data[3] = { 0 };
-  int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_CIRCLE, txdata, 16, additional, 3, rx_data, 3, 10000);
+  int ret = set_nfp32_with_bytes(UXBUS_RG::MOVE_CIRCLE, txdata, 16, additional, 3, rx_data, 3, 10000, feedback_key);
   if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
   return ret;
 }
@@ -1721,8 +1775,22 @@ int UxbusCmd::set_dh_params(float dh_params[28], unsigned char flag)
   return set_nfp32_with_bytes(UXBUS_RG::SET_DH, dh_params, 16, additional, 1);
 }
 
-int UxbusCmd::set_feedback_type(int value)
+int UxbusCmd::_set_feedback_type_no_lock(unsigned char feedback_type)
 {
-  return set_nu8(UXBUS_RG::SET_FEEDBACK_TYPE, &value, 1);
+  unsigned char send_data[1] = {feedback_type};
+  int ret = send_modbus_request(UXBUS_RG::SET_FEEDBACK_TYPE, send_data, 1);
+  if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
+  ret = recv_modbus_response(UXBUS_RG::SET_FEEDBACK_TYPE, ret, NULL, 0, SET_TIMEOUT_);
+  return ret;
+}
+
+int UxbusCmd::set_feedback_type(unsigned char feedback_type)
+{
+  std::lock_guard<std::mutex> locker(mutex_);
+  int ret = _set_feedback_type_no_lock(feedback_type);
+  if (ret != UXBUS_STATE::ERR_NOTTCP) {
+    feedback_type_ = feedback_type;
+  }
+  return ret;
 }
 

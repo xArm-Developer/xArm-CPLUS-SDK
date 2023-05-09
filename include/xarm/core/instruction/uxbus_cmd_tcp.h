@@ -18,6 +18,7 @@
 class UxbusCmdTcp : public UxbusCmd {
 public:
   UxbusCmdTcp(SocketPort *arm_port);
+  UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid_);
   ~UxbusCmdTcp(void);
 
   void close(void);
@@ -57,6 +58,7 @@ private:
   int _read_bits(unsigned short addr, unsigned short quantity, unsigned char *bits, unsigned char funcode = 0x01);
   int _read_registers(unsigned short addr, unsigned short quantity, int *regs, unsigned char funcode = 0x03, bool is_signed = false);
 
+  int _get_trans_id() { return transaction_id_; };
 private:
   SocketPort *arm_port_;
 

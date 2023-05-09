@@ -23,6 +23,12 @@ UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
   unsigned short protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
 }
 
+UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid_) : UxbusCmd(set_feedback_key_transid_) {
+  arm_port_ = arm_port;
+  unsigned short transaction_id_ = 1;
+  unsigned short protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
+}
+
 UxbusCmdTcp::~UxbusCmdTcp(void) {}
 
 int UxbusCmdTcp::get_protocol_identifier(void)

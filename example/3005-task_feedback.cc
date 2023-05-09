@@ -16,19 +16,31 @@ void task_feedback_callback(unsigned char *feedback_data)
   unsigned char feedback_type = feedback_data[8];
   unsigned char feedback_funcode = feedback_data[9];
   unsigned short feedback_taskid = bin8_to_16(&feedback_data[10]);
-  unsigned long long feedback_us = bin8_to_64(&feedback_data[12]);
+  unsigned char feedback_code = feedback_data[12];
+  unsigned long long feedback_us = bin8_to_64(&feedback_data[13]);
   switch (feedback_type) {
     case 1:
       printf("[FB] motion task %d starts execution, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
       break;
     case 2:
-      printf("[FB] motion task %d execution completed, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
+      if (feedback_code == 0)
+        printf("[FB] motion task %d execution completed, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
+      else if (feedback_code == 2) 
+        printf("[FB] motion task %d is discarded, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
       break;
     case 4:
-      printf("[FB] motion task %d is discarded, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
+      printf("[FB] task %d is triggered, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
       break;
-    case 8:
-      printf("[FB] non-motion task %d is triggered, funcode=%d, cmd_id=%d, us=%lld\n",feedback_taskid, feedback_funcode, cmd_id, feedback_us);
+    case 32:
+      printf("[FB] cmd %d starts execution, funcode=%d, us=%lld\n",cmd_id, feedback_funcode, feedback_us);
+      break;
+    case 64:
+      if (feedback_code == 0)
+        printf("[FB] cmd %d execution success, funcode=%d, us=%lld\n",cmd_id, feedback_funcode, feedback_us);
+      else if (feedback_code == 1) 
+        printf("[FB] cmd %d execution failure, funcode=%d, us=%lld\n",cmd_id, feedback_funcode, feedback_us);
+      break;
+      
       break;
   }
 }

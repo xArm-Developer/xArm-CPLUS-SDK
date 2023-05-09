@@ -21,7 +21,7 @@ void UxbusCmdSer::close(void) { arm_port_->close_port(); }
 
 int UxbusCmdSer::is_ok(void) { return arm_port_->is_ok(); }
 
-int UxbusCmdSer::send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id)
+int UxbusCmdSer::_send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id)
 {
   // unsigned char send_data[pdu_len + 4];
   unsigned char *send_data = new unsigned char[pdu_len + 4]();
@@ -43,7 +43,7 @@ int UxbusCmdSer::send_modbus_request(unsigned char unit_id, unsigned char *pdu_d
   return ret;
 }
 
-int UxbusCmdSer::recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id)
+int UxbusCmdSer::_recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id)
 {
   int ret;
   // unsigned char rx_data[arm_port_->que_maxlen] = {0};
@@ -55,7 +55,7 @@ int UxbusCmdSer::recv_modbus_response(unsigned char t_unit_id, unsigned short t_
       sleep_us(500);
       continue;
     }
-    ret = check_private_protocol(rx_data);
+    ret = _check_private_protocol(rx_data);
     for (int i = 0; i < ret_len; i++) { ret_data[i] = rx_data[i + 4]; }
     delete[] rx_data;
     return ret;
@@ -64,7 +64,7 @@ int UxbusCmdSer::recv_modbus_response(unsigned char t_unit_id, unsigned short t_
   return UXBUS_STATE::ERR_TOUT;
 }
 
-int UxbusCmdSer::check_private_protocol(unsigned char *data)
+int UxbusCmdSer::_check_private_protocol(unsigned char *data)
 {
   state_is_ready = !(data[3] & 0x10);
   if (data[3] & 0x08) { return UXBUS_STATE::INVALID; }

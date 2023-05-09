@@ -302,23 +302,23 @@ public:
   virtual int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false) { return -11; };
 
 private:
-  virtual int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
-  virtual int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
-  virtual int check_private_protocol(unsigned char *data);
-  int set_nu8(int funcode, unsigned char *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
-  int set_nu8(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
-  int get_nu8(int funcode, int *rx_data, int num);
-  int get_nu8(int funcode, unsigned char *rx_data, int num);
-  int getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
-  int set_nu16(int funcode, int *datas, int num);
-  int get_nu16(int funcode, int *rx_data, int num);
-  int set_nfp32(int funcode, float *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
-  int set_nint32(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
-  int get_nfp32(int funcode, float *rx_data, int num);
-  int swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
-  int is_nfp32(int funcode, float datas[], int txn, int *value);
-  int set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
-  int get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
+  virtual int _send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
+  virtual int _recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
+  virtual int _check_private_protocol(unsigned char *data);
+  int _set_nu8(int funcode, unsigned char *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int _set_nu8(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int _get_nu8(int funcode, int *rx_data, int num);
+  int _get_nu8(int funcode, unsigned char *rx_data, int num);
+  int _getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
+  int _set_nu16(int funcode, int *datas, int num);
+  int _get_nu16(int funcode, int *rx_data, int num);
+  int _set_nfp32(int funcode, float *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int _set_nint32(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int _get_nfp32(int funcode, float *rx_data, int num);
+  int _swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
+  int _is_nfp32(int funcode, float datas[], int txn, int *value);
+  int _set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int _get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
   int _set_feedback_type_no_lock(unsigned char feedback_type);
   virtual int _get_trans_id() { return 0; }
 

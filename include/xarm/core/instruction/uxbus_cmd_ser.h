@@ -27,9 +27,9 @@ public:
   int set_protocol_identifier(int protocol_identifier = 2) { return 0; }
 
 private:
-  int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
-  int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
-  int check_private_protocol(unsigned char *data);
+  int _send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
+  int _recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
+  int _check_private_protocol(unsigned char *data);
 
 private:
   SerialPort *arm_port_;

@@ -50,7 +50,7 @@ void UxbusCmdTcp::close(void) { arm_port_->close_port(); }
 
 int UxbusCmdTcp::is_ok(void) { return arm_port_->is_ok(); }
 
-int UxbusCmdTcp::send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id)
+int UxbusCmdTcp::_send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id)
 {
   int len = pdu_len + 7;
   // unsigned char send_data[len];
@@ -76,7 +76,7 @@ int UxbusCmdTcp::send_modbus_request(unsigned char unit_id, unsigned char *pdu_d
   return curr_trans_id;
 }
 
-int UxbusCmdTcp::recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id)
+int UxbusCmdTcp::_recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id)
 {
   unsigned short prot_id = t_prot_id < 0 ? protocol_identifier_ : t_prot_id;
   int ret = UXBUS_STATE::ERR_TOUT;
@@ -104,7 +104,7 @@ int UxbusCmdTcp::recv_modbus_response(unsigned char t_unit_id, unsigned short t_
     }
     if (prot_id != STANDARD_MODBUS_TCP_PROTOCOL) {
       // Private Modbus TCP Protocol
-      code = check_private_protocol(data);
+      code = _check_private_protocol(data);
       length = bin8_to_16(&data[4]) - 2;
       for (size_t i = 0; i < length; i++) {
         if (ret_len >= 0 && i >= ret_len) break;
@@ -142,7 +142,7 @@ int UxbusCmdTcp::_check_protocol_header(unsigned char *data, unsigned short t_tr
   return 0;
 }
 
-int UxbusCmdTcp::check_private_protocol(unsigned char *data)
+int UxbusCmdTcp::_check_private_protocol(unsigned char *data)
 {
   state_is_ready = !(data[7] & 0x10);
   if (data[7] & 0x08) { return UXBUS_STATE::INVALID; }
@@ -154,9 +154,9 @@ int UxbusCmdTcp::check_private_protocol(unsigned char *data)
 int UxbusCmdTcp::_standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, unsigned char unit_id)
 {
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = send_modbus_request(unit_id, pdu_data, pdu_len, STANDARD_MODBUS_TCP_PROTOCOL);
+  int ret = _send_modbus_request(unit_id, pdu_data, pdu_len, STANDARD_MODBUS_TCP_PROTOCOL);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  ret = recv_modbus_response(unit_id, ret, rx_data, -1, 10000, STANDARD_MODBUS_TCP_PROTOCOL);
+  ret = _recv_modbus_response(unit_id, ret, rx_data, -1, 10000, STANDARD_MODBUS_TCP_PROTOCOL);
   if (ret == 0 && rx_data[7] == pdu_data[0] + 0x80) {
     return rx_data[8] + 0x80;
   }

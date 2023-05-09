@@ -49,9 +49,9 @@ public:
   int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false);
 
 private:
-  int send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
-  int recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
-  int check_private_protocol(unsigned char *data);
+  int _send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id = -1);
+  int _recv_modbus_response(unsigned char t_unit_id, unsigned short t_trans_id, unsigned char *ret_data, unsigned short ret_len, int timeout, int t_prot_id = -1);
+  int _check_private_protocol(unsigned char *data);
   int _check_protocol_header(unsigned char *data, unsigned short t_trans_id, unsigned short t_prot_id, unsigned short t_unit_id);
 
   int _standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, unsigned char unit_id = 0x01);

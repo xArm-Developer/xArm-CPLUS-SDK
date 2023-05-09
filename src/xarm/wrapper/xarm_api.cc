@@ -425,17 +425,17 @@ bool XArmAPI::_is_rich_reported(void) {
   return is_tcp_ ? (stream_tcp_rich_report_ == NULL ? false : stream_tcp_rich_report_->is_ok() == 0) : false;
 }
 
-static void report_rich_thread_handle_(void *arg) {
+static void report_rich_thread_handle(void *arg) {
   XArmAPI *my_this = (XArmAPI *)arg;
   my_this->_handle_report_rich_data();
 }
 
-static void report_thread_handle_(void *arg) {
+static void report_thread_handle(void *arg) {
   XArmAPI *my_this = (XArmAPI *)arg;
   my_this->_handle_report_data();
 }
 
-static void feedback_thread_handle_(void *arg) {
+static void feedback_thread_handle(void *arg) {
   XArmAPI *my_this = (XArmAPI *)arg;
   my_this->_handle_feedback_data();
 }
@@ -670,7 +670,7 @@ int XArmAPI::connect(const std::string &port) {
       fprintf(stderr, "Error: Tcp control connection failed\n");
       return -2;
     }
-    feedback_thread_ = std::thread(feedback_thread_handle_, this);
+    feedback_thread_ = std::thread(feedback_thread_handle, this);
     feedback_thread_.detach();
 
     core = new UxbusCmdTcp((SocketPort *)stream_tcp_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -688,14 +688,14 @@ int XArmAPI::connect(const std::string &port) {
       _report_connect_changed_callback();
     }
     if (!_is_rich_reported()) { return -3; }
-    report_rich_thread_ = std::thread(report_rich_thread_handle_, this);
+    report_rich_thread_ = std::thread(report_rich_thread_handle, this);
     report_rich_thread_.detach();
 
     if (report_type_ != "rich") {
       stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
       _report_connect_changed_callback();
       if (!is_reported()) { return -3; }
-      report_thread_ = std::thread(report_thread_handle_, this);
+      report_thread_ = std::thread(report_thread_handle, this);
       report_thread_.detach();
     }
   }

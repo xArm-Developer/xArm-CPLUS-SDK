@@ -8,6 +8,9 @@
  * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
  */
 
+#define _CRT_SECURE_NO_WARNINGS 1
+// #pragma warning(disable:4996)
+
 #include <random>
 #include "xarm/wrapper/xarm_api.h"
 

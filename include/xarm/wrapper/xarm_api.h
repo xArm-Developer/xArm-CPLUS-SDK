@@ -11,8 +11,6 @@
 #ifndef WRAPPER_XARM_API_H_
 #define WRAPPER_XARM_API_H_
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <iostream>
 #include <functional>
 #include <algorithm>

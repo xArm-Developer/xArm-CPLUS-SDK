@@ -244,6 +244,9 @@ namespace XArmWrapper
   int __stdcall get_state(int *state) {
     return arm->get_state(state);
   }
+  int __stdcall system_control(int value) {
+    return arm->system_control(value);
+  }
   int __stdcall shutdown_system(int value) {
     return arm->shutdown_system(value);
   }

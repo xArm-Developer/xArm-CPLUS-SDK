@@ -156,6 +156,8 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_state(ref int state);
         [DllImport("xarm.dll")]
+        public static extern int system_control(int value = 1);
+        [DllImport("xarm.dll")]
         public static extern int shutdown_system(int value = 1);
         [DllImport("xarm.dll")]
         public static extern int get_cmdnum(ref int cmdnum);

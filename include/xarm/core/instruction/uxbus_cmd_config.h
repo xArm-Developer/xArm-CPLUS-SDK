@@ -22,7 +22,7 @@ public:
   static const unsigned char CHECK_VERIFY = 3;
   static const unsigned char RELOAD_DYNAMICS = 4;
   static const unsigned char GET_REPORT_TAU_OR_I = 5;
-  static const unsigned char SHUTDOWN_SYSTEM = 10;
+  static const unsigned char SYSTEM_CONTROL = 10;
 
   static const unsigned char MOTION_EN = 11;
   static const unsigned char SET_STATE = 12;

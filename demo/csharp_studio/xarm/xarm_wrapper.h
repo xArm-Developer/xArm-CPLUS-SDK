@@ -84,6 +84,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_version(unsigned char version[40]);
   extern "C" __declspec(dllexport) int __stdcall get_robot_sn(unsigned char robot_sn[40]);
   extern "C" __declspec(dllexport) int __stdcall get_state(int *state);
+  extern "C" __declspec(dllexport) int __stdcall system_control(int value = 1);
   extern "C" __declspec(dllexport) int __stdcall shutdown_system(int value = 1);
   extern "C" __declspec(dllexport) int __stdcall get_cmdnum(int *cmdnum);
   extern "C" __declspec(dllexport) int __stdcall get_err_warn_code(int err_warn[2]);

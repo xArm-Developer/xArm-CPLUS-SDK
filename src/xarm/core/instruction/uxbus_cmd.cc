@@ -284,8 +284,8 @@ int UxbusCmd::check_verification(int *rx_data) {
   return _get_nu8(UXBUS_RG::CHECK_VERIFY, rx_data, 1);
 }
 
-int UxbusCmd::shutdown_system(int value) {
-  return _set_nu8(UXBUS_RG::SHUTDOWN_SYSTEM, &value, 1);
+int UxbusCmd::system_control(int value) {
+  return _set_nu8(UXBUS_RG::SYSTEM_CONTROL, &value, 1);
 }
 
 int UxbusCmd::set_record_traj(int value) {

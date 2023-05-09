@@ -785,10 +785,14 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
   return ret;
 }
 
-int XArmAPI::shutdown_system(int value) {
+int XArmAPI::system_control(int value) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret = core->shutdown_system(value);
+  int ret = core->system_control(value);
   return _check_code(ret);
+}
+
+int XArmAPI::shutdown_system(int value) {
+  return system_control(value);
 }
 
 int XArmAPI::get_state(int *state_) {

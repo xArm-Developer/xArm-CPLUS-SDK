@@ -93,7 +93,7 @@ public:
   int get_version(unsigned char rx_data[40]);
   int get_robot_sn(unsigned char rx_data[40]);
   int check_verification(int *rx_data);
-  int shutdown_system(int value);
+  int system_control(int value);
   int set_record_traj(int value);
   int save_traj(char filename[81], std::string feedback_key = "");
   int load_traj(char filename[81], std::string feedback_key = "");

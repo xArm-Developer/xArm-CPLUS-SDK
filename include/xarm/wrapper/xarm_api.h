@@ -271,12 +271,14 @@ public:
   int get_state(int *state);
 
   /**
-   * @brief Shutdown the xArm controller system
+   * @brief Control the xArm controller system
    * 
    * @param value:
-   *  1: remote shutdown
+   *  1: shutdown
+   *  2: reboot
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
+  int system_control(int value = 1);
   int shutdown_system(int value = 1);
 
   /**

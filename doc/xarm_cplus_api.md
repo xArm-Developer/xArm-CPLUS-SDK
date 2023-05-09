@@ -368,11 +368,12 @@ __XArmAPI(const std::string &robot_ip="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int shutdown_system(int value=1)__
-  > Shutdown the xArm controller system
+- __int system_control(int value=1)__
+  > Control the xArm controller system
   >
   > @param value:  
-  > &ensp;&ensp;&ensp;&ensp;1: remote shutdown  
+  > &ensp;&ensp;&ensp;&ensp;1: shutdown  
+  > &ensp;&ensp;&ensp;&ensp;2: reboot  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 

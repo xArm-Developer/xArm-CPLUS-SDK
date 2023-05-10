@@ -18,7 +18,7 @@
 class UxbusCmdTcp : public UxbusCmd {
 public:
   UxbusCmdTcp(SocketPort *arm_port);
-  UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid_);
+  UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid);
   ~UxbusCmdTcp(void);
 
   void close(void);

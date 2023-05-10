@@ -85,7 +85,7 @@ inline long long get_system_time()
 class UxbusCmd {
 public:
   UxbusCmd(void);
-  UxbusCmd(std::function<void (std::string, int, unsigned char)> set_feedback_uuid_transid);
+  UxbusCmd(std::function<void (std::string, int, unsigned char)> set_feedback_key_transid);
   ~UxbusCmd(void);
 
   int set_timeout(float timeout);
@@ -277,8 +277,8 @@ public:
 
   virtual void close(void);
   virtual int is_ok(void);
-  virtual int get_protocol_identifier(void);
-  virtual int set_protocol_identifier(int protocol_identifier = 2);
+  virtual int get_protocol_identifier(void) { return 0; };
+  virtual int set_protocol_identifier(int protocol_identifier = 2) { return -11; };
 
   /* modbus tcp func_code: 0x01 */
   virtual int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits) { return -11; };
@@ -330,8 +330,8 @@ protected:
   std::mutex mutex_;
 
 private:
-  int GET_TIMEOUT_ = UXBUS_CONF::GET_TIMEOUT;
-  int SET_TIMEOUT_ = UXBUS_CONF::SET_TIMEOUT;
+  int G_TOUT_ = UXBUS_CONF::GET_TIMEOUT;
+  int S_TOUT_ = UXBUS_CONF::SET_TIMEOUT;
 
   long long last_modbus_comm_us_;
   unsigned char feedback_type_;

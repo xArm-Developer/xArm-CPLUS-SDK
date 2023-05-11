@@ -1013,6 +1013,7 @@ int XArmAPI::_wait_feedback(fp32 timeout, int trans_id, int *feedback_code) {
   long long expired = timeout <= 0 ? 0 : (get_system_time() + (long long)(timeout * 1000) + (sleep_finish_time_ > start_time ? sleep_finish_time_ : 0));
   int state_ = state;
   int ret = get_state(&state_);
+  int state5_cnt = 0;
   while (timeout <= 0 || get_system_time() < expired) {
     if (!is_connected()) {
       fb_transid_result_map_.clear();
@@ -1026,11 +1027,18 @@ int XArmAPI::_wait_feedback(fp32 timeout, int trans_id, int *feedback_code) {
     ret = get_state(&state_);
     if (ret != 0) return ret;
 
-    if (state_ == 4 || state_ == 6) {
+    if (state_ >= 4) {
       sleep_finish_time_ = 0;
-      fb_transid_result_map_.clear();
-      return API_CODE::EMERGENCY_STOP;
+      if (state_ == 5) state5_cnt++;
+      if (state_ != 5 || state5_cnt >= 20) {
+        fb_transid_result_map_.clear();
+        return API_CODE::EMERGENCY_STOP;
+      }
     }
+    else {
+      state5_cnt = 0;
+    }
+
     if (fb_transid_result_map_.count(trans_id)) {
       if (feedback_code != NULL) *feedback_code = fb_transid_result_map_[trans_id];
       fb_transid_result_map_.erase(trans_id);
@@ -1048,6 +1056,7 @@ int XArmAPI::_wait_move(fp32 timeout, int trans_id) {
   long long start_time = get_system_time();
   long long expired = timeout <= 0 ? 0 : (get_system_time() + (long long)(timeout * 1000) + (sleep_finish_time_ > start_time ? sleep_finish_time_ : 0));
   int cnt = 0;
+  int state5_cnt = 0;
   int state_ = state;
   int ret = get_state(&state_);
   int max_cnt = (ret == 0 && state_ == 1) ? 2 : 10;
@@ -1059,9 +1068,15 @@ int XArmAPI::_wait_move(fp32 timeout, int trans_id) {
     ret = get_state(&state_);
     if (ret != 0) return ret;
 
-    if (state_ == 4 || state_ == 6) {
+    if (state_ >= 4) {
       sleep_finish_time_ = 0;
-      return API_CODE::EMERGENCY_STOP;
+      if (state_ == 5) state5_cnt++;
+      if (state_ != 5 || state5_cnt >= 20) {
+        return API_CODE::EMERGENCY_STOP;
+      }
+    }
+    else {
+      state5_cnt = 0;
     }
     if (get_system_time() < sleep_finish_time_ || state_ == 3) {
       cnt = 0;

@@ -149,17 +149,17 @@ namespace XArmWrapper
   int __stdcall set_pause_time(fp32 sltime) {
     return arm->set_pause_time(sltime);
   }
-  int __stdcall set_collision_sensitivity(int sensitivity) {
-    return arm->set_collision_sensitivity(sensitivity);
+  int __stdcall set_collision_sensitivity(int sensitivity, bool wait) {
+    return arm->set_collision_sensitivity(sensitivity, wait);
   }
-  int __stdcall set_teach_sensitivity(int sensitivity) {
-    return arm->set_teach_sensitivity(sensitivity);
+  int __stdcall set_teach_sensitivity(int sensitivity, bool wait) {
+    return arm->set_teach_sensitivity(sensitivity, wait);
   }
-  int __stdcall set_gravity_direction(fp32 gravity_dir[3]) {
-    return arm->set_gravity_direction(gravity_dir);
+  int __stdcall set_gravity_direction(fp32 gravity_dir[3], bool wait) {
+    return arm->set_gravity_direction(gravity_dir, wait);
   }
-  int __stdcall set_tcp_offset(fp32 pose_offset[6]) {
-    return arm->set_tcp_offset(pose_offset);
+  int __stdcall set_tcp_offset(fp32 pose_offset[6], bool wait) {
+    return arm->set_tcp_offset(pose_offset, wait);
   }
   int __stdcall set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
     return arm->set_tcp_load(weight, center_of_gravity);
@@ -305,8 +305,8 @@ namespace XArmWrapper
   int __stdcall set_collision_rebound(bool on) {
     return arm->set_collision_rebound(on);
   }
-  int __stdcall set_world_offset(float pose_offset[6]) {
-    return arm->set_world_offset(pose_offset);
+  int __stdcall set_world_offset(float pose_offset[6], bool wait) {
+    return arm->set_world_offset(pose_offset, wait);
   }
   int __stdcall start_record_trajectory(void) {
     return arm->start_record_trajectory();

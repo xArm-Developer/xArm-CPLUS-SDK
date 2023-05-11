@@ -479,24 +479,27 @@ __XArmAPI(const std::string &robot_ip="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_collision_sensitivity(int sensitivity)__
+- __int set_collision_sensitivity(int sensitivity, bool wait = true)__
   > Set the sensitivity of collision
   >
   > @param sensitivity: sensitivity value, 0~5  
+  > @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_teach_sensitivity(int sensitivity)__
+- __int set_teach_sensitivity(int sensitivity, bool wait = true)__
   > Set the sensitivity of drag and teach
   > 
   > @param sensitivity: sensitivity value, 1~5  
+  > @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_gravity_direction(float gravity_dir[3])__
+- __int set_gravity_direction(float gravity_dir[3], bool wait = true)__
   > Set the direction of gravity
   > 
-  > @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]  
+  > @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]
+  > @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -691,12 +694,13 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > Emergency stop
 
 
-- __int set_tcp_offset(float pose_offset[6])__
+- __int set_tcp_offset(float pose_offset[6], bool wait = true)__
   > Set the tool coordinate system offset at the end  
   > 
   > @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of roll/pitch/yaw should be in radians  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of roll/pitch/yaw should be in degrees  
+  > @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
 
@@ -1231,12 +1235,13 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_world_offset(float pose_offset[6])__
+- __int set_world_offset(float pose_offset[6], bool wait = true)__
   > Set the base coordinate system offset at the end
   > 
   > @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of roll/pitch/yaw should be in radians  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of roll/pitch/yaw should be in degrees  
+  > @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

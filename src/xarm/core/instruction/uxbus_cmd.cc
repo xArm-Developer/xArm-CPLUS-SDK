@@ -1790,3 +1790,7 @@ int UxbusCmd::set_feedback_type(unsigned char feedback_type)
   return ret;
 }
 
+int UxbusCmd::check_feedback(std::string feedback_key)
+{
+  return _set_nu8(UXBUS_RG::FEEDBACK_CHECK, (unsigned char *)NULL, 0, feedback_key, FeedbackType::MOTION_FINISH);
+}

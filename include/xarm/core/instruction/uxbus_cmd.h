@@ -274,6 +274,7 @@ public:
   int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
 
   int set_feedback_type(unsigned char feedback_type);
+  int check_feedback(std::string feedback_key = "");
 
   virtual void close(void);
   virtual int is_ok(void);

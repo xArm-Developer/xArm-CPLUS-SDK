@@ -92,13 +92,13 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_pause_time(float sltime);
         [DllImport("xarm.dll")]
-        public static extern int set_collision_sensitivity(int sensitivity);
+        public static extern int set_collision_sensitivity(int sensitivity, bool wait = true);
         [DllImport("xarm.dll")]
-        public static extern int set_teach_sensitivity(int sensitivity);
+        public static extern int set_teach_sensitivity(int sensitivity, bool wait = true);
         [DllImport("xarm.dll")]
-        public static extern int set_gravity_direction(float[] gravity_dir);
+        public static extern int set_gravity_direction(float[] gravity_dir, bool wait = true);
         [DllImport("xarm.dll")]
-        public static extern int set_tcp_offset(float[] pose_offset);
+        public static extern int set_tcp_offset(float[] pose_offset, bool wait = true);
         [DllImport("xarm.dll")]
         public static extern int set_tcp_load(float weight, float[] center_of_gravity);
         [DllImport("xarm.dll")]
@@ -193,7 +193,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_collision_rebound(bool on);
         [DllImport("xarm.dll")]
-        public static extern int set_world_offset(float[] pose_offset);
+        public static extern int set_world_offset(float[] pose_offset, bool wait = true);
         [DllImport("xarm.dll")]
         public static extern int start_record_trajectory();
         [DllImport("xarm.dll")]

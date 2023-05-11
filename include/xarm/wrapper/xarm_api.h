@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.2"
+#define SDK_VERSION "1.13.3"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -414,25 +414,28 @@ public:
    * @brief Set the sensitivity of collision
    * 
    * @param sensitivity: sensitivity value, 0~5
+   * @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_collision_sensitivity(int sensitivity);
+  int set_collision_sensitivity(int sensitivity, bool wait = true);
 
   /**
    * @brief Set the sensitivity of drag and teach
    * 
    * @param sensitivity: sensitivity value, 1~5
+   * @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_teach_sensitivity(int sensitivity);
+  int set_teach_sensitivity(int sensitivity, bool wait = true);
 
   /**
    * @brief Set the direction of gravity
    * 
    * @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]
+   * @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_gravity_direction(fp32 gravity_dir[3]);
+  int set_gravity_direction(fp32 gravity_dir[3], bool wait = true);
 
   /**
    * @brief Clean current config and restore system default settings
@@ -636,6 +639,7 @@ public:
    * @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
    *  if default_is_radian is true, the value of roll/pitch/yaw should be in radians
    *  if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
+   * @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
   int set_tcp_offset(fp32 pose_offset[6], bool wait = true);
@@ -1257,9 +1261,10 @@ public:
    * @param pose_offset: tcp offset, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
    *  if default_is_radian is true, the value of roll/pitch/yaw should be in radians
    *  if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
+   * @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_world_offset(float pose_offset[6]);
+  int set_world_offset(float pose_offset[6], bool wait = true);
 
   /**
    * @brief Start trajectory recording, only in teach mode, so you need to set joint teaching mode before.
@@ -2528,6 +2533,8 @@ private:
   int _wait_load_traj(fp32 timeout, int trans_id, std::string filename = "unknown");
   int _wait_save_traj(fp32 timeout, int trans_id, std::string filename = "unknown");
   int _wait_play_traj(fp32 timeout, int trans_id, int times = 1);
+
+  int _wait_all_task_finish(fp32 timeout = NO_TIMEOUT);
 private:
   std::string port_;
   bool check_tcp_limit_;

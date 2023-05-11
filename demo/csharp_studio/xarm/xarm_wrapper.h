@@ -51,10 +51,10 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall set_servo_attach(int servo_id);
   extern "C" __declspec(dllexport) int __stdcall set_servo_detach(int servo_id);
   extern "C" __declspec(dllexport) int __stdcall set_pause_time(fp32 sltime);
-  extern "C" __declspec(dllexport) int __stdcall set_collision_sensitivity(int sensitivity);
-  extern "C" __declspec(dllexport) int __stdcall set_teach_sensitivity(int sensitivity);
-  extern "C" __declspec(dllexport) int __stdcall set_gravity_direction(fp32 gravity_dir[3]);
-  extern "C" __declspec(dllexport) int __stdcall set_tcp_offset(fp32 pose_offset[6]);
+  extern "C" __declspec(dllexport) int __stdcall set_collision_sensitivity(int sensitivity, bool wait = true);
+  extern "C" __declspec(dllexport) int __stdcall set_teach_sensitivity(int sensitivity, bool wait = true);
+  extern "C" __declspec(dllexport) int __stdcall set_gravity_direction(fp32 gravity_dir[3], bool wait = true);
+  extern "C" __declspec(dllexport) int __stdcall set_tcp_offset(fp32 pose_offset[6], bool wait = true);
   extern "C" __declspec(dllexport) int __stdcall set_tcp_load(fp32 weight, fp32 center_of_gravity[3]);
   extern "C" __declspec(dllexport) int __stdcall set_tcp_jerk(fp32 jerk);
   extern "C" __declspec(dllexport) int __stdcall set_tcp_maxacc(fp32 acc);
@@ -110,7 +110,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall set_fense_mode(bool on);
   extern "C" __declspec(dllexport) int __stdcall set_fence_mode(bool on);
   extern "C" __declspec(dllexport) int __stdcall set_collision_rebound(bool on);
-  extern "C" __declspec(dllexport) int __stdcall set_world_offset(float pose_offset[6]);
+  extern "C" __declspec(dllexport) int __stdcall set_world_offset(float pose_offset[6], bool wait = true);
   extern "C" __declspec(dllexport) int __stdcall start_record_trajectory(void);
   extern "C" __declspec(dllexport) int __stdcall stop_record_trajectory(char* filename = NULL);
   extern "C" __declspec(dllexport) int __stdcall save_record_trajectory(char* filename, float timeout = 10);

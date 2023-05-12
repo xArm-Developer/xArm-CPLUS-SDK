@@ -705,11 +705,12 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
 
 
-- __int set_tcp_load(float weight, float center_of_gravity[3])__
+- __int set_tcp_load(float weight, float center_of_gravity[3], bool wait = false)__
   > Set the tcp load
   > 
   > @param weight: load weight (unit: kg)  
   > @param center_of_gravity: tcp load center of gravity, like [x(mm), y(mm), z(mm)]  
+  > @param wait: whether to wait for the command to be executed or the robotic arm to stop  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.  
 
 

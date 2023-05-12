@@ -100,7 +100,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_tcp_offset(float[] pose_offset, bool wait = true);
         [DllImport("xarm.dll")]
-        public static extern int set_tcp_load(float weight, float[] center_of_gravity);
+        public static extern int set_tcp_load(float weight, float[] center_of_gravity, bool wait = false);
         [DllImport("xarm.dll")]
         public static extern int set_tcp_jerk(float jerk);
         [DllImport("xarm.dll")]

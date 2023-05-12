@@ -73,7 +73,7 @@ int XArmAPI::set_tcp_offset(fp32 pose_offset[6], bool wait) {
   return core->set_tcp_offset(offset);
 }
 
-int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
+int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3], bool wait) {
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
   int code = _xarm_is_ready();
@@ -89,7 +89,15 @@ int XArmAPI::set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
     _gravity[1] = (float)(center_of_gravity[1] / 1000.0);
     _gravity[2] = (float)(center_of_gravity[2] / 1000.0);
   }
-  return core->set_tcp_load(weight, _gravity);
+  std::string feedback_key = _gen_feedback_key(wait);
+  int ret = core->set_tcp_load(weight, _gravity, feedback_key);
+  int trans_id = _get_feedback_transid(feedback_key);
+  ret = _check_code(ret, true);
+  if (wait && ret == 0) {
+    ret = _wait_move(NO_TIMEOUT, trans_id);
+  }
+
+  return ret;
 }
 
 int XArmAPI::set_tcp_jerk(fp32 jerk) {

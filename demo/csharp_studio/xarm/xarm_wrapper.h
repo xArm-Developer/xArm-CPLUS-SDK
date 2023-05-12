@@ -55,7 +55,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall set_teach_sensitivity(int sensitivity, bool wait = true);
   extern "C" __declspec(dllexport) int __stdcall set_gravity_direction(fp32 gravity_dir[3], bool wait = true);
   extern "C" __declspec(dllexport) int __stdcall set_tcp_offset(fp32 pose_offset[6], bool wait = true);
-  extern "C" __declspec(dllexport) int __stdcall set_tcp_load(fp32 weight, fp32 center_of_gravity[3]);
+  extern "C" __declspec(dllexport) int __stdcall set_tcp_load(fp32 weight, fp32 center_of_gravity[3], bool wait = false);
   extern "C" __declspec(dllexport) int __stdcall set_tcp_jerk(fp32 jerk);
   extern "C" __declspec(dllexport) int __stdcall set_tcp_maxacc(fp32 acc);
   extern "C" __declspec(dllexport) int __stdcall set_joint_jerk(fp32 jerk);

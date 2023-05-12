@@ -649,9 +649,10 @@ public:
    * 
    * @param weight: load weight (unit: kg)
    * @param center_of_gravity: tcp load center of gravity, like [x(mm), y(mm), z(mm)]
+   * @param wait: whether to wait for the command to be executed or the robotic arm to stop
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_tcp_load(fp32 weight, fp32 center_of_gravity[3]);
+  int set_tcp_load(fp32 weight, fp32 center_of_gravity[3], bool wait = false);
 
   /**
    * @brief Set the translational jerk of Cartesian space

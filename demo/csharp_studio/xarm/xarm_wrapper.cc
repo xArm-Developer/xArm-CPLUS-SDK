@@ -161,8 +161,8 @@ namespace XArmWrapper
   int __stdcall set_tcp_offset(fp32 pose_offset[6], bool wait) {
     return arm->set_tcp_offset(pose_offset, wait);
   }
-  int __stdcall set_tcp_load(fp32 weight, fp32 center_of_gravity[3]) {
-    return arm->set_tcp_load(weight, center_of_gravity);
+  int __stdcall set_tcp_load(fp32 weight, fp32 center_of_gravity[3], bool wait) {
+    return arm->set_tcp_load(weight, center_of_gravity, wait);
   }
   int __stdcall set_tcp_jerk(fp32 jerk) {
     return arm->set_tcp_jerk(jerk);

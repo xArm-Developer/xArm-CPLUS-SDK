@@ -667,9 +667,9 @@ int UxbusCmd::set_tcp_offset(float pose_offset[6]) {
   return _set_nfp32(UXBUS_RG::SET_TCP_OFFSET, pose_offset, 6);
 }
 
-int UxbusCmd::set_tcp_load(float mass, float load_offset[3]) {
+int UxbusCmd::set_tcp_load(float mass, float load_offset[3], std::string feedback_key) {
   float txdata[4] = { mass, load_offset[0], load_offset[1], load_offset[2] };
-  return _set_nfp32(UXBUS_RG::SET_LOAD_PARAM, txdata, 4);
+  return _set_nfp32(UXBUS_RG::SET_LOAD_PARAM, txdata, 4, feedback_key, FeedbackType::TRIGGER);
 }
 
 int UxbusCmd::set_collis_sens(int value) {

@@ -144,7 +144,7 @@ public:
   int set_joint_jerk(float jerk);
   int set_joint_maxacc(float maxacc);
   int set_tcp_offset(float pose_offset[6]);
-  int set_tcp_load(float mass, float load_offset[3]);
+  int set_tcp_load(float mass, float load_offset[3], std::string feedback_key = "");
   int set_collis_sens(int value);
   int set_teach_sens(int value);
   int set_gravity_dir(float gravity_dir[3]);

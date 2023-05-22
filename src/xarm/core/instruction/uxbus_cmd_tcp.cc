@@ -96,7 +96,7 @@ int UxbusCmdTcp::send_pend(int funcode, int num, int timeout, unsigned char *ret
         // print_hex(" 3", rx_data, num + 8 + 4);
         break;
       }
-      else if (ret != UXBUS_STATE::ERR_NUM) {
+      else if (code != UXBUS_STATE::ERR_NUM) {
         ret = code;
         break;
       }

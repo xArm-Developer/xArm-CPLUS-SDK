@@ -171,7 +171,12 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
   else {
     memcpy(r_sn, sn, 14);
   }
-  if (r_sn[0] != (is_lite6() ? 'L' : 'X') || (axis == 5 && r_sn[1] != 'F') || (axis == 6 && r_sn[1] != 'I') || (axis == 7 && r_sn[1] != 'S')) {
+
+  bool valid_850 = is_850() && r_sn[0] == 'F' && r_sn[1] == 'X';
+  bool valid_lite = is_lite6() && r_sn[0] == 'L' && r_sn[1] == 'I';
+  bool valid_xarm = !is_850() && !is_lite6() && r_sn[0] == 'X' && r_sn[1] == (axis == 5 ? 'F' : axis == 6 ? 'I' : axis == 7 ? 'S' : ' ') ;
+
+  if (!(valid_850 || valid_lite || valid_xarm)) {
     fprintf(stderr, "iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
     return API_CODE::API_EXCEPTION;
   }

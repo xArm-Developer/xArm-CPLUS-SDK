@@ -214,6 +214,11 @@ public:
   bool is_lite6(void);
 
   /**
+   * @brief Robot is UF850 or not
+   */
+  bool is_850(void);
+
+  /**
    * @brief xArm is reported or not, only available in socket way
    */
   bool is_reported(void);

@@ -420,6 +420,10 @@ bool XArmAPI::is_lite6(void) {
   return axis == 6 && device_type == 9;
 }
 
+bool XArmAPI::is_850(void) {
+  return axis == 6 && device_type == 12;
+}
+
 bool XArmAPI::is_reported(void) {
   return is_tcp_ ? (stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_ok() == 0) : false;
 }

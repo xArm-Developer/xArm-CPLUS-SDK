@@ -267,6 +267,8 @@ int XArmAPI::_wait_all_task_finish(fp32 timeout)
   ret = _check_code(ret);
   if (ret == 0) {
     ret = _wait_feedback(timeout, trans_id);
+    if (ret == 0)
+      sleep_milliseconds(500);
   }
   return ret;
 }

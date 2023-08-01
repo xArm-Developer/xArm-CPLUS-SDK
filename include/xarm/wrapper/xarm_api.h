@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.3"
+#define SDK_VERSION "1.13.4"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -154,6 +154,12 @@ public:
 
   fp32 realtime_tcp_speed;
   fp32 *realtime_joint_speeds;
+
+  bool is_reduced_mode;
+  bool is_fence_mode;
+  bool is_report_current;
+  bool is_approx_motion;
+  bool is_cart_continuous;
 
   fp32 *world_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
   fp32 *temperatures;

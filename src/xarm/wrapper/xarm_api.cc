@@ -339,6 +339,12 @@ void XArmAPI::_init(void) {
   only_check_result = 0;
   support_feedback_ = false;
 
+  is_reduced_mode = false;
+  is_fence_mode = false;
+  is_report_current = false;
+  is_approx_motion = false;
+  is_cart_continuous = false;
+
   report_rich_data_ptr_ = new XArmReportData("rich");
   if (report_type_ != "rich") {
     report_data_ptr_ = new XArmReportData(report_type_);

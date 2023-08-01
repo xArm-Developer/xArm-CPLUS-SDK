@@ -333,6 +333,8 @@ XArmReportData::XArmReportData(std::string report_type_)
 
   memset(pose_aa, 0, sizeof(pose_aa));
 
+  switch_status = 0;
+
   debug_data = NULL;
   debug_size = 0;
 }
@@ -515,7 +517,10 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
       memcpy(pose_aa, pose, sizeof(float) * 3);
       hex_to_nfp32(&data_fp[482], pose_aa, 3);
     }
-    __flush_debug_data(494);
+    if (total_num >= 495) {
+      switch_status = data_fp[494];
+    }
+    __flush_debug_data(495);
   }
   return ret;
 }

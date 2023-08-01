@@ -223,6 +223,8 @@ public:
 
   float pose_aa[6];
 
+  unsigned char switch_status;
+
   int debug_size;
   unsigned char *debug_data;
 private:

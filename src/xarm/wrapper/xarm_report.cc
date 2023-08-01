@@ -416,6 +416,13 @@ void XArmAPI::_update(unsigned char *rx_data) {
         position_aa[i] = (float)(default_is_radian || i < 3 ? report_rich_data_ptr_->pose_aa[i] : to_degree(report_rich_data_ptr_->pose_aa[i]));
       }
     }
+    if (sizeof_data >= 495) {
+      is_reduced_mode = (report_rich_data_ptr_->switch_status & 0x01) != 0;
+      is_fence_mode = ((report_rich_data_ptr_->switch_status >> 1) & 0x01) != 0;
+      is_report_current = ((report_rich_data_ptr_->switch_status >> 2) & 0x01) != 0;
+      is_approx_motion = ((report_rich_data_ptr_->switch_status >> 3) & 0x01) != 0;
+      is_cart_continuous = ((report_rich_data_ptr_->switch_status >> 4) & 0x01) != 0;
+    }
   }
 }
 

@@ -789,7 +789,7 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
       sscanf(std::string(control_box_sn).substr(2, 4).data(), "%d", &control_type);
     arm_type_is_1300_ = arm_type >= 1300;
     control_box_type_is_1300_ = control_type >= 1300;
-    memcpy(robot_sn, sn, 40);
+    memcpy(robot_sn, str, 14);
     memcpy(sn, robot_sn, 40);
   }
   return ret;

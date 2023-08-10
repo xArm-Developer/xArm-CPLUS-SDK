@@ -80,7 +80,7 @@ int UxbusCmd::_set_nu8(int funcode, unsigned char *datas, int num, std::string f
   }
   int ret = _send_modbus_request(funcode, datas, num);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  int timeout = (funcode != UXBUS_RG::MOTION_EN || (funcode == UXBUS_RG::MOTION_EN && S_TOUT_ >= 2)) ? S_TOUT_ : 2000;
+  int timeout = (funcode != UXBUS_RG::MOTION_EN || (funcode == UXBUS_RG::MOTION_EN && S_TOUT_ >= 5000)) ? S_TOUT_ : 5000;
   ret = _recv_modbus_response(funcode, ret, NULL, 0, timeout);
   if (need_set_fb && feedback_key != "") {
     _set_feedback_type_no_lock(feedback_type_);

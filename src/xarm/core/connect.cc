@@ -52,7 +52,7 @@ SocketPort *connect_tcp_report_norm(char *server_ip) {
 
 SocketPort *connect_tcp_report_rich(char *server_ip) {
   SocketPort *arm_report =
-    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_RICH, 5, 1024 + 4, 1);  // 494 + 4
+    new SocketPort(server_ip, XARM_CONF::TCP_PORT_REPORT_RICH, 5, 1024, 1);  // 494 + 4
   if (arm_report->is_ok() != 0) {
     fprintf(stderr, "Error: Tcp Report Rich connection failed\n");
     return NULL;

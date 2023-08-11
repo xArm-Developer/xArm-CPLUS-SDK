@@ -495,7 +495,7 @@ void XArmAPI::_handle_report_rich_data(void) {
   int size = 0;
   int connect_fail_count = 0;
 
-    bool reported = _is_rich_reported();
+  bool reported = _is_rich_reported();
   int max_reconnect_cnts = 10;
   long long last_send_ms = 0;
   long long curr_ms = 0;

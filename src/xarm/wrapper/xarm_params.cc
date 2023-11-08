@@ -262,8 +262,8 @@ int XArmAPI::_wait_all_task_finish(fp32 timeout)
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   if (!support_feedback_) return API_CODE::CMD_NOT_EXIST;
   std::string feedback_key = _gen_feedback_key(true);
-  int trans_id = _get_feedback_transid(feedback_key);
   int ret = core->check_feedback(feedback_key);
+  int trans_id = _get_feedback_transid(feedback_key);
   ret = _check_code(ret);
   if (ret == 0) {
     ret = _wait_feedback(timeout, trans_id);

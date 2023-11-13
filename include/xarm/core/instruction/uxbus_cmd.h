@@ -276,6 +276,14 @@ public:
   int set_feedback_type(unsigned char feedback_type);
   int check_feedback(std::string feedback_key = "");
 
+  int set_common_param(unsigned char param_type, int param_val);
+  int set_common_param(unsigned char param_type, float param_val);
+  int get_common_param(unsigned char param_type, int *param_val);
+  int get_common_param(unsigned char param_type, float *param_val);
+  int get_poe_status(int *status);
+  int get_collision_error_info(int *id, float *theoretical_tau, float *actual_tau);
+  int get_payload_error_info(int *id, float *diff_angle);
+
   virtual void close(void);
   virtual int is_ok(void);
   virtual int get_protocol_identifier(void) { return 0; };

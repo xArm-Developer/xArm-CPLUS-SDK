@@ -153,20 +153,23 @@ public:
 
   static const unsigned char FTSENSOR_GET_DATA_OLD = 150;  // only available in firmware version < 1.8.3
   static const unsigned char FTSENSOR_GET_DATA = 200;
-    static const unsigned char FTSENSOR_ENABLE = 201;
-    static const unsigned char FTSENSOR_SET_APP = 202;
-    static const unsigned char FTSENSOR_GET_APP = 203;
-    static const unsigned char IDEN_LOAD = 204;
-    static const unsigned char FTSENSOR_CALI_LOAD_OFFSET = 205;
-    static const unsigned char FTSENSOR_SET_ZERO = 206;
-    static const unsigned char IMPEDANCE_CONFIG = 207;
-    static const unsigned char FORCE_CTRL_PID = 208;
-    static const unsigned char FORCE_CTRL_CONFIG = 209;
-    static const unsigned char IMPEDANCE_CTRL_MBK = 210;
-    static const unsigned char IMPEDANCE_CTRL_CONFIG = 211;
+  static const unsigned char FTSENSOR_ENABLE = 201;
+  static const unsigned char FTSENSOR_SET_APP = 202;
+  static const unsigned char FTSENSOR_GET_APP = 203;
+  static const unsigned char IDEN_LOAD = 204;
+  static const unsigned char FTSENSOR_CALI_LOAD_OFFSET = 205;
+  static const unsigned char FTSENSOR_SET_ZERO = 206;
+  static const unsigned char IMPEDANCE_CONFIG = 207;
+  static const unsigned char FORCE_CTRL_PID = 208;
+  static const unsigned char FORCE_CTRL_CONFIG = 209;
+  static const unsigned char IMPEDANCE_CTRL_MBK = 210;
+  static const unsigned char IMPEDANCE_CTRL_CONFIG = 211;
   static const unsigned char FTSENSOR_GET_CONFIG = 212;
 
   static const unsigned char GET_MAX_JOINT_VELOCITY = 231;
+  static const unsigned char SET_COMMON_PARAM = 232;
+  static const unsigned char GET_COMMON_PARAM = 233;
+  static const unsigned char GET_COMMON_INFO = 234;
 
   static const unsigned char TGPIO_COM_TIOUT = 240;
   static const unsigned char TGPIO_COM_DATA = 241;

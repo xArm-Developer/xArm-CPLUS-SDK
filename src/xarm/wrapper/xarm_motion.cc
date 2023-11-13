@@ -140,14 +140,14 @@ int XArmAPI::set_servo_angle(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime, bo
   std::string feedback_key = _gen_feedback_key(wait);
   if (relative) {
     for (int i = 0; i < 7; i++) {
-      mvjoint[i] = (float)(default_is_radian ? angs[i] : to_radian(angs[i]));
+      mvjoint[i] = i >= axis ? 0 : (float)(default_is_radian ? angs[i] : to_radian(angs[i]));
     }
     ret = core->move_relative(mvjoint, speed_, acc_, mvtime, radius, 1, 0, only_check_type_, &only_check_result, 0, feedback_key);
   }
   else {
     for (int i = 0; i < 7; i++) {
       last_used_angles[i] = angs[i];
-      mvjoint[i] = (float)(default_is_radian ? last_used_angles[i] : to_radian(last_used_angles[i]));
+      mvjoint[i] =  i >= axis ? 0 : (float)(default_is_radian ? last_used_angles[i] : to_radian(last_used_angles[i]));
     }
     if (_version_is_ge(1, 5, 20) && radius >= 0) {
       ret = core->move_jointb(mvjoint, speed_, acc_, radius, only_check_type_, &only_check_result, feedback_key);
@@ -176,7 +176,7 @@ int XArmAPI::set_servo_angle(fp32 angs[7], bool wait, fp32 timeout, fp32 radius,
 }
 
 int XArmAPI::set_servo_angle(int servo_id, fp32 angle, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius, bool relative) {
-  if (servo_id <= 0 || servo_id > 7) return API_CODE::PARAM_ERROR;
+  if (servo_id <= 0 || servo_id > axis) return API_CODE::PARAM_ERROR;
   last_used_angles[servo_id - 1] = angle;
   return set_servo_angle(last_used_angles, speed, acc, mvtime, wait, timeout, radius), relative;
 }
@@ -189,7 +189,7 @@ int XArmAPI::set_servo_angle_j(fp32 angs[7], fp32 speed, fp32 acc, fp32 mvtime) 
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   fp32 mvjoint[7];
   for (int i = 0; i < 7; i++) {
-    mvjoint[i] = (float)(default_is_radian ? angs[i] : to_radian(angs[i]));
+    mvjoint[i] =  i >= axis ? 0 : (float)(default_is_radian ? angs[i] : to_radian(angs[i]));
   }
   int ret = core->move_servoj(mvjoint, last_used_joint_speed, last_used_joint_acc, mvtime);
   ret = _check_code(ret, true, 1);
@@ -387,7 +387,7 @@ int XArmAPI::vc_set_joint_velocity(fp32 speeds[7], bool is_sync, fp32 duration) 
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   fp32 jnt_v[7];
   for (int i = 0; i < 7; i++) {
-    jnt_v[i] = (float)(default_is_radian ? speeds[i] : to_radian(speeds[i]));
+    jnt_v[i] =  i >= axis ? 0 : (float)(default_is_radian ? speeds[i] : to_radian(speeds[i]));
   }
   return core->vc_set_jointv(jnt_v, is_sync ? 1 : 0, _version_is_ge(1, 8, 0) ? duration : (fp32)-1.0);
 }

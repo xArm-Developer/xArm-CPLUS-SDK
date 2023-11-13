@@ -195,6 +195,17 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall set_dh_params(fp32 dh_params[28], unsigned char flag = 0);
   extern "C" __declspec(dllexport) int __stdcall set_feedback_type(unsigned char feedback_type);
 
+  extern "C" __declspec(dllexport) int __stdcall set_linear_spd_limit_factor(float factor);
+  extern "C" __declspec(dllexport) int __stdcall set_cmd_mat_history_num(int num);
+  extern "C" __declspec(dllexport) int __stdcall set_fdb_mat_history_num(int num);
+  extern "C" __declspec(dllexport) int __stdcall get_linear_spd_limit_factor(float *factor);
+  extern "C" __declspec(dllexport) int __stdcall get_cmd_mat_history_num(int *num);
+  extern "C" __declspec(dllexport) int __stdcall get_fdb_mat_history_num(int *num);
+  extern "C" __declspec(dllexport) int __stdcall get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission = false);
+  extern "C" __declspec(dllexport) int __stdcall get_poe_status(int *status);
+  extern "C" __declspec(dllexport) int __stdcall get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
+  extern "C" __declspec(dllexport) int __stdcall get_payload_error_info(int *servo_id, float *diff_angle);
+
   /* modbus tcp func_code: 0x01 */
   extern "C" __declspec(dllexport) int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);
   /* modbus tcp func_code: 0x02 */

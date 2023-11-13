@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.6"
+#define SDK_VERSION "1.13.16"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1919,7 +1919,7 @@ public:
    *  if true, the value of tcp load will be modified
    * @return: See the code documentation for details.
    */
-  int ft_sensor_cali_load(float load[10], bool association_setting_tcp_load = false, float m = 0.325, float x = -17, float y = 9, float z = 11.8);
+  int ft_sensor_cali_load(float load[10], bool association_setting_tcp_load = false, float m = 0.270, float x = -17, float y = 9, float z = 11.8);
 
   /**
    * @brief Used for enabling and disabling the use of the Six-axis Force Torque Sensor measurements in the controller.
@@ -2355,6 +2355,111 @@ public:
    * return: See the code documentation for details.
    */
   int set_feedback_type(unsigned char feedback_type);
+
+  /**
+   * @brief Set linear speed limit factor (default is 1.2)
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   *    2. only available in mode 1
+   * 
+   * @param factor: speed limit factor
+   * return: See the code documentation for details.
+   */
+  int set_linear_spd_limit_factor(float factor);
+
+  /**
+   * @brief Set cmd mat history num
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param num: history num
+   * return: See the code documentation for details.
+   */
+  int set_cmd_mat_history_num(int num);
+  
+  /**
+   * @brief Set fdb mat history num
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param num: history num
+   * return: See the code documentation for details.
+   */
+  int set_fdb_mat_history_num(int num);
+
+  /**
+   * @brief Get linear speed limit factor
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param factor: speed limit factor
+   * return: See the code documentation for details.
+   */
+  int get_linear_spd_limit_factor(float *factor);
+
+  /**
+   * @brief Get cmd mat history num
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param num: history num
+   * return: See the code documentation for details.
+   */
+  int get_cmd_mat_history_num(int *num);
+
+  /**
+   * @brief Get fdb mat history num
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param num: history num
+   * return: See the code documentation for details.
+   */
+  int get_fdb_mat_history_num(int *num);
+
+  /**
+   * @brief Get tgpio modbus timeout
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param timeout: timeout, milliseconds
+   * @param is_transparent_transmission: is transparent transmission or not
+   * return: See the code documentation for details.
+   */
+  int get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission = false);
+
+  /**
+   * @brief Get poe status
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param status: poe status, 1 means poe vaild, 0 means poe invalid
+   * return: See the code documentation for details.
+   */
+  int get_poe_status(int *status);
+
+  /**
+   * @brief Get collision error info
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param servo_id: servo id
+   * @param theoretical_tau: theoretical tau
+   * @param actual_tau: actual tau
+   * return: See the code documentation for details.
+   */
+  int get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
+
+  /**
+   * @brief Get payload error info
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param servo_id: servo id
+   * @param diff_angle: diff angle
+   * return: See the code documentation for details.
+   */
+  int get_payload_error_info(int *servo_id, float *diff_angle);
 
   /**
    * @brief (Standard Modbus TCP) Read Coils (0x01)

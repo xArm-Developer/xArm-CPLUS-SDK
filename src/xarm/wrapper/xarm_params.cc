@@ -272,3 +272,70 @@ int XArmAPI::_wait_all_task_finish(fp32 timeout)
   }
   return ret;
 }
+
+int XArmAPI::set_linear_spd_limit_factor(float factor)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->set_common_param(1, factor);
+}
+
+int XArmAPI::set_cmd_mat_history_num(int num)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->set_common_param(2, num);
+}
+
+int XArmAPI::set_fdb_mat_history_num(int num)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->set_common_param(3, num);
+}
+
+int XArmAPI::get_linear_spd_limit_factor(float *factor)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_common_param(1, factor);
+}
+
+int XArmAPI::get_cmd_mat_history_num(int *num)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_common_param(2, num);
+}
+
+int XArmAPI::get_fdb_mat_history_num(int *num)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_common_param(3, num);
+}
+
+int XArmAPI::get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  if (is_transparent_transmission)
+    return core->get_common_param(5, timeout);
+  else
+    return core->get_common_param(4, timeout);
+}
+
+int XArmAPI::get_poe_status(int *status)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_poe_status(status);
+}
+
+int XArmAPI::get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_collision_error_info(servo_id, theoretical_tau, actual_tau);
+}
+
+int XArmAPI::get_payload_error_info(int *servo_id, float *diff_angle)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->get_payload_error_info(servo_id, diff_angle);
+  if (ret == 0 && !default_is_radian) {
+    *diff_angle = to_degree(*diff_angle);
+  }
+  return ret;
+}

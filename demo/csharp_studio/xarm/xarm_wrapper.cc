@@ -569,6 +569,56 @@ namespace XArmWrapper
     return arm->set_feedback_type(feedback_type);
   }
 
+  int __stdcall set_linear_spd_limit_factor(float factor)
+  {
+    return arm->set_linear_spd_limit_factor(factor);
+  }
+
+  int __stdcall set_cmd_mat_history_num(int num)
+  {
+    return arm->set_cmd_mat_history_num(num);
+  }
+
+  int __stdcall set_fdb_mat_history_num(int num)
+  {
+    return arm->set_fdb_mat_history_num(num);
+  }
+
+  int __stdcall get_linear_spd_limit_factor(float *factor)
+  {
+    return arm->get_linear_spd_limit_factor(factor);
+  }
+
+  int __stdcall get_cmd_mat_history_num(int *num)
+  {
+    return arm->get_cmd_mat_history_num(num);
+  }
+
+  int __stdcall get_fdb_mat_history_num(int *num)
+  {
+    return arm->get_fdb_mat_history_num(num);
+  }
+
+  int __stdcall get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission)
+  {
+    return arm->get_tgpio_modbus_timeout(timeout, is_transparent_transmission);
+  }
+
+  int __stdcall get_poe_status(int *status)
+  {
+    return arm->get_poe_status(status);
+  }
+
+  int __stdcall get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
+  {
+    return arm->get_collision_error_info(servo_id, theoretical_tau, actual_tau);
+  }
+
+  int __stdcall get_payload_error_info(int *servo_id, float *diff_angle)
+  {
+    return arm->get_payload_error_info(servo_id, diff_angle);
+  }
+
   /* modbus tcp func_code: 0x01 */
   int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)
   {

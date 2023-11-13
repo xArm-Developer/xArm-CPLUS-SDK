@@ -364,6 +364,36 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_feedback_type(byte feedback_type);
 
+        [DllImport("xarm.dll")]
+        public static extern int set_linear_spd_limit_factor(float factor);
+
+        [DllImport("xarm.dll")]
+        public static extern int set_cmd_mat_history_num(int num);
+
+        [DllImport("xarm.dll")]
+        public static extern int set_fdb_mat_history_num(int num);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_linear_spd_limit_factor(ref float factor);
+        
+        [DllImport("xarm.dll")]
+        public static extern int get_cmd_mat_history_num(ref int num);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_fdb_mat_history_num(ref int num);
+        
+        [DllImport("xarm.dll")]
+        public static extern int get_tgpio_modbus_timeout(ref int timeout, bool is_transparent_transmission = false);
+        
+        [DllImport("xarm.dll")]
+        public static extern int get_poe_status(ref int status);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_collision_error_info(ref int servo_id, ref float theoretical_tau, ref float actual_tau);
+        
+        [DllImport("xarm.dll")]
+        public static extern int get_payload_error_info(ref int servo_id, ref float diff_angle);
+
         /* modbus tcp func_code: 0x01 */
         [DllImport("xarm.dll")]
         public static extern int read_coil_bits(UInt16 addr, UInt16 quantity, byte[] bits);

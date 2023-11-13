@@ -1794,3 +1794,67 @@ int UxbusCmd::check_feedback(std::string feedback_key)
 {
   return _set_nu8(UXBUS_RG::FEEDBACK_CHECK, (unsigned char *)NULL, 0, feedback_key, FeedbackType::MOTION_FINISH);
 }
+
+int UxbusCmd::set_common_param(unsigned char param_type, int param_val)
+{
+  unsigned char send_data[5] = {0};
+  send_data[0] = param_type;
+  int32_to_hex(param_val, &send_data[1]);
+  return _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data, 5);
+}
+
+int UxbusCmd::set_common_param(unsigned char param_type, float param_val)
+{
+  unsigned char send_data[5] = {0};
+  send_data[0] = param_type;
+  fp32_to_hex(param_val, &send_data[1]);
+  return _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data, 5);
+}
+
+int UxbusCmd::get_common_param(unsigned char param_type, int *param_val)
+{
+  unsigned char send_data[1] = {param_type};
+  unsigned char rx_data[4] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data, 4);
+  *param_val = bin8_to_32(rx_data);
+  return ret;
+}
+
+int UxbusCmd::get_common_param(unsigned char param_type, float *param_val)
+{
+  unsigned char send_data[1] = {param_type};
+  unsigned char rx_data[4] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data, 4);
+  *param_val = hex_to_fp32(rx_data);
+  return ret;
+}
+
+int UxbusCmd::get_poe_status(int *status)
+{
+  unsigned char send_data[1] = {1};
+  unsigned char rx_data[1] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 1);
+  *status = rx_data[0];
+  return ret;
+}
+
+int UxbusCmd::get_collision_error_info(int *id, float *theoretical_tau, float *actual_tau)
+{
+  unsigned char send_data[1] = {101};
+  unsigned char rx_data[9] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 9);
+  *id = rx_data[0];
+  *theoretical_tau = hex_to_fp32(&rx_data[1]);
+  *actual_tau = hex_to_fp32(&rx_data[5]);
+  return ret;
+}
+
+int UxbusCmd::get_payload_error_info(int *id, float *diff_angle)
+{
+  unsigned char send_data[1] = {102};
+  unsigned char rx_data[5] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
+  *id = rx_data[0];
+  *diff_angle = hex_to_fp32(&rx_data[1]);
+  return ret;
+}

@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.13.0)
+# xArm-C++-SDK API Documentation (V1.13.16)
 
 ## class __XArmAPI__
 ************************************
@@ -2299,6 +2299,91 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   >    &ensp;&ensp;&ensp;&ensp;1: feedback when the motion task starts executing  
   >    &ensp;&ensp;&ensp;&ensp;2: feedback when the motion task execution ends or motion task is discarded(usually when the distance is too close to be planned)  
   >    &ensp;&ensp;&ensp;&ensp;4: feedback when the non-motion task is triggered  
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_linear_spd_limit_factor(float factor)__
+  > Set linear speed limit factor (default is 1.2)  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > &ensp;&ensp;&ensp;&ensp;2. only available in mode 1  
+  > 
+  > @param factor: speed limit factor   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_cmd_mat_history_num(int num)__
+  > Set cmd mat history num  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  > 
+  > @param num: history num   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_fdb_mat_history_num(int num)__
+  > Set fdb mat history num  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param num: history num   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_linear_spd_limit_factor(float *factor)__
+  > Get linear speed limit factor 
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param factor: speed limit factor   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_cmd_mat_history_num(int *num)__
+  > Get cmd mat history num  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  > 
+  > @param num: history num   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_fdb_mat_history_num(int *num)__
+  > Get fdb mat history num  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param num: history num   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission = false)__
+  > Get tgpio modbus timeout  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param timeout: timeout, milliseconds   
+  > @param is_transparent_transmission: is transparent transmission or not   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_poe_status(int *status)__
+  > Get poe status  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param status: poe status, 1 means poe vaild, 0 means poe invalid   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)__
+  > Get collision error info  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param servo_id: servo id   
+  > @param theoretical_tau: theoretical tau   
+  > @param actual_tau: actual tau   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_payload_error_info(int *servo_id, float *diff_angle)__
+  > Get payload error info  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
+  > 
+  > @param servo_id: servo id   
+  > @param diff_angle: diff angle   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__

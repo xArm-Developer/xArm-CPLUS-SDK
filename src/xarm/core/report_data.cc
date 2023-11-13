@@ -457,7 +457,7 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
   for (int i = 0; i < 17; i++) { sv3msg[i] = data_fp[229 + i]; }
 
   if (total_num >= 252) {
-    for (int i = 0; i < 17; i++) { temperatures[i] = data_fp[245 + i]; }
+    for (int i = 0; i < 17; i++) { temperatures[i] = (char)data_fp[245 + i]; }
   }
   if (total_num >= 284) {
     float tcp_spd[1];

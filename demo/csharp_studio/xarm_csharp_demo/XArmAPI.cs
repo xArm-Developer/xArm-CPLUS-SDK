@@ -389,10 +389,19 @@ namespace xarm_csharp_demo
         public static extern int get_poe_status(ref int status);
 
         [DllImport("xarm.dll")]
-        public static extern int get_collision_error_info(ref int servo_id, ref float theoretical_tau, ref float actual_tau);
+        public static extern int get_c31_error_info(ref int servo_id, ref float theoretical_tau, ref float actual_tau);
         
         [DllImport("xarm.dll")]
-        public static extern int get_payload_error_info(ref int servo_id, ref float diff_angle);
+        public static extern int get_c37_error_info(ref int servo_id, ref float diff_angle);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_c23_error_info(ref int servo_id, ref float angle);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_c24_error_info(ref int servo_id, ref float speed);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_c60_error_info(ref float max_velo, ref float curr_velo);
 
         /* modbus tcp func_code: 0x01 */
         [DllImport("xarm.dll")]

@@ -281,8 +281,11 @@ public:
   int get_common_param(unsigned char param_type, int *param_val);
   int get_common_param(unsigned char param_type, float *param_val);
   int get_poe_status(int *status);
-  int get_collision_error_info(int *id, float *theoretical_tau, float *actual_tau);
-  int get_payload_error_info(int *id, float *diff_angle);
+  int get_c31_error_info(int *id, float *theoretical_tau, float *actual_tau);
+  int get_c37_error_info(int *id, float *diff_angle);
+  int get_c23_error_info(int *id, float *angle);
+  int get_c24_error_info(int *id, float *speed);
+  int get_c60_error_info(float *max_velo, float *curr_velo);
 
   virtual void close(void);
   virtual int is_ok(void);

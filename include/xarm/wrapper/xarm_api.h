@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.16"
+#define SDK_VERSION "1.13.17"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2439,7 +2439,7 @@ public:
   int get_poe_status(int *status);
 
   /**
-   * @brief Get collision error info
+   * @brief Get collision error (C31) info
    *  Note:
    *    1. only available if firmware_version >= 2.3.0
    * 
@@ -2448,10 +2448,10 @@ public:
    * @param actual_tau: actual tau
    * return: See the code documentation for details.
    */
-  int get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
+  int get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
 
   /**
-   * @brief Get payload error info
+   * @brief Get payload error (C37) info
    *  Note:
    *    1. only available if firmware_version >= 2.3.0
    * 
@@ -2459,7 +2459,41 @@ public:
    * @param diff_angle: diff angle
    * return: See the code documentation for details.
    */
-  int get_payload_error_info(int *servo_id, float *diff_angle);
+  int get_c37_error_info(int *servo_id, float *diff_angle);
+
+  /**
+   * @brief Get joint angle limit error (C23) info
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param servo_id: servo id
+   * @param angle: current angle
+   * return: See the code documentation for details.
+   */
+  int get_c23_error_info(int *servo_id, float *angle);
+  
+  /**
+   * @brief Get joint angle speed limit (C24) error info
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   * 
+   * @param servo_id: servo id
+   * @param speed: current speed
+   * return: See the code documentation for details.
+   */
+  int get_c24_error_info(int *servo_id, float *speed);
+
+  /**
+   * @brief Get linear angle speed limit (C60) error info
+   *  Note:
+   *    1. only available if firmware_version >= 2.3.0
+   *    2. only available in mode 1
+   * 
+   * @param max_velo: max limit linear speed
+   * @param curr_velo: current linear speed
+   * return: See the code documentation for details.
+   */
+  int get_c60_error_info(float *max_velo, float *curr_velo);
 
   /**
    * @brief (Standard Modbus TCP) Read Coils (0x01)

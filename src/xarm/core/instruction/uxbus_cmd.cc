@@ -1838,7 +1838,7 @@ int UxbusCmd::get_poe_status(int *status)
   return ret;
 }
 
-int UxbusCmd::get_collision_error_info(int *id, float *theoretical_tau, float *actual_tau)
+int UxbusCmd::get_c31_error_info(int *id, float *theoretical_tau, float *actual_tau)
 {
   unsigned char send_data[1] = {101};
   unsigned char rx_data[9] = {0};
@@ -1849,12 +1849,42 @@ int UxbusCmd::get_collision_error_info(int *id, float *theoretical_tau, float *a
   return ret;
 }
 
-int UxbusCmd::get_payload_error_info(int *id, float *diff_angle)
+int UxbusCmd::get_c37_error_info(int *id, float *diff_angle)
 {
   unsigned char send_data[1] = {102};
   unsigned char rx_data[5] = {0};
   int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
   *id = rx_data[0];
   *diff_angle = hex_to_fp32(&rx_data[1]);
+  return ret;
+}
+
+int UxbusCmd::get_c23_error_info(int *id, float *angle)
+{
+  unsigned char send_data[1] = {103};
+  unsigned char rx_data[5] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
+  *id = rx_data[0];
+  *angle = hex_to_fp32(&rx_data[1]);
+  return ret;
+}
+
+int UxbusCmd::get_c24_error_info(int *id, float *speed)
+{
+  unsigned char send_data[1] = {104};
+  unsigned char rx_data[5] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
+  *id = rx_data[0];
+  *speed = hex_to_fp32(&rx_data[1]);
+  return ret;
+}
+
+int UxbusCmd::get_c60_error_info(float *max_velo, float *curr_velo)
+{
+  unsigned char send_data[1] = {105};
+  unsigned char rx_data[8] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 8);
+  *max_velo = hex_to_fp32(&rx_data[0]);
+  *curr_velo = hex_to_fp32(&rx_data[4]);
   return ret;
 }

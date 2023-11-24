@@ -324,18 +324,44 @@ int XArmAPI::get_poe_status(int *status)
   return core->get_poe_status(status);
 }
 
-int XArmAPI::get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
+int XArmAPI::get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  return core->get_collision_error_info(servo_id, theoretical_tau, actual_tau);
+  return core->get_c31_error_info(servo_id, theoretical_tau, actual_tau);
 }
 
-int XArmAPI::get_payload_error_info(int *servo_id, float *diff_angle)
+int XArmAPI::get_c37_error_info(int *servo_id, float *diff_angle)
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret = core->get_payload_error_info(servo_id, diff_angle);
+  int ret = core->get_c37_error_info(servo_id, diff_angle);
   if (ret == 0 && !default_is_radian) {
     *diff_angle = to_degree(*diff_angle);
   }
   return ret;
+}
+
+int XArmAPI::get_c23_error_info(int *servo_id, float *angle)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->get_c23_error_info(servo_id, angle);
+  if (ret == 0 && !default_is_radian) {
+    *angle = to_degree(*angle);
+  }
+  return ret;
+}
+
+int XArmAPI::get_c24_error_info(int *servo_id, float *speed)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->get_c24_error_info(servo_id, speed);
+  if (ret == 0 && !default_is_radian) {
+    *speed = to_degree(*speed);
+  }
+  return ret;
+}
+
+int XArmAPI::get_c60_error_info(float *max_velo, float *curr_velo)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_c60_error_info(max_velo, curr_velo);
 }

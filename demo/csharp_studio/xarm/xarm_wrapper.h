@@ -203,8 +203,11 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_fdb_mat_history_num(int *num);
   extern "C" __declspec(dllexport) int __stdcall get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission = false);
   extern "C" __declspec(dllexport) int __stdcall get_poe_status(int *status);
-  extern "C" __declspec(dllexport) int __stdcall get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
-  extern "C" __declspec(dllexport) int __stdcall get_payload_error_info(int *servo_id, float *diff_angle);
+  extern "C" __declspec(dllexport) int __stdcall get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
+  extern "C" __declspec(dllexport) int __stdcall get_c37_error_info(int *servo_id, float *diff_angle);
+  extern "C" __declspec(dllexport) int __stdcall get_c23_error_info(int *servo_id, float *angle);
+  extern "C" __declspec(dllexport) int __stdcall get_c24_error_info(int *servo_id, float *speed);
+  extern "C" __declspec(dllexport) int __stdcall get_c60_error_info(float *max_velo, float *curr_velo);
 
   /* modbus tcp func_code: 0x01 */
   extern "C" __declspec(dllexport) int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);

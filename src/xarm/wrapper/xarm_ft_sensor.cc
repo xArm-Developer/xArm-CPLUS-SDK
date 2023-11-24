@@ -86,6 +86,7 @@ int XArmAPI::ft_sensor_cali_load(float load2[10], bool association_setting_tcp_l
       (m * y + load[0] * load[2]) / mass,
       (m * z + load[0] * (32 + load[3])) / mass
     };
+    set_state(0);
     return set_tcp_load(mass, center_of_gravity);
   }
   return ret;

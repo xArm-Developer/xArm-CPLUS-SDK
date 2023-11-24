@@ -609,14 +609,29 @@ namespace XArmWrapper
     return arm->get_poe_status(status);
   }
 
-  int __stdcall get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
+  int __stdcall get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
   {
-    return arm->get_collision_error_info(servo_id, theoretical_tau, actual_tau);
+    return arm->get_c31_error_info(servo_id, theoretical_tau, actual_tau);
   }
 
-  int __stdcall get_payload_error_info(int *servo_id, float *diff_angle)
+  int __stdcall get_c37_error_info(int *servo_id, float *diff_angle)
   {
-    return arm->get_payload_error_info(servo_id, diff_angle);
+    return arm->get_c37_error_info(servo_id, diff_angle);
+  }
+
+  int __stdcall get_c23_error_info(int *servo_id, float *angle)
+  {
+    return arm->get_c23_error_info(servo_id, angle);
+  }
+
+  int __stdcall get_c24_error_info(int *servo_id, float *speed)
+  {
+    return arm->get_c24_error_info(servo_id, speed);
+  }
+
+  int __stdcall get_c60_error_info(float *max_velo, float *curr_velo)
+  {
+    return arm->get_c60_error_info(max_velo, curr_velo);
   }
 
   /* modbus tcp func_code: 0x01 */

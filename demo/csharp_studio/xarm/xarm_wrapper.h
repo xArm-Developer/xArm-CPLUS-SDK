@@ -208,6 +208,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_c23_error_info(int *servo_id, float *angle);
   extern "C" __declspec(dllexport) int __stdcall get_c24_error_info(int *servo_id, float *speed);
   extern "C" __declspec(dllexport) int __stdcall get_c60_error_info(float *max_velo, float *curr_velo);
+  extern "C" __declspec(dllexport) int __stdcall get_c38_error_info(int *servo_id, float *angle);
 
   /* modbus tcp func_code: 0x01 */
   extern "C" __declspec(dllexport) int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits);

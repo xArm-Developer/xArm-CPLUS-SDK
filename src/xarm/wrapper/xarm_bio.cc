@@ -162,3 +162,12 @@ int XArmAPI::clean_bio_gripper_error(void) {
   get_bio_gripper_status(&status);
   return ret;
 }
+
+int XArmAPI::get_bio_gripper_position(fp32 *pos)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  unsigned char rx_data[7] = { 0 };
+  int ret = _get_bio_gripper_register(rx_data, 0x0700, 2);
+  *pos = (float)((rx_data[5] << 8) + rx_data[6]);
+  return ret;
+}

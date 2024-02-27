@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.17"
+#define SDK_VERSION "1.13.21"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1620,6 +1620,14 @@ public:
   int get_bio_gripper_status(int *status);
 
   /**
+   * @brief Get the target pos of the bio gripper (not real-time pos)
+   * 
+   * @param err: the target pos of the bio gripper
+   * @return: See the code documentation for details.
+   */
+  int get_bio_gripper_position(fp32 *pos);
+
+  /**
    * @brief Get the error code of the bio gripper
    * 
    * @param err: the result of the bio gripper error code
@@ -2494,6 +2502,17 @@ public:
    * return: See the code documentation for details.
    */
   int get_c60_error_info(float *max_velo, float *curr_velo);
+
+  /**
+   * @brief Get joint hard angle limit error (C38) info
+   *  Note:
+   *    1. only available if firmware_version >= 2.4.0
+   * 
+   * @param servo_id: servo id
+   * @param angle: current angle
+   * return: See the code documentation for details.
+   */
+  int get_c38_error_info(int *servo_id, float *angle);
 
   /**
    * @brief (Standard Modbus TCP) Read Coils (0x01)

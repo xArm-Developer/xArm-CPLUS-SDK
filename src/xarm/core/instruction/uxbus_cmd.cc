@@ -1888,3 +1888,13 @@ int UxbusCmd::get_c60_error_info(float *max_velo, float *curr_velo)
   *curr_velo = hex_to_fp32(&rx_data[4]);
   return ret;
 }
+
+int UxbusCmd::get_c38_error_info(int *id, float *angle)
+{
+  unsigned char send_data[1] = {106};
+  unsigned char rx_data[5] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
+  *id = rx_data[0];
+  *angle = hex_to_fp32(&rx_data[1]);
+  return ret;
+}

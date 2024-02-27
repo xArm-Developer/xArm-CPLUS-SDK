@@ -286,6 +286,7 @@ public:
   int get_c23_error_info(int *id, float *angle);
   int get_c24_error_info(int *id, float *speed);
   int get_c60_error_info(float *max_velo, float *curr_velo);
+  int get_c38_error_info(int *id, float *angle);
 
   virtual void close(void);
   virtual int is_ok(void);

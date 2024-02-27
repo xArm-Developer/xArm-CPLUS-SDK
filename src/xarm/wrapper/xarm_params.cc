@@ -365,3 +365,13 @@ int XArmAPI::get_c60_error_info(float *max_velo, float *curr_velo)
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   return core->get_c60_error_info(max_velo, curr_velo);
 }
+
+int XArmAPI::get_c38_error_info(int *servo_id, float *angle)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->get_c38_error_info(servo_id, angle);
+  if (ret == 0 && !default_is_radian) {
+    *angle = to_degree(*angle);
+  }
+  return ret;
+}

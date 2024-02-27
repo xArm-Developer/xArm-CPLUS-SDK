@@ -634,6 +634,11 @@ namespace XArmWrapper
     return arm->get_c60_error_info(max_velo, curr_velo);
   }
 
+  int __stdcall get_c38_error_info(int *servo_id, float *angle)
+  {
+    return arm->get_c38_error_info(servo_id, angle);
+  }
+
   /* modbus tcp func_code: 0x01 */
   int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)
   {

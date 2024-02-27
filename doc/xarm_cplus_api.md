@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.13.16)
+# xArm-C++-SDK API Documentation (V1.13.21)
 
 ## class __XArmAPI__
 ************************************
@@ -2367,23 +2367,60 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param status: poe status, 1 means poe vaild, 0 means poe invalid   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int get_collision_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)__
-  > Get collision error info  
-  > Note:  
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
-  > 
+- __int get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)__
+  > Get collision error (C31) info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  >  
   > @param servo_id: servo id   
   > @param theoretical_tau: theoretical tau   
   > @param actual_tau: actual tau   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int get_payload_error_info(int *servo_id, float *diff_angle)__
-  > Get payload error info  
-  > Note:  
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
-  > 
+- __int get_c37_error_info(int *servo_id, float *diff_angle)__
+  > Get payload error (C37) info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  >   
   > @param servo_id: servo id   
   > @param diff_angle: diff angle   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_c23_error_info(int *servo_id, float *angle)__
+  > Get joint angle limit error (C23) info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  >    
+  > @param servo_id: servo id   
+  > @param angle: current angle   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+  
+- __int get_c24_error_info(int *servo_id, float *speed)__
+  > Get joint angle speed limit (C24) error info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  >   
+  > @param servo_id: servo id   
+  > @param speed: current speed   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_c60_error_info(float *max_velo, float *curr_velo)__
+  > Get linear angle speed limit (C60) error info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
+  > &ensp;&ensp;&ensp;&ensp;2. only available in mode 1   
+  >   
+  > @param max_velo: max limit linear speed   
+  > @param curr_velo: current linear speed   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_c38_error_info(int *servo_id, float *angle)__
+  > Get joint hard angle limit error (C38) info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.0   
+  >    
+  > @param servo_id: servo id   
+  > @param angle: current angle   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__

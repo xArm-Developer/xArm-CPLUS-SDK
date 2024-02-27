@@ -403,6 +403,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_c60_error_info(ref float max_velo, ref float curr_velo);
 
+        [DllImport("xarm.dll")]
+        public static extern int get_c38_error_info(ref int servo_id, ref float angle);
+
         /* modbus tcp func_code: 0x01 */
         [DllImport("xarm.dll")]
         public static extern int read_coil_bits(UInt16 addr, UInt16 quantity, byte[] bits);

@@ -395,7 +395,7 @@ namespace xarm_csharp_demo
         public static extern int get_c37_error_info(ref int servo_id, ref float diff_angle);
 
         [DllImport("xarm.dll")]
-        public static extern int get_c23_error_info(ref int servo_id, ref float angle);
+        public static extern int get_c23_error_info(ref int id_bits, float[] angles);
 
         [DllImport("xarm.dll")]
         public static extern int get_c24_error_info(ref int servo_id, ref float speed);
@@ -404,7 +404,7 @@ namespace xarm_csharp_demo
         public static extern int get_c60_error_info(ref float max_velo, ref float curr_velo);
 
         [DllImport("xarm.dll")]
-        public static extern int get_c38_error_info(ref int servo_id, ref float angle);
+        public static extern int get_c38_error_info(ref int id_bits, float[] angles);
 
         /* modbus tcp func_code: 0x01 */
         [DllImport("xarm.dll")]

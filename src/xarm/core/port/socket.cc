@@ -115,7 +115,7 @@ void SocketPort::recv_report_proc(void) {
           continue;
         }
       }
-      if (bin8_to_32(&recv_data[4]) != size) {
+      if (bin8_to_32(&recv_data[4]) != size && !(size_is_not_confirm && size == 245 && bin8_to_32(&recv_data[4]) == 233)) {
         fprintf(stderr, "report data error, close_port, length=%d, size=%d\n", bin8_to_32(&recv_data[4]), size);
         close_port();
         break;

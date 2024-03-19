@@ -340,12 +340,13 @@ int XArmAPI::get_c37_error_info(int *servo_id, float *diff_angle)
   return ret;
 }
 
-int XArmAPI::get_c23_error_info(int *servo_id, float *angle)
+int XArmAPI::get_c23_error_info(int *id_bits, float angles[7])
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret = core->get_c23_error_info(servo_id, angle);
+  int ret = core->get_c23_error_info(id_bits, angles);
   if (ret == 0 && !default_is_radian) {
-    *angle = to_degree(*angle);
+    for (int i = 0; i < 7; i++)
+      angles[i] = to_degree(angles[i]);
   }
   return ret;
 }
@@ -366,12 +367,13 @@ int XArmAPI::get_c60_error_info(float *max_velo, float *curr_velo)
   return core->get_c60_error_info(max_velo, curr_velo);
 }
 
-int XArmAPI::get_c38_error_info(int *servo_id, float *angle)
+int XArmAPI::get_c38_error_info(int *id_bits, float angles[7])
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret = core->get_c38_error_info(servo_id, angle);
+  int ret = core->get_c38_error_info(id_bits, angles);
   if (ret == 0 && !default_is_radian) {
-    *angle = to_degree(*angle);
+    for (int i = 0; i < 7; i++)
+      angles[i] = to_degree(angles[i]);
   }
   return ret;
 }

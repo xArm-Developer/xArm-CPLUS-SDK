@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.21"
+#define SDK_VERSION "1.13.22"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2472,13 +2472,13 @@ public:
   /**
    * @brief Get joint angle limit error (C23) info
    *  Note:
-   *    1. only available if firmware_version >= 2.3.0
+   *    1. only available if firmware_version >= 2.4.0
    * 
-   * @param servo_id: servo id
-   * @param angle: current angle
+   * @param id_bits: each bit corresponds to each joint (bit0 corresponds to joint 1), and a bit of 1 indicates that the corresponding joint exceeds the limit.
+   * @param angles: current angles
    * return: See the code documentation for details.
    */
-  int get_c23_error_info(int *servo_id, float *angle);
+  int get_c23_error_info(int *id_bits, float angles[7]);
   
   /**
    * @brief Get joint angle speed limit (C24) error info
@@ -2508,11 +2508,11 @@ public:
    *  Note:
    *    1. only available if firmware_version >= 2.4.0
    * 
-   * @param servo_id: servo id
-   * @param angle: current angle
+   * @param id_bits: each bit corresponds to each joint (bit0 corresponds to joint 1), and a bit of 1 indicates that the corresponding joint exceeds the limit.
+   * @param angles: current angles
    * return: See the code documentation for details.
    */
-  int get_c38_error_info(int *servo_id, float *angle);
+  int get_c38_error_info(int *id_bits, float angles[7]);
 
   /**
    * @brief (Standard Modbus TCP) Read Coils (0x01)

@@ -1863,9 +1863,10 @@ int UxbusCmd::get_c23_error_info(int *id, float *angle)
 {
   unsigned char send_data[1] = {103};
   unsigned char rx_data[5] = {0};
-  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 29);
   *id = rx_data[0];
-  *angle = hex_to_fp32(&rx_data[1]);
+  hex_to_nfp32(&rx_data[1], angle, 7);
+  // *angle = hex_to_fp32(&rx_data[1]);
   return ret;
 }
 
@@ -1893,8 +1894,9 @@ int UxbusCmd::get_c38_error_info(int *id, float *angle)
 {
   unsigned char send_data[1] = {106};
   unsigned char rx_data[5] = {0};
-  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 5);
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 29);
   *id = rx_data[0];
-  *angle = hex_to_fp32(&rx_data[1]);
+  hex_to_nfp32(&rx_data[1], angle, 7);
+  // *angle = hex_to_fp32(&rx_data[1]);
   return ret;
 }

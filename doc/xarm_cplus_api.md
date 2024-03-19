@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.13.21)
+# xArm-C++-SDK API Documentation (V1.13.22)
 
 ## class __XArmAPI__
 ************************************
@@ -2386,13 +2386,13 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param diff_angle: diff angle   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int get_c23_error_info(int *servo_id, float *angle)__
+- __int get_c23_error_info(int *id_bits, float angles[7])__
   > Get joint angle limit error (C23) info   
   > Note:   
   > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0   
   >    
-  > @param servo_id: servo id   
-  > @param angle: current angle   
+  > @param id_bits: each bit corresponds to each joint (bit0 corresponds to joint 1), and a bit of 1 indicates that the corresponding joint exceeds the limit.   
+  > @param angles: current angles   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
   
 - __int get_c24_error_info(int *servo_id, float *speed)__
@@ -2414,13 +2414,13 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param curr_velo: current linear speed   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int get_c38_error_info(int *servo_id, float *angle)__
+- __int get_c38_error_info(int *id_bits, float angles[7])__
   > Get joint hard angle limit error (C38) info   
   > Note:   
   > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.0   
   >    
-  > @param servo_id: servo id   
-  > @param angle: current angle   
+  > @param id_bits: each bit corresponds to each joint (bit0 corresponds to joint 1), and a bit of 1 indicates that the corresponding joint exceeds the limit.   
+  > @param angles: current angles   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__

@@ -619,9 +619,9 @@ namespace XArmWrapper
     return arm->get_c37_error_info(servo_id, diff_angle);
   }
 
-  int __stdcall get_c23_error_info(int *servo_id, float *angle)
+  int __stdcall get_c23_error_info(int *id_bits, float angles[7])
   {
-    return arm->get_c23_error_info(servo_id, angle);
+    return arm->get_c23_error_info(id_bits, angles);
   }
 
   int __stdcall get_c24_error_info(int *servo_id, float *speed)
@@ -634,9 +634,9 @@ namespace XArmWrapper
     return arm->get_c60_error_info(max_velo, curr_velo);
   }
 
-  int __stdcall get_c38_error_info(int *servo_id, float *angle)
+  int __stdcall get_c38_error_info(int *id_bits, float angles[7])
   {
-    return arm->get_c38_error_info(servo_id, angle);
+    return arm->get_c38_error_info(id_bits, angles);
   }
 
   /* modbus tcp func_code: 0x01 */

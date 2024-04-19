@@ -11,25 +11,38 @@ namespace xarm_csharp_demo
         static void Main(string[] args)
         {
             int ret;
-            int arm1 = XArmAPI.create_instance("192.168.1.117", false);
-            Console.WriteLine("create_instance: {0}", arm1);
-            // int arm2 = XArmAPI.create_instance("192.168.1.135", false);
-            // Console.WriteLine("create_instance: {0}", arm2);
+            int state = -1;
 
-            float[] pose1 = { 300, 0, 200, 180, 0, 0 };
+            XArmAPIWrapper wrap1 = new XArmAPIWrapper("192.168.1.101");
+            XArmAPIWrapper wrap2 = new XArmAPIWrapper("192.168.1.81");
+            
+            ret = wrap1.get_state(ref state);
+            Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
+            ret = wrap2.get_state(ref state);
+            Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
 
-            ret = XArmAPI.switch_xarm(arm1);
-            Console.WriteLine("switch_xarm: {0}", ret);
-            ret = XArmAPI.clean_warn();
-            Console.WriteLine("clean_warn: {0}", ret);
-            ret = XArmAPI.clean_error();
-            Console.WriteLine("clean_error: {0}", ret);
-            ret = XArmAPI.motion_enable(true);
-            Console.WriteLine("motion_enable: {0}", ret);
-            ret = XArmAPI.set_mode(0);
-            Console.WriteLine("set_mode: {0}", ret);
-            ret = XArmAPI.set_state(0);
-            Console.WriteLine("set_state: {0}", ret);
+            // int arm = XArmAPI.create_instance("192.168.1.101", false);
+            // Console.WriteLine("create_instance: {0}", arm);
+            // ret = XArmAPI.get_state(ref state);
+            // Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
+            // XArmAPIWrapper wrap = new XArmAPIWrapper(arm);
+            // ret = wrap.get_state(ref state);
+            // Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
+
+            // float[] pose1 = { 300, 0, 200, 180, 0, 0 };
+
+            // ret = XArmAPI.switch_xarm(arm1);
+            // Console.WriteLine("switch_xarm: {0}", ret);
+            // ret = XArmAPI.clean_warn();
+            // Console.WriteLine("clean_warn: {0}", ret);
+            // ret = XArmAPI.clean_error();
+            // Console.WriteLine("clean_error: {0}", ret);
+            // ret = XArmAPI.motion_enable(true);
+            // Console.WriteLine("motion_enable: {0}", ret);
+            // ret = XArmAPI.set_mode(0);
+            // Console.WriteLine("set_mode: {0}", ret);
+            // ret = XArmAPI.set_state(0);
+            // Console.WriteLine("set_state: {0}", ret);
 
             // XArmAPI.reset(true);
             // // ret = XArmAPI.set_position(pose1, true);

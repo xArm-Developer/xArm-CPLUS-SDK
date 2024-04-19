@@ -204,6 +204,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_fdb_mat_history_num(int *num, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_tgpio_modbus_timeout(int *timeout, bool is_transparent_transmission = false, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_poe_status(int *status, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_iden_status(int *status, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c37_error_info(int *servo_id, float *diff_angle, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c23_error_info(int *id_bits, float angle[7], int instance_id = -1);

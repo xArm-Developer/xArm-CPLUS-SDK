@@ -1838,6 +1838,15 @@ int UxbusCmd::get_poe_status(int *status)
   return ret;
 }
 
+int UxbusCmd::get_iden_status(int *status)
+{
+  unsigned char send_data[1] = {2};
+  unsigned char rx_data[1] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 1);
+  *status = rx_data[0];
+  return ret;
+}
+
 int UxbusCmd::get_c31_error_info(int *id, float *theoretical_tau, float *actual_tau)
 {
   unsigned char send_data[1] = {101};

@@ -834,6 +834,11 @@ namespace xarm_csharp_demo
             return XArmAPI.get_poe_status(ref status, robot_instance_id);
         }
 
+        public int get_iden_status(ref int status)
+        {
+            return XArmAPI.get_iden_status(ref status, robot_instance_id);
+        }
+
         public int get_c31_error_info(ref int servo_id, ref float theoretical_tau, ref float actual_tau)
         {
             return XArmAPI.get_c31_error_info(ref servo_id, ref theoretical_tau, ref actual_tau, robot_instance_id);

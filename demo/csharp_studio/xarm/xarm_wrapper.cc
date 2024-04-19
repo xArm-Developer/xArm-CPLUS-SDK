@@ -623,6 +623,11 @@ namespace XArmWrapper
     return get_instance(instance_id)->get_poe_status(status);
   }
 
+  int __stdcall get_iden_status(int *status, int instance_id)
+  {
+    return get_instance(instance_id)->get_iden_status(status);
+  }
+
   int __stdcall get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau, int instance_id)
   {
     return get_instance(instance_id)->get_c31_error_info(servo_id, theoretical_tau, actual_tau);

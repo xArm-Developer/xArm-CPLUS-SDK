@@ -389,6 +389,9 @@ namespace xarm_csharp_demo
         public static extern int get_poe_status(ref int status, int instance_id = -1);
 
         [DllImport("xarm.dll")]
+        public static extern int get_iden_status(ref int status, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
         public static extern int get_c31_error_info(ref int servo_id, ref float theoretical_tau, ref float actual_tau, int instance_id = -1);
         
         [DllImport("xarm.dll")]

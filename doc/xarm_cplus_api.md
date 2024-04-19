@@ -2367,6 +2367,14 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param status: poe status, 1 means poe vaild, 0 means poe invalid   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
+- __int get_iden_status(int *status)__
+  > Get iden status  
+  > Note:  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.0  
+  > 
+  > @param status: iden status, 1 means in identifying, 0 means not in identifying   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
 - __int get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)__
   > Get collision error (C31) info   
   > Note:   

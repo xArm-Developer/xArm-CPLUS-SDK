@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.22"
+#define SDK_VERSION "1.13.28"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2445,6 +2445,16 @@ public:
    * return: See the code documentation for details.
    */
   int get_poe_status(int *status);
+
+  /**
+   * @brief Get poe status
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.0
+   * 
+   * @param status: iden status, 1 means in identifying, 0 means not in identifying
+   * return: See the code documentation for details.
+   */
+  int get_iden_status(int *status);
 
   /**
    * @brief Get collision error (C31) info

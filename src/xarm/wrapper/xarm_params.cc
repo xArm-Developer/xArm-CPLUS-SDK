@@ -324,6 +324,12 @@ int XArmAPI::get_poe_status(int *status)
   return core->get_poe_status(status);
 }
 
+int XArmAPI::get_iden_status(int *status)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_iden_status(status);
+}
+
 int XArmAPI::get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau)
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;

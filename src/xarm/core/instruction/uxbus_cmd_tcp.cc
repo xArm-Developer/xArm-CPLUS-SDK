@@ -19,14 +19,14 @@ const unsigned short TRANSACTION_ID_MAX = 65535;
 
 UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
   arm_port_ = arm_port;
-  unsigned short transaction_id_ = 1;
-  unsigned short protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
+  transaction_id_ = 1;
+  protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
 }
 
 UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) : UxbusCmd(set_feedback_key_transid) {
   arm_port_ = arm_port;
-  unsigned short transaction_id_ = 1;
-  unsigned short protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
+  transaction_id_ = 1;
+  protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
 }
 
 UxbusCmdTcp::~UxbusCmdTcp(void) {}
@@ -66,7 +66,7 @@ int UxbusCmdTcp::_send_modbus_request(unsigned char unit_id, unsigned char *pdu_
     memcpy(&send_data[7], pdu_data, pdu_len);
 
   arm_port_->flush();
-  // print_hex("send:", send_data, num + 7);
+  // print_hex("send:", send_data, pdu_len + 7);
   int ret = arm_port_->write_frame(send_data, len);
   delete[] send_data;
   if (ret != len) { return -1; }

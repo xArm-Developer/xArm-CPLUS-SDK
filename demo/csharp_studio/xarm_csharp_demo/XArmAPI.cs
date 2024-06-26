@@ -131,7 +131,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_tgpio_digital(ref int io0_value, ref int io1_value, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int set_tgpio_digital(int ionum, int value, float delay_sec = 0, int instance_id = -1);
+        public static extern int set_tgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int get_tgpio_analog(int ionum, ref float value, int instance_id = -1);
         [DllImport("xarm.dll")]
@@ -139,9 +139,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_cgpio_analog(int ionum, ref float value, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int set_cgpio_digital(int ionum, int value, float delay_sec = 0, int instance_id = -1);
+        public static extern int set_cgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int set_cgpio_analog(int ionum, int value, int instance_id = -1);
+        public static extern int set_cgpio_analog(int ionum, int value, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_cgpio_digital_input_function(int ionum, int fun, int instance_id = -1);
         [DllImport("xarm.dll")]
@@ -171,9 +171,9 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_suction_cup(ref int val, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, int instance_id = -1);
+        public static extern int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, int instance_id = -1);
+        public static extern int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_reduced_mode(bool on, int instance_id = -1);
         [DllImport("xarm.dll")]
@@ -354,6 +354,13 @@ namespace xarm_csharp_demo
 
         [DllImport("xarm.dll")]
         public static extern int set_only_check_type(byte only_check_type, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int open_lite6_gripper(bool sync = true, int instance_id = -1);
+        [DllImport("xarm.dll")]
+        public static extern int close_lite6_gripper(bool sync = true, int instance_id = -1);
+        [DllImport("xarm.dll")]
+        public static extern int stop_lite6_gripper(bool sync = true, int instance_id = -1);
 
         [DllImport("xarm.dll")]
         public static extern int get_dh_params(float[] dh_params, int instance_id = -1);

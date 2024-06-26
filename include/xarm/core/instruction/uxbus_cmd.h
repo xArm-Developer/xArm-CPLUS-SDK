@@ -171,12 +171,12 @@ public:
   int gripper_get_errcode(int rx_data[2]);
   int gripper_clean_err(void);
 
-  int tgpio_addr_w16(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
+  int tgpio_addr_w16(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID, char *add_data = NULL, int add_len = 0);
   int tgpio_addr_r16(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int tgpio_addr_w32(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int tgpio_addr_r32(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int tgpio_get_digital(int *io1, int *io2);
-  int tgpio_set_digital(int ionum, int value);
+  int tgpio_set_digital(int ionum, int value, int sync = -1);
   int tgpio_get_analog1(float *value);
   int tgpio_get_analog2(float *value);
 
@@ -205,9 +205,9 @@ public:
   int cgpio_get_auxdigit(int *value);
   int cgpio_get_analog1(float *value);
   int cgpio_get_analog2(float *value);
-  int cgpio_set_auxdigit(int ionum, int value);
-  int cgpio_set_analog1(float value);
-  int cgpio_set_analog2(float value);
+  int cgpio_set_auxdigit(int ionum, int value, int sync = -1);
+  int cgpio_set_analog1(float value, int sync = -1);
+  int cgpio_set_analog2(float value, int sync = -1);
   int cgpio_set_infun(int ionum, int fun);
   int cgpio_set_outfun(int ionum, int fun);
   int cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2=NULL, int *output_conf2=NULL);
@@ -303,7 +303,7 @@ public:
   /* modbus tcp func_code: 0x04 */
   virtual int read_input_registers(unsigned short addr, unsigned short quantity, int *regs, bool is_signed = false) { return -11; };
   /* modbus tcp func_code: 0x05 */
-  virtual int write_single_coil_bit(unsigned short addr, unsigned bit_val) { return -11; };
+  virtual int write_single_coil_bit(unsigned short addr, unsigned char bit_val) { return -11; };
   /* modbus tcp func_code: 0x06 */
   virtual int write_single_holding_register(unsigned short addr, int reg_val) { return -11; };
   /* modbus tcp func_code: 0x0F */
@@ -324,7 +324,7 @@ private:
   int _get_nu8(int funcode, int *rx_data, int num);
   int _get_nu8(int funcode, unsigned char *rx_data, int num);
   int _getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
-  int _set_nu16(int funcode, int *datas, int num);
+  int _set_nu16(int funcode, int *datas, int num, char *add_data = NULL, int add_len = 0);
   int _get_nu16(int funcode, int *rx_data, int num);
   int _set_nfp32(int funcode, float *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _set_nint32(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);

@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.13.22)
+# xArm-C++-SDK API Documentation (V1.14.2)
 
 ## class __XArmAPI__
 ************************************
@@ -862,6 +862,10 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param ionum: ionum, 0 or 1  
   > @param value: the digital value of the specified io  
   > @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)  
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  > &ensp;&ensp;&ensp;&ensp;2. only available if delay_sec <= 0  
+  >  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -894,6 +898,10 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param ionum: ionum, 0 ~ 15  
   > @param value: the digital value of the specified io  
   > @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)  
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  > &ensp;&ensp;&ensp;&ensp;2. only available if delay_sec <= 0  
+  >  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -902,6 +910,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > 
   > @param ionum: ionum, 0 or 1  
   > @param value: the analog value of the specified io  
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  >  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -1122,6 +1133,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param wait: wait or not, default is false  
   > @param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true  
   > @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)  
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  > &ensp;&ensp;&ensp;&ensp;2. only available if delay_sec <= 0  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
@@ -2197,6 +2211,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms  
   >    
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  >  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -2206,6 +2223,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms  
   >    
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  >  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -2215,6 +2235,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;2. this API can only be used on Lite6 series robotic arms  
   >    
+  > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
+  >  
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 

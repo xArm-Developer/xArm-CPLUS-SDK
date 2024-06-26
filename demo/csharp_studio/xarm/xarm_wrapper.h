@@ -72,12 +72,12 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_gripper_err_code(int *err, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall clean_gripper_error(int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_tgpio_digital(int *io0_value, int *io1_value, int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall set_tgpio_digital(int ionum, int value, fp32 delay_sec = 0, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_tgpio_digital(int ionum, int value, fp32 delay_sec = 0, bool sync = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_tgpio_analog(int ionum, fp32 *value, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_cgpio_digital(int *digitals, int *digitals2 = NULL, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_cgpio_analog(int ionum, fp32 *value, int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall set_cgpio_digital(int ionum, int value, float delay_sec = 0, int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall set_cgpio_analog(int ionum, float value, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_cgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_cgpio_analog(int ionum, float value, bool sync = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_cgpio_digital_input_function(int ionum, int fun, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_cgpio_digital_output_function(int ionum, int fun, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf, int instance_id = -1);
@@ -99,8 +99,8 @@ namespace XArmWrapper {
 
   extern "C" __declspec(dllexport) int __stdcall get_suction_cup(int *val, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_vacuum_gripper(int *val, int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_reduced_mode(bool on, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_reduced_max_tcp_speed(float speed, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_reduced_max_joint_speed(float speed, int instance_id = -1);
@@ -191,6 +191,10 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_joint_states(fp32 position[7], fp32 velocity[7], fp32 effort[7], int num = 3, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall iden_joint_friction(int *result, unsigned char *sn = NULL, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_only_check_type(unsigned char only_check_type = 0, int instance_id = -1);
+
+  extern "C" __declspec(dllexport) int __stdcall open_lite6_gripper(bool sync = true, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall close_lite6_gripper(bool sync = true, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall stop_lite6_gripper(bool sync = true, int instance_id = -1);
 
   extern "C" __declspec(dllexport) int __stdcall get_dh_params(fp32 dh_params[28], int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_dh_params(fp32 dh_params[28], unsigned char flag = 0, int instance_id = -1);

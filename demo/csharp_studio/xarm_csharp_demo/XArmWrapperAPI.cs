@@ -246,9 +246,9 @@ namespace xarm_csharp_demo
             return XArmAPI.get_tgpio_digital(ref io0_value, ref io1_value, robot_instance_id);
         }
 
-        public int set_tgpio_digital(int ionum, int value, float delay_sec = 0)
+        public int set_tgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true)
         {
-            return XArmAPI.set_tgpio_digital(ionum, value, delay_sec, robot_instance_id);
+            return XArmAPI.set_tgpio_digital(ionum, value, delay_sec, sync, robot_instance_id);
         }
 
         public int get_tgpio_analog(int ionum, ref float value)
@@ -266,14 +266,14 @@ namespace xarm_csharp_demo
             return XArmAPI.get_cgpio_analog(ionum, ref value, robot_instance_id);
         }
 
-        public int set_cgpio_digital(int ionum, int value, float delay_sec = 0)
+        public int set_cgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true)
         {
-            return XArmAPI.set_cgpio_digital(ionum, value, delay_sec, robot_instance_id);
+            return XArmAPI.set_cgpio_digital(ionum, value, delay_sec, sync, robot_instance_id);
         }
 
-        public int set_cgpio_analog(int ionum, int value)
+        public int set_cgpio_analog(int ionum, int value, bool sync = true)
         {
-            return XArmAPI.set_cgpio_analog(ionum, value, robot_instance_id);
+            return XArmAPI.set_cgpio_analog(ionum, value, sync, robot_instance_id);
         }
 
         public int set_cgpio_digital_input_function(int ionum, int fun)
@@ -341,14 +341,14 @@ namespace xarm_csharp_demo
             return XArmAPI.get_suction_cup(ref val, robot_instance_id);
         }
 
-        public int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0)
+        public int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true)
         {
-            return XArmAPI.set_suction_cup(on, wait, timeout, delay_sec, robot_instance_id);
+            return XArmAPI.set_suction_cup(on, wait, timeout, delay_sec, sync, robot_instance_id);
         }
 
-        public int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0)
+        public int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true)
         {
-            return XArmAPI.set_vacuum_gripper(on, wait, timeout, delay_sec, robot_instance_id);
+            return XArmAPI.set_vacuum_gripper(on, wait, timeout, delay_sec, sync, robot_instance_id);
         }
 
         public int set_reduced_mode(bool on)
@@ -777,6 +777,21 @@ namespace xarm_csharp_demo
         public int set_only_check_type(byte only_check_type)
         {
             return XArmAPI.set_only_check_type(only_check_type, robot_instance_id);
+        }
+
+        public int open_lite6_gripper(bool sync = true)
+        {
+            return XArmAPI.open_lite6_gripper(sync, robot_instance_id);
+        }
+
+        public int close_lite6_gripper(bool sync = true)
+        {
+            return XArmAPI.close_lite6_gripper(sync, robot_instance_id);
+        }
+
+        public int stop_lite6_gripper(bool sync = true)
+        {
+            return XArmAPI.stop_lite6_gripper(sync, robot_instance_id);
         }
 
         public int get_dh_params(float[] dh_params)

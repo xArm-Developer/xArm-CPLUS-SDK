@@ -221,8 +221,8 @@ namespace XArmWrapper
   int __stdcall get_tgpio_digital(int *io0_value, int *io1_value, int instance_id) {
     return get_instance(instance_id)->get_tgpio_digital(io0_value, io1_value);
   }
-  int __stdcall set_tgpio_digital(int ionum, int value, fp32 delay_sec, int instance_id) {
-    return get_instance(instance_id)->set_tgpio_digital(ionum, value, delay_sec);
+  int __stdcall set_tgpio_digital(int ionum, int value, fp32 delay_sec, bool sync, int instance_id) {
+    return get_instance(instance_id)->set_tgpio_digital(ionum, value, delay_sec, sync);
   }
   int __stdcall get_tgpio_analog(int ionum, fp32 *value, int instance_id) {
     return get_instance(instance_id)->get_tgpio_analog(ionum, value);
@@ -233,11 +233,11 @@ namespace XArmWrapper
   int __stdcall get_cgpio_analog(int ionum, fp32 *value, int instance_id) {
     return get_instance(instance_id)->get_cgpio_analog(ionum, value);
   }
-  int __stdcall set_cgpio_digital(int ionum, int value, float delay_sec, int instance_id) {
-    return get_instance(instance_id)->set_cgpio_digital(ionum, value, delay_sec);
+  int __stdcall set_cgpio_digital(int ionum, int value, float delay_sec, bool sync, int instance_id) {
+    return get_instance(instance_id)->set_cgpio_digital(ionum, value, delay_sec, sync);
   }
-  int __stdcall set_cgpio_analog(int ionum, float value, int instance_id) {
-    return get_instance(instance_id)->set_cgpio_analog(ionum, value);
+  int __stdcall set_cgpio_analog(int ionum, float value, bool sync, int instance_id) {
+    return get_instance(instance_id)->set_cgpio_analog(ionum, value, sync);
   }
   int __stdcall set_cgpio_digital_input_function(int ionum, int fun, int instance_id) {
     return get_instance(instance_id)->set_cgpio_digital_input_function(ionum, fun);
@@ -283,11 +283,11 @@ namespace XArmWrapper
   int __stdcall get_vacuum_gripper(int *val, int instance_id) {
     return get_instance(instance_id)->get_vacuum_gripper(val);
   }
-  int __stdcall set_suction_cup(bool on, bool wait, float timeout, float delay_sec, int instance_id) {
-    return get_instance(instance_id)->set_suction_cup(on, wait, timeout, delay_sec);
+  int __stdcall set_suction_cup(bool on, bool wait, float timeout, float delay_sec, bool sync, int instance_id) {
+    return get_instance(instance_id)->set_suction_cup(on, wait, timeout, delay_sec, sync);
   }
-  int __stdcall set_vacuum_gripper(bool on, bool wait, float timeout, float delay_sec, int instance_id) {
-    return get_instance(instance_id)->set_vacuum_gripper(on, wait, timeout, delay_sec);
+  int __stdcall set_vacuum_gripper(bool on, bool wait, float timeout, float delay_sec, bool sync, int instance_id) {
+    return get_instance(instance_id)->set_vacuum_gripper(on, wait, timeout, delay_sec, sync);
   }
   int __stdcall set_reduced_mode(bool on, int instance_id) {
     return get_instance(instance_id)->set_reduced_mode(on);
@@ -566,6 +566,18 @@ namespace XArmWrapper
 
   int __stdcall set_only_check_type(unsigned char only_check_type, int instance_id) {
     return get_instance(instance_id)->set_only_check_type(only_check_type);
+  }
+
+  int __stdcall open_lite6_gripper(bool sync, int instance_id) {
+    return get_instance(instance_id)->open_lite6_gripper(sync);
+  }
+  
+  int __stdcall close_lite6_gripper(bool sync, int instance_id) {
+    return get_instance(instance_id)->close_lite6_gripper(sync);
+  }
+
+  int __stdcall stop_lite6_gripper(bool sync, int instance_id) {
+    return get_instance(instance_id)->stop_lite6_gripper(sync);
   }
 
   int __stdcall get_dh_params(fp32 dh_params[28], int instance_id)

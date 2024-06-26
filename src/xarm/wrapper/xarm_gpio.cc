@@ -44,7 +44,7 @@ int XArmAPI::get_tgpio_digital(int *io0, int *io1) {
   return core->tgpio_get_digital(io0, io1);
 }
 
-int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
+int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec, bool sync) {
   if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
@@ -54,7 +54,7 @@ int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec) {
     return core->tgpio_delay_set_digital(ionum + 1, value, delay_sec);
   }
   else {
-    return core->tgpio_set_digital(ionum + 1, value);
+    return core->tgpio_set_digital(ionum + 1, value, _version_is_ge(2, 4, 101) ? sync : -1);
   }
 }
 
@@ -95,7 +95,7 @@ int XArmAPI::get_cgpio_analog(int ionum, fp32 *value) {
   }
 }
 
-int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
+int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec, bool sync) {
   if (ionum < 0 || ionum >= 16) return API_CODE::PARAM_ERROR;
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
@@ -105,21 +105,21 @@ int XArmAPI::set_cgpio_digital(int ionum, int value, float delay_sec) {
     return core->cgpio_delay_set_digital(ionum, value, delay_sec);
   }
   else {
-    return core->cgpio_set_auxdigit(ionum, value);
+    return core->cgpio_set_auxdigit(ionum, value, _version_is_ge(2, 4, 101) ? sync : -1);
   }
 }
 
-int XArmAPI::set_cgpio_analog(int ionum, fp32 value) {
+int XArmAPI::set_cgpio_analog(int ionum, fp32 value, bool sync) {
   if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
   int code = _xarm_is_ready();
   if (code != 0) return code;
   if (ionum == 0) {
-    return core->cgpio_set_analog1(value);
+    return core->cgpio_set_analog1(value, _version_is_ge(2, 4, 101) ? sync : -1);
   }
   else {
-    return core->cgpio_set_analog2(value);
+    return core->cgpio_set_analog2(value, _version_is_ge(2, 4, 101) ? sync : -1);
   }
 }
 
@@ -146,19 +146,19 @@ int XArmAPI::get_suction_cup(int *val) {
   return get_tgpio_digital(val, &io1);
 }
 
-int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec) {
+int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec, bool sync) {
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
   int code = _xarm_is_ready();
   if (code != 0) return code;
   int code1, code2;
   if (on) {
-    code1 = set_tgpio_digital(0, 1, delay_sec);
-    code2 = set_tgpio_digital(1, 0, delay_sec);
+    code1 = set_tgpio_digital(0, 1, delay_sec, sync);
+    code2 = set_tgpio_digital(1, 0, delay_sec, sync);
   }
   else {
-    code1 = set_tgpio_digital(0, 0, delay_sec);
-    code2 = set_tgpio_digital(1, 1, delay_sec);
+    code1 = set_tgpio_digital(0, 0, delay_sec, sync);
+    code2 = set_tgpio_digital(1, 1, delay_sec, sync);
   }
   code = code1 == 0 ? code2 : code1;
   if (code == 0 && wait) {

@@ -257,23 +257,23 @@ int XArmAPI::clean_gripper_error(void) {
   return xarm_gripper_error_code_ != 0 ? API_CODE::END_EFFECTOR_HAS_FAULT : ret;
 }
 
-int XArmAPI::open_lite6_gripper(void) {
+int XArmAPI::open_lite6_gripper(bool sync) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret1 = set_tgpio_digital(0, 1);
-  int ret2 = set_tgpio_digital(1, 0);
+  int ret1 = set_tgpio_digital(0, 1, 0.0, sync);
+  int ret2 = set_tgpio_digital(1, 0, 0.0, sync);
   return ret1 != 0 ? ret1 : ret2;
 }
 
-int XArmAPI::close_lite6_gripper(void) {
+int XArmAPI::close_lite6_gripper(bool sync) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret1 = set_tgpio_digital(0, 0);
-  int ret2 = set_tgpio_digital(1, 1);
+  int ret1 = set_tgpio_digital(0, 0, 0.0, sync);
+  int ret2 = set_tgpio_digital(1, 1, 0.0, sync);
   return ret1 != 0 ? ret1 : ret2;
 }
 
-int XArmAPI::stop_lite6_gripper(void) {
+int XArmAPI::stop_lite6_gripper(bool sync) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret1 = set_tgpio_digital(0, 0);
-  int ret2 = set_tgpio_digital(1, 0);
+  int ret1 = set_tgpio_digital(0, 0, 0.0, sync);
+  int ret2 = set_tgpio_digital(1, 0, 0.0, sync);
   return ret1 != 0 ? ret1 : ret2;
 }

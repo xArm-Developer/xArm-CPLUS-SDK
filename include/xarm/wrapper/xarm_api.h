@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.13.28"
+#define SDK_VERSION "1.14.2"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -821,9 +821,12 @@ public:
    * @param ionum: ionum, 0 or 1
    * @param value: the digital value of the specified io
    * @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
+   *   2. only available if delay_sec <= 0
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_tgpio_digital(int ionum, int value, float delay_sec=0);
+  int set_tgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true);
 
   /**
    * @brief Get the analog value of the specified Tool GPIO
@@ -858,18 +861,23 @@ public:
    * @param ionum: ionum, 0 ~ 15
    * @param value: the digital value of the specified io
    * @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
+   *   2. only available if delay_sec <= 0
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_cgpio_digital(int ionum, int value, float delay_sec=0);
+  int set_cgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true);
 
   /**
    * @brief Set the analog value of the specified Controller GPIO
    * 
    * @param ionum: ionum, 0 or 1
    * @param value: the analog value of the specified io
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_cgpio_analog(int ionum, fp32 value);
+  int set_cgpio_analog(int ionum, fp32 value, bool sync = true);
 
   /**
    * @brief Set the digital input functional mode of the Controller GPIO
@@ -1007,7 +1015,7 @@ public:
    *  Note:
    *    1. only available if firmware_version >= 2.1.0
    * 
-   *  feedback_data: unsigned char data[]
+   *  @param feedback_data: unsigned char data[]
    *    feedback_data[0:2]: transaction id, (Big-endian conversion to unsigned 16-bit integer data), command ID corresponding to the feedback, consistent with issued instructions
    *      Note: this can be used to distinguish which instruction the feedback belongs to
    *    feedback_data[4:6]: feedback_length, feedback_length == len(data) - 6, (Big-endian conversion to unsigned 16-bit integer data)
@@ -1139,10 +1147,13 @@ public:
    * @param wait: wait or not, default is false
    * @param timeout: maximum waiting time(unit: second), default is 10s, only valid if wait is true
    * @param delay_sec: delay effective time from the current start, in seconds, default is 0(effective immediately)
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
+   *   2. only available if delay_sec <= 0
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0);
-  int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0) { return set_suction_cup(on, wait, timeout, delay_sec); }
+  int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true);
+  int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true) { return set_suction_cup(on, wait, timeout, delay_sec, sync); }
 
   /**
    * @brief Get gripper version, only for debug
@@ -2292,9 +2303,11 @@ public:
    *    1. only available if firmware_version >= 1.10.0
    *    2. this API can only be used on Lite6 series robotic arms
    * 
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
    * @return: See the code documentation for details.
    */
-  int open_lite6_gripper(void);
+  int open_lite6_gripper(bool sync = true);
 
   /**
    * @brief Close the gripper of Lite6 series robotics arms
@@ -2302,9 +2315,11 @@ public:
    *    1. only available if firmware_version >= 1.10.0
    *    2. this API can only be used on Lite6 series robotic arms
    * 
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
    * @return: See the code documentation for details.
    */
-  int close_lite6_gripper(void);
+  int close_lite6_gripper(bool sync = true);
 
   /**
    * @brief Stop the gripper of Lite6 series robotics arms
@@ -2312,9 +2327,11 @@ public:
    *    1. only available if firmware_version >= 1.10.0
    *    2. this API can only be used on Lite6 series robotic arms
    * 
+   * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
+   *   1. only available if firmware_version >= 2.4.101
    * @return: See the code documentation for details.
    */
-  int stop_lite6_gripper(void);
+  int stop_lite6_gripper(bool sync = true);
 
   /**
    * @brief Get the DH parameters

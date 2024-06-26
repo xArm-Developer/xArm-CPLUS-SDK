@@ -119,12 +119,13 @@ int UxbusCmd::_getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsig
   return _recv_modbus_response(funcode, ret, rx_data, rx_num, G_TOUT_);
 }
 
-int UxbusCmd::_set_nu16(int funcode, int *datas, int num) {
-  unsigned char *send_data = new unsigned char[num * 2]();
+int UxbusCmd::_set_nu16(int funcode, int *datas, int num, char *add_data, int add_len) {
+  unsigned char *send_data = new unsigned char[num * 2 + add_len]();
   for (int i = 0; i < num; i++) { bin16_to_8(datas[i], &send_data[i * 2]); }
+  for (int i = 0; i < add_len; i++) { send_data[num * 2 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = _send_modbus_request(funcode, send_data, num * 2);
+  int ret = _send_modbus_request(funcode, send_data, num * 2 + add_len);
   delete[] send_data;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   return _recv_modbus_response(funcode, ret, NULL, 0, S_TOUT_);
@@ -824,11 +825,12 @@ int UxbusCmd::gripper_clean_err() {
 /*******************************************************
  * tool gpio
  *******************************************************/
-int UxbusCmd::tgpio_addr_w16(int addr, float value, unsigned char host_id) {
-  unsigned char *txdata = new unsigned char[7]();
+int UxbusCmd::tgpio_addr_w16(int addr, float value, unsigned char host_id, char *add_data, int add_len) {
+  unsigned char *txdata = new unsigned char[7 + add_len]();
   txdata[0] = host_id;
   bin16_to_8(addr, &txdata[1]);
   fp32_to_hex(value, &txdata[3]);
+  for (int i = 0; i < add_len; i++) { txdata[7 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_W16B, txdata, 7);
@@ -890,18 +892,45 @@ int UxbusCmd::tgpio_get_digital(int *io1, int *io2) {
   return ret;
 }
 
-int UxbusCmd::tgpio_set_digital(int ionum, int value) {
+int UxbusCmd::tgpio_set_digital(int ionum, int value, int sync) {
   int tmp = 0;
-  if (ionum == 1) {
-    tmp = tmp | 0x0100;
-    if (value) { tmp = tmp | 0x0001; }
+  switch (ionum) {
+    case 1:
+    {
+      tmp = tmp | 0x0100;
+      if (value) { tmp = tmp | 0x0001; }
+      break;
+    }
+    case 2:
+    {
+      tmp = tmp | 0x0200;
+      if (value) { tmp = tmp | 0x0002; }
+      break;
+    }
+    case 3:
+    {
+      tmp = tmp | 0x1000;
+      if (value) { tmp = tmp | 0x0010; }
+      break;
+    }
+    case 4:
+    {
+      tmp = tmp | 0x0400;
+      if (value) { tmp = tmp | 0x0004; }
+      break;
+    }
+    case 5:
+    {
+      tmp = tmp | 0x0800;
+      if (value) { tmp = tmp | 0x0008; }
+      break;
+    }
+    default:
+      return -1; 
   }
-  else if (ionum == 2) {
-    tmp = tmp | 0x0200;
-    if (value) { tmp = tmp | 0x0002; }
-  }
-  else {
-    return -1;
+  if (sync >= 0) {
+    char additional[1] = { (char)sync };
+    return tgpio_addr_w16(SERVO3_RG::DIGITAL_OUT, (float)tmp, UXBUS_CONF::TGPIO_HOST_ID, additional, 1);
   }
   return tgpio_addr_w16(SERVO3_RG::DIGITAL_OUT, (float)tmp);
 }
@@ -1143,13 +1172,17 @@ int UxbusCmd::cgpio_get_analog2(float *value) {
   *value = (float)(tmp * 10.0 / 4095.0);
   return ret;
 }
-int UxbusCmd::cgpio_set_auxdigit(int ionum, int value) {
+int UxbusCmd::cgpio_set_auxdigit(int ionum, int value, int sync) {
   if (ionum > 7) {
     int tmp[2] = {0, 0};
     tmp[1] = tmp[1] | (0x0100 << (ionum - 8));
     if (value)
     {
       tmp[1] = tmp[1] | (0x0001 << (ionum - 8));
+    }
+    if (sync >= 0) {
+      char additional[1] = { (char)sync };
+      return _set_nu16(UXBUS_RG::CGPIO_SET_DIGIT, tmp, 2, additional, 1);
     }
     return _set_nu16(UXBUS_RG::CGPIO_SET_DIGIT, tmp, 2);
   }
@@ -1160,17 +1193,29 @@ int UxbusCmd::cgpio_set_auxdigit(int ionum, int value) {
     {
       tmp = tmp | (0x0001 << ionum);
     }
+    if (sync >= 0) {
+      char additional[1] = { (char)sync };
+      return _set_nu16(UXBUS_RG::CGPIO_SET_DIGIT, &tmp, 1, additional, 1);
+    }
     return _set_nu16(UXBUS_RG::CGPIO_SET_DIGIT, &tmp, 1);
   }
 }
 
-int UxbusCmd::cgpio_set_analog1(float value) {
+int UxbusCmd::cgpio_set_analog1(float value, int sync) {
   int val = (int)(value / 10.0 * 4095.0);
+  if (sync >= 0) {
+    char additional[1] = { (char)sync };
+    return _set_nu16(UXBUS_RG::CGPIO_SET_ANALOG1, &val, 1, additional, 1);
+  }
   return _set_nu16(UXBUS_RG::CGPIO_SET_ANALOG1, &val, 1);
 }
 
-int UxbusCmd::cgpio_set_analog2(float value) {
+int UxbusCmd::cgpio_set_analog2(float value, int sync) {
   int val = (int)(value / 10.0 * 4095.0);
+  if (sync >= 0) {
+    char additional[1] = { (char)sync };
+    return _set_nu16(UXBUS_RG::CGPIO_SET_ANALOG2, &val, 1, additional, 1);
+  }
   return _set_nu16(UXBUS_RG::CGPIO_SET_ANALOG2, &val, 1);
 }
 

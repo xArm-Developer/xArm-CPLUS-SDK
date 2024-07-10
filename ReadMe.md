@@ -11,6 +11,11 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.14.2
+  - Fix the 503 interface protocol identification error issue
+  - Added sync parameters to some gpio interfaces to support immediate execution (requires firmware 2.4.101 or above)
+  - Added XArmAPIWrapper to C# calls to support simultaneous control of multiple robotic arms
+  - Added new interface to support obtaining some error information
 - > ### 1.13.0
   - Compatible with the standard Modbus TCP protocol, providing part of the standard Modbus TCP protocol interface
 

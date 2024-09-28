@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     printf("=========================================\n");
 
     int ret;
-    arm->reset(true);
+    arm->move_gohome(true);
 
     arm->set_mode(5);
     arm->set_state(0);

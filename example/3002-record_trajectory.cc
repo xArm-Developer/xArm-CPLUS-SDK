@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
   printf("=========================================\n");
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
   arm->set_mode(2);
   arm->set_state(0);
   ret = arm->start_record_trajectory();

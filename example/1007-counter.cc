@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   arm->register_count_changed_callback(count_changed_callback);
 
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
   fp32 poses[6][6] = {
     {300, 0, 200, 180, 0, 0},
     {300, 200, 200, 180, 0, 0},
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     arm->set_counter_increase();
   }
 
-  arm->reset(true);
+  arm->move_gohome(true);
   arm->release_count_changed_callback(count_changed_callback);
   return 0;
 }

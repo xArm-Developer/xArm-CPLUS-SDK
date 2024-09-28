@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
   printf("=========================================\n");
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
   std::string filename("test.traj");
   ret = arm->load_trajectory((char *)filename.data());
   printf("load_trajectory, ret=%d\n", ret);

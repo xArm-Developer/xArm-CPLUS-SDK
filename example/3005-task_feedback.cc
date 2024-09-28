@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
   printf("=========================================\n");
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
 
   arm->register_feedback_callback(task_feedback_callback);
   arm->set_feedback_type(14);  // task finish(2) + task discard(4) + task trigger(8)

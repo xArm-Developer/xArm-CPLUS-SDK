@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   printf("=========================================\n");
 
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
   fp32 poses[6][6] = {
     {300, 0, 200, 180, 0, 0},
     {300, 200, 200, 180, 0, 0},
@@ -43,6 +43,6 @@ int main(int argc, char **argv) {
     printf("set_position, ret=%d\n", ret);
   }
 
-  arm->reset(true);
+  arm->move_gohome(true);
   return 0;
 }

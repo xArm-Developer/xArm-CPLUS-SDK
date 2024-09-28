@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   printf("=========================================\n");
 
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
   fp32 poses[5][6] = {
     {300, 0, 100, -180, 0, 0},
     {300, 100, 100, -180, 0, 0},
@@ -45,6 +45,6 @@ int main(int argc, char **argv) {
   ret = arm->move_circle(poses[3], poses[4], 200, 200, 1000, 0, true);
   printf("move_circle, ret=%d\n", ret);
 
-  arm->reset(true);
+  arm->move_gohome(true);
   return 0;
 }

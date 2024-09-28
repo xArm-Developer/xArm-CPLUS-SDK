@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   printf("=========================================\n");
 
   int ret;
-  arm->reset(true);
+  arm->move_gohome(true);
 
   fp32 firstPose[6] = { 200, 0, 200, 180, 0, 0 };
   arm->set_position(firstPose, true);

@@ -333,7 +333,7 @@ int XArmAPI::set_position_aa(fp32 pose[6], fp32 speed, fp32 acc, fp32 mvtime, bo
       ret = core->move_relative(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, 0, true, only_check_type_, &only_check_result, motion_type, feedback_key);
     }
     else {
-      ret = core->move_line_common(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, 0, true, only_check_type_, &only_check_result, motion_type, feedback_key);
+      ret = core->move_line_common(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, (int)is_tool_coord, true, only_check_type_, &only_check_result, motion_type, feedback_key);
     }
   }
   else {

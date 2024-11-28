@@ -1123,6 +1123,10 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param val:  
   > &ensp;&ensp;&ensp;&ensp;0: vacuum gripper is off  
   > &ensp;&ensp;&ensp;&ensp;1: vacuum gripper is on  
+  > @param hardware_version:  
+  > &ensp;&ensp;&ensp;&ensp;1: Plug-in Connection, default  
+  > &ensp;&ensp;&ensp;&ensp;2: Contact Connection  
+  >  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -1136,6 +1140,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)  
   > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.4.101  
   > &ensp;&ensp;&ensp;&ensp;2. only available if delay_sec <= 0  
+  > @param hardware_version:  
+  > &ensp;&ensp;&ensp;&ensp;1: Plug-in Connection, default  
+  > &ensp;&ensp;&ensp;&ensp;2: Contact Connection  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

@@ -141,24 +141,24 @@ int XArmAPI::get_cgpio_state(int *state_, int *digit_io, fp32 *analog, int *inpu
 }
 
 
-int XArmAPI::get_suction_cup(int *val) {
-  int io1 = 0;
+int XArmAPI::get_suction_cup(int *val, int hardware_version) {
+  int io1 = hardware_version == 1 ? 0 : 3;
   return get_tgpio_digital(val, &io1);
 }
 
-int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec, bool sync) {
+int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec, bool sync, int hardware_version) {
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
   int code = _xarm_is_ready();
   if (code != 0) return code;
   int code1, code2;
   if (on) {
-    code1 = set_tgpio_digital(0, 1, delay_sec, sync);
-    code2 = set_tgpio_digital(1, 0, delay_sec, sync);
+    code1 = set_tgpio_digital(hardware_version == 1 ? 0 : 3, 1, delay_sec, sync);
+    code2 = set_tgpio_digital(hardware_version == 1 ? 1 : 4, 0, delay_sec, sync);
   }
   else {
-    code1 = set_tgpio_digital(0, 0, delay_sec, sync);
-    code2 = set_tgpio_digital(1, 1, delay_sec, sync);
+    code1 = set_tgpio_digital(hardware_version == 1 ? 0 : 3, 0, delay_sec, sync);
+    code2 = set_tgpio_digital(hardware_version == 1 ? 1 : 4, 1, delay_sec, sync);
   }
   code = code1 == 0 ? code2 : code1;
   if (code == 0 && wait) {
@@ -166,7 +166,7 @@ int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec,
     int val = 0, ret = 0;
     code = API_CODE::SUCTION_CUP_TOUT;
     while (get_system_time() - start_time < timeout * 1000) {
-      ret = get_suction_cup(&val);
+      ret = get_suction_cup(&val, hardware_version);
       if (ret == UXBUS_STATE::ERR_CODE) {
         code = UXBUS_STATE::ERR_CODE;
         break;

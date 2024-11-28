@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.14.2"
+#define SDK_VERSION "1.14.3"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -1135,10 +1135,13 @@ public:
    * @param val:
    *  0: suction cup is off
    *  1: suction cup is on
+   * @param hardware_version:
+   *  1: Plug-in Connection, default
+   *  2: Contact Connection
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_suction_cup(int *val);
-  int get_vacuum_gripper(int *val) { return get_suction_cup(val); }
+  int get_suction_cup(int *val, int hardware_version = 1);
+  int get_vacuum_gripper(int *val, int hardware_version = 1) { return get_suction_cup(val, hardware_version); }
 
   /**
    * @brief Set suction cup
@@ -1150,10 +1153,13 @@ public:
    * @param sync: whether to execute in the motion queue, set to false to execute immediately(default is true)
    *   1. only available if firmware_version >= 2.4.101
    *   2. only available if delay_sec <= 0
+   * @param hardware_version:
+   *  1: Plug-in Connection, default
+   *  2: Contact Connection
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true);
-  int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true) { return set_suction_cup(on, wait, timeout, delay_sec, sync); }
+  int set_suction_cup(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true, int hardware_version = 1);
+  int set_vacuum_gripper(bool on, bool wait = false, float timeout = 3, float delay_sec = 0, bool sync = true, int hardware_version = 1) { return set_suction_cup(on, wait, timeout, delay_sec, sync, hardware_version); }
 
   /**
    * @brief Get gripper version, only for debug

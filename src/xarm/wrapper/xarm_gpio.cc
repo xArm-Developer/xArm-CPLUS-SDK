@@ -39,9 +39,9 @@ int XArmAPI::get_tgpio_version(unsigned char versions[3]) {
 }
 
 
-int XArmAPI::get_tgpio_digital(int *io0, int *io1) {
+int XArmAPI::get_tgpio_digital(int *io0, int *io1, int *io2, int *io3, int *io4) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  return core->tgpio_get_digital(io0, io1);
+  return core->tgpio_get_digital(io0, io1, io2, io3, io4);
 }
 
 int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec, bool sync) {

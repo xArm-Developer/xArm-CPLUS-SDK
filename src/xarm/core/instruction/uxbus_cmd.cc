@@ -883,12 +883,21 @@ int UxbusCmd::tgpio_addr_r32(int addr, float *value, unsigned char host_id) {
   return ret;
 }
 
-int UxbusCmd::tgpio_get_digital(int *io1, int *io2) {
+int UxbusCmd::tgpio_get_digital(int *io0, int *io1, int *io2, int *io3, int *io4) {
   float tmp;
   int ret = tgpio_addr_r16(SERVO3_RG::DIGITAL_IN, &tmp);
 
-  *io1 = (int)tmp & 0x0001;
-  *io2 = ((int)tmp & 0x0002) >> 1;
+  *io0 = (int)tmp & 0x0001;
+  *io1 = ((int)tmp & 0x0002) >> 1;
+  if (io3 != NULL)
+    *io3 = ((int)tmp & 0x0004) >> 2;
+  if (io4 != NULL)
+    *io4 = ((int)tmp & 0x0008) >> 3;
+  if (io2 != NULL) {
+    int ret2 = tgpio_addr_r16(0x0A12, &tmp);
+    *io2 = (int)tmp & 0x0001;
+    return ret2 != 0 ? ret2 : ret;
+  }
   return ret;
 }
 

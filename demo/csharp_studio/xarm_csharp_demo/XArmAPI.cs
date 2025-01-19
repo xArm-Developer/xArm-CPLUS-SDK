@@ -129,7 +129,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int clean_gripper_error(int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int get_tgpio_digital(ref int io0_value, ref int io1_value, int instance_id = -1);
+        public static extern int get_tgpio_digital(ref int io0_value, ref int io1_value, ref int io2_value = null, ref int io3_value = null, ref int io4_value = null, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_tgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]

@@ -218,8 +218,8 @@ namespace XArmWrapper
   int __stdcall clean_gripper_error(int instance_id) {
     return get_instance(instance_id)->clean_gripper_error();
   }
-  int __stdcall get_tgpio_digital(int *io0_value, int *io1_value, int instance_id) {
-    return get_instance(instance_id)->get_tgpio_digital(io0_value, io1_value);
+  int __stdcall get_tgpio_digital(int *io0_value, int *io1_value, int *io2_value, int *io3_value, int *io4_value, int instance_id) {
+    return get_instance(instance_id)->get_tgpio_digital(io0_value, io1_value, io2_value, io3_value, io4_value);
   }
   int __stdcall set_tgpio_digital(int ionum, int value, fp32 delay_sec, bool sync, int instance_id) {
     return get_instance(instance_id)->set_tgpio_digital(ionum, value, delay_sec, sync);

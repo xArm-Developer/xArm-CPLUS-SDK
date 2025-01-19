@@ -71,7 +71,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_gripper_position(fp32 *pos, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_gripper_err_code(int *err, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall clean_gripper_error(int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall get_tgpio_digital(int *io0_value, int *io1_value, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_tgpio_digital(int *io0_value, int *io1_value, int *io2_value = NULL, int *io3_value = NULL, int *io4_value = NULL, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_tgpio_digital(int ionum, int value, fp32 delay_sec = 0, bool sync = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_tgpio_analog(int ionum, fp32 *value, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_cgpio_digital(int *digitals, int *digitals2 = NULL, int instance_id = -1);

@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.14.3"
+#define SDK_VERSION "1.14.4"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -811,9 +811,12 @@ public:
    * 
    * @param io0_value: the digital value of Tool GPIO-0
    * @param io1_value: the digital value of Tool GPIO-1
+   * @param io2_value: the digital value of Tool GPIO-2
+   * @param io3_value: the digital value of Tool GPIO-3
+   * @param io4_value: the digital value of Tool GPIO-4
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_tgpio_digital(int *io0_value, int *io1_value);
+  int get_tgpio_digital(int *io0_value, int *io1_value, int *io2_value = NULL, int *io3_value = NULL, int *io4_value = NULL);
 
   /**
    * @brief Set the digital value of the specified Tool GPIO

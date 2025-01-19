@@ -853,6 +853,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > 
   > @param io0_value: the digital value of Tool GPIO-0  
   > @param io1_value: the digital value of Tool GPIO-1  
+  > @param io2_value: the digital value of Tool GPIO-2  
+  > @param io3_value: the digital value of Tool GPIO-3  
+  > @param io4_value: the digital value of Tool GPIO-4  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 

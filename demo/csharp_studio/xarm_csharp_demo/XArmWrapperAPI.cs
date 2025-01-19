@@ -241,9 +241,9 @@ namespace xarm_csharp_demo
             return XArmAPI.clean_gripper_error(robot_instance_id);
         }
 
-        public int get_tgpio_digital(ref int io0_value, ref int io1_value)
+        public int get_tgpio_digital(ref int io0_value, ref int io1_value, ref int io2_value = null, ref int io3_value = null, ref int io4_value = null)
         {
-            return XArmAPI.get_tgpio_digital(ref io0_value, ref io1_value, robot_instance_id);
+            return XArmAPI.get_tgpio_digital(ref io0_value, ref io1_value, io2_value, io3_value, io4_value, robot_instance_id);
         }
 
         public int set_tgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true)

@@ -175,7 +175,7 @@ public:
   int tgpio_addr_r16(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int tgpio_addr_w32(int addr, float value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
   int tgpio_addr_r32(int addr, float *value, unsigned char host_id = UXBUS_CONF::TGPIO_HOST_ID);
-  int tgpio_get_digital(int *io1, int *io2);
+  int tgpio_get_digital(int *io0, int *io1, int *io2 = NULL, int *io3 = NULL, int *io4 = NULL);
   int tgpio_set_digital(int ionum, int value, int sync = -1);
   int tgpio_get_analog1(float *value);
   int tgpio_get_analog2(float *value);

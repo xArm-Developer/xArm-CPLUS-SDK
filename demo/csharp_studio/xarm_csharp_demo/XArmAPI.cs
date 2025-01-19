@@ -129,7 +129,7 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int clean_gripper_error(int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int get_tgpio_digital(ref int io0_value, ref int io1_value, ref int io2_value = null, ref int io3_value = null, ref int io4_value = null, int instance_id = -1);
+        public static extern int get_tgpio_digital(ref int io0_value, ref int io1_value, ref int io2_value, ref int io3_value, ref int io4_value, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_tgpio_digital(int ionum, int value, float delay_sec = 0, bool sync = true, int instance_id = -1);
         [DllImport("xarm.dll")]
@@ -474,6 +474,12 @@ namespace xarm_csharp_demo
         public static int set_servo_angle(float[] angles, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, bool relative = false)
         {
             return set_servo_angle(angles, 0, 0, 0, wait, timeout, radius, relative);
+        }
+
+        public static int get_tgpio_digital(ref int io0_value, ref int io1_value)
+        {
+            int tmp = 0;
+            return get_tgpio_digital(ref io0_value, ref io1_value, ref tmp, ref tmp, ref tmp);
         }
     }
 }

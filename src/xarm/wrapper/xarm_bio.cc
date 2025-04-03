@@ -86,9 +86,79 @@ int XArmAPI::set_bio_gripper_speed(int speed) {
   return ret;
 }
 
-int XArmAPI::_set_bio_gripper_position(int pos, int speed, bool wait, fp32 timeout, bool wait_motion) {
+int XArmAPI::_get_bio_gripper_sn(unsigned char sn[32])
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  unsigned char rx_data[40] = { 0 };
+  int ret = _get_bio_gripper_register(rx_data, 0x0B10, 16);
+  if (ret == API_CODE::MODBUS_ERR_LENG)
+  {
+    bio_gripper_version_ = 1;
+    return ret;
+  }
+  else if (ret != 0)
+  {
+    bio_gripper_version_ = 0;
+    return ret;
+  }    
+  else{
+    bio_gripper_version_ = 2;
+    memcpy(sn, &rx_data[3], 32);
+    return ret;
+  }
+}
+
+int XArmAPI::_get_bio_gripper_control_mode(int *mode)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  unsigned char rx_data[5] = { 0 };
+  int ret = _get_bio_gripper_register(rx_data, 0x010A);
+  *mode = (rx_data[3] << 8) + rx_data[4];
+  return ret;
+}
+
+int XArmAPI::set_bio_gripper_control_mode(int mode)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  unsigned char params[6] = { 0x08, 0x06, 0x11, 0x0A, 0x00, (unsigned char)mode };
+  unsigned char rx_data[6] = { 0 };
+  int ret = _bio_gripper_send_modbus(params, 6, rx_data, 6);
+  // reset mcu
+  unsigned char params2[6] = { 0x08, 0x06, 0x06, 0x07, 0x00, 0x01 };
+  _bio_gripper_send_modbus(params2, 6, rx_data, 6);
+  sleep_milliseconds(600);
+  bio_gripper_speed_ = 0;
+  return ret;
+}
+
+int XArmAPI::set_bio_gripper_force(int force)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  unsigned char val = force < 1 ? 1 : force > 100 ? 100 : (unsigned char)force;
+  unsigned char params[6] = { 0x08, 0x06, 0x05, 0x06, 0x00, val };
+  unsigned char rx_data[6] = { 0 };
+  int ret = _bio_gripper_send_modbus(params, 6, rx_data, 6);
+  return ret;
+}
+
+int XArmAPI::set_bio_gripper_position(int pos, int speed, int force, bool wait, fp32 timeout, bool wait_motion) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   if (speed > 0 && speed != bio_gripper_speed_) { set_bio_gripper_speed(speed); }
+  if (bio_gripper_version_ == 0)
+  {
+    unsigned char sn[32];
+    _get_bio_gripper_sn(sn);
+  }
+  if (bio_gripper_version_ == 2)
+  {
+    int mode = 0;
+    int code = _get_bio_gripper_control_mode(&mode);
+    if (mode == 1) {
+      pos = int(pos * 3.798 - 269.620);
+    }
+    set_bio_gripper_force(force);
+  }
+
   unsigned char params[11] = { 0x08, 0x10, 0x07, 0x00, 0x00, 0x02, 0x04 };
   params[7] = (unsigned char)(pos >> 24);
   params[8] = (unsigned char)(pos >> 16);
@@ -108,12 +178,8 @@ int XArmAPI::_set_bio_gripper_position(int pos, int speed, bool wait, fp32 timeo
   return ret;
 }
 
-int XArmAPI::_set_bio_gripper_position(int pos, bool wait, fp32 timeout, bool wait_motion) {
-  return _set_bio_gripper_position(pos, 0, wait, timeout, wait_motion);
-}
-
 int XArmAPI::open_bio_gripper(int speed, bool wait, fp32 timeout, bool wait_motion) {
-  return _set_bio_gripper_position(130, speed, wait, timeout, wait_motion);
+  return set_bio_gripper_position(130, speed, 100, wait, timeout, wait_motion);
 }
 
 int XArmAPI::open_bio_gripper(bool wait, fp32 timeout, bool wait_motion) {
@@ -121,7 +187,7 @@ int XArmAPI::open_bio_gripper(bool wait, fp32 timeout, bool wait_motion) {
 }
 
 int XArmAPI::close_bio_gripper(int speed, bool wait, fp32 timeout, bool wait_motion) {
-  return _set_bio_gripper_position(50, speed, wait, timeout, wait_motion);
+  return set_bio_gripper_position(50, speed, 100, wait, timeout, wait_motion);
 }
 
 int XArmAPI::close_bio_gripper(bool wait, fp32 timeout, bool wait_motion) {

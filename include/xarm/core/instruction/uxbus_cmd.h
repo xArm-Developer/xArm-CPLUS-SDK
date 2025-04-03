@@ -278,8 +278,10 @@ public:
 
   int set_common_param(unsigned char param_type, int param_val);
   int set_common_param(unsigned char param_type, float param_val);
+  int set_common_param(unsigned char param_type, float *param_vals, int n);
   int get_common_param(unsigned char param_type, int *param_val);
   int get_common_param(unsigned char param_type, float *param_val);
+  int get_common_param(unsigned char param_type, float *param_vals, int n);
   int get_poe_status(int *status);
   int get_iden_status(int *status);
   int get_c31_error_info(int *id, float *theoretical_tau, float *actual_tau);

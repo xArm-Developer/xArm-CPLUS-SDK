@@ -11,6 +11,10 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.15.0
+  - Added the Six-axis Force Torque Sensor collision detection related interfaces
+  - Added support for the new version of BIO Gripper control interface
+
 - > ### 1.14.2
   - Fix the 503 interface protocol identification error issue
   - Added sync parameters to some gpio interfaces to support immediate execution (requires firmware 2.4.101 or above)

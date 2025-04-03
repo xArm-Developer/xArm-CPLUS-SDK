@@ -247,6 +247,12 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int set_bio_gripper_speed(int speed, int instance_id = -1);
         [DllImport("xarm.dll")]
+        public static extern int set_bio_gripper_control_mode(int mode, int instance_id = -1);
+        [DllImport("xarm.dll")]
+        public static extern int set_bio_gripper_force(int force, int instance_id = -1);
+        [DllImport("xarm.dll")]
+        public static extern int set_bio_gripper_position(int pos, int speed = 0, int force=100, bool wait = true, float timeout = 5, bool wait_motion = true, int instance_id = -1);
+        [DllImport("xarm.dll")]
         public static extern int open_bio_gripper(int speed = 0, bool wait = true, float timeout = 5, bool wait_motion = true, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int close_bio_gripper(int speed = 0, bool wait = true, float timeout = 5, bool wait_motion = true, int instance_id = -1);
@@ -415,6 +421,31 @@ namespace xarm_csharp_demo
 
         [DllImport("xarm.dll")]
         public static extern int get_c38_error_info(ref int id_bits, float[] angles, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int set_ft_collision_detection(int on_off, int instance_id = -1);
+        
+        [DllImport("xarm.dll")]
+        public static extern int set_ft_collision_rebound(int on_off, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int set_ft_collision_threshold(float[] thresholds, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int set_ft_collision_reb_distance(float[] distances, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_ft_collision_detection(ref int on_off, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_ft_collision_rebound(ref int on_off, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_ft_collision_threshold(float[] thresholds, int instance_id = -1);
+
+        [DllImport("xarm.dll")]
+        public static extern int get_ft_collision_reb_distance(float[] distances, int instance_id = -1);
+
 
         /* modbus tcp func_code: 0x01 */
         [DllImport("xarm.dll")]

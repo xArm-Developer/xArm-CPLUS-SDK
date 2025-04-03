@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.14.2)
+# xArm-C++-SDK API Documentation (V1.15.0)
 
 ## class __XArmAPI__
 ************************************
@@ -496,10 +496,10 @@ __XArmAPI(const std::string &robot_ip="",
 
 
 - __int set_gravity_direction(float gravity_dir[3], bool wait = true)__
-  > Set the direction of gravity
+  > Set the gravity direction for proper torque compensation and collision detection.
   > 
-  > @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]
-  > @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting  
+  > @param gravity_dir: Gravity direction vector [x, y, z], e.g., [0, 0, -1] for a floor-mounted arm.
+  > @param wait: Whether to wait for the robotic arm to stop or clear all previous queued commands before applying the setting.  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
@@ -1569,6 +1569,36 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > 
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
+- __int set_bio_gripper_control_mode(int mode)__
+  > Set the mode of the bio gripper
+  > &ensp;&ensp;&ensp;&ensp;Note: Only available in the new version of BIO Gripper    
+  > 
+  > @param mode: mode
+  > &ensp;&ensp;&ensp;&ensp;0: bio gripper opening and closing mode  
+  > &ensp;&ensp;&ensp;&ensp;1: position loop mode  
+  > 
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_bio_gripper_force(int force)__
+  > Set the force of the bio gripper
+  > &ensp;&ensp;&ensp;&ensp;Note: Only available in the new version of BIO Gripper    
+  > 
+  > @param force: gripper force between 10 and 100  
+  > 
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_bio_gripper_position(int pos, int speed = 0, int force=100, bool wait = true, fp32 timeout = 5)__
+  > Set the position of the bio gripper
+  > &ensp;&ensp;&ensp;&ensp;Note: Only available in the new version of BIO Gripper    
+  > 
+  > @param pos: gripper pos between 71 and 150   
+  > @param speed: gripper speed between 0 and 4500  
+  > @param force: gripper force between 10 and 100  
+  > @param wait: whether to wait for the bio gripper motion complete, default is true  
+  > @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true
+  > 
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
 
 - __int open_bio_gripper(int speed = 0, bool wait = true, float timeout = 5)__
 - __int open_bio_gripper(bool wait = true, float timeout = 5)__
@@ -2462,6 +2492,84 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   >    
   > @param id_bits: each bit corresponds to each joint (bit0 corresponds to joint 1), and a bit of 1 indicates that the corresponding joint exceeds the limit.   
   > @param angles: current angles   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_ft_collision_detection(int on_off)__
+  > Set whether to enable collision detection with the Six-axis Force Torque Sensor   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109   
+  > &ensp;&ensp;&ensp;&ensp;2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)   
+  > &ensp;&ensp;&ensp;&ensp;3. the Six-axis Force Torque Sensor needs to be enabled and set force mode   
+  >    
+  > @param on_off: enable or not   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_ft_collision_rebound(int on_off)__
+  > Set whether to enable collision rebound with the Six-axis Force Torque Sensor   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  >    
+  > @param on_off: enable or not   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_ft_collision_threshold(float thresholds[6])__
+  > Set the threshold of the collision detection with the Six-axis Force Torque Sensor   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  >    
+  > @param thresholds: collision detection thresholds, [x(N), y(N), z(N), Rx(Nm), Ry(Nm), Rz(Nm)]   
+  > &ensp;&ensp;&ensp;&ensp;x: [5, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;y: [5, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;z: [5, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;Rx: [0.1, 4] (Nm)    
+  > &ensp;&ensp;&ensp;&ensp;Ry: [0.1, 4] (Nm)    
+  > &ensp;&ensp;&ensp;&ensp;Rz: [0.1, 4] (Nm)    
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int set_ft_collision_reb_distance(float distances[6])__
+  > Set the rebound distance of the collision rebound with the Six-axis Force Torque Sensor   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  >    
+  > @param distances: collision rebound distance, [x(mm), y(mm), z(mm), Rx(° or rad), Ry(° or rad), Rz(° or rad)]   
+  > &ensp;&ensp;&ensp;&ensp;x: [2, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;y: [2, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;z: [2, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;Rx: [0.2, 50] (°)    
+  > &ensp;&ensp;&ensp;&ensp;Ry: [0.2, 50] (°)    
+  > &ensp;&ensp;&ensp;&ensp;Rz: [0.2, 50] (°)    
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_ft_collision_detection(int *on_off)__
+  > Get the collision detection with the Six-axis Force Torque Sensor is enable or not   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109      
+  >    
+  > @param on_off: enable or not   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_ft_collision_rebound(int *on_off)__
+  > Get the collision rebound with the Six-axis Force Torque Sensor is enable or not   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  >    
+  > @param on_off: enable or not   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_ft_collision_threshold(float thresholds[6])__
+  > Get the collision threshold with the Six-axis Force Torque Sensor   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  >    
+  > @param thresholds: collision detection thresholds, [x(N), y(N), z(N), Rx(Nm), Ry(Nm), Rz(Nm)]    
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
+- __int get_ft_collision_reb_distance(float distances[6])__
+  > Get the collision rebound distance with the Six-axis Force Torque Sensor   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  >    
+  > @param distances: collision rebound distance, [x(mm), y(mm), z(mm), Rx(° or rad), Ry(° or rad), Rz(° or rad)]     
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)__

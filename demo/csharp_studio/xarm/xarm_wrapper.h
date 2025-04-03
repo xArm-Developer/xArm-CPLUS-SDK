@@ -136,6 +136,9 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall robotiq_get_status(unsigned char ret_data[9], unsigned char number_of_registers = 3, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_enable(bool enable, bool wait = true, fp32 timeout = 3, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_speed(int speed, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_control_mode(int mode, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_force(int force, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_bio_gripper_position(int pos, int speed = 0, int force=100, bool wait = true, fp32 timeout = 5, bool wait_motion = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall open_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall close_bio_gripper(int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_bio_gripper_status(int *status, int instance_id = -1);
@@ -215,6 +218,15 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_c24_error_info(int *servo_id, float *speed, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c60_error_info(float *max_velo, float *curr_velo, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c38_error_info(int *id_bits, float angle[7], int instance_id = -1);
+  
+  extern "C" __declspec(dllexport) int __stdcall set_ft_collision_detection(int on_off, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_ft_collision_rebound(int on_off, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_ft_collision_threshold(float thresholds[6], int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall set_ft_collision_reb_distance(float distances[6], int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_ft_collision_detection(int *on_off, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_ft_collision_rebound(int *on_off, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_ft_collision_threshold(float thresholds[6], int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_ft_collision_reb_distance(float distances[6], int instance_id = -1);
 
   /* modbus tcp func_code: 0x01 */
   extern "C" __declspec(dllexport) int __stdcall read_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits, int instance_id = -1);

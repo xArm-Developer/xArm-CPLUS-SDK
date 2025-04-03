@@ -532,6 +532,21 @@ namespace xarm_csharp_demo
             return XArmAPI.set_bio_gripper_speed(speed, robot_instance_id);
         }
 
+        public int set_bio_gripper_control_mode(int mode)
+        {
+            return XArmAPI.set_bio_gripper_control_mode(mode, robot_instance_id);
+        }
+
+        public int set_bio_gripper_force(int force)
+        {
+            return XArmAPI.set_bio_gripper_force(force, robot_instance_id);
+        }
+
+        public int set_bio_gripper_position(int pos, int speed = 0, int force=100, bool wait = true, float timeout = 5, bool wait_motion = true)
+        {
+            return XArmAPI.set_bio_gripper_position(pos, speed, force, wait, timeout, wait_motion, robot_instance_id);
+        }
+
         public int open_bio_gripper(int speed = 0, bool wait = true, float timeout = 5, bool wait_motion = true)
         {
             return XArmAPI.open_bio_gripper(speed, wait, timeout, wait_motion, robot_instance_id);
@@ -888,6 +903,46 @@ namespace xarm_csharp_demo
         public int get_c38_error_info(ref int id_bits, float[] angles)
         {
             return XArmAPI.get_c38_error_info(ref id_bits, angles, robot_instance_id);
+        }
+
+        public int set_ft_collision_detection(int on_off)
+        {
+            return XArmAPI.set_ft_collision_detection(on_off, robot_instance_id);
+        }
+
+        public int set_ft_collision_rebound(int on_off)
+        {
+            return XArmAPI.set_ft_collision_rebound(on_off, robot_instance_id);
+        }
+
+        public int set_ft_collision_threshold(float[] thresholds)
+        {
+            return XArmAPI.set_ft_collision_threshold(thresholds, robot_instance_id);
+        }
+
+        public int set_ft_collision_reb_distance(float[] distances)
+        {
+            return XArmAPI.set_ft_collision_reb_distance(distances, robot_instance_id);
+        }
+
+        public int get_ft_collision_detection(ref int on_off)
+        {
+            return XArmAPI.get_ft_collision_detection(ref on_off, robot_instance_id);
+        }
+
+        public int get_ft_collision_rebound(ref int on_off)
+        {
+            return XArmAPI.get_ft_collision_rebound(ref on_off, robot_instance_id);
+        }
+
+        public int get_ft_collision_threshold(float[] thresholds)
+        {
+            return XArmAPI.get_ft_collision_threshold(thresholds, robot_instance_id);
+        }
+
+        public int get_ft_collision_reb_distance(float[] distances)
+        {
+            return XArmAPI.get_ft_collision_reb_distance(distances, robot_instance_id);
         }
 
         public int read_coil_bits(UInt16 addr, UInt16 quantity, byte[] bits)

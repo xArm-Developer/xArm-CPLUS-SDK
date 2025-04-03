@@ -383,3 +383,61 @@ int XArmAPI::get_c38_error_info(int *id_bits, float angles[7])
   }
   return ret;
 }
+
+int XArmAPI::set_ft_collision_detection(int on_off)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->set_common_param(11, on_off);
+}
+
+int XArmAPI::set_ft_collision_rebound(int on_off)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->set_common_param(13, on_off);
+}
+
+int XArmAPI::set_ft_collision_threshold(float thresholds[6])
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->set_common_param(12, thresholds, 6);
+}
+
+int XArmAPI::set_ft_collision_reb_distance(float distances[6])
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  float dis[6];
+  for (int i = 0; i < 6; i++) {
+    dis[i] = i < 3 || default_is_radian ? distances[i] : to_radian(distances[i]);
+  }
+  return core->set_common_param(14, dis, 6);
+}
+
+int XArmAPI::get_ft_collision_detection(int *on_off)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_common_param(11, on_off);
+}
+
+int XArmAPI::get_ft_collision_rebound(int *on_off)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_common_param(13, on_off);
+}
+
+int XArmAPI::get_ft_collision_threshold(float thresholds[6])
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_common_param(12, thresholds, 6);
+}
+
+int XArmAPI::get_ft_collision_reb_distance(float distances[6])
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->get_common_param(14, distances, 6);
+  if (ret == 0 && !default_is_radian) {
+    for (int i = 3; i < 6; i++) {
+      distances[i] = to_degree(distances[i]);
+    }
+  }
+  return ret;
+}

@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.14.4"
+#define SDK_VERSION "1.15.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -440,10 +440,10 @@ public:
   int set_teach_sensitivity(int sensitivity, bool wait = true);
 
   /**
-   * @brief Set the direction of gravity
+   * @brief Set the gravity direction for proper torque compensation and collision detection.
    * 
-   * @param gravity_dir: direction of gravity, such as [x(mm), y(mm), z(mm)]
-   * @param wait: whether to wait for the robotic arm to stop or all previous queue commands to be executed or cleared before setting
+   * @param gravity_dir: Gravity direction vector [x, y, z], e.g., [0, 0, -1] for a floor-mounted arm.
+   * @param wait: Whether to wait for the robotic arm to stop or clear all previous queued commands before applying the setting.
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
   int set_gravity_direction(fp32 gravity_dir[3], bool wait = true);
@@ -1603,6 +1603,39 @@ public:
   int set_bio_gripper_speed(int speed);
 
   /**
+   * @brief Set the mode of the bio gripper
+   *   Note: Only available in the new version of BIO Gripper
+   * 
+   * @param mode: mode
+   *   0: bio gripper opening and closing mode
+   *   1: position loop mode
+   * @return: See the code documentation for details.
+   */
+  int set_bio_gripper_control_mode(int mode);
+
+  /**
+   * @brief Set the force of the bio gripper
+   *   Note: Only available in the new version of BIO Gripper
+   * 
+   * @param force: gripper force between 10 and 100
+   * @return: See the code documentation for details.
+   */
+  int set_bio_gripper_force(int force);
+
+  /**
+   * @brief Set the position of the bio gripper
+   *   Note: Only available in the new version of BIO Gripper
+   * 
+   * @param pos: gripper pos between 71 and 150
+   * @param speed: gripper speed between 0 and 4500, default is 0 (not set the speed)
+   * @param force: gripper force between 10 and 100
+   * @param wait: whether to wait for the bio gripper motion complete, default is true
+   * @param timeout: maximum waiting time(unit: second), default is 5, only available if wait=true     
+   * @return: See the code documentation for details.
+   */
+  int set_bio_gripper_position(int pos, int speed = 0, int force=100, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+
+  /**
    * @brief Open the bio gripper
    * 
    * @param speed: speed value, default is 0 (not set the speed)
@@ -2551,6 +2584,100 @@ public:
   int get_c38_error_info(int *id_bits, float angles[7]);
 
   /**
+   * @brief Set whether to enable collision detection with the Six-axis Force Torque Sensor
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   *    2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
+   *    3. the Six-axis Force Torque Sensor needs to be enabled and set force mode
+   * 
+   * @param on_off: enable or not
+   * return: See the code documentation for details.
+   */
+  int set_ft_collision_detection(int on_off);
+
+  /**
+   * @brief Set whether to enable collision rebound with the Six-axis Force Torque Sensor
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param on_off: enable or not
+   * return: See the code documentation for details.
+   */
+  int set_ft_collision_rebound(int on_off);
+
+  /**
+   * @brief Set the threshold of the collision detection with the Six-axis Force Torque Sensor
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param thresholds: collision detection thresholds, [x(N), y(N), z(N), Rx(Nm), Ry(Nm), Rz(Nm)]
+   *    x: [5, 200] (N)
+   *    y: [5, 200] (N)
+   *    z: [5, 200] (N)
+   *    Rx: [0.1, 4] (Nm)
+   *    Ry: [0.1, 4] (Nm)
+   *    Rz: [0.1, 4] (Nm)
+   * return: See the code documentation for details.
+   */
+  int set_ft_collision_threshold(float thresholds[6]);
+
+  /**
+   * @brief Set the rebound distance of the collision rebound with the Six-axis Force Torque Sensor
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param distances: collision rebound distance, [x(mm), y(mm), z(mm), Rx(° or rad), Ry(° or rad), Rz(° or rad)]
+   *    x: [2, 200] (mm)
+   *    y: [2, 200] (mm)
+   *    z: [2, 200] (mm)
+   *    Rx: [0.2, 50] (°)
+   *    Ry: [0.2, 50] (°)
+   *    Rz: [0.2, 50] (°)
+   * return: See the code documentation for details.
+   */
+  int set_ft_collision_reb_distance(float distances[6]);
+  
+  /**
+   * @brief Get the collision detection with the Six-axis Force Torque Sensor is enable or not
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param on_off: enable or not
+   * return: See the code documentation for details.
+   */
+  int get_ft_collision_detection(int *on_off);
+
+  /**
+   * @brief Get the collision rebound with the Six-axis Force Torque Sensor is enable or not
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param on_off: enable or not
+   * return: See the code documentation for details.
+   */
+  int get_ft_collision_rebound(int *on_off);
+
+  /**
+   * @brief Get the collision threshold with the Six-axis Force Torque Sensor
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param thresholds: collision threshold
+   * return: See the code documentation for details.
+   */
+  int get_ft_collision_threshold(float thresholds[6]);
+
+  /**
+   * @brief Get the collision rebound distance with the Six-axis Force Torque Sensor
+   *  Note:
+   *    1. only available if firmware_version >= 2.5.109
+   * 
+   * @param distances: rebound distance
+   * return: See the code documentation for details.
+   */
+  int get_ft_collision_reb_distance(float distances[6]);
+
+  /**
    * @brief (Standard Modbus TCP) Read Coils (0x01)
    * 
    * @param addr: the starting address of the register to be read
@@ -2717,8 +2844,8 @@ private:
   int _bio_gripper_send_modbus(unsigned char *send_data, int length, unsigned char *ret_data, int ret_length);
   int _bio_gripper_wait_motion_completed(fp32 timeout = 5);
   int _bio_gripper_wait_enable_completed(fp32 timeout = 3);
-  int _set_bio_gripper_position(int pos, int speed = 0, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
-  int _set_bio_gripper_position(int pos, bool wait = true, fp32 timeout = 5, bool wait_motion = true);
+  int _get_bio_gripper_sn(unsigned char sn[32]);
+  int _get_bio_gripper_control_mode(int *mode);
 
   int _check_gripper_position(fp32 target_pos, fp32 timeout = 10);
   int _check_gripper_status(fp32 timeout = 10);
@@ -2800,6 +2927,7 @@ private:
   int linear_track_baud_;
   int linear_track_speed_;
   int gripper_version_numbers_[3];
+  int bio_gripper_version_;
 
   long long last_report_time_;
   long long max_report_interval_;

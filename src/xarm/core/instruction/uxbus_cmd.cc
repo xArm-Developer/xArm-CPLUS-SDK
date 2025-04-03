@@ -1865,6 +1865,16 @@ int UxbusCmd::set_common_param(unsigned char param_type, float param_val)
   return _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data, 5);
 }
 
+int UxbusCmd::set_common_param(unsigned char param_type, float *param_vals, int n)
+{
+  unsigned char *send_data = new unsigned char[n * 4 + 1]();
+  send_data[0] = param_type;
+  nfp32_to_hex(param_vals, &send_data[1], n);
+  int ret = _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data,  n * 4 + 1);
+  delete[] send_data;
+  return ret;
+}
+
 int UxbusCmd::get_common_param(unsigned char param_type, int *param_val)
 {
   unsigned char send_data[1] = {param_type};
@@ -1880,6 +1890,16 @@ int UxbusCmd::get_common_param(unsigned char param_type, float *param_val)
   unsigned char rx_data[4] = {0};
   int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data, 4);
   *param_val = hex_to_fp32(rx_data);
+  return ret;
+}
+
+int UxbusCmd::get_common_param(unsigned char param_type, float *param_vals, int n)
+{
+  unsigned char send_data[1] = {param_type};
+  unsigned char *rx_data = new unsigned char[n * 4]();
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data,  n * 4);
+  hex_to_nfp32(rx_data, param_vals, n);
+  delete[] rx_data;
   return ret;
 }
 

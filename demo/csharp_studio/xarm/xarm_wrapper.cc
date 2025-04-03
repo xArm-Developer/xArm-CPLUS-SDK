@@ -400,6 +400,15 @@ namespace XArmWrapper
   int __stdcall set_bio_gripper_speed(int speed, int instance_id) {
     return get_instance(instance_id)->set_bio_gripper_speed(speed);
   }
+  int __stdcall set_bio_gripper_control_mode(int mode, int instance_id) {
+    return get_instance(instance_id)->set_bio_gripper_control_mode(mode);
+  }
+  int __stdcall set_bio_gripper_force(int force, int instance_id) {
+    return get_instance(instance_id)->set_bio_gripper_force(force);
+  }
+  int __stdcall set_bio_gripper_position(int pos, int speed, int force, bool wait, fp32 timeout, bool wait_motion, int instance_id) {
+    return get_instance(instance_id)->set_bio_gripper_position(pos, speed, force, wait, timeout, wait_motion);
+  }
   int __stdcall open_bio_gripper(int speed, bool wait, fp32 timeout, bool wait_motion, int instance_id) {
     return get_instance(instance_id)->open_bio_gripper(speed, wait, timeout, wait_motion);
   }
@@ -668,6 +677,46 @@ namespace XArmWrapper
   int __stdcall get_c38_error_info(int *id_bits, float angles[7], int instance_id)
   {
     return get_instance(instance_id)->get_c38_error_info(id_bits, angles);
+  }
+
+  int __stdcall set_ft_collision_detection(int on_off, int instance_id)
+  {
+    return get_instance(instance_id)->set_ft_collision_detection(on_off);
+  }
+
+  int __stdcall set_ft_collision_rebound(int on_off, int instance_id)
+  {
+    return get_instance(instance_id)->set_ft_collision_rebound(on_off);
+  }
+
+  int __stdcall set_ft_collision_threshold(float thresholds[6], int instance_id)
+  {
+    return get_instance(instance_id)->set_ft_collision_threshold(thresholds);
+  }
+
+  int __stdcall set_ft_collision_reb_distance(float distances[6], int instance_id)
+  {
+    return get_instance(instance_id)->set_ft_collision_reb_distance(distances);
+  }
+
+  int __stdcall get_ft_collision_detection(int *on_off, int instance_id)
+  {
+    return get_instance(instance_id)->get_ft_collision_detection(on_off);
+  }
+
+  int __stdcall get_ft_collision_rebound(int *on_off, int instance_id)
+  {
+    return get_instance(instance_id)->get_ft_collision_rebound(on_off);
+  }
+
+  int __stdcall get_ft_collision_threshold(float thresholds[6], int instance_id)
+  {
+    return get_instance(instance_id)->get_ft_collision_threshold(thresholds);
+  }
+
+  int __stdcall get_ft_collision_reb_distance(float distances[6], int instance_id)
+  {
+    return get_instance(instance_id)->get_ft_collision_reb_distance(distances);
   }
 
   /* modbus tcp func_code: 0x01 */

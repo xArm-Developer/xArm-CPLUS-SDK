@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
   ret = arm->ft_sensor_enable(1);
   printf("ft_sensor_enable, ret=%d\n", ret);
   // will overwrite previous sensor zero and payload configuration
-  ret = arm->ft_sensor_set_zero(); // remove this if zero_offset and payload already identified & compensated!
-  printf("ft_sensor_set_zero, ret=%d\n", ret);
+  // ret = arm->ft_sensor_set_zero(); // remove this if zero_offset and payload already identified & compensated!
+  // printf("ft_sensor_set_zero, ret=%d\n", ret);
   sleep_milliseconds(200); // wait for writting zero operation to take effect, do not remove
 
   // move robot in impendance control application

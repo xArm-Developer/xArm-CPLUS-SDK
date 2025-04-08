@@ -45,7 +45,7 @@ int XArmAPI::get_tgpio_digital(int *io0, int *io1, int *io2, int *io3, int *io4)
 }
 
 int XArmAPI::set_tgpio_digital(int ionum, int value, float delay_sec, bool sync) {
-  if (ionum != 0 && ionum != 1) return API_CODE::PARAM_ERROR;
+  if (ionum != 0 && ionum != 1 && ionum != 2 && ionum != 3 && ionum != 4) return API_CODE::PARAM_ERROR;
   _wait_until_not_pause();
   _wait_until_cmdnum_lt_max();
   int code = _xarm_is_ready();
@@ -142,8 +142,14 @@ int XArmAPI::get_cgpio_state(int *state_, int *digit_io, fp32 *analog, int *inpu
 
 
 int XArmAPI::get_suction_cup(int *val, int hardware_version) {
-  int io1 = hardware_version == 1 ? 0 : 3;
-  return get_tgpio_digital(val, &io1);
+  if (hardware_version == 1) {
+    int io1;
+    return get_tgpio_digital(val, &io1);
+  }
+  else {
+    int io0, io1;
+    return get_tgpio_digital(&io0, &io1, NULL, val);
+  }
 }
 
 int XArmAPI::set_suction_cup(bool on, bool wait, float timeout, float delay_sec, bool sync, int hardware_version) {

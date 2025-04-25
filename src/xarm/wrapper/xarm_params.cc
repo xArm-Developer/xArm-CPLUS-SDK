@@ -336,6 +336,12 @@ int XArmAPI::get_c31_error_info(int *servo_id, float *theoretical_tau, float *ac
   return core->get_c31_error_info(servo_id, theoretical_tau, actual_tau);
 }
 
+int XArmAPI::get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  return core->get_c54_error_info(dir, tau_threshold, actual_tau);
+}
+
 int XArmAPI::get_c37_error_info(int *servo_id, float *diff_angle)
 {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;

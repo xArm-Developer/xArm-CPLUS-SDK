@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.15.0"
+#define SDK_VERSION "1.15.1"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -2528,6 +2528,18 @@ public:
   int get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau);
 
   /**
+   * @brief Get (Six-axis Force Torque Sensor) collision error (C54) info
+   *  Note:
+   *    1. only available if firmware_version >= 2.6.103
+   * 
+   * @param dir: trigger direction (XYZRxRyRz)
+   * @param tau_threshold: tau threshold
+   * @param actual_tau: actual tau
+   * return: See the code documentation for details.
+   */
+  int get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau);
+
+  /**
    * @brief Get payload error (C37) info
    *  Note:
    *    1. only available if firmware_version >= 2.3.0
@@ -2586,7 +2598,7 @@ public:
   /**
    * @brief Set whether to enable collision detection with the Six-axis Force Torque Sensor
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    *    2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)
    *    3. the Six-axis Force Torque Sensor needs to be enabled and set force mode
    * 
@@ -2598,7 +2610,7 @@ public:
   /**
    * @brief Set whether to enable collision rebound with the Six-axis Force Torque Sensor
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param on_off: enable or not
    * return: See the code documentation for details.
@@ -2608,7 +2620,7 @@ public:
   /**
    * @brief Set the threshold of the collision detection with the Six-axis Force Torque Sensor
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param thresholds: collision detection thresholds, [x(N), y(N), z(N), Rx(Nm), Ry(Nm), Rz(Nm)]
    *    x: [5, 200] (N)
@@ -2624,12 +2636,12 @@ public:
   /**
    * @brief Set the rebound distance of the collision rebound with the Six-axis Force Torque Sensor
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param distances: collision rebound distance, [x(mm), y(mm), z(mm), Rx(° or rad), Ry(° or rad), Rz(° or rad)]
-   *    x: [2, 200] (mm)
-   *    y: [2, 200] (mm)
-   *    z: [2, 200] (mm)
+   *    x: [2, 500] (mm)
+   *    y: [2, 500] (mm)
+   *    z: [2, 500] (mm)
    *    Rx: [0.2, 50] (°)
    *    Ry: [0.2, 50] (°)
    *    Rz: [0.2, 50] (°)
@@ -2640,7 +2652,7 @@ public:
   /**
    * @brief Get the collision detection with the Six-axis Force Torque Sensor is enable or not
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param on_off: enable or not
    * return: See the code documentation for details.
@@ -2650,7 +2662,7 @@ public:
   /**
    * @brief Get the collision rebound with the Six-axis Force Torque Sensor is enable or not
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param on_off: enable or not
    * return: See the code documentation for details.
@@ -2660,7 +2672,7 @@ public:
   /**
    * @brief Get the collision threshold with the Six-axis Force Torque Sensor
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param thresholds: collision threshold
    * return: See the code documentation for details.
@@ -2670,7 +2682,7 @@ public:
   /**
    * @brief Get the collision rebound distance with the Six-axis Force Torque Sensor
    *  Note:
-   *    1. only available if firmware_version >= 2.5.109
+   *    1. only available if firmware_version >= 2.6.103
    * 
    * @param distances: rebound distance
    * return: See the code documentation for details.

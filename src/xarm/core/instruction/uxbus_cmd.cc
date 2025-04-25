@@ -1932,6 +1932,17 @@ int UxbusCmd::get_c31_error_info(int *id, float *theoretical_tau, float *actual_
   return ret;
 }
 
+int UxbusCmd::get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau)
+{
+  unsigned char send_data[1] = {107};
+  unsigned char rx_data[9] = {0};
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 9);
+  *dir = rx_data[0];
+  *tau_threshold = hex_to_fp32(&rx_data[1]);
+  *actual_tau = hex_to_fp32(&rx_data[5]);
+  return ret;
+}
+
 int UxbusCmd::get_c37_error_info(int *id, float *diff_angle)
 {
   unsigned char send_data[1] = {102};

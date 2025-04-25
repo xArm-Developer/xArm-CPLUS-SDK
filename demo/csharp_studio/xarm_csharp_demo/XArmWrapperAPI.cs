@@ -880,6 +880,11 @@ namespace xarm_csharp_demo
             return XArmAPI.get_c31_error_info(ref servo_id, ref theoretical_tau, ref actual_tau, robot_instance_id);
         }
 
+        public int get_c54_error_info(ref int dir, ref float tau_threshold, ref float actual_tau)
+        {
+            return XArmAPI.get_c54_error_info(ref dir, ref tau_threshold, ref actual_tau, robot_instance_id);
+        }
+
         public int get_c37_error_info(ref int servo_id, ref float diff_angle)
         {
             return XArmAPI.get_c37_error_info(ref servo_id, ref diff_angle, robot_instance_id);

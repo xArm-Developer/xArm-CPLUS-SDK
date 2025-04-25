@@ -285,6 +285,7 @@ public:
   int get_poe_status(int *status);
   int get_iden_status(int *status);
   int get_c31_error_info(int *id, float *theoretical_tau, float *actual_tau);
+  int get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau);
   int get_c37_error_info(int *id, float *diff_angle);
   int get_c23_error_info(int *id, float *angle);
   int get_c24_error_info(int *id, float *speed);

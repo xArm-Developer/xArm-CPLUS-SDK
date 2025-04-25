@@ -213,6 +213,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_poe_status(int *status, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_iden_status(int *status, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c31_error_info(int *servo_id, float *theoretical_tau, float *actual_tau, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c37_error_info(int *servo_id, float *diff_angle, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c23_error_info(int *id_bits, float angle[7], int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_c24_error_info(int *servo_id, float *speed, int instance_id = -1);

@@ -654,6 +654,11 @@ namespace XArmWrapper
     return get_instance(instance_id)->get_c31_error_info(servo_id, theoretical_tau, actual_tau);
   }
 
+  int __stdcall get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau, int instance_id)
+  {
+    return get_instance(instance_id)->get_c54_error_info(dir, tau_threshold, actual_tau);
+  }
+
   int __stdcall get_c37_error_info(int *servo_id, float *diff_angle, int instance_id)
   {
     return get_instance(instance_id)->get_c37_error_info(servo_id, diff_angle);

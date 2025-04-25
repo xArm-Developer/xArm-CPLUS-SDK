@@ -2448,6 +2448,16 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param actual_tau: actual tau   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
+- __int get_c54_error_info(int *dir, float *tau_threshold, float *actual_tau)__
+  > Get (Six-axis Force Torque Sensor) collision error (C54) info   
+  > Note:   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103   
+  >  
+  > @param dir: trigger direction (XYZRxRyRz)   
+  > @param tau_threshold: tau threshold   
+  > @param actual_tau: actual tau   
+  > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
+
 - __int get_c37_error_info(int *servo_id, float *diff_angle)__
   > Get payload error (C37) info   
   > Note:   
@@ -2497,7 +2507,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int set_ft_collision_detection(int on_off)__
   > Set whether to enable collision detection with the Six-axis Force Torque Sensor   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109   
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103   
   > &ensp;&ensp;&ensp;&ensp;2. the Six-axis Force Torque Sensor is required (the third party is not currently supported)   
   > &ensp;&ensp;&ensp;&ensp;3. the Six-axis Force Torque Sensor needs to be enabled and set force mode   
   >    
@@ -2507,7 +2517,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int set_ft_collision_rebound(int on_off)__
   > Set whether to enable collision rebound with the Six-axis Force Torque Sensor   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103     
   >    
   > @param on_off: enable or not   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
@@ -2515,7 +2525,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int set_ft_collision_threshold(float thresholds[6])__
   > Set the threshold of the collision detection with the Six-axis Force Torque Sensor   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103     
   >    
   > @param thresholds: collision detection thresholds, [x(N), y(N), z(N), Rx(Nm), Ry(Nm), Rz(Nm)]   
   > &ensp;&ensp;&ensp;&ensp;x: [5, 200] (N)    
@@ -2529,12 +2539,12 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int set_ft_collision_reb_distance(float distances[6])__
   > Set the rebound distance of the collision rebound with the Six-axis Force Torque Sensor   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103     
   >    
   > @param distances: collision rebound distance, [x(mm), y(mm), z(mm), Rx(° or rad), Ry(° or rad), Rz(° or rad)]   
-  > &ensp;&ensp;&ensp;&ensp;x: [2, 200] (N)    
-  > &ensp;&ensp;&ensp;&ensp;y: [2, 200] (N)    
-  > &ensp;&ensp;&ensp;&ensp;z: [2, 200] (N)    
+  > &ensp;&ensp;&ensp;&ensp;x: [2, 500] (mm)    
+  > &ensp;&ensp;&ensp;&ensp;y: [2, 500] (mm)    
+  > &ensp;&ensp;&ensp;&ensp;z: [2, 500] (mm)    
   > &ensp;&ensp;&ensp;&ensp;Rx: [0.2, 50] (°)    
   > &ensp;&ensp;&ensp;&ensp;Ry: [0.2, 50] (°)    
   > &ensp;&ensp;&ensp;&ensp;Rz: [0.2, 50] (°)    
@@ -2543,7 +2553,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int get_ft_collision_detection(int *on_off)__
   > Get the collision detection with the Six-axis Force Torque Sensor is enable or not   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109      
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103      
   >    
   > @param on_off: enable or not   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
@@ -2551,7 +2561,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int get_ft_collision_rebound(int *on_off)__
   > Get the collision rebound with the Six-axis Force Torque Sensor is enable or not   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103     
   >    
   > @param on_off: enable or not   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
@@ -2559,7 +2569,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int get_ft_collision_threshold(float thresholds[6])__
   > Get the collision threshold with the Six-axis Force Torque Sensor   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103     
   >    
   > @param thresholds: collision detection thresholds, [x(N), y(N), z(N), Rx(Nm), Ry(Nm), Rz(Nm)]    
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
@@ -2567,7 +2577,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 - __int get_ft_collision_reb_distance(float distances[6])__
   > Get the collision rebound distance with the Six-axis Force Torque Sensor   
   > Note:   
-  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.5.109     
+  > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.6.103     
   >    
   > @param distances: collision rebound distance, [x(mm), y(mm), z(mm), Rx(° or rad), Ry(° or rad), Rz(° or rad)]     
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.

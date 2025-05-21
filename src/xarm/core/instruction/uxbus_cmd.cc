@@ -26,6 +26,7 @@ UxbusCmd::UxbusCmd(void) {
   last_modbus_comm_us_ = get_us();
   last_recv_ms = get_system_time();
   has_feedback_key_transid_func_ = false;
+  feedback_type_ = 0;
 }
 
 UxbusCmd::UxbusCmd(std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) {
@@ -34,6 +35,7 @@ UxbusCmd::UxbusCmd(std::function<void (std::string, int, unsigned char)> set_fee
   last_recv_ms = get_system_time();
   has_feedback_key_transid_func_ = true;
   set_feedback_key_transid_ = set_feedback_key_transid;
+  feedback_type_ = 0;
 }
 
 UxbusCmd::~UxbusCmd(void) {}

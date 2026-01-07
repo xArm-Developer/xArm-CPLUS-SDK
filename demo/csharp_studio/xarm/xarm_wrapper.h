@@ -95,7 +95,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall get_position(fp32 pose[6], int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_servo_angle(fp32 angles[7], bool is_real = false, int instance_id = -1);
 
-  extern "C" __declspec(dllexport) int __stdcall get_inverse_kinematics(fp32 pose[6], fp32 angles[7], int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_inverse_kinematics(fp32 pose[6], fp32 angles[7], bool limited = true, fp32 ref_angles[7] = NULL, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_forward_kinematics(fp32 angles[7], fp32 pose[6], int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall is_joint_limit(fp32 angles[7], int *limit, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall is_tcp_limit(fp32 pose[6], int *limit, int instance_id = -1);

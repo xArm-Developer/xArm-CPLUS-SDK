@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.18.0)
+# xArm-C++-SDK API Documentation (V1.17.4)
 
 ## class __XArmAPI__
 ************************************
@@ -747,7 +747,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_inverse_kinematics(float pose[6], float angles[7])__
+- __int get_inverse_kinematics(float pose[6], float angles[7], bool limited = true, fp32 *ref_angles = NULL)__
   > Get inverse kinematics
   > 
   > @param pose: source pose, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
@@ -756,6 +756,11 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param angles: target angles, like [servo-1, ..., servo-7]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees  
+  > @param limited: the result is limited to within ±180° or not, default is true  
+  > &ensp;&ensp;&ensp;&ensp;only available if firmware_version >= 2.7.103  
+  > @param ref_angles: reference values for joint angles, like [servo-1, ..., servo-7]  
+  > &ensp;&ensp;&ensp;&ensp;only available if firmware_version >= 2.7.103 
+  > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, The value of servo-1/.../servo-7 should be in radians  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 

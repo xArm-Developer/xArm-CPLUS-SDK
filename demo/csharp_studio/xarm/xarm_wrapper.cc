@@ -365,8 +365,8 @@ namespace XArmWrapper
     return get_instance(instance_id)->set_cgpio_analog_with_xyz(ionum, value, xyz, tol_r);
   }
 
-  int __stdcall get_inverse_kinematics(fp32 pose[6], fp32 angles[7], int instance_id) {
-    return get_instance(instance_id)->get_inverse_kinematics(pose, angles);
+  int __stdcall get_inverse_kinematics(fp32 pose[6], fp32 angles[7], bool limited, fp32 ref_angles[7], int instance_id) {
+    return get_instance(instance_id)->get_inverse_kinematics(pose, angles, limited, ref_angles);
   }
   int __stdcall get_forward_kinematics(fp32 angles[7], fp32 pose[6], int instance_id) {
     return get_instance(instance_id)->get_forward_kinematics(angles, pose);

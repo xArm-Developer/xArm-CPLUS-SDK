@@ -41,7 +41,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.17.3"
+#define SDK_VERSION "1.17.4"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -713,9 +713,14 @@ public:
    * @param angles: target angles, like [servo-1, ..., servo-7]
    *  if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
    *  if default_is_radian is false, The value of servo-1/.../servo-7 should be in degrees
+   * @param limited: the result is limited to within ±180° or not, default is true
+   *  1. only available if firmware_version >= 2.7.103
+   * @param ref_angles: reference values for joint angles, like [servo-1, ..., servo-7]
+   *  1. only available if firmware_version >= 2.7.103
+   *  2. if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_inverse_kinematics(fp32 pose[6], fp32 angles[7]);
+  int get_inverse_kinematics(fp32 pose[6], fp32 angles[7], bool limited = true, fp32 *ref_angles = NULL);
 
   /**
    * @brief Get forward kinematics

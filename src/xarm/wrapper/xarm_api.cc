@@ -1125,14 +1125,29 @@ void XArmAPI::emergency_stop(void) {
   // }
 }
 
-int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7]) {
+int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7], bool limited, fp32 *ref_angles) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   fp32 pose[6];
   for (int i = 0; i < 6; i++) {
     pose[i] = (float)(default_is_radian || i < 3 ? source_pose[i] : to_radian(source_pose[i]));
   }
   fp32 angs[7] = { 0 };
-  int ret = core->get_ik(pose, angs);
+  int ret;
+  if (_version_is_ge(2, 7, 103)) {
+    if (ref_angles != NULL) {
+      fp32 ref_joints[7] = {0};
+      for (int i = 0; i < 7; i++) {
+        ref_joints[i] = (float)(default_is_radian ? ref_angles[i] : to_degree(ref_angles[i]));
+      }
+      ret = core->get_ik(pose, angs, limited, ref_joints);
+    }
+    else {
+      ret = core->get_ik(pose, angs, limited);
+    }
+  }
+  else {
+    ret = core->get_ik(pose, angs);
+  }  
   ret = _check_code(ret);
   if (ret == 0) {
     for (int i = 0; i < 7; i++) {

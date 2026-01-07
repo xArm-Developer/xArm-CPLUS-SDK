@@ -203,12 +203,16 @@ int UxbusCmd::_get_nfp32(int funcode, float *rx_data, int num) {
   return ret;
 }
 
-int UxbusCmd::_swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn) {
+int UxbusCmd::_swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn, char *add_data, int add_len) {
   unsigned char *send_data = new unsigned char[128]();
   nfp32_to_hex(tx_datas, send_data, txn);
 
+  if (add_data != NULL && add_len > 0) {
+    memcpy(send_data + txn * 4, add_data, add_len);
+  }
+
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = _send_modbus_request(funcode, send_data, txn * 4);
+  int ret = _send_modbus_request(funcode, send_data, txn * 4 + add_len);
   delete[] send_data;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   unsigned char *datas = new unsigned char[128]();
@@ -718,8 +722,22 @@ int UxbusCmd::get_joint_states(float position[7], float velocity[7], float effor
   return ret;
 }
 
-int UxbusCmd::get_ik(float pose[6], float angles[7]) {
-  return _swop_nfp32(UXBUS_RG::GET_IK, pose, 6, angles, 7);
+int UxbusCmd::get_ik(float pose[6], float angles[7], bool limited, float *ref_angles) {
+  if (!limited || ref_angles != NULL) {
+    if (ref_angles != NULL) {
+      char additional[29] = { 0 };
+      additional[0] = limited ? 1 : 0;
+      nfp32_to_hex(ref_angles, (unsigned char*)(&additional[1]), 7);
+      return _swop_nfp32(UXBUS_RG::GET_IK, pose, 6, angles, 7, additional, 29);
+    }
+    else {
+      char additional[1] = { 0 };
+      return _swop_nfp32(UXBUS_RG::GET_IK, pose, 6, angles, 7, additional, 1);
+    }
+  }
+  else {
+    return _swop_nfp32(UXBUS_RG::GET_IK, pose, 6, angles, 7);
+  }
 }
 
 int UxbusCmd::get_fk(float angles[7], float pose[6]) {

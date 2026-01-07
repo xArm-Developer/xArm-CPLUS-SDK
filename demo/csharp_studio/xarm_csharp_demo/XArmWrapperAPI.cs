@@ -489,9 +489,9 @@ namespace xarm_csharp_demo
             return XArmAPI.set_cgpio_analog_with_xyz(ionum, value, xyz, tol_r, robot_instance_id);
         }
 
-        public int get_inverse_kinematics(float[] pose, float[] angles)
+        public int get_inverse_kinematics(float[] pose, float[] angles, bool limited = true, float[] ref_angles = null)
         {
-            return XArmAPI.get_inverse_kinematics(pose, angles, robot_instance_id);
+            return XArmAPI.get_inverse_kinematics(pose, angles, limited, ref_angles, robot_instance_id);
         }
 
         public int get_forward_kinematics(float[] angles, float[] pose)
@@ -684,7 +684,7 @@ namespace xarm_csharp_demo
             return XArmAPI.iden_ft_sensor_load_offset(result, robot_instance_id);
         }
 
-        public int set_ft_sensor_load_offset(float[] load_offset, bool association_setting_tcp_load = false, float m = (float)0.270, float x = -17, float y = 9, float z = (float)11.8)
+        public int set_ft_sensor_load_offset(float[] load_offset, bool association_setting_tcp_load = false, float m = 0.27F, float x = -17, float y = 9, float z = 11.8F)
         {
             return XArmAPI.set_ft_sensor_load_offset(load_offset, association_setting_tcp_load, m, x, y, z, robot_instance_id);
         }
@@ -1187,7 +1187,7 @@ namespace xarm_csharp_demo
             return iden_ft_sensor_load_offset(result);
         }
 
-        public int ft_sensor_cali_load(float[] load_offset, bool association_setting_tcp_load = false, float m = (float)0.270, float x = -17, float y = 9, float z = (float)11.8)
+        public int ft_sensor_cali_load(float[] load_offset, bool association_setting_tcp_load = false, float m = 0.27F, float x = -17, float y = 9, float z = 11.8F)
         {
             return set_ft_sensor_load_offset(load_offset, association_setting_tcp_load, m, x, y, z);
         }

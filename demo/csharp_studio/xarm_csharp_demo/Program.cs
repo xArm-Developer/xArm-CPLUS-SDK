@@ -10,16 +10,36 @@ namespace xarm_csharp_demo
     {
         static void Main(string[] args)
         {
+            if (args.Length < 1)
+            {
+                Console.WriteLine("Usage: xarm_csharp_demo.exe <ip_address>");
+                return;
+            }
             int ret;
-            int state = -1;
 
-            XArmAPIWrapper wrap1 = new XArmAPIWrapper("192.168.1.101");
-            XArmAPIWrapper wrap2 = new XArmAPIWrapper("192.168.1.81");
+            XArmAPIWrapper arm = new XArmAPIWrapper(args[0]);
+
+            float[] pose = { 243.4F, -77.4F, 290.6F, 172.8F, -2.3F, 160.5F };
+            float[] angles = { 0, 0, 0, 0, 0, 0, 0 };
+
+            ret = arm.get_inverse_kinematics(pose, angles);
+            Console.WriteLine("get_inverse_kinematics, ret={0}, angles=[{1}]", ret, string.Join(", ", angles));
+
+            ret = arm.get_inverse_kinematics(pose, angles, false);
+            Console.WriteLine("get_inverse_kinematics, ret={0}, angles=[{1}]", ret, string.Join(", ", angles));
+
+            float[] ref_angles = { -22, -4, -42, -170, -50, -10, 0 };
+            ret = arm.get_inverse_kinematics(pose, angles, true, ref_angles);
+            Console.WriteLine("get_inverse_kinematics, ret={0}, angles=[{1}]", ret, string.Join(", ", angles));
+
+            // XArmAPIWrapper wrap1 = new XArmAPIWrapper("192.168.1.101");
+            // XArmAPIWrapper wrap2 = new XArmAPIWrapper("192.168.1.81");
             
-            ret = wrap1.get_state(ref state);
-            Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
-            ret = wrap2.get_state(ref state);
-            Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
+            // int state = -1;
+            // ret = wrap1.get_state(ref state);
+            // Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
+            // ret = wrap2.get_state(ref state);
+            // Console.WriteLine("get_state: ret={0}, state={1}", ret, state);
 
             // int arm = XArmAPI.create_instance("192.168.1.101", false);
             // Console.WriteLine("create_instance: {0}", arm);
@@ -71,9 +91,9 @@ namespace xarm_csharp_demo
 
             // // continuous joint motion
             // float[][] angles = new float[3][];
-            // angles[0] = new float[] { 0, 14, -25, 0, (float)12.9, 0, 0 };
-            // angles[1] = new float[] { -14, 40, -75, 0, (float)33.4, (float)-13.8, 0 };
-            // angles[2] = new float[] { (float)21.9, 50, -80, 50, 37, 29, 0 };
+            // angles[0] = new float[] { 0, 14, -25, 0, 12.9F, 0, 0 };
+            // angles[1] = new float[] { -14, 40, -75, 0, 33.4F, -13.8F, 0 };
+            // angles[2] = new float[] { 21.9F, 50, -80, 50, 37, 29, 0 };
             // float angle_radius = 60;
             // for (int i = 0; i < 100; i++)
             // {

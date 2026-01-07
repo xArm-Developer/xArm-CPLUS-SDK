@@ -154,7 +154,7 @@ public:
   int get_tcp_pose(float pose[6]);
   int get_joint_pose(float angles[7]);
   int get_joint_states(float position[7], float velocity[7], float effort[7], int num = 3);
-  int get_ik(float pose[6], float angles[7]);
+  int get_ik(float pose[6], float angles[7], bool limited = true, float *ref_angles = NULL);
   int get_fk(float angles[7], float pose[6]);
   int is_joint_limit(float joint[7], int *value);
   int is_tcp_limit(float pose[6], int *value);
@@ -334,7 +334,7 @@ private:
   int _set_nfp32(int funcode, float *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _set_nint32(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _get_nfp32(int funcode, float *rx_data, int num);
-  int _swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn);
+  int _swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn, char *add_data = NULL, int add_len = 0);
   int _is_nfp32(int funcode, float datas[], int txn, int *value);
   int _set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);

@@ -1741,7 +1741,7 @@ int UxbusCmd::ft_sensor_get_config(int *ft_mode, int *ft_is_started, int *ft_typ
   return ret;
 }
 
-int UxbusCmd::ft_sensor_get_error(int *err)
+int UxbusCmd::ft_sensor_get_error(int *err, bool is_new)
 {
   unsigned char *txdata = new unsigned char[3]();
   txdata[0] = 8;
@@ -1758,7 +1758,10 @@ int UxbusCmd::ft_sensor_get_error(int *err)
       *err = 0;
     }
     else {
-      *err = rx_data[2];
+      if (is_new)
+        *err = bin8_to_16(&rx_data[2]);
+      else
+        *err = rx_data[2];
     }
   }
   return ret;

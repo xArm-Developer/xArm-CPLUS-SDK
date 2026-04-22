@@ -335,7 +335,7 @@ XArmReportData::XArmReportData(std::string report_type_)
 
   switch_status = 0;
 
-  debug_data = NULL;
+  // debug_data = NULL;
   debug_size = 0;
 }
 
@@ -368,10 +368,11 @@ void XArmReportData::__print_common_data(void)
 void XArmReportData::__flush_debug_data(int since_size) {
   if (total_num > since_size) {
     debug_size = total_num - since_size;
-    if (debug_data == NULL) {
-      debug_data = new unsigned char[debug_size];
-    }
-    memcpy(debug_data, &data_fp[since_size], debug_size);
+    debug_data.assign(&data_fp[since_size], (&data_fp[since_size] + debug_size));
+    // if (debug_data == NULL) {
+    //   debug_data = new unsigned char[debug_size];
+    // }
+    // memcpy(debug_data, &data_fp[since_size], debug_size);
   }
 }
 

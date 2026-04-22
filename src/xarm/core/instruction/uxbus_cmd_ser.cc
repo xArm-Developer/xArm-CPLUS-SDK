@@ -13,8 +13,16 @@
 #include "xarm/core/debug/debug_print.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
 
+// UxbusCmdSer::UxbusCmdSer(SerialPort *arm_port) {
+//   throw std::logic_error("raw-pointer constructor is no longer supported");
+//   std::shared_ptr<SerialPort> ptr(arm_port);
+//   arm_port_ = ptr;
+// }
 
-UxbusCmdSer::UxbusCmdSer(SerialPort *arm_port) { arm_port_ = arm_port; }
+UxbusCmdSer::UxbusCmdSer(const std::shared_ptr<SerialPort> &arm_port) {
+  arm_port_ = arm_port;
+}
+
 UxbusCmdSer::~UxbusCmdSer(void) {}
 
 void UxbusCmdSer::close(void) { arm_port_->close_port(); }
@@ -24,7 +32,7 @@ int UxbusCmdSer::is_ok(void) { return arm_port_->is_ok(); }
 int UxbusCmdSer::_send_modbus_request(unsigned char unit_id, unsigned char *pdu_data, unsigned short pdu_len, int prot_id)
 {
   // unsigned char send_data[pdu_len + 4];
-  unsigned char *send_data = new unsigned char[pdu_len + 4]();
+  unsigned char *send_data = new unsigned char[pdu_len + 6]();
 
   send_data[0] = UXBUS_CONF::MASTER_ID;
   send_data[1] = UXBUS_CONF::SLAVE_ID;

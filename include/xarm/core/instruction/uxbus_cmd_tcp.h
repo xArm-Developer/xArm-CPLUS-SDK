@@ -12,13 +12,20 @@
 #ifndef CORE_INSTRUCTION_UXBUS_CMD_TCP_H_
 #define CORE_INSTRUCTION_UXBUS_CMD_TCP_H_
 
+#include <memory>
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/port/socket.h"
 
 class UxbusCmdTcp : public UxbusCmd {
 public:
-  UxbusCmdTcp(SocketPort *arm_port);
-  UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid);
+  // [[deprecated("please UxbusCmdTcp(std::shared_ptr<SocketPort> &arm_port)")]]
+  UxbusCmdTcp(SocketPort *arm_port) = delete;
+  // [[deprecated("please UxbusCmdTcp(std::shared_ptr<SocketPort> &arm_port, ...)")]]
+  UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) = delete;
+  
+  UxbusCmdTcp(const std::shared_ptr<SocketPort> &arm_port);
+  UxbusCmdTcp(const std::shared_ptr<SocketPort> &arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid);
+  
   ~UxbusCmdTcp(void);
 
   void close(void);
@@ -54,13 +61,13 @@ private:
   int _check_private_protocol(unsigned char *data);
   int _check_protocol_header(unsigned char *data, unsigned short t_trans_id, unsigned short t_prot_id, unsigned short t_unit_id);
 
-  int _standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, unsigned char unit_id = 0x01);
+  int _standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, int rx_len=-1, unsigned char unit_id = 0x01);
   int _read_bits(unsigned short addr, unsigned short quantity, unsigned char *bits, unsigned char funcode = 0x01);
   int _read_registers(unsigned short addr, unsigned short quantity, int *regs, unsigned char funcode = 0x03, bool is_signed = false);
 
   int _get_trans_id() { return transaction_id_; };
 private:
-  SocketPort *arm_port_;
+  std::shared_ptr<SocketPort> arm_port_;
 
   unsigned short transaction_id_;       // transaction id 
   unsigned short protocol_identifier_;  // protocol identifier

@@ -19,7 +19,7 @@ public:
   QueueMemcpy(long n, long n_size);
   ~QueueMemcpy(void);
   char flush(void);
-  char push(void *data);
+  char push(void *data, bool full_auto_pop=false);
   char pop(void *data);
   char get(void *data);
   long size(void);

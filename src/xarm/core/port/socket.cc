@@ -84,13 +84,13 @@ void SocketPort::recv_report_proc(void) {
 
   while (state_ == 0)
   {
-    num = recv(fp_, (char *)(&recv_data[4] + data_num), (size == 0 ? 4 : size) - data_num, 0);
+    num = recv(sockfd_, (char *)(&recv_data[4] + data_num), (size == 0 ? 4 : size) - data_num, 0);
     if (num <= 0) {
-      if (is_ignore_errno(fp_, port_)) {
+      if (is_ignore_errno(sockfd_, sin_port_)) {
         continue;
       }
       else {
-        close_port();
+        disconnect();
         break;
       }
     }
@@ -99,6 +99,11 @@ void SocketPort::recv_report_proc(void) {
       data_num += num;
       if (data_num != 4) continue;
       size = bin8_to_32(&recv_data[4]);
+      if (size <= 0 || size > que_maxlen - 4) {
+        fprintf(stderr, "recv_report_proc: invalid report size %d (max %d), port=%d\n", size, que_maxlen - 4, sin_port_);
+        disconnect();
+        break;
+      }
       if (size == 233) {
         size_is_not_confirm = true;
         size = 245;
@@ -110,14 +115,14 @@ void SocketPort::recv_report_proc(void) {
       if (data_num < size) continue;
       if (size_is_not_confirm) {
         size_is_not_confirm = false;
-        if (bin8_to_32(&recv_data[237]) == 233) {
+        if (que_maxlen >= 241 && bin8_to_32(&recv_data[237]) == 233) {
           size = 233;
           continue;
         }
       }
       if (bin8_to_32(&recv_data[4]) != size && !(size_is_not_confirm && size == 245 && bin8_to_32(&recv_data[4]) == 233)) {
-        fprintf(stderr, "report data error, close_port, length=%d, size=%d\n", bin8_to_32(&recv_data[4]), size);
-        close_port();
+        fprintf(stderr, "report data error, disconnect, length=%d, size=%d\n", bin8_to_32(&recv_data[4]), size);
+        disconnect();
         break;
       }
 
@@ -159,16 +164,14 @@ void SocketPort::recv_report_proc(void) {
       // recv_prev_ms = recv_curr_ms;
 
       bin32_to_8(data_num, &recv_data[0]);
-      if (rx_que_->is_full()) {
-        rx_que_->pop(tmp_data);
-      }
-      ret = rx_que_->push(recv_data);
+      ret = rx_que_->push(recv_data, true);
+      
       data_num = 0;
       memset(recv_data, 0, que_maxlen);
     }
   }
   delete[] recv_data;
-  delete rx_que_;
+  delete[] tmp_data;
 }
 
 void SocketPort::recv_proc(void) {
@@ -182,13 +185,13 @@ void SocketPort::recv_proc(void) {
   unsigned char *recv_buf = new unsigned char[buf_size]();
   unsigned char *recv_data = new unsigned char[que_maxlen]();
   while (state_ == 0) {
-    num = recv(fp_, (char *)(&recv_buf[buf_len]), buf_size - buf_len, 0);
+    num = recv(sockfd_, (char *)(&recv_buf[buf_len]), buf_size - buf_len, 0);
     if (num <= 0) {
-      if (is_ignore_errno(fp_, port_)) {
+      if (is_ignore_errno(sockfd_, sin_port_)) {
         continue;
       }
       else {
-        close_port();
+        disconnect();
         break;
       }
     }
@@ -198,6 +201,11 @@ void SocketPort::recv_proc(void) {
       if (buf_len < 6) break;
       length = bin8_to_16(&recv_buf[buf_offset + 4]) + 6;
       if (buf_len < length) break;
+      if (length > que_maxlen) {
+        fprintf(stderr, "recv_proc: frame length %d exceeds buffer %d, port=%d\n", length, que_maxlen, sin_port_);
+        disconnect();
+        break;
+      }
 
       memcpy(&recv_data[4], &recv_buf[buf_offset], length);
       if (recv_data[10] == 0xFF) {
@@ -219,23 +227,20 @@ void SocketPort::recv_proc(void) {
         }
         if (ret != 0) {
           if (state_ == 0)
-            fprintf(stderr, "socket push data failed, exit, port=%d, fp=%d\n", port_, fp_);
-          close_port();
+            fprintf(stderr, "socket push data failed, exit, port=%d, fp=%d\n", sin_port_, sockfd_);
+          disconnect();
           break;
         };
       }
       buf_len -= length;
       buf_offset += length;
     }
-    if (buf_len > 0) {
-      memcpy(recv_data, &recv_buf[buf_offset], buf_len);
+    if (buf_len > 0 && buf_offset > 0) {
+      memmove(recv_buf, &recv_buf[buf_offset], buf_len);
     }
   }
   delete[] recv_buf;
   delete[] recv_data;
-  delete rx_que_;
-  if (feedback_que_num_ > 0)
-    delete feedback_que_;
 }
 
 static void *recv_proc_(void *arg) {
@@ -249,40 +254,73 @@ static void *recv_proc_(void *arg) {
   return (void *)0;
 }
 
-SocketPort::SocketPort(char *server_ip, int server_port, int que_num,int que_maxlen_, int tcp_type, int feedback_que_num, int feedback_que_maxlen) {
+SocketPort::SocketPort(const char *server_ip, const int server_port, int que_num,int que_maxlen_, int tcp_type, int feedback_que_num, int feedback_que_maxlen) {
+  sin_addr_ = std::string(server_ip);
+  sin_port_ = server_port;
   que_num_ = que_num;
   que_maxlen = que_maxlen_;
-  state_ = -1;
-  is_report = tcp_type == 1 ? true : false;
-  rx_que_ = new QueueMemcpy(que_num_, que_maxlen);
   feedback_que_num_ = feedback_que_num;
-  if (feedback_que_num_ > 0)
-    feedback_que_ = new QueueMemcpy(feedback_que_num_, feedback_que_maxlen);
-  fp_ = socket_init((char *)" ", 0, 0);
-  if (fp_ == -1) { 
-    delete rx_que_;
-    if (feedback_que_num_ > 0)
-      delete feedback_que_;
-    return;
-  }
-
-  int ret = socket_connect_server(&fp_, server_ip, server_port);
-  if (ret == -1) { 
-    delete rx_que_;
-    if (feedback_que_num_ > 0)
-      delete feedback_que_;
-    return;
-  }
-  port_ = server_port;
-  state_ = 0;
-  flush();
-  std::thread th(recv_proc_, this);
-  th.detach();
+  feedback_que_maxlen_ = feedback_que_maxlen;
+  state_ = -1;
+  sockfd_ = -1;
+  is_report = tcp_type == 1 ? true : false;
+  rx_que_ = nullptr;
+  feedback_que_ = nullptr;
+  connect();
 }
 
 SocketPort::~SocketPort(void) {
-  state_ = -1;
-  close_port();
+  disconnect();
+  _join_recv_thread();
+}
+
+void SocketPort::_join_recv_thread() {
+  if (!thread_id_.joinable()) return;
+  if (thread_id_.get_id() == std::this_thread::get_id()) return;
+  thread_id_.join();
+}
+
+int SocketPort::connect()
+{
+  std::unique_lock<std::mutex> lock(conn_mutex_);
+  if (state_.load(std::memory_order_acquire) == 0) return 1;
+
+  _join_recv_thread();
+  int new_fd = socket_init((char *)" ", 0, 0);
+  if (new_fd == -1) {
+    return -1;
+  }
+  int ret = socket_connect_server(&new_fd, sin_addr_.data(), sin_port_);
+  if (ret == -1) {
+    close(new_fd);
+    return -2;
+  }
+  sockfd_ = new_fd;
+  state_.store(0, std::memory_order_release);
+  if (rx_que_ == nullptr)
+    rx_que_ = std::make_shared<QueueMemcpy>(que_num_, que_maxlen);
+  if (feedback_que_num_ > 0 && feedback_que_ == nullptr)
+    feedback_que_ = std::make_shared<QueueMemcpy>(feedback_que_num_, feedback_que_maxlen_);
+  state_ = 0;
+  flush();
+  thread_id_ = std::thread(recv_proc_, this);
+  // thread_id_.detach();
+  return 0;
+}
+
+void SocketPort::disconnect()
+{
+  std::unique_lock<std::mutex> lock(conn_mutex_);
+  state_.store(-1, std::memory_order_release);
+  if (sockfd_ != -1) {
+    close(sockfd_);
+    sockfd_ = -1;
+  }
+}
+
+bool SocketPort::is_connected()
+{
+  return state_ == 0;
 }
 
 int SocketPort::is_ok(void) { return state_; }
@@ -291,25 +329,20 @@ void SocketPort::flush(void) { rx_que_->flush(); }
 
 int SocketPort::read_frame(unsigned char *data) {
   if (state_ != 0) { return -1; }
-
-  if (rx_que_->size() == 0) { return -1; }
-
-  rx_que_->pop(data);
-  return 0;
+  return rx_que_->pop(data);
 }
 
 int SocketPort::write_frame(unsigned char *data, int len) {
-  int ret = socket_send_data(fp_, data, len);
+  int ret = socket_send_data(sockfd_, data, len);
   return ret;
 }
 
 void SocketPort::close_port(void) {
-  state_ = -1;
-  close(fp_);
+  disconnect();
 }
 
 int SocketPort::read_feedback_frame(unsigned char *data)
 {
-  if (state_ != 0 || feedback_que_num_ <= 0) { return -1; }
+  if (state_ != 0 || feedback_que_num_ <= 0 || feedback_que_ == nullptr) { return -1; }
   return feedback_que_->pop(data);
 }

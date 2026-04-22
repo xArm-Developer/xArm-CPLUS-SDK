@@ -14,7 +14,10 @@
 
 #include <iostream>
 #include <thread>
-
+#include <memory>
+#include <string>
+#include <atomic>
+#include <mutex>
 #include "serial/serial.h"
 #include "xarm/core/common/data_type.h"
 #include "xarm/core/common/queue_memcpy.h"
@@ -23,26 +26,36 @@ class SerialPort {
 public:
   SerialPort(const char *port, int baud, int que_num, int que_maxlen);
   ~SerialPort(void);
-  serial::Serial ser;
+  int connect();
+  void disconnect();
+  bool is_connected();
   int is_ok(void);
   void flush(void);
   void recv_proc(void);
   int write_frame(unsigned char *data, int len);
   int read_frame(unsigned char *data);
   void close_port(void);
-  int que_maxlen;
 
 private:
-  int fp_;
-  int state_;
-  int que_num_;
-  std::thread thread_id_;
+  std::shared_ptr<serial::Serial> _init_serial(const char *port, int baud);
+  int _read_char(unsigned char *ch);
+  int _write_char(unsigned char ch);
+  void _parse_put(unsigned char *data, int len);
+  void _join_recv_thread();
 
-  QueueMemcpy *rx_que_;
-  int init_serial(const char *port, int baud);
-  int read_char(unsigned char *ch);
-  int write_char(unsigned char ch);
-  void parse_put(unsigned char *data, int len);
+public:
+  int que_maxlen;
+  // serial::Serial ser;
+  std::shared_ptr<serial::Serial> ser;
+
+private:
+  std::string ser_port_;
+  int ser_baud_;
+  int que_num_;
+  mutable std::mutex conn_mutex_;
+  std::atomic<int> state_{-1};
+  std::shared_ptr<QueueMemcpy> rx_que_;
+  std::thread thread_id_;
 
   typedef enum _UXBUS_RECV_STATE {
   UXBUS_START_FROMID = 0,

@@ -12,6 +12,7 @@
 // #pragma warning(disable:4996)
 
 #include <random>
+#include <algorithm>
 #include "xarm/wrapper/xarm_api.h"
 
 const int FEEDBACK_QUE_SIZE = 256;
@@ -25,7 +26,7 @@ fp32 to_degree(fp32 val) {
   return (fp32)(val * RAD_DEGREE);
 }
 
-static std::default_random_engine engine;
+thread_local std::default_random_engine engine;
 
 XArmAPI::XArmAPI(
   const std::string &port,
@@ -51,8 +52,9 @@ XArmAPI::XArmAPI(
   // check_tcp_limit_ = check_tcp_limit;
   max_callback_thread_count_ = max_callback_thread_count;
   if (max_callback_thread_count_ < 0) max_callback_thread_count_ = 100;
-  pool_.set_max_thread_count(max_callback_thread_count_);
   callback_in_thread_ = max_callback_thread_count_ != 0;
+  pool_ = std::make_shared<ThreadPool>(max_callback_thread_count_);
+  pool_->set_max_thread_count(max_callback_thread_count_);
   max_cmdnum_ = max_cmdnum > 0 ? max_cmdnum : 256;
   axis = init_axis;
   report_type_ = report_type;
@@ -69,141 +71,12 @@ XArmAPI::~XArmAPI() {
   _destroy();
 }
 
-void XArmAPI::_destroy(void) {
-  if (version_number != NULL) {
-    delete[] version_number;
-    version_number = NULL;
-  }
-  if (angles != NULL) {
-    delete[] angles;
-    angles = NULL;
-  }
-  if (last_used_angles != NULL) {
-    delete[] last_used_angles;
-    last_used_angles = NULL;
-  }
-  if (tcp_offset != NULL) {
-    delete[] tcp_offset;
-    tcp_offset = NULL;
-  }
-  if (joint_speed_limit != NULL) {
-    delete[] joint_speed_limit;
-    joint_speed_limit = NULL;
-  }
-  if (joint_acc_limit != NULL) {
-    delete[] joint_acc_limit;
-    joint_acc_limit = NULL;
-  }
-  if (position != NULL) {
-    delete[] position;
-    position = NULL;
-  }
-  if (position_aa != NULL) {
-    delete[] position_aa;
-    position_aa = NULL;
-  }
-  if (last_used_position != NULL) {
-    delete[] last_used_position;
-    last_used_position = NULL;
-  }
-  if (joints_torque != NULL) {
-    delete[] joints_torque;
-    joints_torque = NULL;
-  }
-  if (motor_brake_states != NULL) {
-    delete[] motor_brake_states;
-    motor_brake_states = NULL;
-  }
-  if (motor_enable_states != NULL) {
-    delete[] motor_enable_states;
-    motor_enable_states = NULL;
-  }
-  if (tcp_load != NULL) {
-    delete[] tcp_load;
-    tcp_load = NULL;
-  }
-  if (tcp_speed_limit != NULL) {
-    delete[] tcp_speed_limit;
-    tcp_speed_limit = NULL;
-  }
-  if (tcp_acc_limit != NULL) {
-    delete[] tcp_acc_limit;
-    tcp_acc_limit = NULL;
-  }
-  if (gravity_direction != NULL) {
-    delete[] gravity_direction;
-    gravity_direction = NULL;
-  }
-  if (realtime_joint_speeds != NULL) {
-    delete[] realtime_joint_speeds;
-    realtime_joint_speeds = NULL;
-  }
-  if (world_offset != NULL) {
-    delete[] world_offset;
-    world_offset = NULL;
-  }
-  if (temperatures != NULL) {
-    delete[] temperatures;
-    temperatures = NULL;
-  }
-  if (gpio_reset_config != NULL) {
-    delete[] gpio_reset_config;
-    gpio_reset_config = NULL;
-  }
-  if (ft_ext_force != NULL) {
-    delete[] ft_ext_force;
-    ft_ext_force = NULL;
-  }
-  if (ft_raw_force != NULL) {
-    delete[] ft_raw_force;
-    ft_raw_force = NULL;
-  }
-  if (voltages != NULL) {
-    delete[] voltages;
-    voltages = NULL;
-  }
-  if (currents != NULL) {
-    delete[] currents;
-    currents = NULL;
-  }
-  if (collision_model_params != NULL) {
-    delete[] collision_model_params;
-    collision_model_params = NULL;
-  }
-  if (cgpio_input_digitals != NULL) {
-    delete[] cgpio_input_digitals;
-    cgpio_input_digitals = NULL;
-  }
-  if (cgpio_output_digitals != NULL) {
-    delete[] cgpio_output_digitals;
-    cgpio_output_digitals = NULL;
-  }
-  if (cgpio_intput_anglogs != NULL) {
-    delete[] cgpio_intput_anglogs;
-    cgpio_intput_anglogs = NULL;
-  }
-  if (cgpio_output_anglogs != NULL) {
-    delete[] cgpio_output_anglogs;
-    cgpio_output_anglogs = NULL;
-  }
-  if (cgpio_input_conf != NULL) {
-    delete[] cgpio_input_conf;
-    cgpio_input_conf = NULL;
-  }
-  if (cgpio_output_conf != NULL) {
-    delete[] cgpio_output_conf;
-    cgpio_output_conf = NULL;
-  }
-  if (report_rich_data_ptr_ != NULL) {
-    delete report_rich_data_ptr_;
-    report_rich_data_ptr_ = NULL;
-  }
-}
+void XArmAPI::_destroy(void) {}
 
 void XArmAPI::_init(void) {
-  core = NULL;
+  core = nullptr;
+  core503_ = nullptr;
   stream_tcp_ = NULL;
-  core503_ = NULL;
   stream_tcp503_ = NULL;
   stream_tcp_report_ = NULL;
   stream_tcp_rich_report_ = NULL;
@@ -216,20 +89,23 @@ void XArmAPI::_init(void) {
   arm_type_is_1300_ = false;
   control_box_type_is_1300_ = false;
 
+  is_shutdown_ = false;
+
   major_version_number_ = 0;
   minor_version_number_ = 0;
   revision_version_number_ = 0;
-  version_number = new int[3]{ major_version_number_, minor_version_number_, revision_version_number_ };
-
+  version_number[0] = major_version_number_;
+  version_number[1] = minor_version_number_;
+  version_number[2] = revision_version_number_;
   mt_brake_ = 0;
   mt_able_ = 0;
-  min_tcp_speed_ = (float)0.1;    // mm/s
+  min_tcp_speed_ = 0.1f;    // mm/s
   max_tcp_speed_ = 1000;   // mm/s
-  min_tcp_acc_ = 1.0;      // mm/s^2
+  min_tcp_acc_ = 1.0f;      // mm/s^2
   max_tcp_acc_ = 50000;    // mm/s^2
-  min_joint_speed_ = (float)0.01; // rad/s
+  min_joint_speed_ = 0.01f; // rad/s
   max_joint_speed_ = 4.0;  // rad/s
-  min_joint_acc_ = (float)0.01;   // rad/s^2
+  min_joint_acc_ = 0.01f;   // rad/s^2
   max_joint_acc_ = 20.0;   // rad/s^2
   count = -1;
   iden_progress = 0;
@@ -237,37 +113,52 @@ void XArmAPI::_init(void) {
 
   sleep_finish_time_ = get_system_time();
 
-  angles = new fp32[7]{ 0, 0, 0, 0, 0, 0, 0 };
-  last_used_angles = new fp32[7]{ 0, 0, 0, 0, 0, 0, 0 };
-  tcp_offset = new fp32[6]{ 0, 0, 0, 0, 0, 0 };
+  fp32 fp32_zero2[] = { 0, 0 };
+  fp32 fp32_zero3[] = { 0, 0, 0 };
+  fp32 fp32_zero4[] = { 0, 0, 0, 0 };
+  fp32 fp32_zero5[] = { 0, 0, 0, 0, 0 };
+  fp32 fp32_zero6[] = { 0, 0, 0, 0, 0, 0 };
+  fp32 fp32_zero7[] = { 0, 0, 0, 0, 0, 0, 0 };
+  int int_zero2[] = { 0, 0 };
+  bool bool_zero8[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  int int_zero16[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), angles);
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), last_used_angles);
+  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), tcp_offset);
   if (default_is_radian) {
-    joint_speed_limit = new fp32[2]{ min_joint_speed_, max_joint_speed_ };
-    joint_acc_limit = new fp32[2]{ min_joint_acc_, max_joint_acc_ };
-    last_used_joint_speed = (fp32)0.3490658503988659; // rad/s (20°/s);
-    last_used_joint_acc = (fp32)8.726646259971648;    // rad/s^2 (500°/s^2);
-    position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
-    position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
-    last_used_position = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
+    joint_speed_limit[0] = min_joint_speed_;
+    joint_speed_limit[1] = max_joint_speed_;
+    joint_acc_limit[0] = min_joint_acc_;
+    joint_acc_limit[1] = max_joint_acc_;
+    last_used_joint_speed = 0.3490658503988659f; // rad/s (20°/s);
+    last_used_joint_acc = 8.726646259971648f;    // rad/s^2 (500°/s^2);
+    fp32 pos[] = { 201.5f, 0.0f, 140.5f, 3.1415926f, 0.0f, 0.0f };
+    std::copy(std::begin(pos), std::end(pos), position);
+    std::copy(std::begin(pos), std::end(pos), position_aa);
+    std::copy(std::begin(pos), std::end(pos), last_used_position);
   }
   else {
-    joint_speed_limit = new fp32[2]{ to_degree(min_joint_speed_), to_degree(max_joint_speed_) };
-    joint_acc_limit = new fp32[2]{ to_degree(min_joint_acc_), to_degree(max_joint_acc_) };
-    last_used_joint_speed = to_degree((fp32)0.3490658503988659); // rad/s (20°/s);
-    last_used_joint_acc = to_degree((fp32)8.726646259971648);    // rad/s^2 (500°/s^2);
-    position = new fp32[6]{ 201.5, 0, 140.5, to_degree((fp32)3.1415926), 0, 0 };
-    position_aa = new fp32[6]{ 201.5, 0, 140.5, (fp32)3.1415926, 0, 0 };
-    last_used_position = new fp32[6]{ 201.5, 0, 140.5, to_degree((fp32)3.1415926), 0, 0 };
+    joint_speed_limit[0] = to_degree(min_joint_speed_);
+    joint_speed_limit[1] = to_degree(max_joint_speed_);
+    joint_acc_limit[0] = to_degree(min_joint_acc_);
+    joint_acc_limit[1] = to_degree(max_joint_acc_);
+    last_used_joint_speed = to_degree(0.3490658503988659f); // rad/s (20°/s);
+    last_used_joint_acc = to_degree(8.726646259971648f);    // rad/s^2 (500°/s^2);
+    fp32 pos[] = { 201.5f, 0.0f, 140.5f, to_degree(3.1415926f), 0.0f, 0.0f };
+    std::copy(std::begin(pos), std::end(pos), position);
+    std::copy(std::begin(pos), std::end(pos), position_aa);
+    std::copy(std::begin(pos), std::end(pos), last_used_position);
   }
 
   state = 4;
   mode = 0;
   cmd_num = 0;
-  joints_torque = new fp32[7]{ 0, 0, 0, 0, 0, 0, 0 };
-  motor_brake_states = new bool[8]{ 0, 0, 0, 0, 0, 0, 0, 0 };
-  motor_enable_states = new bool[8]{ 0, 0, 0, 0, 0, 0, 0, 0 };
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), joints_torque);
+  std::copy(std::begin(bool_zero8), std::end(bool_zero8), motor_brake_states);
+  std::copy(std::begin(bool_zero8), std::end(bool_zero8), motor_enable_states);
   error_code = 0;
   warn_code = 0;
-  tcp_load = new fp32[4]{ 0, 0, 0, 0 };
+  std::copy(std::begin(fp32_zero4), std::end(fp32_zero4), tcp_load);
   collision_sensitivity = 0;
   teach_sensitivity = 0;
   device_type = 7;
@@ -277,21 +168,25 @@ void XArmAPI::_init(void) {
   motor_tid = 0;
   motor_fid = 0;
   tcp_jerk = 1000;        // mm/s^3
-  joint_jerk = default_is_radian ? (fp32)20.0 : to_degree((fp32)20.0); // 20 rad/s^3
-  rot_jerk = (float)2.3;
-  max_rot_acc = (float)2.7;
-  tcp_speed_limit = new fp32[2]{ min_tcp_speed_, max_tcp_speed_ };
-  tcp_acc_limit = new fp32[2]{ min_tcp_acc_, max_tcp_acc_ };
+  joint_jerk = default_is_radian ? 20.0f : to_degree(20.0f); // 20 rad/s^3
+  rot_jerk = 2.3f;
+  max_rot_acc = 2.7f;
+  tcp_speed_limit[0] = min_tcp_speed_;
+  tcp_speed_limit[1] = max_tcp_speed_;
+  tcp_acc_limit[0] = min_tcp_acc_;
+  tcp_acc_limit[1] = max_tcp_acc_;
   last_used_tcp_speed = 100;  // mm/s
   last_used_tcp_acc = 2000;   // mm/s^2
-  gravity_direction = new fp32[3]{ 0, 0, -1 };
+  std::copy(std::begin(fp32_zero3), std::end(fp32_zero3), gravity_direction);
+  gravity_direction[2] = -1;
   realtime_tcp_speed = 0;
-  realtime_joint_speeds = new fp32[7]{ 0, 0, 0, 0, 0, 0, 0 };
-  world_offset = new fp32[6]{ 0, 0, 0, 0, 0, 0 };
-  temperatures = new fp32[7]{ 0, 0, 0, 0, 0, 0 };
-  gpio_reset_config = new unsigned char[2]{0, 0};
-  ft_ext_force = new fp32[6]{ 0, 0, 0, 0, 0, 0 };
-  ft_raw_force = new fp32[6]{ 0, 0, 0, 0, 0, 0 };
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), realtime_joint_speeds);
+  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), world_offset);
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), temperatures);
+  gpio_reset_config[0] = 0;
+  gpio_reset_config[1] = 0;
+  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), ft_ext_force);
+  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), ft_raw_force);
   tgpio_modbus_baud_ = -1;
   ignore_error_ = false;
   ignore_state_ = false;
@@ -301,20 +196,20 @@ void XArmAPI::_init(void) {
   robotiq_is_activated_ = false;
   last_report_time_ = get_system_time();
   max_report_interval_ = 0;
-  voltages = new fp32[7]{ 0, 0, 0, 0, 0, 0, 0 };
-  currents = new fp32[7]{ 0, 0, 0, 0, 0, 0, 0 };
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), voltages);
+  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), currents);
   is_simulation_robot = 0;
   is_collision_detection = 0;
   collision_tool_type = 0;
-  collision_model_params = new fp32[6]{ 0, 0, 0, 0, 0, 0};
+  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), collision_model_params);
   cgpio_state = 0;
   cgpio_code = 0;
-  cgpio_input_digitals = new int[2]{ 0, 0 };
-  cgpio_output_digitals = new int[2]{ 0, 0 };
-  cgpio_intput_anglogs = new fp32[2]{ 0, 0 };
-  cgpio_output_anglogs = new fp32[2]{ 0, 0 };
-  cgpio_input_conf = new int[16]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  cgpio_output_conf = new int[16]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  std::copy(std::begin(int_zero2), std::end(int_zero2), cgpio_input_digitals);
+  std::copy(std::begin(int_zero2), std::end(int_zero2), cgpio_output_digitals);
+  std::copy(std::begin(fp32_zero2), std::end(fp32_zero2), cgpio_intput_anglogs);
+  std::copy(std::begin(fp32_zero2), std::end(fp32_zero2), cgpio_output_anglogs);
+  std::copy(std::begin(int_zero16), std::end(int_zero16), cgpio_input_conf);
+  std::copy(std::begin(int_zero16), std::end(int_zero16), cgpio_output_conf);
   cmd_timeout_ = -1;
 
   xarm_gripper_error_ = 0;
@@ -348,9 +243,9 @@ void XArmAPI::_init(void) {
   is_approx_motion = false;
   is_cart_continuous = false;
 
-  report_rich_data_ptr_ = new XArmReportData("rich");
+  report_rich_data_ptr_ = std::make_shared<XArmReportData>("rich");
   if (report_type_ != "rich") {
-    report_data_ptr_ = new XArmReportData(report_type_);
+    report_data_ptr_ = std::make_shared<XArmReportData>(report_type_);
   }
   else {
     report_data_ptr_ = report_rich_data_ptr_;
@@ -418,11 +313,11 @@ bool XArmAPI::has_warn(void) {
 }
 
 bool XArmAPI::is_connected(void) {
-  return is_tcp_ ? (stream_tcp_ == NULL ? false : stream_tcp_->is_ok() == 0) : (stream_ser_ == NULL ? false : stream_ser_->is_ok() == 0);
+  return is_tcp_ ? (stream_tcp_ == nullptr ? false : stream_tcp_->is_connected()) : (stream_ser_ == nullptr ? false : stream_ser_->is_connected());
 }
 
 bool XArmAPI::_is_connected_503(void) {
-  return stream_tcp503_ == NULL ? false : stream_tcp503_->is_ok() == 0;
+  return stream_tcp503_ == nullptr ? false : stream_tcp503_->is_connected();
 }
 
 bool XArmAPI::is_lite6(void) {
@@ -434,11 +329,11 @@ bool XArmAPI::is_850(void) {
 }
 
 bool XArmAPI::is_reported(void) {
-  return is_tcp_ ? (stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_ok() == 0) : false;
+  return is_tcp_ ? (stream_tcp_report_ == nullptr ? false : stream_tcp_report_->is_connected()) : false;
 }
 
 bool XArmAPI::_is_rich_reported(void) {
-  return is_tcp_ ? (stream_tcp_rich_report_ == NULL ? false : stream_tcp_rich_report_->is_ok() == 0) : false;
+  return is_tcp_ ? (stream_tcp_rich_report_ == nullptr ? false : stream_tcp_rich_report_->is_connected()) : false;
 }
 
 static void report_rich_thread_handle(void *arg) {
@@ -667,6 +562,95 @@ bool XArmAPI::_version_is_ge(int major, int minor, int revision) {
   return major_version_number_ > major || (major_version_number_ == major && minor_version_number_ > minor) || (major_version_number_ == major && minor_version_number_ == minor && revision_version_number_ >= revision);
 }
 
+// int XArmAPI::_connect_tcp_control()
+// {
+//   is_tcp_ = true;
+//   stream_tcp_ = std::make_shared<SocketPort>((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
+//   if (!stream_tcp_->is_connected()) {
+//     fprintf(stderr, "Error: Tcp control connection failed\n");
+//     return -2;
+//   }
+//   core = std::make_shared<UxbusCmdTcp>(stream_tcp_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+//   printf("Tcp control connection successful\n");
+//   core->set_protocol_identifier(2);
+
+//   sleep_milliseconds(200);
+//   _check_version();
+
+//   support_feedback_ = _version_is_ge(2, 0, 102);
+//   return 0;
+// }
+
+int XArmAPI::_tcp_connect()
+{
+  is_tcp_ = true;
+  auto new_tcp = std::make_shared<SocketPort>((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
+  if (!new_tcp->is_connected()) {
+    fprintf(stderr, "Error: Tcp control connection failed\n");
+    return -2;
+  }
+  auto new_tcp_rich_report = connect_tcp_report2((char *)port_.data(), "rich");
+  if (new_tcp_rich_report == nullptr) {
+    new_tcp->disconnect();
+    return -3;
+  }
+  if (report_type_ != "rich") {
+    auto new_tcp_report = connect_tcp_report2((char *)port_.data(), report_type_);
+    if (new_tcp_report == nullptr) {
+      new_tcp->disconnect();
+      new_tcp_rich_report->disconnect();
+      return -4;
+    }
+    stream_tcp_ = std::move(new_tcp);
+    stream_tcp_rich_report_ = std::move(new_tcp_rich_report);
+    stream_tcp_report_ = std::move(new_tcp_report);
+  }
+  else {
+    stream_tcp_ = std::move(new_tcp);
+    stream_tcp_rich_report_ = std::move(new_tcp_rich_report);
+    stream_tcp_report_ = stream_tcp_rich_report_;
+  }
+  core = std::make_shared<UxbusCmdTcp>(stream_tcp_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  printf("Tcp control connection successful\n");
+  core->set_protocol_identifier(2);
+  sleep_milliseconds(200);
+  _check_version();
+  support_feedback_ = _version_is_ge(2, 0, 102);
+
+  return 0;
+}
+
+// int XArmAPI::_connect_tcp_report()
+// {
+//   stream_tcp_rich_report_ = connect_tcp_report2((char *)port_.data(), "rich");
+//   if (!_is_rich_reported()) { return -3; }
+//   if (report_type_ != "rich") {
+//     stream_tcp_report_ = connect_tcp_report2((char *)port_.data(), report_type_);
+//     if (!is_reported()) {
+//       stream_tcp_rich_report_->disconnect();
+//       stream_tcp_rich_report_.reset();
+//       return -4; 
+//     }
+//   }
+//   else {
+//     stream_tcp_report_ = stream_tcp_rich_report_;
+//   }
+//   _report_connect_changed_callback();
+//   return 0;
+// }
+
+void XArmAPI::_init_threads()
+{
+  feedback_thread_ = std::thread(feedback_thread_handle, this);
+  // feedback_thread_.detach();
+  report_rich_thread_ = std::thread(report_rich_thread_handle, this);
+  // report_rich_thread_.detach();
+  if (report_type_ != "rich") {
+    report_thread_ = std::thread(report_thread_handle, this);
+    // report_thread_.detach();
+  }
+}
+
 int XArmAPI::connect(const std::string &port) {
   if (is_connected()) return 0;
   if (port != "" && port != port_) {
@@ -676,49 +660,35 @@ int XArmAPI::connect(const std::string &port) {
     fprintf(stderr, "can not connect to port/ip: %s\n", port_.data());
     return API_CODE::NOT_CONNECTED;
   }
+  auto new_pool = std::make_shared<ThreadPool>(max_callback_thread_count_);
+  new_pool->set_max_thread_count(max_callback_thread_count_);
   // std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
   std::regex pattern("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
   is_ready_ = true;
   if (port_ == "localhost" || std::regex_match(port_, pattern)) {
-    is_tcp_ = true;
-    stream_tcp_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
-    if (stream_tcp_->is_ok() != 0) {
-      fprintf(stderr, "Error: Tcp control connection failed\n");
-      return -2;
-    }
-    feedback_thread_ = std::thread(feedback_thread_handle, this);
-    feedback_thread_.detach();
-
-    core = new UxbusCmdTcp((SocketPort *)stream_tcp_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    printf("Tcp control connection successful\n");
-    core->set_protocol_identifier(2);
-
-    sleep_milliseconds(200);
-    _check_version();
-
-    support_feedback_ = _version_is_ge(2, 0, 102);
-
-    stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
-    if (report_type_ == "rich") {
-      stream_tcp_report_ = stream_tcp_rich_report_;
-      _report_connect_changed_callback();
-    }
-    if (!_is_rich_reported()) { return -3; }
-    report_rich_thread_ = std::thread(report_rich_thread_handle, this);
-    report_rich_thread_.detach();
-
-    if (report_type_ != "rich") {
-      stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
-      _report_connect_changed_callback();
-      if (!is_reported()) { return -3; }
-      report_thread_ = std::thread(report_thread_handle, this);
-      report_thread_.detach();
-    }
+    int ret = _tcp_connect();
+    // int ret = _connect_tcp_control();
+    if (ret != 0) return ret;
+    // ret = _connect_tcp_report();
+    // if (ret != 0) {
+    //   stream_tcp_->disconnect();
+    //   core.reset();
+    //   return ret;
+    // }
+    pool_ = std::move(new_pool);
+    _report_connect_changed_callback();
+    _init_threads();
   }
   else {
     is_tcp_ = false;
-    stream_ser_ = new SerialPort((const char *)port_.data(), XARM_CONF::SERIAL_BAUD, 3, 320);
-    core = new UxbusCmdSer((SerialPort *)stream_ser_);
+    auto new_ser = std::make_shared<SerialPort>((const char *)port_.data(), XARM_CONF::SERIAL_BAUD, 3, 320);
+    if (!new_ser->is_connected()) {
+      fprintf(stderr, "Error: Serial control connection failed\n");
+      return -2;
+    }
+    pool_ = std::move(new_pool);
+    stream_ser_ = std::move(new_ser);
+    core = std::make_shared<UxbusCmdSer>(stream_ser_);
     _report_connect_changed_callback();
     sleep_milliseconds(200);
     _check_version();
@@ -731,37 +701,49 @@ int XArmAPI::connect(const std::string &port) {
 
 int XArmAPI::_connect_503(void)
 {
-  stream_tcp503_ = new SocketPort((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL + 1, 3, 320);
-  if (stream_tcp503_->is_ok() != 0) {
+  stream_tcp503_ = std::make_shared<SocketPort>((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL + 1, 3, 320);
+  if (!stream_tcp503_->is_connected()) {
     return -2;
   }
-  core503_ = new UxbusCmdTcp((SocketPort *)stream_tcp503_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  core503_ = std::make_shared<UxbusCmdTcp>(stream_tcp503_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   return 0;
 }
 
 void XArmAPI::disconnect(void) {
-  if (stream_tcp_ != NULL) {
-    stream_tcp_->close_port();
-    stream_tcp_ = NULL;
-  }
-  if (stream_tcp503_ != NULL) {
-    stream_tcp503_->close_port();
-    stream_tcp503_ = NULL;
-  }
-  if (stream_ser_ != NULL) {
-    stream_ser_->close_port();
-    stream_ser_ = NULL;
-  }
-  if (stream_tcp_rich_report_ != NULL) {
-    stream_tcp_rich_report_->close_port();
-    stream_tcp_rich_report_ = NULL;
-  }
-  if (stream_tcp_report_ != NULL && report_type_ != "rich") {
-    stream_tcp_report_->close_port();
-    stream_tcp_report_ = NULL;
-  }
+  is_shutdown_ = true;
+
+  auto tcp = stream_tcp_;
+  auto tcp503 = stream_tcp503_;
+  auto ser = stream_ser_;
+  auto report = stream_tcp_report_;
+  auto rich = stream_tcp_rich_report_;
+  
+  if (tcp) tcp->disconnect();
+  if (tcp503) tcp503->disconnect();
+  if (ser) ser->disconnect();
+  if (rich) rich->disconnect();
+  if (report && report != rich) report->disconnect();
+
+  if (feedback_thread_.joinable()) feedback_thread_.join();
+  if (report_thread_.joinable()) report_thread_.join();
+  if (report_rich_thread_.joinable()) report_rich_thread_.join();
+
+  if (stream_tcp_) stream_tcp_.reset();
+  if (stream_tcp503_) stream_tcp503_.reset();
+  if (stream_ser_) stream_ser_.reset();
+  if (stream_tcp_report_) stream_tcp_report_.reset();
+  if (stream_tcp_rich_report_) stream_tcp_rich_report_.reset();
+
   _report_connect_changed_callback();
   is_ready_ = false;
+
+  if (pool_) pool_->stop();
+}
+
+void XArmAPI::_request_shutdown_from_report_thread() {
+  is_shutdown_ = true;
+  auto tcp = stream_tcp_;
+  if (tcp) tcp->disconnect();
 }
 
 int XArmAPI::set_timeout(fp32 timeout) {
@@ -996,6 +978,7 @@ int XArmAPI::set_pause_time(fp32 sltime) {
 
 std::string XArmAPI::_gen_feedback_key(bool wait)
 {
+  std::lock_guard<std::mutex> locker(fb_mutex_);
   std::string feedback_key = (wait && support_feedback_) ? (std::to_string(get_us()) + std::to_string(engine())) : "";
   fb_key_transid_map_[feedback_key != "" ? feedback_key : "no_use"] = -1;
   return feedback_key;
@@ -1003,6 +986,7 @@ std::string XArmAPI::_gen_feedback_key(bool wait)
 
 int XArmAPI::_get_feedback_transid(std::string feedback_key)
 {
+  std::lock_guard<std::mutex> locker(fb_mutex_);
   int trans_id = -1;
   if (feedback_key != "" && fb_key_transid_map_.count(feedback_key)) {
     trans_id = fb_key_transid_map_[feedback_key];
@@ -1012,6 +996,7 @@ int XArmAPI::_get_feedback_transid(std::string feedback_key)
 }
 
 void XArmAPI::_set_feedback_key_transid(std::string feedback_key, int trans_id, unsigned char feedback_type) {
+  std::lock_guard<std::mutex> locker(fb_mutex_);
   fb_key_transid_map_[feedback_key] = trans_id;
   fb_transid_type_map_[trans_id] = feedback_type;
   if (fb_transid_result_map_.count(trans_id)) {
@@ -1027,11 +1012,15 @@ int XArmAPI::_wait_feedback(fp32 timeout, int trans_id, int *feedback_code) {
   int state5_cnt = 0;
   while (timeout <= 0 || get_system_time() < expired) {
     if (!is_connected()) {
+      std::unique_lock<std::mutex> locker(fb_mutex_);
       fb_transid_result_map_.clear();
+      locker.unlock();
       return API_CODE::NOT_CONNECTED;
     }
     if (error_code != 0) {
+      std::unique_lock<std::mutex> locker(fb_mutex_);
       fb_transid_result_map_.clear();
+      locker.unlock();
       return API_CODE::HAS_ERROR;
     }
 
@@ -1042,19 +1031,23 @@ int XArmAPI::_wait_feedback(fp32 timeout, int trans_id, int *feedback_code) {
       sleep_finish_time_ = 0;
       if (state_ == 5) state5_cnt++;
       if (state_ != 5 || state5_cnt >= 20) {
+        std::unique_lock<std::mutex> locker(fb_mutex_);
         fb_transid_result_map_.clear();
+        locker.unlock();
         return API_CODE::EMERGENCY_STOP;
       }
     }
     else {
       state5_cnt = 0;
     }
-
+    std::unique_lock<std::mutex> locker(fb_mutex_);
     if (fb_transid_result_map_.count(trans_id)) {
       if (feedback_code != NULL) *feedback_code = fb_transid_result_map_[trans_id];
       fb_transid_result_map_.erase(trans_id);
+      locker.unlock();
       return 0;
     }
+    locker.unlock();
     sleep_milliseconds(50);
   }
   return API_CODE::WAIT_FINISH_TIMEOUT;
@@ -1358,7 +1351,7 @@ void XArmAPI::_handle_feedback_data(void)
   int feedback_maxcount = std::max(max_callback_thread_count_ + 1, 1);
   unsigned char (*feedback_datas)[FEEDBACK_DATA_MAX_LEN] = new unsigned char[feedback_maxcount][FEEDBACK_DATA_MAX_LEN];
   int cnt = 0;
-  while (is_connected()) {
+  while (!is_shutdown_ && is_connected()) {
     ret = stream_tcp_->read_feedback_frame(feedback_datas[cnt]);
     if (ret == 0) {
       _feedback_callback(feedback_datas[cnt]);

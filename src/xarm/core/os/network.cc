@@ -73,7 +73,7 @@ extern "C" {
 
 #ifdef _WIN32
 
-int socket_init(char *local_ip, int port, int is_server) {
+int socket_init(const char *local_ip, const int port, int is_server) {
   // int iResult;
   // WSADATA wsaData;
   // iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -179,15 +179,14 @@ int socket_init(char *local_ip, int port, int is_server) {
   return sockfd;
 }
 
-int socket_connect_server(int *socket, char server_ip[], int server_port) {
+int socket_connect_server(int *socket, const char server_ip[], const int server_port) {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(server_port);
   //inet_aton(server_ip, &server_addr.sin_addr);
   inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
   //InetPton(AF_INET, server_ip, &server_addr.sin_addr);
-  int ret =
-    connect(*socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  int ret = connect(*socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
   PERRNO(ret, DB_FLG, "Error: connect");
   return 0;
 }
@@ -200,7 +199,7 @@ int socket_send_data(int client_fp, unsigned char *data, int len) {
 
 #else
 
-int socket_init(char *local_ip, int port, int is_server) {
+int socket_init(const char *local_ip, const int port, int is_server) {
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   PERRNO(sockfd, DB_FLG, "Error: socket");
 
@@ -244,13 +243,12 @@ int socket_init(char *local_ip, int port, int is_server) {
   return sockfd;
 }
 
-int socket_connect_server(int *socket, char server_ip[], int server_port) {
+int socket_connect_server(int *socket, const char server_ip[], const int server_port) {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(server_port);
   inet_aton(server_ip, &server_addr.sin_addr);
-  int ret =
-    connect(*socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  int ret = connect(*socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
   PERRNO(ret, DB_FLG, "Error: connect");
   return 0;
 }

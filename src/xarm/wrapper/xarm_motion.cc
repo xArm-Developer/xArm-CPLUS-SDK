@@ -38,7 +38,6 @@ int XArmAPI::set_position(fp32 pose[6], fp32 radius, fp32 speed, fp32 acc, fp32 
       last_used_position[i] = pose[i];
       mvpose[i] = (float)(default_is_radian || i < 3 ? last_used_position[i] : to_radian(last_used_position[i]));
     }
-    int ret = 0;
     if (_version_is_ge(1, 11, 100)) {
       ret = core->move_line_common(mvpose, last_used_tcp_speed, last_used_tcp_acc, mvtime, radius, 0, false, only_check_type_, &only_check_result, motion_type, feedback_key);
     }
@@ -178,7 +177,7 @@ int XArmAPI::set_servo_angle(fp32 angs[7], bool wait, fp32 timeout, fp32 radius,
 int XArmAPI::set_servo_angle(int servo_id, fp32 angle, fp32 speed, fp32 acc, fp32 mvtime, bool wait, fp32 timeout, fp32 radius, bool relative) {
   if (servo_id <= 0 || servo_id > axis) return API_CODE::PARAM_ERROR;
   last_used_angles[servo_id - 1] = angle;
-  return set_servo_angle(last_used_angles, speed, acc, mvtime, wait, timeout, radius), relative;
+  return set_servo_angle(last_used_angles, speed, acc, mvtime, wait, timeout, radius, relative);
 }
 
 int XArmAPI::set_servo_angle(int servo_id, fp32 angle, bool wait, fp32 timeout, fp32 radius, bool relative) {

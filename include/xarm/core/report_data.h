@@ -13,6 +13,7 @@
 #define XARM_REPORT_DATA_H_
 
 #include <string>
+#include <vector>
 #include "xarm/core/common/data_type.h"
 
 
@@ -226,7 +227,8 @@ public:
   unsigned char switch_status;
 
   int debug_size;
-  unsigned char *debug_data;
+  // unsigned char *debug_data;
+  std::vector<unsigned char> debug_data;
 private:
   unsigned char *data_fp;
   float trs_msg_[5];

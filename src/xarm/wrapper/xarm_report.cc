@@ -144,16 +144,16 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
     min_joint_speed_ = p2p_msg_[3];
     max_joint_speed_ = p2p_msg_[4];
     if (default_is_radian) {
-      joint_speed_limit[0] = min_joint_acc_;
-      joint_speed_limit[1] = max_joint_acc_;
-      joint_acc_limit[0] = min_joint_speed_;
-      joint_acc_limit[1] = max_joint_speed_;
+      joint_speed_limit[0] = min_joint_speed_;
+      joint_speed_limit[1] = max_joint_speed_;
+      joint_acc_limit[0] = min_joint_acc_;
+      joint_acc_limit[1] = max_joint_acc_;
     }
     else {
-      joint_speed_limit[0] = to_degree(min_joint_acc_);
-      joint_speed_limit[1] = to_degree(max_joint_acc_);
-      joint_acc_limit[0] = to_degree(min_joint_speed_);
-      joint_acc_limit[1] = to_degree(max_joint_speed_);
+      joint_speed_limit[0] = to_degree(min_joint_speed_);
+      joint_speed_limit[1] = to_degree(max_joint_speed_);
+      joint_acc_limit[0] = to_degree(min_joint_acc_);
+      joint_acc_limit[1] = to_degree(max_joint_acc_);
     }
 
     hex_to_nfp32(&data_fp[163], rot_msg_, 2);
@@ -181,11 +181,11 @@ void XArmAPI::_update(unsigned char *rx_data) {
   if (report_type_ != "rich") {
     // use rich report data update to other report data
     std::unique_lock<std::mutex> locker(report_mutex_);
-    report_data_ptr_->flush_data(report_rich_data_ptr_);
+    report_data_ptr_->flush_data(report_rich_data_ptr_.get());
     locker.unlock();
   }
   else {
-    _report_data_callback(report_rich_data_ptr_);
+    _report_data_callback(report_rich_data_ptr_.get());
   }
   int sizeof_data = bin8_to_32(rx_data);
   if (sizeof_data >= 87) {
@@ -327,16 +327,16 @@ void XArmAPI::_update(unsigned char *rx_data) {
     min_joint_speed_ = report_rich_data_ptr_->p2p_velomin;
     max_joint_speed_ = report_rich_data_ptr_->p2p_velomax;
     if (default_is_radian) {
-      joint_speed_limit[0] = min_joint_acc_;
-      joint_speed_limit[1] = max_joint_acc_;
-      joint_acc_limit[0] = min_joint_speed_;
-      joint_acc_limit[1] = max_joint_speed_;
+      joint_speed_limit[0] = min_joint_speed_;
+      joint_speed_limit[1] = max_joint_speed_;
+      joint_acc_limit[0] = min_joint_acc_;
+      joint_acc_limit[1] = max_joint_acc_;
     }
     else {
-      joint_speed_limit[0] = to_degree(min_joint_acc_);
-      joint_speed_limit[1] = to_degree(max_joint_acc_);
-      joint_acc_limit[0] = to_degree(min_joint_speed_);
-      joint_acc_limit[1] = to_degree(max_joint_speed_);
+      joint_speed_limit[0] = to_degree(min_joint_speed_);
+      joint_speed_limit[1] = to_degree(max_joint_speed_);
+      joint_acc_limit[0] = to_degree(min_joint_acc_);
+      joint_acc_limit[1] = to_degree(max_joint_acc_);
     }
 
     rot_jerk = report_rich_data_ptr_->rot_jerk;
@@ -442,7 +442,7 @@ void XArmAPI::_handle_report_data(void) {
   bool reported = is_reported();
   int max_reconnect_cnts = 10;
 
-  while (is_connected()) {
+  while (!is_shutdown_ && is_connected()) {
     if (ret != 0)
       sleep_milliseconds(1);
     if (!is_reported()) {
@@ -451,11 +451,24 @@ void XArmAPI::_handle_report_data(void) {
         fprintf(stderr, "Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
         _report_connect_changed_callback();
       }
-      stream_tcp_report_ = connect_tcp_report((char *)port_.data(), report_type_);
-      if (stream_tcp_report_ == NULL) {
+      // stream_tcp_report_ = connect_tcp_report2((char *)port_.data(), report_type_);
+      // if (stream_tcp_report_ == nullptr) {
+      if (stream_tcp_report_->connect() < 0) {
         connect_fail_count += 1;
-        if (is_connected())
+        // if (is_connected())
+        //   sleep_milliseconds(2000);
+        // continue;
+
+        if (!is_connected()) {
+          fprintf(stderr, "report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+          break;
+        }
+        if (connect_fail_count <= max_reconnect_cnts) {
           sleep_milliseconds(2000);
+        }
+        else {
+          sleep_milliseconds(5000);
+        }
         continue;
       }
       else {
@@ -480,9 +493,9 @@ void XArmAPI::_handle_report_data(void) {
       if (is_first_report_) continue;
       ret = report_data_ptr_->check_data(rx_data);
       if (ret == 0) {
-        std::unique_lock<std::mutex> locker(report_mutex_);		
+        std::unique_lock<std::mutex> locker(report_mutex_);
         if (report_data_ptr_->flush_data(rx_data) == 0) {
-          _report_data_callback(report_data_ptr_);
+          _report_data_callback(report_data_ptr_.get());
         }
         locker.unlock();
       }
@@ -508,7 +521,7 @@ void XArmAPI::_handle_report_rich_data(void) {
   int state;
   int protocol_identifier = 2;
 
-  while (is_connected()) {
+  while (!is_shutdown_ && is_connected()) {
     if (ret != 0)
       sleep_milliseconds(1);
     curr_ms = get_system_time();
@@ -530,15 +543,29 @@ void XArmAPI::_handle_report_rich_data(void) {
         if (report_type_ == "rich")
           _report_connect_changed_callback();
       }
-      stream_tcp_rich_report_ = connect_tcp_report((char *)port_.data(), "rich");
-      if (stream_tcp_rich_report_ == NULL) {
+      
+      // stream_tcp_rich_report_ = connect_tcp_report2((char *)port_.data(), "rich");
+      // if (stream_tcp_rich_report_ == nullptr) {
+      if (stream_tcp_rich_report_->connect() < 0) {
         connect_fail_count += 1;
-        if (is_connected() && (connect_fail_count <= max_reconnect_cnts || protocol_identifier == 3))
-          sleep_milliseconds(2000);
-        else if (!is_connected() || protocol_identifier == 2)
-        {
-          fprintf(stderr, "report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+        // if (is_connected() && (connect_fail_count <= max_reconnect_cnts || protocol_identifier == 3))
+        //   sleep_milliseconds(2000);
+        // else if (!is_connected() || protocol_identifier == 2)
+        // {
+        //   fprintf(stderr, "report rich thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+        //   break;
+        // }
+        // continue;
+
+        if (!is_connected() || connect_fail_count > max_reconnect_cnts) {
+          fprintf(stderr, "report rich thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
           break;
+        }
+        if (connect_fail_count <= max_reconnect_cnts) {
+          sleep_milliseconds(2000);
+        }
+        else {
+          sleep_milliseconds(5000);
         }
         continue;
       }
@@ -573,6 +600,5 @@ void XArmAPI::_handle_report_rich_data(void) {
     }
   }
   printf("xarm report thread is quit.\n");
-  disconnect();
-  pool_.stop();
+  _request_shutdown_from_report_thread();
 }

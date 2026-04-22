@@ -17,13 +17,29 @@ const unsigned short STANDARD_MODBUS_TCP_PROTOCOL = 0x00;
 const unsigned short PRIVATE_MODBUS_TCP_PROTOCOL= 0x02;
 const unsigned short TRANSACTION_ID_MAX = 65535;
 
-UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
+// UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port) {
+//   throw std::logic_error("raw-pointer constructor is no longer supported");
+//   std::shared_ptr<SocketPort> ptr(arm_port);
+//   arm_port_ = ptr;
+//   transaction_id_ = 1;
+//   protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
+// }
+
+// UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) : UxbusCmd(set_feedback_key_transid) {
+//   throw std::logic_error("raw-pointer constructor is no longer supported");
+//   std::shared_ptr<SocketPort> ptr(arm_port);
+//   arm_port_ = ptr;
+//   transaction_id_ = 1;
+//   protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
+// }
+
+UxbusCmdTcp::UxbusCmdTcp(const std::shared_ptr<SocketPort> &arm_port) {
   arm_port_ = arm_port;
   transaction_id_ = 1;
   protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
 }
 
-UxbusCmdTcp::UxbusCmdTcp(SocketPort *arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) : UxbusCmd(set_feedback_key_transid) {
+UxbusCmdTcp::UxbusCmdTcp(const std::shared_ptr<SocketPort> &arm_port, std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) : UxbusCmd(set_feedback_key_transid) {
   arm_port_ = arm_port;
   transaction_id_ = 1;
   protocol_identifier_ = PRIVATE_MODBUS_TCP_PROTOCOL;
@@ -151,12 +167,12 @@ int UxbusCmdTcp::_check_private_protocol(unsigned char *data)
   return 0;
 }
 
-int UxbusCmdTcp::_standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, unsigned char unit_id)
+int UxbusCmdTcp::_standard_modbus_tcp_request(unsigned char *pdu_data, int pdu_len, unsigned char *rx_data, int rx_len, unsigned char unit_id)
 {
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(unit_id, pdu_data, pdu_len, STANDARD_MODBUS_TCP_PROTOCOL);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  ret = _recv_modbus_response(unit_id, ret, rx_data, -1, 10000, STANDARD_MODBUS_TCP_PROTOCOL);
+  ret = _recv_modbus_response(unit_id, ret, rx_data, rx_len, 10000, STANDARD_MODBUS_TCP_PROTOCOL);
   if (ret == 0 && rx_data[7] == pdu_data[0] + 0x80) {
     return rx_data[8] + 0x80;
   }
@@ -169,8 +185,9 @@ int UxbusCmdTcp::_read_bits(unsigned short addr, unsigned short quantity, unsign
   pdu[0] = funcode;
   bin16_to_8(addr, &pdu[1]);
   bin16_to_8(quantity, &pdu[3]);
-  unsigned char *rx_data = new unsigned char[9 + (quantity + 7) / 8];
-  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data);
+  int rx_len = 9 + (quantity + 7) / 8;
+  unsigned char *rx_data = new unsigned char[rx_len]();
+  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data, rx_len);
   if (ret == 0) {
     for (size_t i = 0; i < quantity; i++) {
       bits[i] = (rx_data[9 + i / 8] >> (i % 8) & 0x01);
@@ -186,8 +203,9 @@ int UxbusCmdTcp::_read_registers(unsigned short addr, unsigned short quantity, i
   pdu[0] = funcode;
   bin16_to_8(addr, &pdu[1]);
   bin16_to_8(quantity, &pdu[3]);
-  unsigned char *rx_data = new unsigned char[9 + quantity * 2];
-  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data);
+  int rx_len = 9 + quantity * 2;
+  unsigned char *rx_data = new unsigned char[rx_len]();
+  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data, rx_len);
   if (ret == 0) {
     if (is_signed) {
       bin8_to_ns16(&rx_data[9], regs, quantity);
@@ -300,8 +318,9 @@ int UxbusCmdTcp::write_and_read_holding_registers(unsigned short r_addr, unsigne
   for (size_t i = 0; i < w_quantity; i++) {
     bin16_to_8(w_regs[i], &pdu[10 + i * 2]);
   }
-  unsigned char *rx_data = new unsigned char[9 + r_quantity * 2]();
-  int ret = _standard_modbus_tcp_request(pdu, 10 + w_quantity * 2, rx_data, 9 + r_quantity * 2);
+  int rx_len = 9 + r_quantity * 2;
+  unsigned char *rx_data = new unsigned char[rx_len]();
+  int ret = _standard_modbus_tcp_request(pdu, 10 + w_quantity * 2, rx_data, rx_len);
   if (ret == 0) {
     if (is_signed) {
       bin8_to_ns16(&rx_data[9], r_regs, r_quantity);

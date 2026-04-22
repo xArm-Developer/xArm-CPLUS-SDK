@@ -12,12 +12,16 @@
 #ifndef CORE_INSTRUCTION_UXBUS_CMD_SER_H_
 #define CORE_INSTRUCTION_UXBUS_CMD_SER_H_
 
+#include <memory>
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/port/ser.h"
 
 class UxbusCmdSer : public UxbusCmd {
 public:
-  UxbusCmdSer(SerialPort *arm_port);
+  // [[deprecated("please UxbusCmdSer(std::shared_ptr<SerialPort> &arm_port)")]]
+  UxbusCmdSer(SerialPort *arm_port) = delete;
+  UxbusCmdSer(const std::shared_ptr<SerialPort> &arm_port);
+  
   ~UxbusCmdSer(void);
 
   void close(void);
@@ -29,7 +33,7 @@ private:
   int _check_private_protocol(unsigned char *data);
 
 private:
-  SerialPort *arm_port_;
+  std::shared_ptr<SerialPort> arm_port_;
 };
 
 #endif

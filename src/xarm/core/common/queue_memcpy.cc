@@ -22,6 +22,7 @@ QueueMemcpy::QueueMemcpy(long n, long n_size) {
 QueueMemcpy::~QueueMemcpy(void) { delete[] buf_; }
 
 char QueueMemcpy::flush(void) {
+  std::lock_guard<std::mutex> locker(mutex_);
   cnt_ = 0;
   head_ = 0;
   tail_ = 0;
@@ -30,16 +31,23 @@ char QueueMemcpy::flush(void) {
   return 0;
 }
 
-long QueueMemcpy::size(void) { return cnt_; }
+long QueueMemcpy::size(void) {
+  std::lock_guard<std::mutex> locker(mutex_);
+  return cnt_;
+}
 
 int QueueMemcpy::is_full(void) {
+  std::lock_guard<std::mutex> locker(mutex_);
   if (total_ <= cnt_)
     return 1;
   else
     return 0;
 }
 
-long QueueMemcpy::node_size(void) { return annode_size_; }
+long QueueMemcpy::node_size(void) { 
+  std::lock_guard<std::mutex> locker(mutex_);
+  return annode_size_; 
+}
 
 char QueueMemcpy::pop(void *data) {
   std::lock_guard<std::mutex> locker(mutex_);
@@ -66,10 +74,17 @@ char QueueMemcpy::get(void *data) {
   return 0;
 }
 
-char QueueMemcpy::push(void *data) {
+char QueueMemcpy::push(void *data, bool full_auto_pop) {
   std::lock_guard<std::mutex> locker(mutex_);
   if (total_ <= cnt_) {
-    return -1;
+    if (full_auto_pop) {
+      if (total_ <= tail_) tail_ = 0;
+      // memcpy(data, &buf_[tail_ * annode_size_], annode_size_);
+      tail_++;
+      cnt_--;
+    }
+    else
+      return -1;
   }
   if (total_ <= head_) head_ = 0;
 

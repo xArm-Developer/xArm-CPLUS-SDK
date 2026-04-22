@@ -20,6 +20,7 @@
 #include <cmath>
 #include <regex>
 #include <map>
+#include <array>
 #include <string>
 #include <stdarg.h>
 #include <string.h>
@@ -115,12 +116,12 @@ public:
   int state; // state
   int mode; // mode
   int cmd_num; // cmd cache count
-  fp32 *joints_torque; // joints torque, fp32[7]{servo-1, ..., servo-7}
-  bool *motor_brake_states; // motor brake states, bool[8]{servo-1, ..., servo-7, reversed}
-  bool *motor_enable_states; // motor enable states, bool[8]{servo-1, ..., servo-7, reversed}
+  fp32 joints_torque[7]; // joints torque, fp32[7]{servo-1, ..., servo-7}
+  bool motor_brake_states[8]; // motor brake states, bool[8]{servo-1, ..., servo-7, reversed}
+  bool motor_enable_states[8]; // motor enable states, bool[8]{servo-1, ..., servo-7, reversed}
   int error_code; // error code
   int warn_code; // warn code
-  fp32 *tcp_load; // tcp load, fp32[4]{weight, x, y, z}
+  fp32 tcp_load[4]; // tcp load, fp32[4]{weight, x, y, z}
   int collision_sensitivity; // collision sensitivity
   int teach_sensitivity; // teach sensitivity
   int device_type; // device type
@@ -131,30 +132,30 @@ public:
   int motor_fid;
   unsigned char version[30]; // version
   unsigned char sn[40]; // sn
-  int *version_number; // version numbre
+  int version_number[3]; // version number
   fp32 tcp_jerk; // tcp jerk
   fp32 joint_jerk; // joint jerk
   fp32 rot_jerk; // rot jerk
   fp32 max_rot_acc; // max rot acc
-  fp32 *tcp_speed_limit; // fp32[2]{min, max}
-  fp32 *tcp_acc_limit; // fp32[2]{min, max}
+  fp32 tcp_speed_limit[2]; // fp32[2]{min, max}
+  fp32 tcp_acc_limit[2]; // fp32[2]{min, max}
   fp32 last_used_tcp_speed;
   fp32 last_used_tcp_acc;
 
-  fp32 *angles; // fp32[7]{servo-1, ..., servo-7}
-  fp32 *last_used_angles; // fp32[7]{servo-1, ..., servo-7}
-  fp32 *joint_speed_limit; // fp32[2]{min, max}
-  fp32 *joint_acc_limit; // fp32[2]{min, max}
+  fp32 angles[7]; // fp32[7]{servo-1, ..., servo-7}
+  fp32 last_used_angles[7]; // fp32[7]{servo-1, ..., servo-7}
+  fp32 joint_speed_limit[2]; // fp32[2]{min, max}
+  fp32 joint_acc_limit[2]; // fp32[2]{min, max}
   fp32 last_used_joint_speed;
   fp32 last_used_joint_acc;
-  fp32 *position; // fp32[6]{x, y, z, roll, pitch, yaw}
-  fp32 *position_aa; // fp32[6]{x, y, z, rx, ry, rz}
-  fp32 *last_used_position; // fp32[6]{x, y, z, roll, pitch, yaw}
-  fp32 *tcp_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
-  fp32 *gravity_direction; // fp32[3]{x_direction, y_direction, z_direction}
+  fp32 position[6]; // fp32[6]{x, y, z, roll, pitch, yaw}
+  fp32 position_aa[6]; // fp32[6]{x, y, z, rx, ry, rz}
+  fp32 last_used_position[6]; // fp32[6]{x, y, z, roll, pitch, yaw}
+  fp32 tcp_offset[6]; // fp32[6]{x, y, z, roll, pitch, yaw}
+  fp32 gravity_direction[3]; // fp32[3]{x_direction, y_direction, z_direction}
 
   fp32 realtime_tcp_speed;
-  fp32 *realtime_joint_speeds;
+  fp32 realtime_joint_speeds[7];
 
   bool is_reduced_mode;
   bool is_fence_mode;
@@ -162,35 +163,35 @@ public:
   bool is_approx_motion;
   bool is_cart_continuous;
 
-  fp32 *world_offset; // fp32[6]{x, y, z, roll, pitch, yaw}
-  fp32 *temperatures;
+  fp32 world_offset[6]; // fp32[6]{x, y, z, roll, pitch, yaw}
+  fp32 temperatures[7];
   int count;
   int iden_progress;
-  unsigned char *gpio_reset_config; // unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
-  fp32 *ft_ext_force;
-  fp32 *ft_raw_force;
+  unsigned char gpio_reset_config[2]; // unsigned char[2]{cgpio_reset_enable, tgpio_reset_enable}
+  fp32 ft_ext_force[6];
+  fp32 ft_raw_force[6];
 
   bool default_is_radian;
 
-  UxbusCmd *core;
+  std::shared_ptr<UxbusCmd> core;
 
   struct RobotIqStatus robotiq_status;
   LinearMotorStatus linear_motor_status;
 
-  fp32 *voltages; // fp32[7]{servo-1, ..., servo-7}
-  fp32 *currents; // fp32[7]{servo-1, ..., servo-7}
+  fp32 voltages[7]; // fp32[7]{servo-1, ..., servo-7}
+  fp32 currents[7]; // fp32[7]{servo-1, ..., servo-7}
   int is_simulation_robot;  // 0: off, 1: on
   int is_collision_detection; // 0: off, 1: on
   int collision_tool_type;
-  fp32 *collision_model_params; // fp32[6]{...}
+  fp32 collision_model_params[6]; // fp32[6]{...}
   int cgpio_state;
   int cgpio_code;
-  int *cgpio_input_digitals;  // int[2]{ digital-input-functional-gpio-state, digital-input-configuring-gpio-state }
-  int *cgpio_output_digitals; // int[2]{ digital-output-functional-gpio-state, digital-output-configuring-gpio-state }
-  fp32 *cgpio_intput_anglogs; // fp32[2] {analog-1-input-value, analog-2-input-value}
-  fp32 *cgpio_output_anglogs; // fp32[2] {analog-1-output-value, analog-2-output-value}
-  int *cgpio_input_conf; // fp32[8]{ CI0-conf, ... CI7-conf }
-  int *cgpio_output_conf; // fp32[8]{ CO0-conf, ... CO7-conf }
+  int cgpio_input_digitals[2];  // int[2]{ digital-input-functional-gpio-state, digital-input-configuring-gpio-state }
+  int cgpio_output_digitals[2]; // int[2]{ digital-output-functional-gpio-state, digital-output-configuring-gpio-state }
+  fp32 cgpio_intput_anglogs[2]; // fp32[2] {analog-1-input-value, analog-2-input-value}
+  fp32 cgpio_output_anglogs[2]; // fp32[2] {analog-1-output-value, analog-2-output-value}
+  int cgpio_input_conf[16]; // int[16]{ CI0-conf, ... CI7-conf }
+  int cgpio_output_conf[16]; // int[16]{ CO0-conf, ... CO7-conf }
 
   unsigned char only_check_result;
 
@@ -3107,6 +3108,10 @@ private:
   void _init(void);
   void _destroy(void);
   void _sync(void);
+  int _tcp_connect();
+  // int _connect_tcp_control();
+  // int _connect_tcp_report();
+  void _init_threads();
   void _check_version(void);
   bool _version_is_ge(int major = 1, int minor = 2, int revision = 11);
   void _wait_until_not_pause(void);
@@ -3181,6 +3186,7 @@ private:
   int _wait_play_traj(fp32 timeout, int trans_id, int times = 1);
 
   int _wait_all_task_finish(fp32 timeout = NO_TIMEOUT);
+  void _request_shutdown_from_report_thread();
 private:
   std::string port_;
   bool check_tcp_limit_;
@@ -3207,6 +3213,8 @@ private:
   bool ignore_state_;
   bool arm_type_is_1300_;
   bool control_box_type_is_1300_;
+
+  bool is_shutdown_;
 
   int major_version_number_;
   int minor_version_number_;
@@ -3251,16 +3259,17 @@ private:
 
   fp32 cmd_timeout_;
 
-  UxbusCmd *core503_;
-  SocketPort *stream_tcp503_;
+  std::shared_ptr<UxbusCmd> core503_;
+  std::shared_ptr<SocketPort> stream_tcp503_;
 
-  SerialPort *stream_ser_;
-  SocketPort *stream_tcp_;
-  SocketPort *stream_tcp_report_;
-  SocketPort *stream_tcp_rich_report_;
-  ThreadPool pool_;
-  XArmReportData *report_data_ptr_;
-  XArmReportData *report_rich_data_ptr_;
+  std::shared_ptr<SerialPort> stream_ser_;
+  std::shared_ptr<SocketPort> stream_tcp_;
+  std::shared_ptr<SocketPort> stream_tcp_report_;
+  std::shared_ptr<SocketPort> stream_tcp_rich_report_;
+  std::shared_ptr<ThreadPool> pool_;
+
+  std::shared_ptr<XArmReportData> report_data_ptr_;
+  std::shared_ptr<XArmReportData> report_rich_data_ptr_;
   std::string report_type_;
   bool debug_;
   int default_bio_baud_;
@@ -3275,6 +3284,9 @@ private:
   std::map<std::string, int> fb_key_transid_map_;
   std::map<int, unsigned char> fb_transid_type_map_;
   std::map<int, unsigned char> fb_transid_result_map_;
+
+  std::mutex fb_mutex_;
+  std::mutex report_callback_mutex_;
 
   std::vector<std::function<void (XArmReportData *)>> report_data_functions_;
   std::vector<std::function<void (const fp32*, const fp32*)>> report_location_functions_;

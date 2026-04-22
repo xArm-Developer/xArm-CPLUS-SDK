@@ -12,14 +12,18 @@
 
 
 template<typename CallableVector, typename FunctionVector, class... arguments>
-void XArmAPI::_report_callback(CallableVector&& callbacks, FunctionVector&& functions, arguments&&... args) {
+void XArmAPI::_report_callback(CallableVector&& callbacks_, FunctionVector&& functions_, arguments&&... args) {
+  std::unique_lock<std::mutex> locker(report_callback_mutex_);
+  CallableVector callbacks = callbacks_;
+  FunctionVector functions = functions_;
+  locker.unlock();
   for (size_t i = 0; i < callbacks.size(); i++) {
-    if (callback_in_thread_) pool_.dispatch(callbacks[i], std::forward<arguments>(args)...);
-    else pool_.commit(callbacks[i], std::forward<arguments>(args)...);
+    if (callback_in_thread_) pool_->dispatch(callbacks[i], std::forward<arguments>(args)...);
+    else pool_->commit(callbacks[i], std::forward<arguments>(args)...);
   }
   for (size_t i = 0; i < functions.size(); i++) {
-    if (callback_in_thread_) pool_.dispatch(functions[i], std::forward<arguments>(args)...);
-    else pool_.commit(functions[i], std::forward<arguments>(args)...);
+    if (callback_in_thread_) pool_->dispatch(functions[i], std::forward<arguments>(args)...);
+    else pool_->commit(functions[i], std::forward<arguments>(args)...);
   }
 }
 
@@ -30,18 +34,18 @@ void XArmAPI::_report_data_callback(XArmReportData *report_data_ptr) {
 void XArmAPI::_report_location_callback(void) {
   _report_callback(report_location_callbacks_, report_location_functions_, position, angles);
   // for (size_t i = 0; i < report_location_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(report_location_callbacks_[i], position, angles);
-  // 	else pool_.commit(report_location_callbacks_[i], position, angles);
+  // 	if (callback_in_thread_) pool_->dispatch(report_location_callbacks_[i], position, angles);
+  // 	else pool_->commit(report_location_callbacks_[i], position, angles);
   // }
 }
 
 void XArmAPI::_report_connect_changed_callback(void) {
-  bool connected = stream_tcp_ == NULL ? false : stream_tcp_->is_ok() == 0;
-  bool reported = stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_ok() == 0;
+  bool connected = stream_tcp_ == NULL ? false : stream_tcp_->is_connected();
+  bool reported = stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_connected();
   _report_callback(connect_changed_callbacks_, connect_changed_functions_, connected, reported);
   // for (size_t i = 0; i < connect_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(connect_changed_callbacks_[i], connected, reported);
-  // 	else pool_.commit(connect_changed_callbacks_[i], connected, reported);
+  // 	if (callback_in_thread_) pool_->dispatch(connect_changed_callbacks_[i], connected, reported);
+  // 	else pool_->commit(connect_changed_callbacks_[i], connected, reported);
   // }
 }
 
@@ -49,24 +53,24 @@ void XArmAPI::_report_state_changed_callback(void) {
   if (ignore_state_) return;
   _report_callback(state_changed_callbacks_, state_changed_functions_, state);
   // for (size_t i = 0; i < state_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(state_changed_callbacks_[i], state);
-  // 	else pool_.commit(state_changed_callbacks_[i], state);
+  // 	if (callback_in_thread_) pool_->dispatch(state_changed_callbacks_[i], state);
+  // 	else pool_->commit(state_changed_callbacks_[i], state);
   // }
 }
 
 void XArmAPI::_report_mode_changed_callback(void) {
   _report_callback(mode_changed_callbacks_, mode_changed_functions_, mode);
   // for (size_t i = 0; i < mode_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(mode_changed_callbacks_[i], mode);
-  // 	else pool_.commit(mode_changed_callbacks_[i], mode);
+  // 	if (callback_in_thread_) pool_->dispatch(mode_changed_callbacks_[i], mode);
+  // 	else pool_->commit(mode_changed_callbacks_[i], mode);
   // }
 }
 
 void XArmAPI::_report_mtable_mtbrake_changed_callback(void) {
   _report_callback(mtable_mtbrake_changed_callbacks_, mtable_mtbrake_changed_functions_, mt_able_, mt_brake_);
   // for (size_t i = 0; i < mtable_mtbrake_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(mtable_mtbrake_changed_callbacks_[i], mt_able_, mt_brake_);
-  // 	else pool_.commit(mtable_mtbrake_changed_callbacks_[i], mt_able_, mt_brake_);
+  // 	if (callback_in_thread_) pool_->dispatch(mtable_mtbrake_changed_callbacks_[i], mt_able_, mt_brake_);
+  // 	else pool_->commit(mtable_mtbrake_changed_callbacks_[i], mt_able_, mt_brake_);
   // }
 }
 
@@ -74,40 +78,40 @@ void XArmAPI::_report_error_warn_changed_callback(void) {
   if (ignore_error_) return;
   _report_callback(error_warn_changed_callbacks_, error_warn_changed_functions_, error_code, warn_code);
   // for (size_t i = 0; i < error_warn_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(error_warn_changed_callbacks_[i], error_code, warn_code);
-  // 	else pool_.commit(error_warn_changed_callbacks_[i], error_code, warn_code);
+  // 	if (callback_in_thread_) pool_->dispatch(error_warn_changed_callbacks_[i], error_code, warn_code);
+  // 	else pool_->commit(error_warn_changed_callbacks_[i], error_code, warn_code);
   // }
 }
 
 void XArmAPI::_report_cmdnum_changed_callback(void) {
   _report_callback(cmdnum_changed_callbacks_, cmdnum_changed_functions_, cmd_num);
   // for (size_t i = 0; i < cmdnum_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(cmdnum_changed_callbacks_[i], cmd_num);
-  // 	else pool_.commit(cmdnum_changed_callbacks_[i], cmd_num);
+  // 	if (callback_in_thread_) pool_->dispatch(cmdnum_changed_callbacks_[i], cmd_num);
+  // 	else pool_->commit(cmdnum_changed_callbacks_[i], cmd_num);
   // }
 }
 
 void XArmAPI::_report_temperature_changed_callback(void) {
   _report_callback(temperature_changed_callbacks_, temperature_changed_functions_, temperatures);
   // for (size_t i = 0; i < temperature_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(temperature_changed_callbacks_[i], temperatures);
-  // 	else pool_.commit(temperature_changed_callbacks_[i], temperatures);
+  // 	if (callback_in_thread_) pool_->dispatch(temperature_changed_callbacks_[i], temperatures);
+  // 	else pool_->commit(temperature_changed_callbacks_[i], temperatures);
   // }
 }
 
 void XArmAPI::_report_count_changed_callback(void) {
   _report_callback(count_changed_callbacks_, count_changed_functions_, count);
   // for (size_t i = 0; i < count_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(count_changed_callbacks_[i], count);
-  // 	else pool_.commit(count_changed_callbacks_[i], count);
+  // 	if (callback_in_thread_) pool_->dispatch(count_changed_callbacks_[i], count);
+  // 	else pool_->commit(count_changed_callbacks_[i], count);
   // }
 }
 
 void XArmAPI::_report_iden_progress_changed_callback(void) {
   _report_callback(iden_progress_changed_callbacks_, iden_progress_changed_functions_, iden_progress);
   // for (size_t i = 0; i < iden_progress_changed_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(iden_progress_changed_callbacks_[i], iden_progress);
-  // 	else pool_.commit(iden_progress_changed_callbacks_[i], iden_progress);
+  // 	if (callback_in_thread_) pool_->dispatch(iden_progress_changed_callbacks_[i], iden_progress);
+  // 	else pool_->commit(iden_progress_changed_callbacks_[i], iden_progress);
   // }
 }
 
@@ -115,6 +119,7 @@ void XArmAPI::_feedback_callback(unsigned char *feedback_data)
 {
   unsigned short trans_id = bin8_to_16(&feedback_data[0]);
   int feedback_type = -1;
+  std::unique_lock<std::mutex> locker(fb_mutex_);
   if (fb_transid_type_map_.count(trans_id)) {
     feedback_type = fb_transid_type_map_[trans_id];
     fb_transid_type_map_.erase(trans_id);
@@ -122,16 +127,18 @@ void XArmAPI::_feedback_callback(unsigned char *feedback_data)
   if (feedback_type != -1) {
     fb_transid_result_map_[trans_id] = feedback_data[12];
   }
+  locker.unlock();
   if ((feedback_type & feedback_data[8]) == 0) return;
   _report_callback(feedback_callbacks_, feedback_functions_, feedback_data);
   // for (size_t i = 0; i < feedback_callbacks_.size(); i++) {
-  // 	if (callback_in_thread_) pool_.dispatch(feedback_callbacks_[i], feedback_data);
-  // 	else pool_.commit(feedback_callbacks_[i], feedback_data);
+  // 	if (callback_in_thread_) pool_->dispatch(feedback_callbacks_[i], feedback_data);
+  // 	else pool_->commit(feedback_callbacks_[i], feedback_data);
   // }
 }
 
 template<typename CallableVector, typename Callable>
 int XArmAPI::_register_event_callback(CallableVector&& callbacks, Callable&& callback) {
+  std::lock_guard<std::mutex> locker(report_callback_mutex_);
   for (size_t i = 0; i < callbacks.size(); i++) {
     if (callbacks[i] == callback) return 1;
   }
@@ -141,6 +148,7 @@ int XArmAPI::_register_event_callback(CallableVector&& callbacks, Callable&& cal
 
 template<typename CallableVector, typename Callable>
 int XArmAPI::_release_event_callback(CallableVector&& callbacks, Callable&& callback) {
+  std::lock_guard<std::mutex> locker(report_callback_mutex_);
   if (callback == NULL) {
     callbacks.clear();
     return 0;
@@ -156,12 +164,14 @@ int XArmAPI::_release_event_callback(CallableVector&& callbacks, Callable&& call
 
 template<typename FunctionVector, typename Function>
 int XArmAPI::_register_event_function(FunctionVector&& functions, Function&& function) {
+  std::lock_guard<std::mutex> locker(report_callback_mutex_);
   functions.push_back(function);
   return 0;
 }
 
 template<typename CallableVector, typename FunctionVector>
 int XArmAPI::_clear_event_callback(CallableVector&& callbacks, FunctionVector&& functions, bool clear_all) {
+  std::lock_guard<std::mutex> locker(report_callback_mutex_);
   if (clear_all)
     callbacks.clear();
   functions.clear();

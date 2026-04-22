@@ -14,8 +14,8 @@
 
 #include "xarm/core/common/data_type.h"
 
-int socket_init(char *local_ip, int port, int is_server);
+int socket_init(const char *local_ip, const int port, int is_server);
 int socket_send_data(int client_fp, unsigned char *data, int len);
-int socket_connect_server(int *socket, char server_ip[], int server_port);
+int socket_connect_server(int *socket, const char server_ip[], const int server_port);
 
 #endif // OS_NETWORK_H_

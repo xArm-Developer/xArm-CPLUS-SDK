@@ -31,10 +31,10 @@ void SerialPort::recv_proc(void) {
   unsigned char ch;
   int ret;
   while (state_ == 0) {
-    ret = read_char(&ch);
+    ret = _read_char(&ch);
 
     if (ret >= 0) {
-      parse_put(&ch, 1);
+      _parse_put(&ch, 1);
       continue;
     }
     //usleep(1000);
@@ -44,7 +44,6 @@ void SerialPort::recv_proc(void) {
     usleep(1000); // 1000us
 #endif
   }
-  delete rx_que_;
 }
 
 static void recv_proc_(void *arg) {
@@ -54,35 +53,62 @@ static void recv_proc_(void *arg) {
 }
 
 SerialPort::SerialPort(const char *port, int baud, int que_num, int que_maxlen_) {
+  ser_port_ = std::string(port);
+  ser_baud_ = baud;
   que_num_ = que_num;
   que_maxlen = que_maxlen_;
-  rx_que_ = new QueueMemcpy(que_num_, que_maxlen);
-
-  int ret = init_serial(port, baud);
-  if (ret == -1)
-  {
-    state_ = -1;
-  }
-  else
-  {
-    state_ = 0;
-  }
-
-  if (state_ == -1) { 
-    delete rx_que_;
-    return;
-  }
-
+  state_ = -1;
+  rx_que_ = nullptr;
   UXBUS_PROT_FROMID_ = 0x55;
   UXBUS_PROT_TOID_ = 0xAA;
-  flush();
-  thread_id_ = std::thread(recv_proc_, this);
-  thread_id_.detach();
+  connect();
 }
 
 SerialPort::~SerialPort(void) {
-  state_ = -1;
-  close_port();
+  disconnect();
+  _join_recv_thread();
+}
+
+void SerialPort::_join_recv_thread() {
+  if (!thread_id_.joinable()) return;
+  if (thread_id_.get_id() == std::this_thread::get_id()) return;
+  thread_id_.join();
+}
+
+int SerialPort::connect()
+{
+  std::unique_lock<std::mutex> lock(conn_mutex_);
+  if (state_.load(std::memory_order_acquire) == 0) return 1;
+
+  _join_recv_thread();
+  auto new_ser = _init_serial(ser_port_.data(), ser_baud_);
+  if (new_ser == nullptr)
+  {
+    return -1;
+  }
+  ser = new_ser;
+  state_.store(0, std::memory_order_release);
+  if (rx_que_ == nullptr)
+    rx_que_ = std::make_shared<QueueMemcpy>(que_num_, que_maxlen);
+  flush();
+  thread_id_ = std::thread(recv_proc_, this);
+  // thread_id_.detach();
+
+  return 0;
+}
+
+void SerialPort::disconnect()
+{
+  std::unique_lock<std::mutex> lock(conn_mutex_);
+  state_.store(-1, std::memory_order_release);
+  try {
+    ser->close();
+  } catch(...) {}
+}
+
+bool SerialPort::is_connected()
+{
+  return state_ == 0;
 }
 
 int SerialPort::is_ok(void) { return state_; }
@@ -93,32 +119,28 @@ void SerialPort::flush(void) {
   rx_state_ = UXBUS_START_FROMID;
 }
 
-int SerialPort::read_char(unsigned char *ch) {
-  //return (read(fp_, ch, 1) == 1) ? 0 : -1;
+int SerialPort::_read_char(unsigned char *ch) {
   try {
-    ser.read();
+    std::string s = ser->read(1);
+    if (s.empty()) return -1;
+    *ch = static_cast<unsigned char>(s[0]);
     return 0;
   }
   catch (...) {
     return -1;
   }
-
 }
 
 int SerialPort::read_frame(unsigned char *data) {
   if (state_ != 0) { return -1; }
-
-  if (rx_que_->size() == 0) { return -1; }
-
-  rx_que_->pop(data);
-  return 0;
+  return rx_que_->pop(data);
 }
 
-int SerialPort::write_char(unsigned char ch) {
+int SerialPort::_write_char(unsigned char ch) {
   //return ((write(fp_, &ch, 1) == 1) ? 0 : -1);
   try {
-    ser.write(std::to_string(ch));
-    return 0;
+    char c = static_cast<char>(ch);
+    return write_frame((unsigned char *)&c, 1);
   }
   catch (...) {
     return -1;
@@ -126,30 +148,22 @@ int SerialPort::write_char(unsigned char ch) {
 }
 
 int SerialPort::write_frame(unsigned char *data, int len) {
-  //if (write(fp_, data, len) != len) { return -1; }
-  //return 0;
   try {
-
-    std::string str_data = (char *)data;
-    int size = ser.write(str_data);
+    std::string str_data(reinterpret_cast<const char *>(data), len);
+    int size = ser->write(str_data);
     if (size != len) { return -1; }
     return 0;
   }
   catch (...) {
     return -1;
   }
-
 }
 
 void SerialPort::close_port(void) {
-  state_ = -1;
-  //close(fp_);
-  try {
-    ser.close();
-  } catch(...) {}
+  disconnect();
 }
 
-void SerialPort::parse_put(unsigned char *data, int len) {
+void SerialPort::_parse_put(unsigned char *data, int len) {
   unsigned char ch;
 
   for (int i = 0; i < len; i++) {
@@ -220,7 +234,7 @@ void SerialPort::parse_put(unsigned char *data, int len) {
   }
 }
 
-int SerialPort::init_serial(const char *port, int baud) {
+std::shared_ptr<serial::Serial> SerialPort::_init_serial(const char *port, int baud) {
   /* speed_t speed;
    struct termios options;
 
@@ -280,15 +294,15 @@ int SerialPort::init_serial(const char *port, int baud) {
    return 0;
    */
   try {
-    ser.setPort(port);
-    ser.setBaudrate(baud);
+    auto new_ser = std::make_shared<serial::Serial>();
+    new_ser->setPort(port);
+    new_ser->setBaudrate(baud);
     serial::Timeout timeout = serial::Timeout::simpleTimeout(1000);
-    ser.setTimeout(timeout);
-    ser.open();
-    return 0;
+    new_ser->setTimeout(timeout);
+    new_ser->open();
+    return new_ser;
   }
   catch (...) {
-    return -1;
-
+    return nullptr;
   }
 }

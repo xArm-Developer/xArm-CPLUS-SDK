@@ -42,7 +42,7 @@
 #define RAD_DEGREE 57.295779513082320876798154814105
 #define TIMEOUT_10 10
 #define NO_TIMEOUT -1
-#define SDK_VERSION "1.17.6"
+#define SDK_VERSION "1.18.0"
 
 typedef unsigned int u32;
 typedef float fp32;
@@ -78,21 +78,21 @@ class XArmAPI {
 public:
   /**
    * @param port: ip-address(such as "192.168.1.185")
-   *  Note: this parameter is required if parameter do_not_open is false
+   *  Note: this parameter is required if `do_not_open` is false
    * @param is_radian: set the default unit is radians or not, default is false
-   * @param do_not_open: do not open, default is false, if true, you need to manually call the connect interface.
-   * @param check_tcp_limit: reversed, whether checking tcp limit, default is true
-   * @param check_joint_limit: reversed, whether checking joint limit, default is true
-   * @param check_cmdnum_limit: whether checking command num limit, default is true
-   * @param check_robot_sn: whether checking robot sn, default is false
-   * @param check_is_ready: check robot is ready to move or not, default is true
-   *	Note: only available if firmware_version < 1.5.20
-   * @param check_is_pause: check robot is pause or not, default is true
-   * @param max_callback_thread_count: max callback thread count, default is -1
-   *  Note: greater than 0 means the maximum number of threads that can be used to process callbacks
-   *  Note: equal to 0 means no thread is used to process the callback
-   *  Note: less than 0 means no limit on the number of threads used for callback
-   * @param max_cmdnum: max cmdnum, default is 512
+   * @param do_not_open: do not open, default is false. if true, call `connect()` manually later 
+   * @param check_tcp_limit: reserved, whether to check tcp limit, default is true
+   * @param check_joint_limit: reserved, whether to check joint limit, default is true
+   * @param check_cmdnum_limit: whether to check command num limit, default is true
+   * @param check_robot_sn: whether to check robot sn, default is false
+   * @param check_is_ready: whether to check robot ready state before motion, default is true
+   *	Note: only available if firmware version `< 1.5.20`
+   * @param check_is_pause: whether to check robot pause state, default is true
+   * @param max_callback_thread_count: max callback thread count, default is `-1`
+   *  greater than 0: maximum number of callback worker threads
+   *  equal to 0: callbacks are not dispatched by worker thread
+   *  less than 0: no limit on callback worker threads
+   * @param max_cmdnum: max command cache threshold, default is 512
    *	Note: only available in the param `check_cmdnum_limit` is true
    */
   XArmAPI(const std::string &port = "",
@@ -117,8 +117,8 @@ public:
   int mode; // mode
   int cmd_num; // cmd cache count
   fp32 joints_torque[7]; // joints torque, fp32[7]{servo-1, ..., servo-7}
-  bool motor_brake_states[8]; // motor brake states, bool[8]{servo-1, ..., servo-7, reversed}
-  bool motor_enable_states[8]; // motor enable states, bool[8]{servo-1, ..., servo-7, reversed}
+  bool motor_brake_states[8]; // motor brake states, bool[8]{servo-1, ..., servo-7, reserved}
+  bool motor_enable_states[8]; // motor enable states, bool[8]{servo-1, ..., servo-7, reserved}
   int error_code; // error code
   int warn_code; // warn code
   fp32 tcp_load[4]; // tcp load, fp32[4]{weight, x, y, z}
@@ -509,7 +509,7 @@ public:
    *  MoveToolLine: Linear motion
    *  MoveToolArcLine: Linear arc motion with interpolation
    * 
-   * @param pose: the coordinate relative to the current tool coordinate systemion, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
+   * @param pose: the coordinate relative to the current tool coordinate system, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]
    *  if default_is_radian is true, the value of roll/pitch/yaw should be in radians
    *  if default_is_radian is false, The value of roll/pitch/yaw should be in degrees
    * @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed
@@ -721,7 +721,7 @@ public:
    *  2. if default_is_radian is true, the value of servo-1/.../servo-7 should be in radians
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_inverse_kinematics(fp32 pose[6], fp32 angles[7], bool limited = true, fp32 *ref_angles = NULL);
+  int get_inverse_kinematics(fp32 pose[6], fp32 angles[7], bool limited = true, fp32 *ref_angles = nullptr);
 
   /**
    * @brief Get forward kinematics
@@ -862,7 +862,7 @@ public:
    * @param io4_value: the digital value of Tool GPIO-4
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_tgpio_digital(int *io0_value, int *io1_value, int *io2_value = NULL, int *io3_value = NULL, int *io4_value = NULL);
+  int get_tgpio_digital(int *io0_value, int *io1_value, int *io2_value = nullptr, int *io3_value = nullptr, int *io4_value = nullptr);
 
   /**
    * @brief Set the digital value of the specified Tool GPIO
@@ -893,7 +893,7 @@ public:
    * @param digitals2: the values of the controller GPIO(8-15)
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_cgpio_digital(int *digitals, int *digitals2 = NULL);
+  int get_cgpio_digital(int *digitals, int *digitals2 = nullptr);
 
   /**
    * @brief Get the analog value of the specified Controller GPIO
@@ -991,7 +991,7 @@ public:
    * @param output_conf2: digital(8-15) output functional info
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf, int *input_conf2 = NULL, int *output_conf2 = NULL);
+  int get_cgpio_state(int *state, int *digit_io, fp32 *analog, int *input_conf, int *output_conf, int *input_conf2 = nullptr, int *output_conf2 = nullptr);
 
   /**
    * @brief Register the report data callback
@@ -1085,97 +1085,97 @@ public:
   /**
    * @brief Release the report data callback
    * 
-   * @param callback: NULL means to release all callbacks;
+   * @param callback: nullptr means to release all callbacks;
    */
-  int release_report_data_callback(void(*callback)(XArmReportData *report_data_ptr) = NULL);
+  int release_report_data_callback(void(*callback)(XArmReportData *report_data_ptr) = nullptr);
   int release_report_data_callback(bool clear_all);
 
   /**
    * @brief Release the location report callback
    * 
-   * @param callback: NULL means to release all callbacks;
+   * @param callback: nullptr means to release all callbacks;
    */
-  int release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles) = NULL);
+  int release_report_location_callback(void(*callback)(const fp32 *pose, const fp32 *angles) = nullptr);
   int release_report_location_callback(bool clear_all);
 
   /**
    * @brief Release the connect changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_connect_changed_callback(void(*callback)(bool connected, bool reported) = NULL);
+  int release_connect_changed_callback(void(*callback)(bool connected, bool reported) = nullptr);
   int release_connect_changed_callback(bool clear_all);
 
   /**
    * @brief Release the state changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_state_changed_callback(void(*callback)(int state) = NULL);
+  int release_state_changed_callback(void(*callback)(int state) = nullptr);
   int release_state_changed_callback(bool clear_all);
 
   /**
    * @brief Release the mode changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_mode_changed_callback(void(*callback)(int mode) = NULL);
+  int release_mode_changed_callback(void(*callback)(int mode) = nullptr);
   int release_mode_changed_callback(bool clear_all);
 
   /**
    * @brief Release the motor enable states or motor brake states changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake) = NULL);
+  int release_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake) = nullptr);
   int release_mtable_mtbrake_changed_callback(bool clear_all);
 
   /**
    * @brief Release the error warn changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_error_warn_changed_callback(void(*callback)(int err_code, int warn_code) = NULL);
+  int release_error_warn_changed_callback(void(*callback)(int err_code, int warn_code) = nullptr);
   int release_error_warn_changed_callback(bool clear_all);
 
   /**
    * @brief Release the cmdnum changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_cmdnum_changed_callback(void(*callback)(int cmdnum) = NULL);
+  int release_cmdnum_changed_callback(void(*callback)(int cmdnum) = nullptr);
   int release_cmdnum_changed_callback(bool clear_all);
 
   /**
    * @brief Release the temperature changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_temperature_changed_callback(void(*callback)(const fp32 *temps) = NULL);
+  int release_temperature_changed_callback(void(*callback)(const fp32 *temps) = nullptr);
   int release_temperature_changed_callback(bool clear_all);
 
   /**
    * @brief Release the value of counter changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_count_changed_callback(void(*callback)(int count) = NULL);
+  int release_count_changed_callback(void(*callback)(int count) = nullptr);
   int release_count_changed_callback(bool clear_all);
 
   /**
    * @brief Release the progress of identification changed callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_iden_progress_changed_callback(void(*callback)(int progress) = NULL);
+  int release_iden_progress_changed_callback(void(*callback)(int progress) = nullptr);
   int release_iden_progress_changed_callback(bool clear_all);
 
   /**
    * @brief Release the feedback data callback
    * 
-   * @param callback: NULL means to release all callbacks for the same event
+   * @param callback: nullptr means to release all callbacks for the same event
    */
-  int release_feedback_callback(void(*callback)(unsigned char *feedback_data) = NULL);
+  int release_feedback_callback(void(*callback)(unsigned char *feedback_data) = nullptr);
   int release_feedback_callback(bool clear_all);
 
   /**
@@ -1299,7 +1299,7 @@ public:
    *  1: collision rebound is off
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14] = NULL, int *fense_is_on = NULL, int *collision_rebound_is_on = NULL);
+  int get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14] = nullptr, int *fense_is_on = nullptr, int *collision_rebound_is_on = nullptr);
 
   /**
    * @brief Set the boundary of the safety boundary mode
@@ -1359,13 +1359,13 @@ public:
    * @brief Stop trajectory recording
    * 
    * @param filename: the name to save
-   *  If the filename is NULL, just stop recording, do not save, you need to manually call `save_record_trajectory` save before changing the mode. otherwise it will be lost
+   *  If the filename is nullptr, just stop recording, do not save, you need to manually call `save_record_trajectory` save before changing the mode. otherwise it will be lost
    *  the trajectory is saved in the controller box.
    *  this action will overwrite the trajectory with the same name
    *  empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int stop_record_trajectory(char* filename = NULL);
+  int stop_record_trajectory(const char* filename = nullptr);
 
   /**
    * @brief Save the trajectory you just recorded
@@ -1376,7 +1376,7 @@ public:
    *  empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int save_record_trajectory(char* filename, float timeout = 5);
+  int save_record_trajectory(const char* filename, float timeout = 5);
 
   /**
    * @brief Load the trajectory
@@ -1385,19 +1385,19 @@ public:
    * @param timeout: the maximum timeout waiting for loading to complete, default is 10 seconds.
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int load_trajectory(char* filename, float timeout = NO_TIMEOUT);
+  int load_trajectory(const char* filename, float timeout = NO_TIMEOUT);
 
   /**
    * @brief Playback trajectory
    * 
    * @param times: number of playbacks.
    * @param filename: the name of the trajectory to play back
-   *  if filename is None, you need to manually call the `load_trajectory` to load the trajectory.
+   *  if filename is nullptr, you need to manually call the `load_trajectory` to load the trajectory.
    * @param wait: whether to wait for the arm to complete, default is false.
    * @param double_speed: double speed, only support 1/2/4, default is 1, only available if version > 1.2.11
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int playback_trajectory(int times = 1, char* filename = NULL, bool wait = false, int double_speed = 1);
+  int playback_trajectory(int times = 1, const char* filename = nullptr, bool wait = false, int double_speed = 1);
 
   /**
    * @brief Get trajectory read/write status
@@ -1558,7 +1558,7 @@ public:
    * @param ret_data: the response from robotiq
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int robotiq_reset(unsigned char ret_data[6] = NULL);
+  int robotiq_reset(unsigned char ret_data[6] = nullptr);
 
   /**
    * @brief If not already activated. Activate the robotiq gripper
@@ -1568,7 +1568,7 @@ public:
    * @param ret_data: the response from robotiq
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = NULL);
+  int robotiq_set_activate(bool wait = true, fp32 timeout = 3, unsigned char ret_data[6] = nullptr);
   int robotiq_set_activate(bool wait, unsigned char ret_data[6]);
   int robotiq_set_activate(unsigned char ret_data[6]);
 
@@ -1583,8 +1583,8 @@ public:
    * @param ret_data: the response from robotiq
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-  int robotiq_set_position(unsigned char pos, bool wait, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+  int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = nullptr, bool wait_motion = true);
+  int robotiq_set_position(unsigned char pos, bool wait, fp32 timeout = 5, unsigned char ret_data[6] = nullptr, bool wait_motion = true);
   int robotiq_set_position(unsigned char pos, bool wait, unsigned char ret_data[6], bool wait_motion = true);
   int robotiq_set_position(unsigned char pos, unsigned char ret_data[6], bool wait_motion = true);
 
@@ -1598,8 +1598,8 @@ public:
    * @param ret_data: the response from robotiq
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-  int robotiq_open(bool wait, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+  int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = nullptr, bool wait_motion = true);
+  int robotiq_open(bool wait, fp32 timeout = 5, unsigned char ret_data[6] = nullptr, bool wait_motion = true);
   int robotiq_open(bool wait, unsigned char ret_data[6], bool wait_motion = true);
   int robotiq_open(unsigned char ret_data[6], bool wait_motion = true);
 
@@ -1613,8 +1613,8 @@ public:
    * @param ret_data: the response from robotiq
    * @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
    */
-  int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
-  int robotiq_close(bool wait, fp32 timeout = 5, unsigned char ret_data[6] = NULL, bool wait_motion = true);
+  int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, fp32 timeout = 5, unsigned char ret_data[6] = nullptr, bool wait_motion = true);
+  int robotiq_close(bool wait, fp32 timeout = 5, unsigned char ret_data[6] = nullptr, bool wait_motion = true);
   int robotiq_close(bool wait, unsigned char ret_data[6], bool wait_motion = true);
   int robotiq_close(unsigned char ret_data[6], bool wait_motion = true);
 
@@ -2275,9 +2275,9 @@ public:
    * @param xe_limit: 6d vector. for compliant axes, these values are the maximum allowed tcp speed along/about the axis. mm/s
    * @return: See the code documentation for details.
    */
-  int get_ft_sensor_config(int *ft_mode = NULL, int *ft_is_started = NULL, int *ft_type = NULL, int *ft_id = NULL, int *ft_freq = NULL, 
-    float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL,
-    int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
+  int get_ft_sensor_config(int *ft_mode = nullptr, int *ft_is_started = nullptr, int *ft_type = nullptr, int *ft_id = nullptr, int *ft_freq = nullptr, 
+    float *ft_mass = nullptr, float *ft_dir_bias = nullptr, float ft_centroid[3] = nullptr, float ft_zero[6] = nullptr, int *imp_coord = nullptr, int imp_c_axis[6] = nullptr, float M[6] = nullptr, float K[6] = nullptr, float B[6] = nullptr,
+    int *f_coord = nullptr, int f_c_axis[6] = nullptr, float f_ref[6] = nullptr, float f_limits[6] = nullptr, float kp[6] = nullptr, float ki[6] = nullptr, float kd[6] = nullptr, float xe_limit[6] = nullptr);
 
   /**
    * @brief Get the error code of the Six-axis Force Torque Sensor
@@ -2306,9 +2306,9 @@ public:
    * @param status: the result of linear motor status
    * @return: See the code documentation for details.
    */
-  int get_linear_motor_registers(LinearMotorStatus *status = NULL, int addr = 0x0A20, int number_of_registers = 8);
+  int get_linear_motor_registers(LinearMotorStatus *status = nullptr, int addr = 0x0A20, int number_of_registers = 8);
   // Old API name, only for compatibility with old code, please use `get_linear_motor_registers` instead
-  int get_linear_track_registers(LinearMotorStatus *status = NULL, int addr = 0x0A20, int number_of_registers = 8) { return get_linear_motor_registers(status, addr, number_of_registers); }
+  int get_linear_track_registers(LinearMotorStatus *status = nullptr, int addr = 0x0A20, int number_of_registers = 8) { return get_linear_motor_registers(status, addr, number_of_registers); }
 
   /**
    * @brief Get the pos of the linear motor
@@ -2528,7 +2528,7 @@ public:
    *  -1: failure
    * return: See the code documentation for details.
    */
-  int iden_joint_friction(int *result, unsigned char *sn = NULL);
+  int iden_joint_friction(int *result, unsigned char *sn = nullptr);
 
   /** 
    * @brief Set the motion process detection type (valid for all motion interfaces of the current SDK instance)
@@ -2723,7 +2723,7 @@ public:
    *  Note:
    *    1. only available if firmware_version >= 2.3.0
    * 
-   * @param status: poe status, 1 means poe vaild, 0 means poe invalid
+   * @param status: poe status, 1 means poe valid, 0 means poe invalid
    * return: See the code documentation for details.
    */
   int get_poe_status(int *status);
@@ -3109,8 +3109,6 @@ private:
   void _destroy(void);
   void _sync(void);
   int _tcp_connect();
-  // int _connect_tcp_control();
-  // int _connect_tcp_report();
   void _init_threads();
   void _check_version(void);
   bool _version_is_ge(int major = 1, int minor = 2, int revision = 11);
@@ -3119,7 +3117,7 @@ private:
   int _xarm_is_ready(void);
   int _check_code(int code, bool is_move_cmd = false, int mode = -1);
   int _wait_move(fp32 timeout, int trans_id = -1);
-  int _wait_feedback(fp32 timeout, int trans_id = -1, int *feedback_code = NULL);
+  int _wait_feedback(fp32 timeout, int trans_id = -1, int *feedback_code = nullptr);
   void _set_feedback_key_transid(std::string feedback_key, int trans_id, unsigned char feedback_type);
   std::string _gen_feedback_key(bool wait);
   int _get_feedback_transid(std::string feedback_key);
@@ -3149,7 +3147,7 @@ private:
   void _report_count_changed_callback(void);
   void _report_iden_progress_changed_callback(void);
   void _feedback_callback(unsigned char *feedback_data);
-  int _check_modbus_code(int ret, unsigned char *rx_data = NULL, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
+  int _check_modbus_code(int ret, unsigned char *rx_data = nullptr, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
   int _get_modbus_baudrate(int *baud_inx, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
   int _checkset_modbus_baud(int baudrate, bool check = true, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
   int _robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]);

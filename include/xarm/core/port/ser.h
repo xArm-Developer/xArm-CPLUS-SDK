@@ -45,7 +45,6 @@ private:
 
 public:
   int que_maxlen;
-  // serial::Serial ser;
   std::shared_ptr<serial::Serial> ser;
 
 private:

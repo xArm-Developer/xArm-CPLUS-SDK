@@ -103,7 +103,7 @@ int XArmAPI::_get_bio_gripper_sn(unsigned char *sn)
   }    
   else {
     bio_gripper_version_ = 2;
-    if (sn != NULL)
+    if (sn != nullptr)
       memcpy(sn, &rx_data[3], 32);
     return ret;
   }
@@ -122,7 +122,7 @@ int XArmAPI::_check_bio_gripper_version()
 {
   if (bio_gripper_version_ == 0)
   {
-    _get_bio_gripper_sn(NULL);
+    _get_bio_gripper_sn(nullptr);
   }
   if (bio_gripper_version_ == 2 && bio_gripper_mode_ == -1)
   {

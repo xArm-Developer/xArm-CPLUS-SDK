@@ -26,6 +26,7 @@
 
 #include "xarm/core/port/ser.h"
 #include "xarm/core/common/crc16.h"
+#include "xarm/core/debug/debug_print.h"
 
 void SerialPort::recv_proc(void) {
   unsigned char ch;
@@ -81,7 +82,7 @@ int SerialPort::connect()
   if (state_.load(std::memory_order_acquire) == 0) return 1;
 
   _join_recv_thread();
-  auto new_ser = _init_serial(ser_port_.data(), ser_baud_);
+  auto new_ser = _init_serial(ser_port_.c_str(), ser_baud_);
   if (new_ser == nullptr)
   {
     return -1;
@@ -103,7 +104,15 @@ void SerialPort::disconnect()
   state_.store(-1, std::memory_order_release);
   try {
     ser->close();
-  } catch(...) {}
+  } 
+  catch (const std::exception& e) {
+    XARM_LOG_WARN("serial close exception: %s\n", e.what());
+    return;
+  }
+  catch (...) {
+    XARM_LOG_WARN("serial close exception: unknown\n");
+    return;
+  }
 }
 
 bool SerialPort::is_connected()
@@ -126,7 +135,12 @@ int SerialPort::_read_char(unsigned char *ch) {
     *ch = static_cast<unsigned char>(s[0]);
     return 0;
   }
+  catch (const std::exception& e) {
+    XARM_LOG_WARN("serial read char exception: %s\n", e.what());
+    return -1;
+  }
   catch (...) {
+    XARM_LOG_WARN("serial read char exception: unknown\n");
     return -1;
   }
 }
@@ -142,7 +156,12 @@ int SerialPort::_write_char(unsigned char ch) {
     char c = static_cast<char>(ch);
     return write_frame((unsigned char *)&c, 1);
   }
+  catch (const std::exception& e) {
+    XARM_LOG_WARN("serial write char exception: %s\n", e.what());
+    return -1;
+  }
   catch (...) {
+    XARM_LOG_WARN("serial write char exception: unknown\n");
     return -1;
   }
 }
@@ -154,7 +173,12 @@ int SerialPort::write_frame(unsigned char *data, int len) {
     if (size != len) { return -1; }
     return 0;
   }
+  catch (const std::exception& e) {
+    XARM_LOG_WARN("serial write exception: %s\n", e.what());
+    return -1;
+  }
   catch (...) {
+    XARM_LOG_WARN("serial write exception: unknown\n");
     return -1;
   }
 }
@@ -168,7 +192,6 @@ void SerialPort::_parse_put(unsigned char *data, int len) {
 
   for (int i = 0; i < len; i++) {
     ch = data[i];
-    // printf("---state = %d, ch = %x\n", rx_state_, ch);
     switch (rx_state_) {
     case UXBUS_START_FROMID:
       if (UXBUS_PROT_FROMID_ == ch) {
@@ -302,7 +325,12 @@ std::shared_ptr<serial::Serial> SerialPort::_init_serial(const char *port, int b
     new_ser->open();
     return new_ser;
   }
+  catch (const std::exception& e) {
+    XARM_LOG_ERROR("serial open exception: %s\n", e.what());
+    return nullptr;
+  }
   catch (...) {
+    XARM_LOG_ERROR("serial open exception: unknown\n");
     return nullptr;
   }
 }

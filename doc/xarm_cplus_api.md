@@ -1,4 +1,4 @@
-# xArm-C++-SDK API Documentation (V1.17.4)
+# xArm-C++-SDK API Documentation (V1.18.0)
 
 ## class __XArmAPI__
 ************************************
@@ -9,7 +9,7 @@ __XArmAPI(const std::string &robot_ip="",
     bool check_joint_limit=true,
     bool check_cmdnum_limit=true,
     bool check_robot_sn=false,
-    bool check_is_ready=false,
+    bool check_is_ready=true,
     bool check_is_pause=true,
     int max_callback_thread_count=100,
     int max_cmdnum = 512,
@@ -18,26 +18,26 @@ __XArmAPI(const std::string &robot_ip="",
     std::string report_type = "rich",
     bool baud_checkset = true)__  
 > @param robot_ip: ip-address(such as "192.168.1.185")  
-> &ensp;&ensp;&ensp;&ensp;Note: this parameter is required if parameter do_not_open is false  
+> &ensp;&ensp;&ensp;&ensp;Note: this parameter is required if `do_not_open` is false  
 > @param is_radian: set the default unit is radians or not, default is false  
-> @param do_not_open: do not open, default is false, if true, you need to manually call the connect interface.  
-> @param check_tcp_limit: reversed, whether checking tcp limit, default is true  
-> @param check_joint_limit: reversed, whether checking joint limit, default is true  
-> @param check_cmdnum_limit: whether checking command num limit, default is true  
-> @param check_robot_sn: whether checking robot sn, default is false  
-> @param check_is_ready: check robot is ready to move or not, default is true  
-> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version < 1.5.20  
-> @param check_is_pause: check robot is pause or not, default is true  
-> @param max_callback_thread_count: max callback thread count, default is -1  
-> &ensp;&ensp;&ensp;&ensp;Note: greater than 0 means the maximum number of threads that can be used to process callbacks  
-> &ensp;&ensp;&ensp;&ensp;Note: equal to 0 means no thread is used to process the callback  
-> &ensp;&ensp;&ensp;&ensp;Note: less than 0 means no limit on the number of threads used for callback  
-> @param max_cmdnum: max cmdnum, default is 512  
+> @param do_not_open: do not open, default is false. if true, call `connect()` manually later  
+> @param check_tcp_limit: reserved, whether to check tcp limit, default is true  
+> @param check_joint_limit: reserved, whether to check joint limit, default is true  
+> @param check_cmdnum_limit: whether to check command num limit, default is true  
+> @param check_robot_sn: whether to check robot sn, default is false  
+> @param check_is_ready: whether to check robot ready state before motion, default is true  
+> &ensp;&ensp;&ensp;&ensp;Note: only available if firmware version `< 1.5.20`  
+> @param check_is_pause: whether to check robot pause state, default is true  
+> @param max_callback_thread_count: max callback thread count, default is `-1`  
+> &ensp;&ensp;&ensp;&ensp;greater than 0: maximum number of callback worker threads  
+> &ensp;&ensp;&ensp;&ensp;equal to 0: callbacks are not dispatched by worker thread  
+> &ensp;&ensp;&ensp;&ensp;less than 0: no limit on callback worker threads  
+> @param max_cmdnum: max command cache threshold, default is 512  
 > &ensp;&ensp;&ensp;&ensp;Note: only available in the param `check_cmdnum_limit` is true  
 > @param init_axis: init axis variable  
-> @param debug:  reversed  
-> @param report_type: report type   
-> @param baud_checkset: auto check set the baud when use the gripper/bio/robotiq/linear_motor api or not  
+> @param debug: reserved  
+> @param report_type: report type, default is `"rich"`   
+> @param baud_checkset: auto check/set baud when using gripper/bio/robotiq/linear motor APIs  
 
 ************************************
 
@@ -54,7 +54,7 @@ __XArmAPI(const std::string &robot_ip="",
 
 
 - __int mode__
-  >xArm mode，only available in socket way and  enable_report is true  
+  >xArm mode，only available in socket way    
   >  
   > @return:   
   > &ensp;&ensp;&ensp;&ensp;0: position control mode  
@@ -82,7 +82,7 @@ __XArmAPI(const std::string &robot_ip="",
   > Note:  
   > &ensp;&ensp;&ensp;&ensp;For a robot with a number of axes n, only the first n states are valid, and the latter are reserved.  
   > 
-  > @return: bool[8]{servo-1, ..., servo-7, reversed}
+  > @return: bool[8]{servo-1, ..., servo-7, reserved}
 
 
 - __bool motor_enable_states[8]__
@@ -90,7 +90,7 @@ __XArmAPI(const std::string &robot_ip="",
   > Note:  
   > &ensp;&ensp;&ensp;&ensp;For a robot with a number of axes n, only the first n states are valid, and the latter are reserved.
   >
-  > @return: bool[8]{servo-1, ..., servo-7, reversed}
+  > @return: bool[8]{servo-1, ..., servo-7, reserved}
 
 
 - __int error_code__
@@ -132,7 +132,7 @@ __XArmAPI(const std::string &robot_ip="",
 
 
 - __int version_number[3]__
-  > Frimware version number
+  > Firmware version number
 
 
 - __float tcp_jerk__
@@ -164,11 +164,11 @@ __XArmAPI(const std::string &robot_ip="",
 
 
 - __float last_used_tcp_speed__
-  > The last used cartesion speed, default value of parameter speed of interface set_position/move_circle
+  > The last used cartesian speed, default value of parameter speed of interface set_position/move_circle
 
 
 - __float last_used_tcp_acc__
-  > The last used cartesion acceleration, default value of parameter mvacc of interface set_position/move_circle
+  > The last used cartesian acceleration, default value of parameter mvacc of interface set_position/move_circle
 
 
 - __float angles[7]__
@@ -204,19 +204,19 @@ __XArmAPI(const std::string &robot_ip="",
 
 
 - __float position[6]__
-  > Cartesion position
+  > Cartesian position
   >
   > @return: float[6]{x, y, z, roll, pitch, yaw}
 
 
 - __float last_used_position[6]__
-  > The last used cartesion position, default value of parameter x/y/z/roll/pitch/yaw of interface set_position
+  > The last used cartesian position, default value of parameter x/y/z/roll/pitch/yaw of interface set_position
   > 
   > @return: float[6]{x, y, z, roll, pitch, yaw}
 
 
 - __float tcp_offset[6]__
-  > Cartesion position offset, only available in socket way and enable_report is true 
+  > Cartesian position offset, only available in socket way and enable_report is true 
   >
   > @return: float[6]{x, y, z, roll, pitch, yaw}
 
@@ -340,7 +340,7 @@ __XArmAPI(const std::string &robot_ip="",
 
 
 - __void disconnect(void)__
-  > Disconnect to xArm
+  > Disconnect from xArm
 
 
 - __int get_version(unsigned char version[40])__
@@ -554,13 +554,13 @@ __XArmAPI(const std::string &robot_ip="",
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_tool_position(float pose[6], float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, unsigned char motion_type=0)__
-- __int set_tool_position(float pose[6], bool wait, float timeout=NO_TIMEOUT, unsigned char motion_type=0)__
+- __int set_tool_position(float pose[6], float speed=0, float acc=0, float mvtime=0, bool wait=false, float timeout=NO_TIMEOUT, float radius = -1, unsigned char motion_type=0)__
+- __int set_tool_position(float pose[6], bool wait, float timeout=NO_TIMEOUT, float radius = -1, unsigned char motion_type=0)__
   > Movement relative to the tool coordinate system  
   > &ensp;&ensp;&ensp;&ensp;MoveToolLine: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveToolArcLine: Linear arc motion with interpolation  
   > 
-  > @param pose: the coordinate relative to the current tool coordinate systemion, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
+  > @param pose: the coordinate relative to the current tool coordinate system, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is true, the value of roll/pitch/yaw should be in radians  
   > &ensp;&ensp;&ensp;&ensp;if default_is_radian is false, The value of roll/pitch/yaw should be in degrees  
   > @param speed: move speed (mm/s, rad/s), default is this.last_used_tcp_speed  
@@ -747,7 +747,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_inverse_kinematics(float pose[6], float angles[7], bool limited = true, fp32 *ref_angles = NULL)__
+- __int get_inverse_kinematics(float pose[6], float angles[7], bool limited = true, float *ref_angles = nullptr)__
   > Get inverse kinematics
   > 
   > @param pose: source pose, like [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)]  
@@ -839,7 +839,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int set_gripper_g2_position(int pos, int speed = 100, int force=50, bool wait = false, fp32 timeout = 10, bool wait_motion = true)__
+- __int set_gripper_g2_position(int pos, int speed = 100, int force=50, bool wait = false, float timeout = 10, bool wait_motion = true)__
   > Set the position of the xArm Gripper G2
   > 
   > @param pos: gripper pos between 0 and 84, (unit: mm)   
@@ -989,7 +989,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_cgpio_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2 = NULL, int *output_conf2 = NULL)__
+- __int get_cgpio_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2 = nullptr, int *output_conf2 = nullptr)__
   > Get the state of the Controller GPIO
   > 
   > @param state: contorller gpio module state and controller gpio module error code  
@@ -1089,69 +1089,69 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;Note: this time is the corresponding controller system time when the feedback is triggered  
 
 
-- __int release_report_location_callback(void(*callback)(const float *pose, const float *angles)=NULL)__
+- __int release_report_location_callback(void(*callback)(const float *pose, const float *angles)=nullptr)__
   > Release the location report callback
   > 
-  > @param callback: NULL means to release all callbacks
+  > @param callback: nullptr means to release all callbacks
 
 
-- __int release_connect_changed_callback(void(*callback)(bool connected, bool reported)=NULL)__
+- __int release_connect_changed_callback(void(*callback)(bool connected, bool reported)=nullptr)__
   > Release the connect changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_state_changed_callback(void(*callback)(int state)=NULL)__
+- __int release_state_changed_callback(void(*callback)(int state)=nullptr)__
   > Release the state changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_mode_changed_callback(void(*callback)(int mode)=NULL)__
+- __int release_mode_changed_callback(void(*callback)(int mode)=nullptr)__
   > Release the mode changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake)=NULL)__
+- __int release_mtable_mtbrake_changed_callback(void(*callback)(int mtable, int mtbrake)=nullptr)__
   > Release the motor enable states or motor brake states changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_error_warn_changed_callback(void(*callback)(int err_code, int warn_code)=NULL)__
+- __int release_error_warn_changed_callback(void(*callback)(int err_code, int warn_code)=nullptr)__
   > Release the error warn changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_cmdnum_changed_callback(void(*callback)(int cmdnum)=NULL)__
+- __int release_cmdnum_changed_callback(void(*callback)(int cmdnum)=nullptr)__
   > Release the cmdnum changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_temperature_changed_callback(void(*callback)(const float *temps)=NULL)__
+- __int release_temperature_changed_callback(void(*callback)(const float *temps)=nullptr)__
   > Release the temperature changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_count_changed_callback(void(*callback)(int count)=NULL)__
+- __int release_count_changed_callback(void(*callback)(int count)=nullptr)__
   > Release the value of counter changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
-- __int release_iden_progress_changed_callback(void(*callback)(int progress) = NULL)__
+- __int release_iden_progress_changed_callback(void(*callback)(int progress) = nullptr)__
   > Release the progress of identification changed callback
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
-- __int release_feedback_callback(void(*callback)(unsigned char *feedback_data) = NULL)__
+- __int release_feedback_callback(void(*callback)(unsigned char *feedback_data) = nullptr)__
   > Release the feedback data callback    
   > 
-  > @param callback: NULL means to release all callbacks for the same event
+  > @param callback: nullptr means to release all callbacks for the same event
 
 
 - __int get_vacuum_gripper(int *val)__
@@ -1241,7 +1241,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14]=NULL, int *fense_is_on=NULL, int *collision_rebound_is_on=NULL)__
+- __int get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14]=nullptr, int *fense_is_on=nullptr, int *collision_rebound_is_on=nullptr)__
   > Get states of the reduced mode
   > 
   > @param on:  
@@ -1282,7 +1282,8 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
 
 
 - __int set_fence_mode(bool on)__
-  > Turn on/off safety mode, alias for `set_fense_mode`
+  > Turn on/off safety mode
+  > Note: `set_fense_mode` is the old compatibility alias. New code should use `set_fence_mode`.   
   > 
   > @param on: on/off  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
@@ -1312,18 +1313,17 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int stop_record_trajectory(char* filename=NULL)__
+- __int stop_record_trajectory(const char* filename=nullptr)__
   > Stop trajectory recording
   > 
   > @param filename: the name to save  
-  > &ensp;&ensp;&ensp;&ensp;If the filename is NULL, just stop recording, do not save, you need to manually call `save_record_trajectory` save before changing the mode. otherwise it will be lost the trajectory is saved in the controller box.  
-  > &ensp;&ensp;&ensp;&ensp;This action will overwrite the trajectory with the same name
-      empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.  
+  > &ensp;&ensp;&ensp;&ensp;If the filename is nullptr, just stop recording, do not save, you need to manually call `save_record_trajectory` save before changing the mode. otherwise it will be lost the trajectory is saved in the controller box.  
+  > &ensp;&ensp;&ensp;&ensp;This action will overwrite the trajectory with the same name empty the trajectory in memory after saving, so repeated calls will cause the recorded trajectory to be covered by an empty trajectory.  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int save_record_trajectory(char* filename, float timeout=10)__
+- __int save_record_trajectory(const char* filename, float timeout=5)__
   > Save the trajectory you just recorded
   > 
   > @param filename: the name to save  
@@ -1333,16 +1333,16 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int load_trajectory(char* filename, float timeout=10)__
+- __int load_trajectory(const char* filename, float timeout=NO_TIMEOUT)__
   > Load the trajectory
   > 
   > @param filename: the name of the trajectory to load  
-  > @param timeout: the maximum timeout waiting for loading to complete, default is 10 seconds.  
+  > @param timeout: the maximum timeout waiting for loading to complete, default is no timeout.  
   > 
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int playback_trajectory(int times=1, char* filename=NULL, bool wait=false, int double_speed=1)__
+- __int playback_trajectory(int times=1, const char* filename=nullptr, bool wait=false, int double_speed=1)__
   > Playback trajectory
   > 
   > @param times: number of playbacks.  
@@ -1402,7 +1402,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_cgpio_digital_with_xyz(int ionum, int value, float xyz[3], float tol_r)__
+- __int set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], float tol_r)__
   > Set the analog value of the specified Controller GPIO when the robot has reached the specified xyz position
   > 
   > @param ionum: 0 ~ 1  
@@ -1429,8 +1429,8 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int set_position_aa(float pose[6], float speed = 0, float acc = 0, float mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
-- __int set_position_aa(float pose[6], bool is_tool_coord, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, unsigned char motion_type = 0)__
+- __int set_position_aa(float pose[6], float speed = 0, float acc = 0, float mvtime = 0, bool is_tool_coord = false, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, unsigned char motion_type = 0)__
+- __int set_position_aa(float pose[6], bool is_tool_coord, bool relative = false, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, unsigned char motion_type = 0)__
   > Set the pose represented by the axis angle pose  
   > &ensp;&ensp;&ensp;&ensp;MoveLineAA: Linear motion  
   > &ensp;&ensp;&ensp;&ensp;MoveArcLineAA: Linear arc motion with interpolation  
@@ -1504,7 +1504,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_reset(unsigned char ret_data[6] = NULL)__
+- __int robotiq_reset(unsigned char ret_data[6] = nullptr)__
   > Reset the robotiq gripper (clear previous activation if any)
   > 
   > @param ret_data: the response from robotiq
@@ -1512,9 +1512,9 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_set_activate(bool wait = true, float timeout = 3, unsigned char ret_data[6] = NULL)__
-- __int robotiq_set_activate(bool wait = true, unsigned char ret_data[6] = NULL)__
-- __int robotiq_set_activate(unsigned char ret_data[6] = NULL)__
+- __int robotiq_set_activate(bool wait = true, float timeout = 3, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_set_activate(bool wait = true, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_set_activate(unsigned char ret_data[6] = nullptr)__
   > If not already activated. Activate the robotiq gripper
   > 
   > @param wait: whether to wait for the robotiq activate complete, default is true  
@@ -1524,10 +1524,10 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5,  unsigned char ret_data[6] = NULL)__
-- __int robotiq_set_position(unsigned char pos, bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = NULL)__
-- __int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = NULL)__
+- __int robotiq_set_position(unsigned char pos, unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5,  unsigned char ret_data[6] = nullptr)__
+- __int robotiq_set_position(unsigned char pos, bool wait = true, float timeout = 5, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_set_position(unsigned char pos, bool wait = true, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_set_position(unsigned char pos, unsigned char ret_data[6] = nullptr)__
   > Go to the position with determined speed and force.
   > 
   > @param pos: position of the gripper. Integer between 0 and 255. 0 being the open position and 255 being the close position.  
@@ -1540,10 +1540,10 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_open(bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_open(bool wait = true, unsigned char ret_data[6] = NULL)__
-- __int robotiq_open(unsigned char ret_data[6] = NULL)__
+- __int robotiq_open(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_open(bool wait = true, float timeout = 5, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_open(bool wait = true, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_open(unsigned char ret_data[6] = nullptr)__
   > Open the robotiq gripper
   > 
   > @param speed: gripper speed between 0 and 255  
@@ -1555,10 +1555,10 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_close(bool wait = true, float timeout = 5, unsigned char ret_data[6] = NULL)__
-- __int robotiq_close(bool wait = true, unsigned char ret_data[6] = NULL)__
-- __int robotiq_close(unsigned char ret_data[6] = NULL)__
+- __int robotiq_close(unsigned char speed = 0xFF, unsigned char force = 0xFF, bool wait = true, float timeout = 5, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_close(bool wait = true, float timeout = 5, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_close(bool wait = true, unsigned char ret_data[6] = nullptr)__
+- __int robotiq_close(unsigned char ret_data[6] = nullptr)__
   > Close the robotiq gripper
   > 
   > @param speed: gripper speed between 0 and 255  
@@ -1628,7 +1628,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @param pos: used to store the results obtained  
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
-- __int set_bio_gripper_g2_position(int pos, int speed = 2000, int force=100, bool wait = true, fp32 timeout = 10, bool wait_motion = true)__
+- __int set_bio_gripper_g2_position(int pos, int speed = 2000, int force=100, bool wait = true, float timeout = 10, bool wait_motion = true)__
   > Set the position of the BIO Gripper G2
   > 
   > @param pos: gripper pos between 71 and 150, (unit: mm)   
@@ -2054,7 +2054,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_ft_sensor_config(int *ft_mode = NULL, int *ft_is_started = NULL, int *ft_type = NULL, int *ft_id = NULL, int *ft_freq = NULL, float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL, int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL)__
+- __int get_ft_sensor_config(int *ft_mode = nullptr, int *ft_is_started = nullptr, int *ft_type = nullptr, int *ft_id = nullptr, int *ft_freq = nullptr, float *ft_mass = nullptr, float *ft_dir_bias = nullptr, float ft_centroid[3] = nullptr, float ft_zero[6] = nullptr, int *imp_coord = nullptr, int imp_c_axis[6] = nullptr, float M[6] = nullptr, float K[6] = nullptr, float B[6] = nullptr, int *f_coord = nullptr, int f_c_axis[6] = nullptr, float f_ref[6] = nullptr, float f_limits[6] = nullptr, float kp[6] = nullptr, float ki[6] = nullptr, float kd[6] = nullptr, float xe_limit[6] = nullptr)__
   > Get the config of the Six-axis Force Torque Sensor  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   > &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.8.3  
@@ -2295,7 +2295,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int get_joint_states(float position[7], float velocity[7], float effort[7])__
+- __int get_joint_states(float position[7], float velocity[7], float effort[7], int num = 3)__
   > Get the joint states  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
   >
@@ -2309,7 +2309,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: see the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int iden_joint_friction(int *result, unsigned char *sn = NULL)__
+- __int iden_joint_friction(int *result, unsigned char *sn = nullptr)__
   > Identification the friction  
   > &ensp;&ensp;&ensp;&ensp;Note: only available if firmware_version >= 1.9.0  
   > 
@@ -2320,7 +2320,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int open_lite6_gripper(void)__
+- __int open_lite6_gripper(bool sync = true)__
   > Open the gripper of Lite6 series robotics arms  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
@@ -2332,7 +2332,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int close_lite6_gripper(void)__
+- __int close_lite6_gripper(bool sync = true)__
   > Close the gripper of Lite6 series robotics arms  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
@@ -2344,7 +2344,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 
-- __int stop_lite6_gripper(void)__
+- __int stop_lite6_gripper(bool sync = true)__
   > Stop the gripper of Lite6 series robotics arms  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 1.10.0  
@@ -2398,7 +2398,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int get_dh_params(float dh_params[28])__
-  > Stop the gripper of Lite6 series robotics arms  
+  > Get the DH parameters  
   > &ensp;&ensp;&ensp;&ensp;Note:  
   >  &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.0.0  
   >    
@@ -2493,7 +2493,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > Note:  
   > &ensp;&ensp;&ensp;&ensp;1. only available if firmware_version >= 2.3.0  
   > 
-  > @param status: poe status, 1 means poe vaild, 0 means poe invalid   
+  > @param status: poe status, 1 means poe valid, 0 means poe invalid   
   > @return: See the [API Code Documentation](./xarm_api_code.md#api-code) for details.
 
 - __int get_iden_status(int *status)__
@@ -2796,7 +2796,7 @@ __int move_gohome(bool wait=false, float timeout=NO_TIMEOUT)__
   > &ensp;&ensp;&ensp;&ensp;Note: code 129~144 means Modbus TCP exception, the actual modbus tcp exception code is (code-0x80), refer to [Standard Modbus TCP](./UF_ModbusTCP_Manual.md)
 
 - __int write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed = false)__
-  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Mask Write Holding Register (0x17)  
+  > ([Standard Modbus TCP](./UF_ModbusTCP_Manual.md)) Write and Read Holding Registers (0x17)  
   > 
   > @param r_addr: the starting address of the register to be read  
   > @param r_quantity: number of registers to read  

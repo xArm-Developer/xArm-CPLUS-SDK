@@ -76,7 +76,7 @@ int XArmAPI::get_cgpio_digital(int *digitals, int *digitals2) {
   for (int i = 0; i < 8; i++) {
     digitals[i] = tmp >> i & 0x0001;
   }
-  if (digitals2 != NULL) {
+  if (digitals2 != nullptr) {
     for (int i = 8; i < 16; i++) {
       digitals2[i-8] = tmp >> i & 0x0001;
     }
@@ -165,7 +165,7 @@ int XArmAPI::get_vacuum_gripper(int *val, int hardware_version) {
       return ret;
     }
     int io0, io1;
-    return get_tgpio_digital(&io0, &io1, NULL, val);
+    return get_tgpio_digital(&io0, &io1, nullptr, val);
   }
 }
 
@@ -238,7 +238,7 @@ int XArmAPI::set_cgpio_analog_with_xyz(int ionum, float value, float xyz[3], flo
 int XArmAPI::_check_modbus_code(int ret, unsigned char *rx_data, unsigned char host_id) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   if (ret == 0 || ret == UXBUS_STATE::ERR_CODE || ret == UXBUS_STATE::WAR_CODE) {
-    if (rx_data != NULL && rx_data[0] != host_id)
+    if (rx_data != nullptr && rx_data[0] != host_id)
       return API_CODE::HOST_ID_ERR;
     if (ret != 0) {
       if (host_id == UXBUS_CONF::ROBOT_RS485_HOST_ID) {
@@ -330,9 +330,16 @@ int XArmAPI::_checkset_modbus_baud(int baudrate, bool check, unsigned char host_
           sleep_milliseconds(1000);
         }
       }
+      catch (const std::exception& e) {
+        ignore_error_ = false;
+        ignore_state_ = false;
+        XARM_LOG_WARN("checkset_modbus_baud exception: %s\n", e.what());
+        return API_CODE::API_EXCEPTION;
+      }
       catch (...) {
         ignore_error_ = false;
         ignore_state_ = false;
+        XARM_LOG_WARN("checkset_modbus_baud exception: unknown\n");
         return API_CODE::API_EXCEPTION;
       }
       ignore_error_ = false;
@@ -429,21 +436,19 @@ int XArmAPI::set_rs485_use_503_port(bool use_503_port)
 
 int XArmAPI::set_rs485_data(unsigned char *modbus_data, int modbus_length, unsigned char *ret_data, int ret_length, unsigned char host_id, bool is_transparent_transmission, bool use_503_port) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  unsigned char *rx_data = new unsigned char[ret_length + 1]();
+  std::vector<unsigned char> rx_data(ret_length + 1, 0);
   int ret = 0;
   if (use_503_port) {
     if (!_is_connected_503() && _connect_503() != 0) {
-      delete[] rx_data;
       return API_CODE::NOT_CONNECTED;
     }
-    ret = core503_->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data, host_id, 0.0, is_transparent_transmission);
+    ret = core503_->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data.data(), host_id, 0.0, is_transparent_transmission);
   }
   else {
-    ret = core->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data, host_id, 0.0, is_transparent_transmission);
+    ret = core->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data.data(), host_id, 0.0, is_transparent_transmission);
   }
-  ret = _check_modbus_code(ret, rx_data);
-  memcpy(ret_data, rx_data + 1, ret_length);
-  delete[] rx_data;
+  ret = _check_modbus_code(ret, rx_data.data());
+  memcpy(ret_data, rx_data.data() + 1, ret_length);
   return ret;
 }
 

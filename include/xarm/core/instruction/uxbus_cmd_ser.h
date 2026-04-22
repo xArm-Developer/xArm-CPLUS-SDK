@@ -13,6 +13,7 @@
 #define CORE_INSTRUCTION_UXBUS_CMD_SER_H_
 
 #include <memory>
+#include <vector>
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/port/ser.h"
 

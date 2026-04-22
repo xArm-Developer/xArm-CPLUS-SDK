@@ -11,8 +11,9 @@
 
 #include <stdio.h>
 #include "xarm/core/os/thread.h"
+#include "xarm/core/debug/debug_print.h"
 
-#define PRINT_ERR printf
+#define PRINT_ERR XARM_LOG_ERROR
 
 #ifdef _WIN32
 HANDLE thread_init(fun_point_t fun_point, void *arg) {
@@ -24,8 +25,8 @@ HANDLE thread_init(fun_point_t fun_point, void *arg) {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   char ret = pthread_create(&id, &attr, fun_point, arg);
   */
-  m_handle = (HANDLE)_beginthreadex(NULL, 0, fun_point, arg, 0, NULL);
-  if (NULL == m_handle) PRINT_ERR("error: pthread create failes\n");
+  m_handle = (HANDLE)_beginthreadex(nullptr, 0, fun_point, arg, 0, nullptr);
+  if (nullptr == m_handle) PRINT_ERR("error: pthread create failes\n");
 
   return m_handle;
 }

@@ -11,6 +11,9 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
+- > ### 1.18.0
+  - Strengthen the code, fix some hidden bugs, and eliminate security risks.
+
 - > ### 1.17.0/1.17.1 
   - Change some API names
 
@@ -277,7 +280,7 @@
 
 - ##### [6001-set_reduced_mode](example/6001-set_reduced_mode.cc)
 
-- ##### [6002-set_fense_mode](example/6002-set_fense_mode.cc)
+- ##### [6002-set_fence_mode](example/6002-set_fence_mode.cc)
 
 - ##### [7001-servo_j](example/7001-servo_j.cc)
 

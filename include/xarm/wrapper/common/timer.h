@@ -21,6 +21,7 @@
 #include <condition_variable>
 #include <vector>
 #include <queue>
+#include "xarm/core/debug/debug_print.h"
 
 class Timer final {
 public:
@@ -162,7 +163,11 @@ private:
       try {
         task();
       }
+      catch (const std::exception& e) {
+        XARM_LOG_WARN("timer task exception: %s\n", e.what());
+      }
       catch (...) {
+        XARM_LOG_WARN("timer task exception: unknown\n");
       }
       lock.lock();
 
@@ -331,7 +336,12 @@ public:
       try {
         if (thread.joinable()) thread.join();
       }
-      catch (...) {}
+      catch (const std::exception& e) {
+        XARM_LOG_WARN("thread join exception: %s\n", e.what());
+      }
+      catch (...) {
+        XARM_LOG_WARN("thread join exception: unknown\n");
+      }
     }
     thread_vector_.clear();
   };

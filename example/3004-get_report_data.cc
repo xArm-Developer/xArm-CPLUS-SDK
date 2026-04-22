@@ -19,8 +19,8 @@ int main(int argc, char **argv) {
   std::string robot_ip(argv[1]);
   int report_port = atoi(argv[2]);
 
-  SocketPort *sock = new SocketPort((char*)robot_ip.c_str(), report_port, 10, 320, 1);
-  if (sock->is_ok() != 0) {
+  auto sock = std::make_shared<SocketPort>((char*)robot_ip.c_str(), report_port, 10, 320, 1);
+  if (!sock->is_connected()) {
     fprintf(stderr, "Error: Tcp Report connection failed\n");
     return -1;
   }
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   float report_angles[7];
   unsigned char buf[256];
   unsigned char *data_fp;
-  while (sock->is_ok() == 0)
+  while (sock->is_connected())
   {
     if (sock->read_frame(buf) == 0)
     {

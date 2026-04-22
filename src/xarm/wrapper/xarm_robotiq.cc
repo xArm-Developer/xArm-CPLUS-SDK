@@ -13,7 +13,7 @@
 int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_data[6]) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   if (baud_checkset_flag_ && _checkset_modbus_baud(default_robotiq_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
-  unsigned char *send_data = new unsigned char[7 + length]();
+  std::vector<unsigned char> send_data(7 + length, 0);
   send_data[0] = 0x09;
   send_data[1] = 0x10;
   send_data[2] = 0x03;
@@ -22,14 +22,13 @@ int XArmAPI::_robotiq_set(unsigned char *params, int length, unsigned char ret_d
   send_data[5] = 0x03;
   send_data[6] = (unsigned char)length;
   for (int i = 0; i < length; i++) { send_data[7+i] = params[i]; }
-  int ret = getset_tgpio_modbus_data(send_data, length + 7, ret_data, 6);
-  delete[] send_data;
+  int ret = getset_tgpio_modbus_data(send_data.data(), length + 7, ret_data, 6);
   return ret;
 }
 int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_registers) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   if (baud_checkset_flag_ && _checkset_modbus_baud(default_robotiq_baud_) != 0) return API_CODE::MODBUS_BAUD_NOT_CORRECT;
-  unsigned char *send_data = new unsigned char[6]();
+  unsigned char send_data[6] = {0};
   send_data[0] = 0x09;
   send_data[1] = 0x03;
   send_data[2] = 0x07;
@@ -37,7 +36,6 @@ int XArmAPI::_robotiq_get(unsigned char ret_data[9], unsigned char number_of_reg
   send_data[4] = 0x00;
   send_data[5] = number_of_registers;
   int ret = getset_tgpio_modbus_data(send_data, 6, ret_data, 3 + 2 * number_of_registers);
-  delete[] send_data;
   if (ret == 0) {
     if (number_of_registers >= 0x01) {
       robotiq_status.gOBJ = (ret_data[3] & 0xC0) >> 6;
@@ -120,7 +118,7 @@ int XArmAPI::robotiq_reset(unsigned char ret_data[6]) {
   unsigned char params[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
   unsigned char rx_data[6] = { 0 };
   int ret = _robotiq_set(params, 6, rx_data);
-  if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
+  if (ret_data != nullptr) { memcpy(ret_data, rx_data, 6); }
   return ret;
 }
 
@@ -129,7 +127,7 @@ int XArmAPI::robotiq_set_activate(bool wait, fp32 timeout, unsigned char ret_dat
   unsigned char params[6] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
   unsigned char rx_data[6] = { 0 };
   int ret = _robotiq_set(params, 6, rx_data);
-  if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
+  if (ret_data != nullptr) { memcpy(ret_data, rx_data, 6); }
   if (wait && ret == 0) { ret = _robotiq_wait_activation_completed(timeout); }
   if (ret == 0) robotiq_is_activated_ = true;
   return ret;
@@ -155,7 +153,7 @@ int XArmAPI::robotiq_set_position(unsigned char pos, unsigned char speed, unsign
     }
   }
   int ret = _robotiq_set(params, 6, rx_data);
-  if (ret_data != NULL) { memcpy(ret_data, rx_data, 6); }
+  if (ret_data != nullptr) { memcpy(ret_data, rx_data, 6); }
   if (wait && ret == 0) { ret = _robotiq_wait_motion_completed(timeout); }
   return ret;
 }

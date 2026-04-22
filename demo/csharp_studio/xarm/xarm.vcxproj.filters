@@ -137,6 +137,9 @@
     <ClCompile Include="..\..\..\src\xarm\core\report_data.cc">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\xarm\core\xarm_config.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\xarm\wrapper\xarm_api.cc">
       <Filter>源文件</Filter>
     </ClCompile>

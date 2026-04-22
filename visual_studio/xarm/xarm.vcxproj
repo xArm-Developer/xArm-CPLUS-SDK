@@ -179,6 +179,7 @@
     <ClCompile Include="..\..\src\xarm\core\port\ser.cc" />
     <ClCompile Include="..\..\src\xarm\core\port\socket.cc" />
     <ClCompile Include="..\..\src\xarm\core\report_data.cc" />
+    <ClCompile Include="..\..\src\xarm\core\xarm_config.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_api.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_bio.cc" />
     <ClCompile Include="..\..\src\xarm\wrapper\xarm_events.cc" />

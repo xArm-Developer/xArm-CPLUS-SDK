@@ -57,12 +57,12 @@ int UxbusCmdTcp::set_protocol_identifier(int protocol_identifier)
   std::lock_guard<std::mutex> locker(mutex_);
   if (protocol_identifier_ != protocol_identifier) {
     protocol_identifier_ = protocol_identifier;
-    printf("change protocol identifier to %d\n", protocol_identifier_);
+    XARM_LOG_INFO("change protocol identifier to %d\n", protocol_identifier_);
   }
   return 0;
 }
 
-void UxbusCmdTcp::close(void) { arm_port_->close_port(); }
+void UxbusCmdTcp::close(void) { arm_port_->disconnect(); }
 
 int UxbusCmdTcp::is_ok(void) { return arm_port_->is_ok(); }
 
@@ -70,7 +70,7 @@ int UxbusCmdTcp::_send_modbus_request(unsigned char unit_id, unsigned char *pdu_
 {
   int len = pdu_len + 7;
   // unsigned char send_data[len];
-  unsigned char *send_data = new unsigned char[len]();
+  std::vector<unsigned char> send_data(len, 0);
   unsigned short curr_trans_id = transaction_id_;
   unsigned short curr_prot_id = prot_id < 0 ? protocol_identifier_ : prot_id;
 
@@ -83,8 +83,7 @@ int UxbusCmdTcp::_send_modbus_request(unsigned char unit_id, unsigned char *pdu_
 
   arm_port_->flush();
   // print_hex("send:", send_data, pdu_len + 7);
-  int ret = arm_port_->write_frame(send_data, len);
-  delete[] send_data;
+  int ret = arm_port_->write_frame(send_data.data(), len);
   if (ret != len) { return -1; }
 
   transaction_id_ = transaction_id_ % TRANSACTION_ID_MAX + 1;
@@ -98,11 +97,10 @@ int UxbusCmdTcp::_recv_modbus_response(unsigned char t_unit_id, unsigned short t
   int ret = UXBUS_STATE::ERR_TOUT;
   int code;
   unsigned short length;
-  // unsigned char rx_data[arm_port_->que_maxlen] = {0};
-  unsigned char *rx_data = new unsigned char[arm_port_->que_maxlen]();
+  std::vector<unsigned char> rx_data(arm_port_->que_maxlen, 0);
   long long expired = get_system_time() + (long long)timeout;
   while (get_system_time() < expired) {
-    code = arm_port_->read_frame(rx_data);
+    code = arm_port_->read_frame(rx_data.data());
     if (code == -1) {
       sleep_us(500);
       continue;
@@ -140,7 +138,6 @@ int UxbusCmdTcp::_recv_modbus_response(unsigned char t_unit_id, unsigned short t
       break;
     }
   }
-  delete[] rx_data;
   return ret;
 }
 
@@ -186,14 +183,13 @@ int UxbusCmdTcp::_read_bits(unsigned short addr, unsigned short quantity, unsign
   bin16_to_8(addr, &pdu[1]);
   bin16_to_8(quantity, &pdu[3]);
   int rx_len = 9 + (quantity + 7) / 8;
-  unsigned char *rx_data = new unsigned char[rx_len]();
-  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data, rx_len);
+  std::vector<unsigned char> rx_data(rx_len, 0);
+  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data.data(), rx_len);
   if (ret == 0) {
     for (size_t i = 0; i < quantity; i++) {
       bits[i] = (rx_data[9 + i / 8] >> (i % 8) & 0x01);
     }
   }
-  delete[] rx_data;
   return ret;
 }
 
@@ -204,8 +200,8 @@ int UxbusCmdTcp::_read_registers(unsigned short addr, unsigned short quantity, i
   bin16_to_8(addr, &pdu[1]);
   bin16_to_8(quantity, &pdu[3]);
   int rx_len = 9 + quantity * 2;
-  unsigned char *rx_data = new unsigned char[rx_len]();
-  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data, rx_len);
+  std::vector<unsigned char> rx_data(rx_len, 0);
+  int ret = _standard_modbus_tcp_request(pdu, 5, rx_data.data(), rx_len);
   if (ret == 0) {
     if (is_signed) {
       bin8_to_ns16(&rx_data[9], regs, quantity);
@@ -216,7 +212,6 @@ int UxbusCmdTcp::_read_registers(unsigned short addr, unsigned short quantity, i
       } 
     }
   }
-  delete[] rx_data;
   return ret;
 }
 
@@ -264,7 +259,7 @@ int UxbusCmdTcp::write_single_holding_register(unsigned short addr, int reg_val)
 int UxbusCmdTcp::write_multiple_coil_bits(unsigned short addr, unsigned short quantity, unsigned char *bits)
 {
   unsigned char data_len = (quantity + 7) / 8;
-  unsigned char *pdu = new unsigned char[6 + data_len]();
+  std::vector<unsigned char> pdu(6 + data_len, 0);
   pdu[0] = 0x0F;
   bin16_to_8(addr, &pdu[1]);
   bin16_to_8(quantity, &pdu[3]);
@@ -274,14 +269,13 @@ int UxbusCmdTcp::write_multiple_coil_bits(unsigned short addr, unsigned short qu
       pdu[6 + i / 8] |= (1 << (i % 8));
   }
   unsigned char rx_data[12];
-  int ret = _standard_modbus_tcp_request(pdu, 6 + data_len, rx_data, 12);
-  delete[] pdu;
+  int ret = _standard_modbus_tcp_request(pdu.data(), 6 + data_len, rx_data, 12);
   return ret;
 }
 
 int UxbusCmdTcp::write_multiple_holding_registers(unsigned short addr, unsigned short quantity, int *regs)
 {
-  unsigned char *pdu = new unsigned char[6 + quantity * 2]();
+  std::vector<unsigned char> pdu(6 + quantity * 2, 0);
   pdu[0] = 0x10;
   bin16_to_8(addr, &pdu[1]);
   bin16_to_8(quantity, &pdu[3]);
@@ -290,8 +284,7 @@ int UxbusCmdTcp::write_multiple_holding_registers(unsigned short addr, unsigned 
     bin16_to_8(regs[i], &pdu[6 + i * 2]);
   }
   unsigned char rx_data[12];
-  int ret = _standard_modbus_tcp_request(pdu, 6 + quantity * 2, rx_data, 12);
-  delete[] pdu;
+  int ret = _standard_modbus_tcp_request(pdu.data(), 6 + quantity * 2, rx_data, 12);
   return ret;
 }
 
@@ -308,30 +301,28 @@ int UxbusCmdTcp::mask_write_holding_register(unsigned short addr, unsigned short
 
 int UxbusCmdTcp::write_and_read_holding_registers(unsigned short r_addr, unsigned short r_quantity, int *r_regs, unsigned short w_addr, unsigned short w_quantity, int *w_regs, bool is_signed)
 {
-  unsigned char *pdu = new unsigned char[10 + w_quantity * 2]();
+  std::vector<unsigned char> pdu(10 + w_quantity * 2, 0);
   pdu[0] = 0x17;
-  bin16_to_8(r_addr, &pdu[1]);
-  bin16_to_8(r_quantity, &pdu[3]);
-  bin16_to_8(w_addr, &pdu[5]);
-  bin16_to_8(w_quantity, &pdu[7]);
+  bin16_to_8(r_addr, pdu.data() + 1);
+  bin16_to_8(r_quantity, pdu.data() + 3);
+  bin16_to_8(w_addr, pdu.data() + 5);
+  bin16_to_8(w_quantity, pdu.data() + 7);
   pdu[9] = w_quantity * 2;
   for (size_t i = 0; i < w_quantity; i++) {
-    bin16_to_8(w_regs[i], &pdu[10 + i * 2]);
+    bin16_to_8(w_regs[i], pdu.data() + 10 + i * 2);
   }
   int rx_len = 9 + r_quantity * 2;
-  unsigned char *rx_data = new unsigned char[rx_len]();
-  int ret = _standard_modbus_tcp_request(pdu, 10 + w_quantity * 2, rx_data, rx_len);
+  std::vector<unsigned char> rx_data(rx_len, 0);
+  int ret = _standard_modbus_tcp_request(pdu.data(), 10 + w_quantity * 2, rx_data.data(), rx_len);
   if (ret == 0) {
     if (is_signed) {
-      bin8_to_ns16(&rx_data[9], r_regs, r_quantity);
+      bin8_to_ns16(rx_data.data() + 9, r_regs, r_quantity);
     }
     else {
       for (size_t i = 0; i < r_quantity; i++) {
-        r_regs[i] = bin8_to_16(&rx_data[9 + i * 2]);
+        r_regs[i] = bin8_to_16(rx_data.data() + 9 + i * 2);
       } 
     }
   }
-  delete[] pdu;
-  delete[] rx_data;
   return ret;
 }

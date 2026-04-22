@@ -16,17 +16,17 @@ int XArmAPI::start_record_trajectory(void) {
   return core->set_record_traj(1);
 }
 
-int XArmAPI::stop_record_trajectory(char* filename) {
+int XArmAPI::stop_record_trajectory(const char* filename) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int ret = core->set_record_traj(0);
-  if (ret == 0 && filename != NULL) {
+  if (ret == 0 && filename != nullptr) {
     int ret2 = save_record_trajectory(filename, 10);
     return ret2;
   }
   return ret;
 }
 
-int XArmAPI::save_record_trajectory(char* filename, float timeout) {
+int XArmAPI::save_record_trajectory(const char* filename, float timeout) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int status;
   get_trajectory_rw_status(&status);
@@ -40,7 +40,7 @@ int XArmAPI::save_record_trajectory(char* filename, float timeout) {
   return ret;
 }
 
-int XArmAPI::load_trajectory(char* filename, float timeout) {
+int XArmAPI::load_trajectory(const char* filename, float timeout) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int status;
   get_trajectory_rw_status(&status);
@@ -54,10 +54,10 @@ int XArmAPI::load_trajectory(char* filename, float timeout) {
   return ret;
 }
 
-int XArmAPI::playback_trajectory(int times, char* filename, bool wait, int double_speed) {
+int XArmAPI::playback_trajectory(int times, const char* filename, bool wait, int double_speed) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int ret = 0;
-  if (filename != NULL) {
+  if (filename != nullptr) {
     ret = load_trajectory(filename, -1);
     if (ret != 0) {
       return ret;
@@ -81,19 +81,19 @@ int XArmAPI::get_trajectory_rw_status(int *status) {
 int XArmAPI::_check_traj_status(int status, std::string filename)
 {
   if (status == TRAJ_STATE::LOAD_SUCCESS) {
-    // printf("Load %s success\n", filename.c_str());
+    // XARM_LOG_INFO("Load %s success\n", filename.c_str());
     return 0;
   }
   else if (status == TRAJ_STATE::LOAD_FAIL) {
-    // fprintf(stderr, "Load %s failed\n", filename.c_str());
+    // XARM_LOG_ERROR("Load %s failed\n", filename.c_str());
     return API_CODE::TRAJ_RW_FAILED;
   }
   if (status == TRAJ_STATE::SAVE_SUCCESS) {
-    // printf("Save %s success\n", filename.c_str());
+    // XARM_LOG_INFO("Save %s success\n", filename.c_str());
     return 0;
   }
   else if (status == TRAJ_STATE::SAVE_FAIL) {
-    // fprintf(stderr, "Save %s failed\n", filename.c_str());
+    // XARM_LOG_ERROR("Save %s failed\n", filename.c_str());
     return API_CODE::TRAJ_RW_FAILED;
   }
   return -1;
@@ -124,7 +124,7 @@ int XArmAPI::_wait_traj_op(fp32 timeout, int trans_id, std::string filename, std
         if (status == TRAJ_STATE::IDLE) {
           idle_cnts += 1;
           if (idle_cnts >= 5) {
-            // fprintf(stderr, "%s %s failed\n", op.c_str(), filename.c_str());
+            // XARM_LOG_ERROR("%s %s failed\n", op.c_str(), filename.c_str());
             return API_CODE::TRAJ_RW_FAILED;
           }
         }
@@ -134,7 +134,7 @@ int XArmAPI::_wait_traj_op(fp32 timeout, int trans_id, std::string filename, std
         }
       }
     }
-    // fprintf(stderr, "%s %s timeout\n", op.c_str(), filename.c_str());
+    // XARM_LOG_ERROR("%s %s timeout\n", op.c_str(), filename.c_str());
     return API_CODE::TRAJ_RW_TOUT;
   }
 }

@@ -12,74 +12,71 @@
 #include <string.h>
 #include "xarm/core/common/queue_memcpy.h"
 
-QueueMemcpy::QueueMemcpy(long n, long n_size) {
-  total_ = n;
-  annode_size_ = n_size;
-  buf_ = new char[total_ * annode_size_]();
+QueueMemcpy::QueueMemcpy(size_t n, size_t n_size) 
+  : total_(n), annode_size_(n_size), buf_(total_ * annode_size_, 0) {
   flush();
 }
 
-QueueMemcpy::~QueueMemcpy(void) { delete[] buf_; }
+QueueMemcpy::~QueueMemcpy(void) {}
 
-char QueueMemcpy::flush(void) {
+int QueueMemcpy::flush(void) {
   std::lock_guard<std::mutex> locker(mutex_);
   cnt_ = 0;
   head_ = 0;
   tail_ = 0;
-  memset(buf_, 0, annode_size_ * total_);
-
+  std::fill(buf_.begin(), buf_.end(), 0); 
   return 0;
 }
 
-long QueueMemcpy::size(void) {
+size_t QueueMemcpy::size() {
   std::lock_guard<std::mutex> locker(mutex_);
   return cnt_;
 }
 
-int QueueMemcpy::is_full(void) {
+bool QueueMemcpy::is_full() {
   std::lock_guard<std::mutex> locker(mutex_);
   if (total_ <= cnt_)
-    return 1;
+    return true;
   else
-    return 0;
+    return false;
 }
 
-long QueueMemcpy::node_size(void) { 
+size_t QueueMemcpy::node_size() { 
   std::lock_guard<std::mutex> locker(mutex_);
   return annode_size_; 
 }
 
-char QueueMemcpy::pop(void *data) {
+int QueueMemcpy::pop(void *data) {
   std::lock_guard<std::mutex> locker(mutex_);
   if (0 >= cnt_) {
     return -1;
   }
   if (total_ <= tail_) tail_ = 0;
 
-  memcpy(data, &buf_[tail_ * annode_size_], annode_size_);
+  memcpy(data, buf_.data() + tail_ * annode_size_, annode_size_);
   tail_++;
   cnt_--;
   return 0;
 }
 
-char QueueMemcpy::get(void *data) {
+int QueueMemcpy::get(void *data) {
   std::lock_guard<std::mutex> locker(mutex_);
   if (0 >= cnt_) {
     return -1;
   }
   if (total_ <= tail_) tail_ = 0;
 
-  memcpy(data, &buf_[tail_ * annode_size_], annode_size_);
+  memcpy(data, buf_.data() + tail_ * annode_size_, annode_size_);
 
   return 0;
 }
 
-char QueueMemcpy::push(void *data, bool full_auto_pop) {
+int QueueMemcpy::push(const void *data, bool full_auto_pop) {
   std::lock_guard<std::mutex> locker(mutex_);
   if (total_ <= cnt_) {
     if (full_auto_pop) {
       if (total_ <= tail_) tail_ = 0;
-      // memcpy(data, &buf_[tail_ * annode_size_], annode_size_);
+      // memcpy(data, buf_.data() + tail_ * annode_size_, annode_size_);
       tail_++;
       cnt_--;
     }
@@ -88,7 +85,7 @@ char QueueMemcpy::push(void *data, bool full_auto_pop) {
   }
   if (total_ <= head_) head_ = 0;
 
-  memcpy(&buf_[head_ * annode_size_], data, annode_size_);
+  memcpy(buf_.data() + head_ * annode_size_, data, annode_size_);
   head_++;
   cnt_++;
   return 0;

@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8B9FC61-C667-4E89-B284-D6068E53A747}</ProjectGuid>
-    <RootNamespace>My6002set_fense_mode</RootNamespace>
+    <RootNamespace>My6002set_fence_mode</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -119,7 +119,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\6002-set_fense_mode.cc" />
+    <ClCompile Include="..\..\example\6002-set_fence_mode.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

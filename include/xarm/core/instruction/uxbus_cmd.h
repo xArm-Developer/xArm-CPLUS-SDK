@@ -95,8 +95,8 @@ public:
   int check_verification(int *rx_data);
   int system_control(int value);
   int set_record_traj(int value);
-  int save_traj(char filename[81], std::string feedback_key = "");
-  int load_traj(char filename[81], std::string feedback_key = "");
+  int save_traj(const char filename[81], std::string feedback_key = "");
+  int load_traj(const char filename[81], std::string feedback_key = "");
   int playback_traj(int times, int spdx = 1, std::string feedback_key = "");
   int playback_traj_old(int times);
   int get_traj_rw_status(int *rx_data);
@@ -104,7 +104,7 @@ public:
   int set_reduced_linespeed(float lspd_mm);
   int set_reduced_jointspeed(float jspd_rad);
   int get_reduced_mode(int *rx_data);
-  int get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14] = NULL, int *fense_is_on = NULL, int *collision_rebound_is_on = NULL, int length = 21);
+  int get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14] = nullptr, int *fense_is_on = nullptr, int *collision_rebound_is_on = nullptr, int length = 21);
   int set_xyz_limits(int xyz_list[6]);
   int set_world_offset(float pose_offset[6]);
   int cnter_reset(void);
@@ -123,13 +123,13 @@ public:
   int clean_war(void);
   int set_brake(int axis, int en);
   int set_mode(int value, int detection_param = -1);
-  int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
+  int move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, unsigned char motion_type = 0);
   int move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtime,
-    float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
-  int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
-  int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
-  int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
-  int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
+    float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, unsigned char motion_type = 0);
+  int move_joint(float mvjoint[7], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, std::string feedback_key = "");
+  int move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvradii, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, std::string feedback_key = "");
+  int move_line_tool(float mvpose[6], float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, unsigned char motion_type = 0);
+  int move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, std::string feedback_key = "");
   int move_servoj(float mvjoint[7], float mvvelo, float mvacc, float mvtime);
   int move_servo_cartesian(float mvpose[6], float mvvelo, float mvacc, float mvtime);
   // // this interface is no longer supported
@@ -138,7 +138,7 @@ public:
   int set_safe_level(int level);
   int get_safe_level(int *level);
   int sleep_instruction(float sltime);
-  int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL);
+  int move_circle(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr);
   int set_tcp_jerk(float jerk);
   int set_tcp_maxacc(float maxacc);
   int set_joint_jerk(float jerk);
@@ -154,7 +154,7 @@ public:
   int get_tcp_pose(float pose[6]);
   int get_joint_pose(float angles[7]);
   int get_joint_states(float position[7], float velocity[7], float effort[7], int num = 3);
-  int get_ik(float pose[6], float angles[7], bool limited = true, float *ref_angles = NULL);
+  int get_ik(float pose[6], float angles[7], bool limited = true, float *ref_angles = nullptr);
   int get_fk(float angles[7], float pose[6]);
   int is_joint_limit(float joint[7], int *value);
   int is_tcp_limit(float pose[6], int *value);
@@ -171,11 +171,11 @@ public:
   int gripper_get_errcode(int rx_data[2]);
   int gripper_clean_err(void);
 
-  int tgpio_addr_w16(int addr, float value, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID, char *add_data = NULL, int add_len = 0);
+  int tgpio_addr_w16(int addr, float value, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID, char *add_data = nullptr, int add_len = 0);
   int tgpio_addr_r16(int addr, int *value, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
   int tgpio_addr_w32(int addr, float value, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
   int tgpio_addr_r32(int addr, int *value, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID);
-  int tgpio_get_digital(int *io0, int *io1, int *io2 = NULL, int *io3 = NULL, int *io4 = NULL);
+  int tgpio_get_digital(int *io0, int *io1, int *io2 = nullptr, int *io3 = nullptr, int *io4 = nullptr);
   int tgpio_set_digital(int ionum, int value, int sync = -1);
   int tgpio_get_analog1(float *value);
   int tgpio_get_analog2(float *value);
@@ -210,13 +210,13 @@ public:
   int cgpio_set_analog2(float value, int sync = -1);
   int cgpio_set_infun(int ionum, int fun);
   int cgpio_set_outfun(int ionum, int fun);
-  int cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2=NULL, int *output_conf2=NULL);
+  int cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2=nullptr, int *output_conf2=nullptr);
 
   int get_pose_offset(float pose1[6], float pose2[6], float offset[6], int orient_type_in=0, int orient_type_out=0);
   int get_position_aa(float pose[6]);
-  int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0);
+  int move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvtime, int mvcoord=0, int relative=0, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, unsigned char motion_type = 0);
   int move_servo_cart_aa(float mvpose[6], float mvvelo, float mvacc, int tool_coord=0, int relative=0);
-  int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0, std::string feedback_key = "");
+  int move_relative(float mvpose[7], float mvvelo, float mvacc, float mvtime, float radius, int is_joint_motion = false, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, unsigned char motion_type = 0, std::string feedback_key = "");
 
   int tgpio_delay_set_digital(int ionum, int value, float delay_sec);
   int cgpio_delay_set_digital(int ionum, int value, float delay_sec);
@@ -229,7 +229,7 @@ public:
   int get_report_tau_or_i(int *rx_data);
 
   int set_self_collision_detection(int on_off);
-  int set_collision_tool_model(int tool_type, int n = 0, float *argv = NULL);
+  int set_collision_tool_model(int tool_type, int n = 0, float *argv = nullptr);
   int set_simulation_robot(int on_off);
 
   int vc_set_jointv(float jnt_v[7], int jnt_sync, float duration = -1.0);
@@ -253,9 +253,9 @@ public:
   int ft_sensor_app_set(int app_code);
   int ft_sensor_app_get(int *app_code);
   int ft_sensor_get_data(float ft_data[6], bool is_new = true, bool is_raw = false);
-  int ft_sensor_get_config(int *ft_mode = NULL, int *ft_is_started = NULL, int *ft_type = NULL, int *ft_id = NULL, int *ft_freq = NULL, 
-    float *ft_mass = NULL, float *ft_dir_bias = NULL, float ft_centroid[3] = NULL, float ft_zero[6] = NULL, int *imp_coord = NULL, int imp_c_axis[6] = NULL, float M[6] = NULL, float K[6] = NULL, float B[6] = NULL,
-    int *f_coord = NULL, int f_c_axis[6] = NULL, float f_ref[6] = NULL, float f_limits[6] = NULL, float kp[6] = NULL, float ki[6] = NULL, float kd[6] = NULL, float xe_limit[6] = NULL);
+  int ft_sensor_get_config(int *ft_mode = nullptr, int *ft_is_started = nullptr, int *ft_type = nullptr, int *ft_id = nullptr, int *ft_freq = nullptr, 
+    float *ft_mass = nullptr, float *ft_dir_bias = nullptr, float ft_centroid[3] = nullptr, float ft_zero[6] = nullptr, int *imp_coord = nullptr, int imp_c_axis[6] = nullptr, float M[6] = nullptr, float K[6] = nullptr, float B[6] = nullptr,
+    int *f_coord = nullptr, int f_c_axis[6] = nullptr, float f_ref[6] = nullptr, float f_limits[6] = nullptr, float kp[6] = nullptr, float ki[6] = nullptr, float kd[6] = nullptr, float xe_limit[6] = nullptr);
   int ft_sensor_get_error(int *err, bool is_new = true);
   int iden_tcp_load(float result[4], float estimated_mass = 0.5);
 
@@ -270,8 +270,8 @@ public:
 
   int iden_joint_friction(unsigned char sn[14], float *result);
 
-  int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, unsigned char motion_type = 0, std::string feedback_key = "");
-  int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = NULL, std::string feedback_key = "");
+  int move_line_common(float mvpose[6], float mvvelo, float mvacc, float mvtime, float radius = -1.0, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, unsigned char motion_type = 0, std::string feedback_key = "");
+  int move_circle_common(float pose1[6], float pose2[6], float mvvelo, float mvacc, float mvtime, float percent, int coord = 0, bool is_axis_angle = false, unsigned char only_check_type = 0, unsigned char *only_check_result = nullptr, std::string feedback_key = "");
 
   int set_feedback_type(unsigned char feedback_type);
   int check_feedback(std::string feedback_key = "");
@@ -329,14 +329,14 @@ private:
   int _get_nu8(int funcode, int *rx_data, int num);
   int _get_nu8(int funcode, unsigned char *rx_data, int num);
   int _getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsigned char *rx_data, int rx_num);
-  int _set_nu16(int funcode, int *datas, int num, char *add_data = NULL, int add_len = 0);
+  int _set_nu16(int funcode, int *datas, int num, char *add_data = nullptr, int add_len = 0);
   int _get_nu16(int funcode, int *rx_data, int num);
   int _set_nfp32(int funcode, float *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _set_nint32(int funcode, int *datas, int num, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _get_nfp32(int funcode, float *rx_data, int num);
-  int _swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn, char *add_data = NULL, int add_len = 0);
+  int _swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn, char *add_data = nullptr, int add_len = 0);
   int _is_nfp32(int funcode, float datas[], int txn, int *value);
-  int _set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = NULL, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
+  int _set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data = nullptr, int rx_len=0, int timeout = UXBUS_CONF::SET_TIMEOUT, std::string feedback_key = "", unsigned char feedback_type=FeedbackType::MOTION_FINISH);
   int _get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_num, float *rx_data, int rxn, int timeout = UXBUS_CONF::GET_TIMEOUT);
   int _set_feedback_type_no_lock(unsigned char feedback_type);
   virtual int _get_trans_id() { return 0; }

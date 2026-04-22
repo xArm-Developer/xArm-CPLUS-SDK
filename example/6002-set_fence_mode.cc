@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   }
   std::string port(argv[1]);
 
-  XArmAPI *arm = new XArmAPI(port);
+  auto arm = std::make_shared<XArmAPI>(port);
   sleep_milliseconds(500);
   if (arm->error_code != 0) arm->clean_error();
   if (arm->warn_code != 0) arm->clean_warn();
@@ -33,8 +33,8 @@ int main(int argc, char **argv) {
   int boundary[6] = {500, -500, 500, -500, 600, -400};
   ret = arm->set_reduced_tcp_boundary(boundary);
   printf("set_reduced_tcp_boundary, ret=%d\n", ret);
-  ret = arm->set_fense_mode(true);
-  printf("set_fense_mode, ret=%d\n", ret);
+  ret = arm->set_fence_mode(true);
+  printf("set_fence_mode, ret=%d\n", ret);
 
   // int reduced_is_on, fense_is_on, rebound_is_on;
   // int xyz_limit[6];

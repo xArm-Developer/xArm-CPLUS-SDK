@@ -45,7 +45,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "5008-get_cgpio_state", "500
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6001-set_reduced_mode", "6001-set_reduced_mode\6001-set_reduced_mode.vcxproj", "{44964BE6-A177-4330-A027-8EBB5ACA8FCB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6002-set_fense_mode", "6002-set_fense_mode\6002-set_fense_mode.vcxproj", "{D8B9FC61-C667-4E89-B284-D6068E53A747}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6002-set_fence_mode", "6002-set_fence_mode\6002-set_fence_mode.vcxproj", "{D8B9FC61-C667-4E89-B284-D6068E53A747}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7001-servo_j", "7001-servo_j\7001-servo_j.vcxproj", "{9CA5F1F7-D0B6-4A13-9679-A9C102EC663B}"
 EndProject

@@ -60,7 +60,7 @@ XArmAPI::XArmAPI(
   report_type_ = report_type;
   debug_ = debug;
   _init();
-  printf("SDK_VERSION: %s\n", SDK_VERSION);
+  XARM_LOG_INFO("SDK_VERSION: %s\n", SDK_VERSION);
   if (!do_not_open) {
     connect();
   }
@@ -76,11 +76,11 @@ void XArmAPI::_destroy(void) {}
 void XArmAPI::_init(void) {
   core = nullptr;
   core503_ = nullptr;
-  stream_tcp_ = NULL;
-  stream_tcp503_ = NULL;
-  stream_tcp_report_ = NULL;
-  stream_tcp_rich_report_ = NULL;
-  stream_ser_ = NULL;
+  stream_tcp_ = nullptr;
+  stream_tcp503_ = nullptr;
+  stream_tcp_report_ = nullptr;
+  stream_tcp_rich_report_ = nullptr;
+  stream_ser_ = nullptr;
   is_ready_ = true;
   is_tcp_ = true;
   is_old_protocol_ = false;
@@ -113,18 +113,9 @@ void XArmAPI::_init(void) {
 
   sleep_finish_time_ = get_system_time();
 
-  fp32 fp32_zero2[] = { 0, 0 };
-  fp32 fp32_zero3[] = { 0, 0, 0 };
-  fp32 fp32_zero4[] = { 0, 0, 0, 0 };
-  fp32 fp32_zero5[] = { 0, 0, 0, 0, 0 };
-  fp32 fp32_zero6[] = { 0, 0, 0, 0, 0, 0 };
-  fp32 fp32_zero7[] = { 0, 0, 0, 0, 0, 0, 0 };
-  int int_zero2[] = { 0, 0 };
-  bool bool_zero8[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-  int int_zero16[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), angles);
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), last_used_angles);
-  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), tcp_offset);
+  std::fill(angles, angles + 7, 0);
+  std::fill(last_used_angles, last_used_angles + 7, 0);
+  std::fill(tcp_offset, tcp_offset + 6, 0);
   if (default_is_radian) {
     joint_speed_limit[0] = min_joint_speed_;
     joint_speed_limit[1] = max_joint_speed_;
@@ -153,12 +144,12 @@ void XArmAPI::_init(void) {
   state = 4;
   mode = 0;
   cmd_num = 0;
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), joints_torque);
-  std::copy(std::begin(bool_zero8), std::end(bool_zero8), motor_brake_states);
-  std::copy(std::begin(bool_zero8), std::end(bool_zero8), motor_enable_states);
+  std::fill(joints_torque, joints_torque + 7, 0);
+  std::fill(motor_brake_states, motor_brake_states + 8, 0);
+  std::fill(motor_enable_states, motor_enable_states + 8, 0);
+  std::fill(tcp_load, tcp_load + 4, 0);
   error_code = 0;
   warn_code = 0;
-  std::copy(std::begin(fp32_zero4), std::end(fp32_zero4), tcp_load);
   collision_sensitivity = 0;
   teach_sensitivity = 0;
   device_type = 7;
@@ -177,16 +168,16 @@ void XArmAPI::_init(void) {
   tcp_acc_limit[1] = max_tcp_acc_;
   last_used_tcp_speed = 100;  // mm/s
   last_used_tcp_acc = 2000;   // mm/s^2
-  std::copy(std::begin(fp32_zero3), std::end(fp32_zero3), gravity_direction);
+  std::fill(gravity_direction, gravity_direction + 3, 0);
   gravity_direction[2] = -1;
   realtime_tcp_speed = 0;
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), realtime_joint_speeds);
-  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), world_offset);
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), temperatures);
+  std::fill(realtime_joint_speeds, realtime_joint_speeds + 7, 0);
+  std::fill(world_offset, world_offset + 6, 0);
+  std::fill(temperatures, temperatures + 7, 0);
+  std::fill(ft_ext_force, ft_ext_force + 6, 0);
+  std::fill(ft_raw_force, ft_raw_force + 6, 0);
   gpio_reset_config[0] = 0;
   gpio_reset_config[1] = 0;
-  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), ft_ext_force);
-  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), ft_raw_force);
   tgpio_modbus_baud_ = -1;
   ignore_error_ = false;
   ignore_state_ = false;
@@ -196,28 +187,26 @@ void XArmAPI::_init(void) {
   robotiq_is_activated_ = false;
   last_report_time_ = get_system_time();
   max_report_interval_ = 0;
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), voltages);
-  std::copy(std::begin(fp32_zero7), std::end(fp32_zero7), currents);
+  std::fill(voltages, voltages + 7, 0);
+  std::fill(currents, currents + 7, 0);
+  std::fill(collision_model_params, collision_model_params + 6, 0);
   is_simulation_robot = 0;
   is_collision_detection = 0;
   collision_tool_type = 0;
-  std::copy(std::begin(fp32_zero6), std::end(fp32_zero6), collision_model_params);
   cgpio_state = 0;
   cgpio_code = 0;
-  std::copy(std::begin(int_zero2), std::end(int_zero2), cgpio_input_digitals);
-  std::copy(std::begin(int_zero2), std::end(int_zero2), cgpio_output_digitals);
-  std::copy(std::begin(fp32_zero2), std::end(fp32_zero2), cgpio_intput_anglogs);
-  std::copy(std::begin(fp32_zero2), std::end(fp32_zero2), cgpio_output_anglogs);
-  std::copy(std::begin(int_zero16), std::end(int_zero16), cgpio_input_conf);
-  std::copy(std::begin(int_zero16), std::end(int_zero16), cgpio_output_conf);
+  std::fill(cgpio_input_digitals, cgpio_input_digitals + 2, 0);
+  std::fill(cgpio_output_digitals, cgpio_output_digitals + 2, 0);
+  std::fill(cgpio_intput_anglogs, cgpio_intput_anglogs + 2, 0);
+  std::fill(cgpio_output_anglogs, cgpio_output_anglogs + 2, 0);
+  std::fill(cgpio_input_conf, cgpio_input_conf + 16, 0);
+  std::fill(cgpio_output_conf, cgpio_output_conf + 16, 0);
   cmd_timeout_ = -1;
 
   xarm_gripper_error_ = 0;
   bio_gripper_error_ = 0;
   robotiq_error_code_ = 0;
-  xarm_gripper_versions_[0] = -1;
-  xarm_gripper_versions_[1] = -1;
-  xarm_gripper_versions_[2] = -1;
+  std::fill(xarm_gripper_versions_, xarm_gripper_versions_ + 3, -1);
 
   control_box_modbus_baud_ = -1;
   linear_motor_speed_ = 0;
@@ -380,27 +369,27 @@ void XArmAPI::_check_version(void) {
     auto str_arm_type = std::string(*++it);
     auto str_control_type = std::string(*++it);
 
-    sscanf(str_axis.data(), "%d", &axis);
-    sscanf(str_device_type.data(), "%d", &device_type);
+    sscanf(str_axis.c_str(), "%d", &axis);
+    sscanf(str_device_type.c_str(), "%d", &device_type);
     if (str_arm_type.size() >= 6) {
-      sscanf(str_arm_type.substr(2, 4).data(), "%d", &arm_type);
+      sscanf(str_arm_type.substr(2, 4).c_str(), "%d", &arm_type);
     }
     if (str_control_type.size() >= 6) {
-      sscanf(str_control_type.substr(2, 4).data(), "%d", &control_type);
+      sscanf(str_control_type.substr(2, 4).c_str(), "%d", &control_type);
     }
 
     arm_type_is_1300_ = arm_type >= 1300;
     control_box_type_is_1300_ = control_type >= 1300;
 
-    sscanf(std::string(*++it).data(), "%d", &major_version_number_);
-    sscanf(std::string(*++it).data(), "%d", &minor_version_number_);
-    sscanf(std::string(*++it).data(), "%d", &revision_version_number_);
+    sscanf(std::string(*++it).c_str(), "%d", &major_version_number_);
+    sscanf(std::string(*++it).c_str(), "%d", &minor_version_number_);
+    sscanf(std::string(*++it).c_str(), "%d", &revision_version_number_);
   }
   else if (std::regex_match(v, result, pattern)) {
     auto it = result.begin();
-    sscanf(std::string(*++it).data(), "%d", &major_version_number_);
-    sscanf(std::string(*++it).data(), "%d", &minor_version_number_);
-    sscanf(std::string(*++it).data(), "%d", &revision_version_number_);
+    sscanf(std::string(*++it).c_str(), "%d", &major_version_number_);
+    sscanf(std::string(*++it).c_str(), "%d", &minor_version_number_);
+    sscanf(std::string(*++it).c_str(), "%d", &revision_version_number_);
   }
   else {
     std::vector<std::string> tmpList = split(v, "-");
@@ -440,9 +429,9 @@ void XArmAPI::_check_version(void) {
       sleep_milliseconds(100);
       cnt -= 1;
     }
-    printf("ROBOT_SN: %s\n", sn);
+    XARM_LOG_INFO("ROBOT_SN: %s\n", sn);
   }
-  printf("ROBOT_IP: %s, VERSION: v%d.%d.%d, PROTOCOL: V%d, DETAIL: %s, TYPE1300: [%d, %d]\n", port_.c_str(), major_version_number_, minor_version_number_, revision_version_number_, is_old_protocol_ ? 0 : 1, version_, control_box_type_is_1300_, arm_type_is_1300_);
+  XARM_LOG_INFO("ROBOT_IP: %s, VERSION: v%d.%d.%d, PROTOCOL: V%d, DETAIL: %s, TYPE1300: [%d, %d]\n", port_.c_str(), major_version_number_, minor_version_number_, revision_version_number_, is_old_protocol_ ? 0 : 1, version_, control_box_type_is_1300_, arm_type_is_1300_);
 }
 
 void XArmAPI::_wait_until_not_pause(void) {
@@ -480,7 +469,7 @@ int XArmAPI::_check_code(int code, bool is_move_cmd, int mode_) {
     if (code == 0 || code == UXBUS_STATE::WAR_CODE) {
       if (core->state_is_ready) {
         if (mode_ >= 0 && mode != mode_) {
-          fprintf(stderr, "The mode may be incorrect, just as a reminder, mode: %d (%d)\n", mode_, mode);
+          XARM_LOG_ERROR("The mode may be incorrect, just as a reminder, mode: %d (%d)\n", mode_, mode);
         }
         return 0;
         // return (mode_ < 0 || mode == mode_) ? 0 : API_CODE::MODE_IS_NOT_CORRECT;
@@ -512,23 +501,23 @@ bool XArmAPI::_version_is_ge(int major, int minor, int revision) {
     int control_type = 0;
     if (std::regex_match(v, result, pattern_new)) {
       auto it = result.begin();
-      sscanf(std::string(*++it).data(), "%d", &axis);
-      sscanf(std::string(*++it).data(), "%d", &device_type);
-      sscanf(std::string(*++it).substr(2, 4).data(), "%d", &arm_type);
-      sscanf(std::string(*++it).substr(2, 4).data(), "%d", &control_type);
+      sscanf(std::string(*++it).c_str(), "%d", &axis);
+      sscanf(std::string(*++it).c_str(), "%d", &device_type);
+      sscanf(std::string(*++it).substr(2, 4).c_str(), "%d", &arm_type);
+      sscanf(std::string(*++it).substr(2, 4).c_str(), "%d", &control_type);
 
       arm_type_is_1300_ = arm_type >= 1300;
       control_box_type_is_1300_ = control_type >= 1300;
 
-      sscanf(std::string(*++it).data(), "%d", &major_version_number_);
-      sscanf(std::string(*++it).data(), "%d", &minor_version_number_);
-      sscanf(std::string(*++it).data(), "%d", &revision_version_number_);
+      sscanf(std::string(*++it).c_str(), "%d", &major_version_number_);
+      sscanf(std::string(*++it).c_str(), "%d", &minor_version_number_);
+      sscanf(std::string(*++it).c_str(), "%d", &revision_version_number_);
     }
     else if (std::regex_match(v, result, pattern)) {
       auto it = result.begin();
-      sscanf(std::string(*++it).data(), "%d", &major_version_number_);
-      sscanf(std::string(*++it).data(), "%d", &minor_version_number_);
-      sscanf(std::string(*++it).data(), "%d", &revision_version_number_);
+      sscanf(std::string(*++it).c_str(), "%d", &major_version_number_);
+      sscanf(std::string(*++it).c_str(), "%d", &minor_version_number_);
+      sscanf(std::string(*++it).c_str(), "%d", &revision_version_number_);
     }
     else {
       std::vector<std::string> tmpList = split(v, "-");
@@ -562,40 +551,21 @@ bool XArmAPI::_version_is_ge(int major, int minor, int revision) {
   return major_version_number_ > major || (major_version_number_ == major && minor_version_number_ > minor) || (major_version_number_ == major && minor_version_number_ == minor && revision_version_number_ >= revision);
 }
 
-// int XArmAPI::_connect_tcp_control()
-// {
-//   is_tcp_ = true;
-//   stream_tcp_ = std::make_shared<SocketPort>((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
-//   if (!stream_tcp_->is_connected()) {
-//     fprintf(stderr, "Error: Tcp control connection failed\n");
-//     return -2;
-//   }
-//   core = std::make_shared<UxbusCmdTcp>(stream_tcp_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-//   printf("Tcp control connection successful\n");
-//   core->set_protocol_identifier(2);
-
-//   sleep_milliseconds(200);
-//   _check_version();
-
-//   support_feedback_ = _version_is_ge(2, 0, 102);
-//   return 0;
-// }
-
 int XArmAPI::_tcp_connect()
 {
   is_tcp_ = true;
-  auto new_tcp = std::make_shared<SocketPort>((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
+  auto new_tcp = std::make_shared<SocketPort>(port_.c_str(), XARM_CONF::TCP_PORT_CONTROL, 3, 320, 0, FEEDBACK_QUE_SIZE, FEEDBACK_DATA_MAX_LEN);
   if (!new_tcp->is_connected()) {
-    fprintf(stderr, "Error: Tcp control connection failed\n");
+    XARM_LOG_ERROR("Error: Tcp control connection failed\n");
     return -2;
   }
-  auto new_tcp_rich_report = connect_tcp_report2((char *)port_.data(), "rich");
+  auto new_tcp_rich_report = connect_tcp_report2(port_.c_str(), "rich");
   if (new_tcp_rich_report == nullptr) {
     new_tcp->disconnect();
     return -3;
   }
   if (report_type_ != "rich") {
-    auto new_tcp_report = connect_tcp_report2((char *)port_.data(), report_type_);
+    auto new_tcp_report = connect_tcp_report2(port_.c_str(), report_type_);
     if (new_tcp_report == nullptr) {
       new_tcp->disconnect();
       new_tcp_rich_report->disconnect();
@@ -611,7 +581,7 @@ int XArmAPI::_tcp_connect()
     stream_tcp_report_ = stream_tcp_rich_report_;
   }
   core = std::make_shared<UxbusCmdTcp>(stream_tcp_, std::bind(&XArmAPI::_set_feedback_key_transid, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  printf("Tcp control connection successful\n");
+  XARM_LOG_INFO("Tcp control connection successful\n");
   core->set_protocol_identifier(2);
   sleep_milliseconds(200);
   _check_version();
@@ -619,25 +589,6 @@ int XArmAPI::_tcp_connect()
 
   return 0;
 }
-
-// int XArmAPI::_connect_tcp_report()
-// {
-//   stream_tcp_rich_report_ = connect_tcp_report2((char *)port_.data(), "rich");
-//   if (!_is_rich_reported()) { return -3; }
-//   if (report_type_ != "rich") {
-//     stream_tcp_report_ = connect_tcp_report2((char *)port_.data(), report_type_);
-//     if (!is_reported()) {
-//       stream_tcp_rich_report_->disconnect();
-//       stream_tcp_rich_report_.reset();
-//       return -4; 
-//     }
-//   }
-//   else {
-//     stream_tcp_report_ = stream_tcp_rich_report_;
-//   }
-//   _report_connect_changed_callback();
-//   return 0;
-// }
 
 void XArmAPI::_init_threads()
 {
@@ -657,35 +608,29 @@ int XArmAPI::connect(const std::string &port) {
     port_ = port;
   }
   if (port_ == "") {
-    fprintf(stderr, "can not connect to port/ip: %s\n", port_.data());
+    XARM_LOG_ERROR("can not connect to port/ip: %s\n", port_.c_str());
     return API_CODE::NOT_CONNECTED;
   }
   auto new_pool = std::make_shared<ThreadPool>(max_callback_thread_count_);
   new_pool->set_max_thread_count(max_callback_thread_count_);
   // std::regex pattern("(\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})[.](\\d|\\d{1,2}|(1\\d{1,2})|2[0-5]{1,2})");
   std::regex pattern("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
-  is_ready_ = true;
   if (port_ == "localhost" || std::regex_match(port_, pattern)) {
     int ret = _tcp_connect();
-    // int ret = _connect_tcp_control();
     if (ret != 0) return ret;
-    // ret = _connect_tcp_report();
-    // if (ret != 0) {
-    //   stream_tcp_->disconnect();
-    //   core.reset();
-    //   return ret;
-    // }
+    is_ready_ = true;
     pool_ = std::move(new_pool);
     _report_connect_changed_callback();
     _init_threads();
   }
   else {
     is_tcp_ = false;
-    auto new_ser = std::make_shared<SerialPort>((const char *)port_.data(), XARM_CONF::SERIAL_BAUD, 3, 320);
+    auto new_ser = std::make_shared<SerialPort>(port_.c_str(), XARM_CONF::SERIAL_BAUD, 3, 320);
     if (!new_ser->is_connected()) {
-      fprintf(stderr, "Error: Serial control connection failed\n");
+      XARM_LOG_ERROR("Error: Serial control connection failed\n");
       return -2;
     }
+    is_ready_ = true;
     pool_ = std::move(new_pool);
     stream_ser_ = std::move(new_ser);
     core = std::make_shared<UxbusCmdSer>(stream_ser_);
@@ -701,7 +646,7 @@ int XArmAPI::connect(const std::string &port) {
 
 int XArmAPI::_connect_503(void)
 {
-  stream_tcp503_ = std::make_shared<SocketPort>((char *)port_.data(), XARM_CONF::TCP_PORT_CONTROL + 1, 3, 320);
+  stream_tcp503_ = std::make_shared<SocketPort>(port_.c_str(), XARM_CONF::TCP_PORT_CONTROL + 1, 3, 320);
   if (!stream_tcp503_->is_connected()) {
     return -2;
   }
@@ -769,9 +714,9 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
     int control_type = 0;
     char *control_box_sn = strchr(str, '\0') + 1;
     if (strlen(str) >= 6)
-      sscanf(std::string(str).substr(2, 4).data(), "%d", &arm_type);
+      sscanf(std::string(str).substr(2, 4).c_str(), "%d", &arm_type);
     if (strlen(control_box_sn) >= 6)
-      sscanf(std::string(control_box_sn).substr(2, 4).data(), "%d", &control_type);
+      sscanf(std::string(control_box_sn).substr(2, 4).c_str(), "%d", &control_type);
     arm_type_is_1300_ = arm_type >= 1300;
     control_box_type_is_1300_ = control_type >= 1300;
     memcpy(robot_sn, str, 14);
@@ -836,7 +781,7 @@ int XArmAPI::get_servo_angle(fp32 angs[7], bool is_real) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int ret = 0;
   if (is_real && _version_is_ge(1, 9, 100)) {
-    ret = core->get_joint_states(angs, NULL, NULL, 1);
+    ret = core->get_joint_states(angs, nullptr, nullptr, 1);
   }
   else {
     ret = core->get_joint_pose(angs);
@@ -880,13 +825,13 @@ int XArmAPI::motion_enable(bool enable, int servo_id) {
   if (state == 4 || state == 5) {
     sleep_finish_time_ = 0;
     if (debug_ && is_ready_) {
-      printf("[motion_enable], xArm is not ready to move\n");
+      XARM_LOG_INFO("[motion_enable], xArm is not ready to move\n");
     }
     is_ready_ = false;
   }
   else {
     if (debug_ && !is_ready_) {
-      printf("[motion_enable], xArm is ready to move\n");
+      XARM_LOG_INFO("[motion_enable], xArm is ready to move\n");
     }
     is_ready_ = true;
   }
@@ -902,13 +847,13 @@ int XArmAPI::set_state(int state_) {
     // is_sync_ = false;
     sleep_finish_time_ = 0;
     if (debug_ && is_ready_) {
-      printf("[set_state], xArm is not ready to move\n");
+      XARM_LOG_INFO("[set_state], xArm is not ready to move\n");
     }
     is_ready_ = false;
   }
   else {
     if (debug_ && !is_ready_) {
-      printf("[set_state], xArm is ready to move\n");
+      XARM_LOG_INFO("[set_state], xArm is ready to move\n");
     }
     is_ready_ = true;
   }
@@ -943,13 +888,13 @@ int XArmAPI::clean_error(void) {
   if (state == 4 || state == 5) {
     sleep_finish_time_ = 0;
     if (debug_ && is_ready_) {
-      printf("[clean_error], xArm is not ready to move\n");
+      XARM_LOG_INFO("[clean_error], xArm is not ready to move\n");
     }
     is_ready_ = false;
   }
   else {
     if (debug_ && !is_ready_) {
-      printf("[clean_error], xArm is ready to move\n");
+      XARM_LOG_INFO("[clean_error], xArm is ready to move\n");
     }
     is_ready_ = true;
   }
@@ -1042,7 +987,7 @@ int XArmAPI::_wait_feedback(fp32 timeout, int trans_id, int *feedback_code) {
     }
     std::unique_lock<std::mutex> locker(fb_mutex_);
     if (fb_transid_result_map_.count(trans_id)) {
-      if (feedback_code != NULL) *feedback_code = fb_transid_result_map_[trans_id];
+      if (feedback_code != nullptr) *feedback_code = fb_transid_result_map_[trans_id];
       fb_transid_result_map_.erase(trans_id);
       locker.unlock();
       return 0;
@@ -1127,7 +1072,7 @@ int XArmAPI::get_inverse_kinematics(fp32 source_pose[6], fp32 target_angles[7], 
   fp32 angs[7] = { 0 };
   int ret;
   if (_version_is_ge(2, 7, 103)) {
-    if (ref_angles != NULL) {
+    if (ref_angles != nullptr) {
       fp32 ref_joints[7] = {0};
       for (int i = 0; i < 7; i++) {
         ref_joints[i] = (float)(default_is_radian ? ref_angles[i] : to_degree(ref_angles[i]));
@@ -1384,11 +1329,11 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
   
   unsigned char r_sn[14];
-  if (sn == NULL) {
+  if (sn == nullptr) {
     unsigned char tmp_sn[40] = {0};
     int code = get_robot_sn(tmp_sn);
     if (code != 0) {
-      fprintf(stderr, "iden_joint_friction -> get_robot_sn failed, code=%d\n", code);
+      XARM_LOG_ERROR("iden_joint_friction -> get_robot_sn failed, code=%d\n", code);
       return API_CODE::API_EXCEPTION;
     }
     memcpy(r_sn, tmp_sn, 14);
@@ -1402,7 +1347,7 @@ int XArmAPI::iden_joint_friction(int *result, unsigned char *sn)
   bool valid_xarm = !is_850() && !is_lite6() && r_sn[0] == 'X' && r_sn[1] == (axis == 5 ? 'F' : axis == 6 ? 'I' : axis == 7 ? 'S' : ' ') ;
 
   if (!(valid_850 || valid_lite || valid_xarm)) {
-    fprintf(stderr, "iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
+    XARM_LOG_ERROR("iden_joint_friction -> get_robot_sn failed, sn=%s\n", r_sn);
     return API_CODE::API_EXCEPTION;
   }
   

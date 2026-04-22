@@ -40,9 +40,10 @@ extern "C" {
 #endif
 
 #include "xarm/core/os/network.h"
+#include "xarm/core/debug/debug_print.h"
 
 #define DB_FLG "[net work] "
-#define PRINT_ERR printf
+#define PRINT_ERR XARM_LOG_ERROR
 
 #define PERRNO(ret, db_flg, str)        \
   {                                     \
@@ -60,10 +61,10 @@ int socket_init(char *local_ip, int port, int is_server) {
   // WSADATA wsaData;
   // iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
   // if (iResult != 0) {
-  // 	printf("WSAStartup failed: %d\n", iResult);
+  // 	XARM_LOG_ERROR("WSAStartup failed: %d\n", iResult);
   // 	return -1;
   // }
-  // struct addrinfo *result = NULL, *ptr = NULL, hints;
+  // struct addrinfo *result = nullptr, *ptr = nullptr, hints;
   // ZeroMemory(&hints, sizeof(hints));
   // hints.ai_family = AF_INET; // AF_UNSPEC;
   // hints.ai_socktype = SOCK_STREAM;
@@ -71,7 +72,7 @@ int socket_init(char *local_ip, int port, int is_server) {
   // if (is_server) hints.ai_flags = AI_PASSIVE;
   // iResult = getaddrinfo(local_ip, port, &hints, &result);
   // if (iResult != 0) {
-  // 	printf("getaddrinfo failed: %d\n", iResult);
+  // 	XARM_LOG_ERROR("getaddrinfo failed: %d\n", iResult);
   // 	WSACleanup();
   // 	return -1;
   // }
@@ -83,7 +84,7 @@ int socket_init(char *local_ip, int port, int is_server) {
   // // Create a SOCKET for connecting to server
   // sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
   // if (sockfd == INVALID_SOCKET) {
-  // 	printf("Error at socket(): %ld\n", WSAGetLastError());
+  // 	XARM_LOG_ERROR("Error at socket(): %ld\n", WSAGetLastError());
   // 	freeaddrinfo(result);
   // 	WSACleanup();
   // 	return -1;
@@ -91,7 +92,7 @@ int socket_init(char *local_ip, int port, int is_server) {
   // if (is_server) {
   // 	iResult = bind(sockfd, result->ai_addr, (int)result->ai_addrlen);
   // 	if (iResult == SOCKET_ERROR) {
-  // 		printf("bind failed with error: %d\n", WSAGetLastError());
+  // 		XARM_LOG_ERROR("bind failed with error: %d\n", WSAGetLastError());
   // 		freeaddrinfo(result);
   // 		closesocket(sockfd);
   // 		WSACleanup();
@@ -126,7 +127,7 @@ int socket_init(char *local_ip, int port, int is_server) {
   alive_in.onoff = 1;
   unsigned long ulBytesReturn = 0;
   ret = WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, &alive_in, sizeof(alive_in),
-    &alive_out, sizeof(alive_out), &ulBytesReturn, NULL, NULL);
+    &alive_out, sizeof(alive_out), &ulBytesReturn, nullptr, nullptr);
   if (ret == SOCKET_ERROR)
   {
     PERRNO(ret, DB_FLG, "WSAIoctl failed");

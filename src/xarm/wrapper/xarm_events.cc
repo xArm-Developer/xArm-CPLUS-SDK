@@ -17,13 +17,33 @@ void XArmAPI::_report_callback(CallableVector&& callbacks_, FunctionVector&& fun
   CallableVector callbacks = callbacks_;
   FunctionVector functions = functions_;
   locker.unlock();
+
   for (size_t i = 0; i < callbacks.size(); i++) {
-    if (callback_in_thread_) pool_->dispatch(callbacks[i], std::forward<arguments>(args)...);
-    else pool_->commit(callbacks[i], std::forward<arguments>(args)...);
+    if (callback_in_thread_) {
+      if (!pool_ || !pool_->dispatch(callbacks[i], std::forward<arguments>(args)...)) {
+        if (pool_) {
+          XARM_LOG_WARN("callback dispatch fallback to commit\n");
+          pool_->commit(callbacks[i], std::forward<arguments>(args)...);
+        }
+      }
+    }
+    else {
+      pool_->commit(callbacks[i], std::forward<arguments>(args)...);
+    }
   }
+
   for (size_t i = 0; i < functions.size(); i++) {
-    if (callback_in_thread_) pool_->dispatch(functions[i], std::forward<arguments>(args)...);
-    else pool_->commit(functions[i], std::forward<arguments>(args)...);
+    if (callback_in_thread_) {
+      if (!pool_ || !pool_->dispatch(functions[i], std::forward<arguments>(args)...)) {
+        if (pool_) {
+          XARM_LOG_WARN("function dispatch fallback to commit\n");
+          pool_->commit(functions[i], std::forward<arguments>(args)...);
+        }
+      }
+    }
+    else {
+      pool_->commit(functions[i], std::forward<arguments>(args)...);
+    }
   }
 }
 
@@ -40,8 +60,18 @@ void XArmAPI::_report_location_callback(void) {
 }
 
 void XArmAPI::_report_connect_changed_callback(void) {
-  bool connected = stream_tcp_ == NULL ? false : stream_tcp_->is_connected();
-  bool reported = stream_tcp_report_ == NULL ? false : stream_tcp_report_->is_connected();
+  bool connected = false;
+  bool reported = false;
+
+  if (is_tcp_) {
+    connected = stream_tcp_ != nullptr && stream_tcp_->is_connected();
+    reported = stream_tcp_report_ != nullptr && stream_tcp_report_->is_connected();
+  }
+  else {
+    connected = stream_ser_ != nullptr && stream_ser_->is_connected();
+    reported = false;
+  }
+
   _report_callback(connect_changed_callbacks_, connect_changed_functions_, connected, reported);
   // for (size_t i = 0; i < connect_changed_callbacks_.size(); i++) {
   // 	if (callback_in_thread_) pool_->dispatch(connect_changed_callbacks_[i], connected, reported);
@@ -149,7 +179,7 @@ int XArmAPI::_register_event_callback(CallableVector&& callbacks, Callable&& cal
 template<typename CallableVector, typename Callable>
 int XArmAPI::_release_event_callback(CallableVector&& callbacks, Callable&& callback) {
   std::lock_guard<std::mutex> locker(report_callback_mutex_);
-  if (callback == NULL) {
+  if (callback == nullptr) {
     callbacks.clear();
     return 0;
   }

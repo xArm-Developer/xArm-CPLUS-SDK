@@ -12,52 +12,94 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdarg.h>
+#include <vector>
+#include <string>
 #include "xarm/core/debug/debug_print.h"
 #include "xarm/core/common/data_type.h"
 
-#define DB_FLG "[deprint ] "
-#define PRINTF_NUM_MAX 128
-#define log_put printf
+static std::string vformat_string(const char *fmt, va_list args) {
+  va_list args_copy;
+  va_copy(args_copy, args);
+  int size = vsnprintf(nullptr, 0, fmt, args_copy);
+  va_end(args_copy);
+  if (size <= 0) return {};
 
-void print_log(const char *format, ...) {
-  char buffer[PRINTF_NUM_MAX] = { 0 };
-  va_list arg;
-  va_start(arg, format);
-  vsnprintf(buffer, PRINTF_NUM_MAX, format, arg);
-  printf("%s", buffer);
-  va_end(arg);
+  std::string out(size, '\0');
+  vsnprintf(&out[0], out.size() + 1, fmt, args);
+  return out;
 }
 
-void print_nvect(const char *str, double vect[], int n) {
-  print_log("%s", str);
-  for (int i = 0; i < n; ++i) { print_log("%0.3f ", vect[i]); }
-  print_log("\n");
+void xarm_log(LogLevel level, const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  std::string msg = vformat_string(fmt, args);
+  va_end(args);
+
+  const char *prefix = "";
+  FILE *stream = stdout;
+  switch (level) {
+    case LogLevel::Debug: prefix = "[D] "; break;
+    case LogLevel::Info:  prefix = "[I] "; break;
+    case LogLevel::Warn:  prefix = "[W] "; stream = stderr; break;
+    case LogLevel::Error: prefix = "[E] "; stream = stderr; break;
+    case LogLevel::Pure:  break;
+  }
+  fprintf(stream, "%s%s", prefix, msg.c_str());
 }
 
-void print_nvect(const char *str, float *vect, int n) {
-  print_log("%s", str);
-  for (int i = 0; i < n; ++i) { print_log("%0.3f ", vect[i]); }
-  print_log("\n");
+void print_nvect(const char *str, const double vect[], int n) {
+  std::string line = str ? str : "";
+  for (int i = 0; i < n; ++i) {
+    char buf[32] = {0};
+    snprintf(buf, sizeof(buf), "%0.3f ", vect[i]);
+    line += buf;
+  }
+  line += "\n";
+  XARM_LOG_PURE("%s", line.c_str());
 }
 
-void print_nvect(const char *str, unsigned char vect[], int n) {
-  print_log("%s", str);
-  for (int i = 0; i < n; ++i) { print_log("%d ", vect[i]); }
-  print_log("\n");
+void print_nvect(const char *str, const float *vect, int n) {
+  std::string line = str ? str : "";
+  for (int i = 0; i < n; ++i) {
+    char buf[32] = {0};
+    snprintf(buf, sizeof(buf), "%0.3f ", vect[i]);
+    line += buf;
+  }
+  line += "\n";
+  XARM_LOG_PURE("%s", line.c_str());
 }
 
-void print_nvect(const char *str, int vect[], int n) {
-  print_log("%s", str);
-  for (int i = 0; i < n; ++i) { print_log("%d ", vect[i]); }
-  print_log("\n");
+void print_nvect(const char *str, const unsigned char vect[], int n) {
+  std::string line = str ? str : "";
+  for (int i = 0; i < n; ++i) {
+    char buf[32] = {0};
+    snprintf(buf, sizeof(buf), "%d ", vect[i]);
+    line += buf;
+  }
+  line += "\n";
+  XARM_LOG_PURE("%s", line.c_str());
 }
 
-void print_hex(const char *str, unsigned char *hex, int len) {
-  // char buf[len * 3 + 1] = {'\0'};
-  char *buf = new char[len * 3 + 1]();
-  long i;
-  for (i = 0; i < len; ++i) { sprintf((char *)&buf[i * 3], "%02x ", hex[i]); }
+void print_nvect(const char *str, const int vect[], int n) {
+  std::string line = str ? str : "";
+  for (int i = 0; i < n; ++i) {
+    char buf[32] = {0};
+    snprintf(buf, sizeof(buf), "%d ", vect[i]);
+    line += buf;
+  }
+  line += "\n";
+  XARM_LOG_PURE("%s", line.c_str());
+}
 
-  printf("%s %s\n", str, buf);
-  delete[] buf;
+void print_hex(const char *str, const unsigned char *hex, int len) {
+  std::string line = str ? str : "";
+  line += " ";
+  char buf[4] = {0};
+  for (int i = 0; i < len; ++i) {
+    snprintf(buf, sizeof(buf), "%02x ", hex[i]);
+    line += buf;
+  }
+  line += "\n";
+  XARM_LOG_PURE("%s", line.c_str());
 }

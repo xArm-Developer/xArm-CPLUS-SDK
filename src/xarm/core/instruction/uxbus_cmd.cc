@@ -9,6 +9,7 @@
  */
 
 #include <string.h>
+#include <vector>
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/instruction/servo3_config.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
@@ -85,7 +86,7 @@ int UxbusCmd::_set_nu8(int funcode, unsigned char *datas, int num, std::string f
   int ret = _send_modbus_request(funcode, datas, num);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   int timeout = (funcode != UXBUS_RG::MOTION_EN || (funcode == UXBUS_RG::MOTION_EN && S_TOUT_ >= 5000)) ? S_TOUT_ : 5000;
-  ret = _recv_modbus_response(funcode, ret, NULL, 0, timeout);
+  ret = _recv_modbus_response(funcode, ret, nullptr, 0, timeout);
   if (need_set_fb && feedback_key != "") {
     _set_feedback_type_no_lock(feedback_type_);
   }
@@ -93,18 +94,16 @@ int UxbusCmd::_set_nu8(int funcode, unsigned char *datas, int num, std::string f
 }
 
 int UxbusCmd::_set_nu8(int funcode, int *datas, int num, std::string feedback_key, unsigned char feedback_type) {
-  unsigned char *send_data = new unsigned char[num]();
+  std::vector<unsigned char> send_data(num, 0);
   for (int i = 0; i < num; i++) { send_data[i] = (unsigned char)datas[i]; }
-  int ret = _set_nu8(funcode, send_data, num, feedback_key, feedback_type);
-  delete[] send_data;
+  int ret = _set_nu8(funcode, send_data.data(), num, feedback_key, feedback_type);
   return ret;
 }
 
 int UxbusCmd::_get_nu8(int funcode, int *rx_data, int num) {
-  unsigned char *datas = new unsigned char[num]();
-  int ret = _get_nu8(funcode, datas, num);
+  std::vector<unsigned char> datas(num, 0);
+  int ret = _get_nu8(funcode, datas.data(), num);
   for (int i = 0; i < num; i++) { rx_data[i] = datas[i]; }
-  delete[] datas;
   return ret;
 }
 
@@ -124,31 +123,29 @@ int UxbusCmd::_getset_nu8(int funcode, unsigned char *tx_data, int tx_num, unsig
 }
 
 int UxbusCmd::_set_nu16(int funcode, int *datas, int num, char *add_data, int add_len) {
-  unsigned char *send_data = new unsigned char[num * 2 + add_len]();
+  std::vector<unsigned char> send_data(num * 2 + add_len, 0);
   for (int i = 0; i < num; i++) { bin16_to_8(datas[i], &send_data[i * 2]); }
   for (int i = 0; i < add_len; i++) { send_data[num * 2 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = _send_modbus_request(funcode, send_data, num * 2 + add_len);
-  delete[] send_data;
+  int ret = _send_modbus_request(funcode, send_data.data(), num * 2 + add_len);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(funcode, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(funcode, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::_get_nu16(int funcode, int *rx_data, int num) {
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(funcode, 0, 0);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *datas = new unsigned char[num * 2]();
-  ret = _recv_modbus_response(funcode, ret, datas, num * 2, G_TOUT_);
-  for (int i = 0; i < num; i++) { rx_data[i] = bin8_to_16(&datas[i * 2]); }
-  delete[] datas;
+  std::vector<unsigned char> datas(num * 2, 0);
+  ret = _recv_modbus_response(funcode, ret, datas.data(), num * 2, G_TOUT_);
+  for (int i = 0; i < num; i++) { rx_data[i] = bin8_to_16(datas.data() + i * 2); }
   return ret;
 }
 
 int UxbusCmd::_set_nfp32(int funcode, float *datas, int num, std::string feedback_key, unsigned char feedback_type) {
-  unsigned char *send_data = new unsigned char[num * 4]();
-  nfp32_to_hex(datas, send_data, num);
+  std::vector<unsigned char> send_data(num * 4, 0);
+  nfp32_to_hex(datas, send_data.data(), num);
 
   std::lock_guard<std::mutex> locker(mutex_);
   bool need_set_fb = feedback_type != 0 && (feedback_type_ & feedback_type) != feedback_type;
@@ -159,10 +156,9 @@ int UxbusCmd::_set_nfp32(int funcode, float *datas, int num, std::string feedbac
   if (has_feedback_key_transid_func_ && feedback_key != "") {
     set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
   }
-  int ret = _send_modbus_request(funcode, send_data, num * 4);
-  delete[] send_data;
+  int ret = _send_modbus_request(funcode, send_data.data(), num * 4);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  ret = _recv_modbus_response(funcode, ret, NULL, 0, S_TOUT_);
+  ret = _recv_modbus_response(funcode, ret, nullptr, 0, S_TOUT_);
   if (need_set_fb && feedback_key != "") {
     _set_feedback_type_no_lock(feedback_type_);
   }
@@ -170,8 +166,8 @@ int UxbusCmd::_set_nfp32(int funcode, float *datas, int num, std::string feedbac
 }
 
 int UxbusCmd::_set_nint32(int funcode, int *datas, int num, std::string feedback_key, unsigned char feedback_type) {
-  unsigned char *send_data = new unsigned char[num * 4]();
-  nint32_to_hex(datas, send_data, num);
+  std::vector<unsigned char> send_data(num * 4, 0);
+  nint32_to_hex(datas, send_data.data(), num);
 
   std::lock_guard<std::mutex> locker(mutex_);
   bool need_set_fb = feedback_type != 0 && (feedback_type_ & feedback_type) != feedback_type;
@@ -182,10 +178,9 @@ int UxbusCmd::_set_nint32(int funcode, int *datas, int num, std::string feedback
   if (has_feedback_key_transid_func_ && feedback_key != "") {
     set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
   }
-  int ret = _send_modbus_request(funcode, send_data, num * 4);
-  delete[] send_data;
+  int ret = _send_modbus_request(funcode, send_data.data(), num * 4);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  ret = _recv_modbus_response(funcode, ret, NULL, 0, S_TOUT_);
+  ret = _recv_modbus_response(funcode, ret, nullptr, 0, S_TOUT_);
   if (need_set_fb && feedback_key != "") {
     _set_feedback_type_no_lock(feedback_type_);
   }
@@ -196,50 +191,45 @@ int UxbusCmd::_get_nfp32(int funcode, float *rx_data, int num) {
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(funcode, 0, 0);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *datas = new unsigned char[num * 4]();
-  ret = _recv_modbus_response(funcode, ret, datas, num * 4, G_TOUT_);
-  hex_to_nfp32(datas, rx_data, num);
-  delete[] datas;
+  std::vector<unsigned char> datas(num * 4, 0);
+  ret = _recv_modbus_response(funcode, ret, datas.data(), num * 4, G_TOUT_);
+  hex_to_nfp32(datas.data(), rx_data, num);
   return ret;
 }
 
 int UxbusCmd::_swop_nfp32(int funcode, float tx_datas[], int txn, float *rx_data, int rxn, char *add_data, int add_len) {
-  unsigned char *send_data = new unsigned char[128]();
+  unsigned char send_data[128] = {0};
   nfp32_to_hex(tx_datas, send_data, txn);
 
-  if (add_data != NULL && add_len > 0) {
+  if (add_data != nullptr && add_len > 0) {
     memcpy(send_data + txn * 4, add_data, add_len);
   }
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(funcode, send_data, txn * 4 + add_len);
-  delete[] send_data;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *datas = new unsigned char[128]();
+  unsigned char datas[128] = {0};
   ret = _recv_modbus_response(funcode, ret, datas, rxn * 4, G_TOUT_);
   hex_to_nfp32(datas, rx_data, rxn);
-  delete[] datas;
   return ret;
 }
 
 int UxbusCmd::_is_nfp32(int funcode, float tx_datas[], int txn, int *value) {
-  unsigned char *send_data = new unsigned char[txn * 4]();
-  nfp32_to_hex(tx_datas, send_data, txn);
+  std::vector<unsigned char> send_data(txn * 4, 0);
+  nfp32_to_hex(tx_datas, send_data.data(), txn);
 
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = _send_modbus_request(funcode, send_data, txn * 4);
-  delete[] send_data;
+  int ret = _send_modbus_request(funcode, send_data.data(), txn * 4);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[txn * 4]();
-  ret = _recv_modbus_response(funcode, ret, rx_data, 1, G_TOUT_);
+  std::vector<unsigned char> rx_data(txn * 4, 0);
+  ret = _recv_modbus_response(funcode, ret, rx_data.data(), 1, G_TOUT_);
   *value = rx_data[0];
-  delete[] rx_data;
   return ret;
 }
 
 int UxbusCmd::_set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, char *add_data, int add_len, unsigned char *rx_data, int rx_len, int timeout, std::string feedback_key, unsigned char feedback_type) {
-  unsigned char *send_data = new unsigned char[tx_num * 4 + add_len]();
-  nfp32_to_hex(tx_data, send_data, tx_num);
+  std::vector<unsigned char> send_data(tx_num * 4 + add_len, 0);
+  nfp32_to_hex(tx_data, send_data.data(), tx_num);
   for (int i = 0; i < add_len; i++) { send_data[tx_num * 4 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
@@ -251,8 +241,7 @@ int UxbusCmd::_set_nfp32_with_bytes(int funcode, float *tx_data, int tx_num, cha
   if (has_feedback_key_transid_func_ && feedback_key != "") {
     set_feedback_key_transid_(feedback_key, trans_id, feedback_type_);
   }
-  int ret = _send_modbus_request(funcode, send_data, tx_num * 4 + add_len);
-  delete[] send_data;
+  int ret = _send_modbus_request(funcode, send_data.data(), tx_num * 4 + add_len);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   ret = _recv_modbus_response(funcode, ret, rx_data, rx_len, timeout);
   if (need_set_fb && feedback_key != "") {
@@ -267,10 +256,9 @@ int UxbusCmd::_get_nfp32_with_bytes(int funcode, unsigned char *tx_data, int tx_
   int ret = _send_modbus_request(funcode, tx_data, tx_num);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-  unsigned char *datas = new unsigned char[rxn * 4]();
-  ret = _recv_modbus_response(funcode, ret, datas, rxn * 4, timeout);
-  hex_to_nfp32(datas, rx_data, rxn);
-  delete[] datas;
+  std::vector<unsigned char> datas(rxn * 4, 0);
+  ret = _recv_modbus_response(funcode, ret, datas.data(), rxn * 4, timeout);
+  hex_to_nfp32(datas.data(), rx_data, rxn);
   return ret;
 }
 
@@ -308,15 +296,15 @@ int UxbusCmd::playback_traj_old(int times) {
   return _set_nint32(UXBUS_RG::PLAY_TRAJ, txdata, 1);
 }
 
-int UxbusCmd::save_traj(char filename[81], std::string feedback_key) {
+int UxbusCmd::save_traj(const char filename[81], std::string feedback_key) {
   return _set_nu8(UXBUS_RG::SAVE_TRAJ, (unsigned char*)filename, 81, feedback_key, FeedbackType::OTHER_FINISH);
 }
 
-int UxbusCmd::load_traj(char filename[81], std::string feedback_key) {
+int UxbusCmd::load_traj(const char filename[81], std::string feedback_key) {
   // std::lock_guard<std::mutex> locker(mutex_);
   // int ret = _send_modbus_request(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81);
   // if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  // return _recv_modbus_response(UXBUS_RG::LOAD_TRAJ, ret, NULL, 0, S_TOUT_);
+  // return _recv_modbus_response(UXBUS_RG::LOAD_TRAJ, ret, nullptr, 0, S_TOUT_);
   return _set_nu8(UXBUS_RG::LOAD_TRAJ, (unsigned char*)filename, 81, feedback_key, FeedbackType::OTHER_FINISH);
 }
 
@@ -344,18 +332,17 @@ int UxbusCmd::get_reduced_mode(int *rx_data) {
 }
 
 int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14], int *fense_is_on, int *collision_rebound_is_on, int length) {
-  unsigned char *rx_data = new unsigned char[length]();
-  int ret = _get_nu8(UXBUS_RG::GET_REDUCED_STATE, rx_data, length);
+  std::vector<unsigned char> rx_data(length, 0);
+  int ret = _get_nu8(UXBUS_RG::GET_REDUCED_STATE, rx_data.data(), length);
   *on = rx_data[0];
-  bin8_to_ns16(&rx_data[1], xyz_list, 6);
-  *tcp_speed = hex_to_fp32(&rx_data[13]);
-  *joint_speed = hex_to_fp32(&rx_data[17]);
+  bin8_to_ns16(rx_data.data() + 1, xyz_list, 6);
+  *tcp_speed = hex_to_fp32(rx_data.data() + 13);
+  *joint_speed = hex_to_fp32(rx_data.data() + 17);
   if (length == 79) {
-    if (jrange_rad != NULL) { hex_to_nfp32(&rx_data[21], jrange_rad, 14); }
-    if (fense_is_on != NULL) { *fense_is_on = rx_data[77]; }
-    if (collision_rebound_is_on != NULL) { *collision_rebound_is_on = rx_data[78]; }
+    if (jrange_rad != nullptr) { hex_to_nfp32(rx_data.data() + 21, jrange_rad, 14); }
+    if (fense_is_on != nullptr) { *fense_is_on = rx_data[77]; }
+    if (collision_rebound_is_on != nullptr) { *collision_rebound_is_on = rx_data[78]; }
   }
-  delete[] rx_data;
   return ret;
 }
 
@@ -468,7 +455,7 @@ int UxbusCmd::move_line(float mvpose[6], float mvvelo, float mvacc, float mvtime
       char additional[2] = { (char)only_check_type, (char)motion_type };
       ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 9, additional, 2, rx_data, 3, 10000);
     }
-    if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (only_check_type > 0 && ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_LINE, txdata, 9);
@@ -496,7 +483,7 @@ int UxbusCmd::move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtim
       char additional[2] = { (char)only_check_type, (char)motion_type };
       ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 2, rx_data, 3, 10000);
     }
-    if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_LINEB, txdata, 10);
@@ -516,7 +503,7 @@ int UxbusCmd::move_joint(float mvjoint[7], float mvvelo, float mvacc,
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
     int ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_JOINT, txdata, 10, additional, 1, rx_data, 3, 10000, feedback_key);
-    if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_JOINT, txdata, 10);
@@ -535,7 +522,7 @@ int UxbusCmd::move_jointb(float mvjoint[7], float mvvelo, float mvacc, float mvr
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
     int ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_JOINTB, txdata, 10, additional, 1, rx_data, 3, 10000, feedback_key);
-    if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_JOINTB, txdata, 10);
@@ -561,7 +548,7 @@ int UxbusCmd::move_line_tool(float mvpose[6], float mvvelo, float mvacc, float m
       char additional[2] = { (char)only_check_type, (char)motion_type };
       ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9, additional, 2, rx_data, 3, 10000);
     }
-    if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (only_check_type > 0 && ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_LINE_TOOL, txdata, 9);
@@ -579,7 +566,7 @@ int UxbusCmd::move_gohome(float mvvelo, float mvacc, float mvtime, unsigned char
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
     int ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_HOME, txdata, 3, additional, 1, rx_data, 3, 10000, feedback_key);
-    if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_HOME, txdata, 3);
@@ -646,7 +633,7 @@ int UxbusCmd::move_circle(float pose1[6], float pose2[6], float mvvelo, float mv
     char additional[1] = { (char)only_check_type };
     unsigned char rx_data[3] = { 0 };
     int ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_CIRCLE, txdata, 16, additional, 1, rx_data, 3, 10000);
-    if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // return _set_nfp32(UXBUS_RG::MOVE_CIRCLE, txdata, 16);
@@ -715,16 +702,16 @@ int UxbusCmd::get_joint_states(float position[7], float velocity[7], float effor
   num = num & 0x0F;
   int ret = _get_nfp32_with_bytes(UXBUS_RG::GET_JOINT_POS, &u8_tmp, 1, fp_tmp, num * 7);
   memcpy(position, fp_tmp, sizeof(float) * 7);
-  if (num >= 2 && velocity != NULL)
+  if (num >= 2 && velocity != nullptr)
     memcpy(velocity, fp_tmp + 7, sizeof(float) * 7);
-  if (num >= 3 && effort != NULL)
+  if (num >= 3 && effort != nullptr)
     memcpy(effort, fp_tmp + 14, sizeof(float) * 7);
   return ret;
 }
 
 int UxbusCmd::get_ik(float pose[6], float angles[7], bool limited, float *ref_angles) {
-  if (!limited || ref_angles != NULL) {
-    if (ref_angles != NULL) {
+  if (!limited || ref_angles != nullptr) {
+    if (ref_angles != nullptr) {
       char additional[29] = { 0 };
       additional[0] = limited ? 1 : 0;
       nfp32_to_hex(ref_angles, (unsigned char*)(&additional[1]), 7);
@@ -756,60 +743,54 @@ int UxbusCmd::is_tcp_limit(float pose[6], int *value) {
  * gripper
  *******************************************************/
 int UxbusCmd::gripper_addr_w16(int addr, float value) {
-  unsigned char *txdata = new unsigned char[7]();
+  unsigned char txdata[7] = {0};
   txdata[0] = UXBUS_CONF::GRIPPER_ID;
   bin16_to_8(addr, &txdata[1]);
   fp32_to_hex(value, &txdata[3]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_W16B, txdata, 7);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::TGPIO_W16B, ret, NULL, 0, G_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::TGPIO_W16B, ret, nullptr, 0, G_TOUT_);
 }
 
 int UxbusCmd::gripper_addr_r16(int addr, float *value) {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3] = {0};
   txdata[0] = UXBUS_CONF::GRIPPER_ID;
   bin16_to_8(addr, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_R16B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::TGPIO_R16B, ret, rx_data, 4, G_TOUT_);
   *value = (float)bin8_to_32(rx_data);
-  delete[] rx_data;
   return ret;
 }
 
 int UxbusCmd::gripper_addr_w32(int addr, float value) {
-  unsigned char *txdata = new unsigned char[7]();
+  unsigned char txdata[7] = {0};
   txdata[0] = UXBUS_CONF::GRIPPER_ID;
   bin16_to_8(addr, &txdata[1]);
   fp32_to_hex(value, &txdata[3]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_W32B, txdata, 7);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::TGPIO_W32B, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::TGPIO_W32B, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::gripper_addr_r32(int addr, float *value) {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3] = {0};
   txdata[0] = UXBUS_CONF::GRIPPER_ID;
   bin16_to_8(addr, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_R32B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::TGPIO_R32B, ret, rx_data, 4, G_TOUT_);
   *value = (float)bin8_to_32(rx_data);
-  delete[] rx_data;
   return ret;
 }
 
@@ -849,60 +830,54 @@ int UxbusCmd::gripper_clean_err() {
  * tool gpio
  *******************************************************/
 int UxbusCmd::tgpio_addr_w16(int addr, float value, unsigned char host_id, char *add_data, int add_len) {
-  unsigned char *txdata = new unsigned char[7 + add_len]();
+  std::vector<unsigned char> txdata(7 + add_len, 0);
   txdata[0] = host_id;
-  bin16_to_8(addr, &txdata[1]);
-  fp32_to_hex(value, &txdata[3]);
+  bin16_to_8(addr, txdata.data() + 1);
+  fp32_to_hex(value, txdata.data() + 3);
   for (int i = 0; i < add_len; i++) { txdata[7 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = _send_modbus_request(UXBUS_RG::TGPIO_W16B, txdata, 7);
-  delete[] txdata;
+  int ret = _send_modbus_request(UXBUS_RG::TGPIO_W16B, txdata.data(), 7);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::TGPIO_W16B, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::TGPIO_W16B, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::tgpio_addr_r16(int addr, int *value, unsigned char host_id) {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3] = {0};
   txdata[0] = host_id;
   bin16_to_8(addr, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_R16B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::TGPIO_R16B, ret, rx_data, 4, G_TOUT_);
   *value = bin8_to_32(rx_data);
-  delete[] rx_data;
   return ret;
 }
 int UxbusCmd::tgpio_addr_w32(int addr, float value, unsigned char host_id) {
-  unsigned char *txdata = new unsigned char[7]();
+  unsigned char txdata[7] = {0};
   txdata[0] = host_id;
   bin16_to_8(addr, &txdata[1]);
   fp32_to_hex(value, &txdata[3]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_W32B, txdata, 7);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::TGPIO_W32B, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::TGPIO_W32B, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::tgpio_addr_r32(int addr, int *value, unsigned char host_id) {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3]  ={0};
   txdata[0] = host_id;
   bin16_to_8(addr, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::TGPIO_R32B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::TGPIO_R32B, ret, rx_data, 4, G_TOUT_);
   *value = bin8_to_32(rx_data);
-  delete[] rx_data;
   return ret;
 }
 
@@ -912,11 +887,11 @@ int UxbusCmd::tgpio_get_digital(int *io0, int *io1, int *io2, int *io3, int *io4
 
   *io0 = tmp & 0x0001;
   *io1 = (tmp & 0x0002) >> 1;
-  if (io3 != NULL)
+  if (io3 != nullptr)
     *io3 = (tmp & 0x0004) >> 2;
-  if (io4 != NULL)
+  if (io4 != nullptr)
     *io4 = (tmp & 0x0008) >> 3;
-  if (io2 != NULL) {
+  if (io2 != nullptr) {
     int ret2 = tgpio_addr_r16(0x0A12, &tmp);
     *io2 = tmp & 0x0001;
     return ret2 != 0 ? ret2 : ret;
@@ -977,7 +952,6 @@ int UxbusCmd::tgpio_get_analog1(float * value) {
 int UxbusCmd::tgpio_get_analog2(float * value) {
   int tmp;
   int ret = tgpio_addr_r16(SERVO3_RG::ANALOG_IO2, &tmp);
-  // printf("tmp = %d\n", tmp);
   *value = (float)(tmp * 3.3 / 4095.0);
   return ret;
 }
@@ -1008,7 +982,7 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
 }
 
 int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id, float limit_sec, bool is_transparent_transmission) {
-  unsigned char *txdata = new unsigned char[len_t + 1]();
+  std::vector<unsigned char> txdata(len_t + 1, 0);
   txdata[0] = host_id;
   for (int i = 0; i < len_t; i++) { txdata[i + 1] = modbus_t[i]; }
 
@@ -1018,8 +992,7 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
     long long limit_us = (long long)(limit_sec * 1000000);
     if (diff_us < limit_us) sleep_us(limit_us - diff_us);
   }
-  int ret = _send_modbus_request(is_transparent_transmission ? UXBUS_RG::RS485_AGENT : UXBUS_RG::RS485_RTU, txdata, len_t + 1);
-  delete[] txdata;
+  int ret = _send_modbus_request(is_transparent_transmission ? UXBUS_RG::RS485_AGENT : UXBUS_RG::RS485_RTU, txdata.data(), len_t + 1);
   if (-1 == ret) { 
     last_modbus_comm_us_ = get_us();
     return UXBUS_STATE::ERR_NOTTCP;
@@ -1031,8 +1004,8 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
 }
 
 int UxbusCmd::gripper_modbus_w16s(int addr, int value, int count) {
-  unsigned char *txdata = new unsigned char[11]();
-  unsigned char *rx_data = new unsigned char[254]();
+  unsigned char txdata[11] = {0};
+  unsigned char rx_data[254] = {0};
   txdata[0] = UXBUS_CONF::GRIPPER_ID;
   txdata[1] = 0x10;
   bin16_to_8(addr, &txdata[2]);
@@ -1044,35 +1017,30 @@ int UxbusCmd::gripper_modbus_w16s(int addr, int value, int count) {
     bin32_to_8(value, &txdata[7]);
   // fp32_to_hex(value, &txdata[7]);
   int ret = tgpio_set_modbus_func(txdata, count * 2 + 7, rx_data, UXBUS_CONF::ROBOT_RS485_HOST_ID, 0.0, false);
-  delete[] txdata;
-  delete[] rx_data;
   return ret;
 }
 
 int UxbusCmd::gripper_modbus_r16s(int addr, int count, unsigned char *rx_data) {
-  unsigned char *txdata = new unsigned char[6]();
+  unsigned char txdata[6];
   txdata[0] = UXBUS_CONF::GRIPPER_ID;
   txdata[1] = 0x03;
   bin16_to_8(addr, &txdata[2]);
   bin16_to_8(count, &txdata[4]);
   int ret = tgpio_set_modbus_func(txdata, 6, rx_data, UXBUS_CONF::ROBOT_RS485_HOST_ID, 0.0, false);
-  delete[] txdata;
   return ret;
 }
 
 int UxbusCmd::gripper_modbus_set_en(int value) {
-  // unsigned char *txdata = new unsigned char[4]();
+  // unsigned char txdata[4] = {0};
   // bin16_to_8(value, &txdata[0]);
   // float _value = hex_to_fp32(txdata);
-  // delete[] txdata;
   return gripper_modbus_w16s(SERVO3_RG::CON_EN, value, 1);
 }
 
 int UxbusCmd::gripper_modbus_set_mode(int value) {
-  // unsigned char *txdata = new unsigned char[4]();
+  // unsigned char txdata[4] = {0};
   // bin16_to_8(value, &txdata[0]);
   // float _value = hex_to_fp32(txdata);
-  // delete[] txdata;
   return gripper_modbus_w16s(SERVO3_RG::CON_MODE, value, 1);
 }
 
@@ -1081,37 +1049,33 @@ int UxbusCmd::gripper_modbus_set_zero(void) {
 }
 
 int UxbusCmd::gripper_modbus_get_pos(int *pulse) {
-  unsigned char *rx_data = new unsigned char[254]();
+  unsigned char rx_data[254] = {0};
   int ret = gripper_modbus_r16s(SERVO3_RG::CURR_POS, 2, rx_data);
   *pulse = bin8_to_32(&rx_data[4]);
-  delete[] rx_data;
   return ret;
 }
 
 int UxbusCmd::gripper_modbus_set_pos(int pulse) {
-  // unsigned char *txdata = new unsigned char[4]();
+  // unsigned char txdata[4] = {0};
   // txdata[0] = (pulse >> 24) & 0xFF;
   // txdata[1] = (pulse >> 16) & 0xFF;
   // txdata[2] = (pulse >> 8) & 0xFF;
   // txdata[3] = pulse & 0xFF;
   // float value = hex_to_fp32(txdata);
-  // delete[] txdata;
   return gripper_modbus_w16s(SERVO3_RG::TAGET_POS, pulse, 2);
 }
 
 int UxbusCmd::gripper_modbus_set_posspd(int speed) {
-  // unsigned char *txdata = new unsigned char[4]();
+  // unsigned char txdata[4] = {0};
   // bin16_to_8(speed, &txdata[0]);
   // float value = hex_to_fp32(txdata);
-  // delete[] txdata;
   return gripper_modbus_w16s(SERVO3_RG::POS_SPD, speed, 1);
 }
 
 int UxbusCmd::gripper_modbus_get_errcode(int *err) {
-  unsigned char *rx_data = new unsigned char[254]();
+  unsigned char rx_data[254] = {0};
   int ret = gripper_modbus_r16s(SERVO3_RG::ERR_CODE, 1, rx_data);
   *err = bin8_to_16(&rx_data[4]);
-  delete[] rx_data;
   return ret;
 }
 
@@ -1131,60 +1095,54 @@ int UxbusCmd::servo_get_dbmsg(int rx_data[16]) {
 }
 
 int UxbusCmd::servo_addr_w16(int id, int addr, float value) {
-  unsigned char *txdata = new unsigned char[7]();
+  unsigned char txdata[7] = {0};
   txdata[0] = id;
   bin16_to_8(addr, &txdata[1]);
   fp32_to_hex(value, &txdata[3]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::SERVO_W16B, txdata, 7);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::SERVO_W16B, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::SERVO_W16B, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::servo_addr_r16(int id, int addr, float *value) {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3] = {0};
   txdata[0] = id;
   bin16_to_8(addr, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::SERVO_R16B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::SERVO_R16B, ret, rx_data, 4, G_TOUT_);
   *value = (float)bin8_to_32(rx_data);
-  delete[] rx_data;
   return ret;
 }
 
 int UxbusCmd::servo_addr_w32(int id, int addr, float value) {
-  unsigned char *txdata = new unsigned char[7]();
+  unsigned char txdata[7] = {0};
   txdata[0] = id;
   bin16_to_8(addr, &txdata[1]);
   fp32_to_hex(value, &txdata[3]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::SERVO_W32B, txdata, 7);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::SERVO_W32B, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::SERVO_W32B, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::servo_addr_r32(int id, int addr, float *value) {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3] = {0};
   txdata[0] = id;
   bin16_to_8(addr, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::SERVO_R32B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::SERVO_R32B, ret, rx_data, 4, G_TOUT_);
   *value = (float)bin8_to_32(rx_data);
-  delete[] rx_data;
   return ret;
 }
 
@@ -1283,7 +1241,7 @@ int UxbusCmd::cgpio_set_outfun(int num, int fun) {
  * @return: [description]
  */
 int UxbusCmd::cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2, int *output_conf2) {
-  unsigned char *rx_data = new unsigned char[50]();
+  unsigned char rx_data[50] = {0};
   int ret = _get_nu8(UXBUS_RG::CGPIO_GET_STATE, rx_data, -1);
 
   state[0] = rx_data[0];
@@ -1296,17 +1254,16 @@ int UxbusCmd::cgpio_get_state(int *state, int *digit_io, float *analog, int *inp
     input_conf[i] = rx_data[18 + i];
     output_conf[i] = rx_data[26 + i];
   }
-  if (input_conf2 != NULL) {
+  if (input_conf2 != nullptr) {
     for (int i = 0; i < 8; i++) {
       input_conf2[i] = rx_data[34 + i];
     }
   }
-  if (output_conf2 != NULL) {
+  if (output_conf2 != nullptr) {
     for (int i = 0; i < 8; i++) {
       output_conf2[i] = rx_data[42 + i];
     }
   }
-  delete[] rx_data;
   return ret;
 }
 
@@ -1314,19 +1271,17 @@ int UxbusCmd::get_pose_offset(float pose1[6], float pose2[6], float offset[6], i
   float txdata[14] = { 0 };
   for (int i = 0; i < 6; i++) { txdata[i] = pose1[i]; }
   for (int i = 0; i < 6; i++) { txdata[6+i] = pose2[i]; }
-  unsigned char *hexdata = new unsigned char[50]();
+  unsigned char hexdata[50] = {0};
   nfp32_to_hex(txdata, hexdata, 12);
   hexdata[48] = orient_type_in;
   hexdata[49] = orient_type_out;
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::CAL_POSE_OFFSET, hexdata, 50);
-  delete[] hexdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *datas = new unsigned char[24]();
+  unsigned char datas[24] = {0};
   ret = _recv_modbus_response(UXBUS_RG::CAL_POSE_OFFSET, ret, datas, 24, G_TOUT_);
   hex_to_nfp32(datas, offset, 6);
-  delete[] datas;
   return ret;
 }
 
@@ -1355,7 +1310,7 @@ int UxbusCmd::move_line_aa(float mvpose[6], float mvvelo, float mvacc, float mvt
       char additional[4] = { (char)mvcoord, (char)relative, (char)only_check_type, (char)motion_type };
       ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE_AA, txdata, 9, additional, 4, rx_data, 3, 10000);
     }
-    if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (only_check_type > 0 && ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // char additional[2] = { (char)mvcoord, (char)relative };
@@ -1386,7 +1341,7 @@ int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mv
   txdata[10] = radius;
   if (only_check_type <= 0 && motion_type == 0) {
     char additional[2] = { (char)is_joint_motion, (char)is_axis_angle  };
-    return _set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 2, NULL, 0, 2000, feedback_key);
+    return _set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 2, nullptr, 0, 2000, feedback_key);
   }
   else {
     unsigned char rx_data[3] = { 0 };
@@ -1399,7 +1354,7 @@ int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mv
       char additional[4] = { (char)is_joint_motion, (char)is_axis_angle , (char)only_check_type, (char)motion_type };
       ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_RELATIVE, txdata, 11, additional, 4, rx_data, 3, 10000, feedback_key);
     }
-    if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+    if (only_check_type > 0 && ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
   }
   // char additional[2] = { (char)is_joint_motion, (char)is_axis_angle };
@@ -1407,33 +1362,31 @@ int UxbusCmd::move_relative(float mvpose[7], float mvvelo, float mvacc, float mv
 }
 
 int UxbusCmd::tgpio_delay_set_digital(int ionum, int value, float delay_sec) {
-  unsigned char *txdata = new unsigned char[6]();
+  unsigned char txdata[6] = {0};
   txdata[0] = ionum;
   txdata[1] = value;
   fp32_to_hex(delay_sec, &txdata[2]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::DELAYED_TGPIO_SET, txdata, 6);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::DELAYED_TGPIO_SET, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::DELAYED_TGPIO_SET, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::cgpio_delay_set_digital(int ionum, int value, float delay_sec) {
-  unsigned char *txdata = new unsigned char[6]();
+  unsigned char txdata[6] = {0};
   txdata[0] = ionum;
   txdata[1] = value;
   fp32_to_hex(delay_sec, &txdata[2]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::DELAYED_CGPIO_SET, txdata, 6);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::DELAYED_CGPIO_SET, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::DELAYED_CGPIO_SET, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::tgpio_position_set_digital(int ionum, int value, float xyz[3], float tol_r) {
-  unsigned char *txdata = new unsigned char[18]();
+  unsigned char txdata[18] = {0};
   txdata[0] = ionum;
   txdata[1] = value;
   nfp32_to_hex(xyz, &txdata[2], 3);
@@ -1441,13 +1394,12 @@ int UxbusCmd::tgpio_position_set_digital(int ionum, int value, float xyz[3], flo
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::POSITION_TGPIO_SET, txdata, 18);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::POSITION_TGPIO_SET, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::POSITION_TGPIO_SET, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::cgpio_position_set_digital(int ionum, int value, float xyz[3], float tol_r) {
-  unsigned char *txdata = new unsigned char[18]();
+  unsigned char txdata[18] = {0};
   txdata[0] = ionum;
   txdata[1] = value;
   nfp32_to_hex(xyz, &txdata[2], 3);
@@ -1455,13 +1407,12 @@ int UxbusCmd::cgpio_position_set_digital(int ionum, int value, float xyz[3], flo
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::POSITION_CGPIO_SET, txdata, 18);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::POSITION_CGPIO_SET, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::POSITION_CGPIO_SET, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::cgpio_position_set_analog(int ionum, float value, float xyz[3], float tol_r) {
-  unsigned char *txdata = new unsigned char[19]();
+  unsigned char txdata[19] = {0};
   txdata[0] = ionum;
   int val = (int)(value / 10.0 * 4095.0);
   bin16_to_8(val, &txdata[1]);
@@ -1470,9 +1421,8 @@ int UxbusCmd::cgpio_position_set_analog(int ionum, float value, float xyz[3], fl
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::POSITION_CGPIO_SET_ANALOG, txdata, 19);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  return _recv_modbus_response(UXBUS_RG::POSITION_CGPIO_SET_ANALOG, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::POSITION_CGPIO_SET_ANALOG, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::config_io_stop_reset(int io_type, int val) {
@@ -1541,11 +1491,10 @@ int UxbusCmd::cali_user_orient(float three_pnts[3][6], float ret_rpy[3], int mod
     for (int i = 0; i < 6; i++) { txdata[j*6 + i] = three_pnts[j][i]; }
   }
   int rx_len = 12;
-  unsigned char *rx_data = new unsigned char[rx_len]();
+  std::vector<unsigned char> rx_data(rx_len, 0);
   char additional[2] = { (char)mode, (char)trust_ind };
-  int ret = _set_nfp32_with_bytes(UXBUS_RG::CALI_WRLD_ORIENT, txdata, 18, additional, 2, rx_data, rx_len);
-  hex_to_nfp32(rx_data, ret_rpy, 3);
-  delete[] rx_data;
+  int ret = _set_nfp32_with_bytes(UXBUS_RG::CALI_WRLD_ORIENT, txdata, 18, additional, 2, rx_data.data(), rx_len);
+  hex_to_nfp32(rx_data.data(), ret_rpy, 3);
   return ret;
 }
 
@@ -1600,7 +1549,7 @@ int UxbusCmd::set_admittance(int coord, int c_axis[6], float M[6], float K[6], f
   int ret = _send_modbus_request(UXBUS_RG::ADMITTANCE_CONFIG, tx_data, 79);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-  return _recv_modbus_response(UXBUS_RG::ADMITTANCE_CONFIG, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::ADMITTANCE_CONFIG, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::set_admittance_mbk(float M[6], float K[6], float B[6])
@@ -1615,7 +1564,7 @@ int UxbusCmd::set_admittance_mbk(float M[6], float K[6], float B[6])
   int ret = _send_modbus_request(UXBUS_RG::ADMITTANCE_CTRL_MKB, tx_data, 72);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-  return _recv_modbus_response(UXBUS_RG::ADMITTANCE_CTRL_MKB, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::ADMITTANCE_CTRL_MKB, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::set_admittance_config(int coord, int c_axis[6])
@@ -1630,7 +1579,7 @@ int UxbusCmd::set_admittance_config(int coord, int c_axis[6])
   int ret = _send_modbus_request(UXBUS_RG::ADMITTANCE_CTRL_CONFIG, tx_data, 7);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-  return _recv_modbus_response(UXBUS_RG::ADMITTANCE_CTRL_CONFIG, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::ADMITTANCE_CTRL_CONFIG, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::config_force_control(int coord, int c_axis[6], float f_ref[6], float limits[6])
@@ -1648,7 +1597,7 @@ int UxbusCmd::config_force_control(int coord, int c_axis[6], float f_ref[6], flo
   int ret = _send_modbus_request(UXBUS_RG::FORCE_CTRL_CONFIG, tx_data, 55);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-  return _recv_modbus_response(UXBUS_RG::FORCE_CTRL_CONFIG, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::FORCE_CTRL_CONFIG, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::set_force_control_pid(float kp[6], float ki[6], float kd[6], float xe_limit[6])
@@ -1664,7 +1613,7 @@ int UxbusCmd::set_force_control_pid(float kp[6], float ki[6], float kd[6], float
   int ret = _send_modbus_request(UXBUS_RG::FORCE_CTRL_PID, tx_data, 96);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
 
-  return _recv_modbus_response(UXBUS_RG::FORCE_CTRL_PID, ret, NULL, 0, S_TOUT_);
+  return _recv_modbus_response(UXBUS_RG::FORCE_CTRL_PID, ret, nullptr, 0, S_TOUT_);
 }
 
 int UxbusCmd::ft_sensor_set_zero(void)
@@ -1714,44 +1663,43 @@ int UxbusCmd::ft_sensor_get_config(int *ft_mode, int *ft_is_started, int *ft_typ
 {
   unsigned char data[280];
   int ret = _get_nu8(UXBUS_RG::FTSENSOR_GET_CONFIG, data, 280);
-  if (ft_mode != NULL) *ft_mode = data[0];
-  if (ft_is_started != NULL) *ft_is_started = data[1];
-  if (ft_type != NULL) *ft_type = data[2];
-  if (ft_id != NULL) *ft_id = data[3];
-  if (ft_freq != NULL) *ft_freq = bin8_to_16(&data[4]);
-  if (ft_mass != NULL) *ft_mass = hex_to_fp32(&data[6]);
-  if (ft_dir_bias != NULL) *ft_dir_bias = hex_to_fp32(&data[10]);
-  if (ft_centroid != NULL) hex_to_nfp32(&data[14], ft_centroid, 3);
-  if (ft_zero != NULL) hex_to_nfp32(&data[26], ft_zero, 6);
-  if (imp_coord != NULL) *imp_coord = data[50];
-  if (imp_c_axis != NULL) { for(int i = 0; i < 6; i++) imp_c_axis[i] = data[51+i]; };
-  if (M != NULL) hex_to_nfp32(&data[57], M, 6);
-  if (K != NULL) hex_to_nfp32(&data[81], K, 6);
-  if (B != NULL) hex_to_nfp32(&data[105], B, 6);
+  if (ft_mode != nullptr) *ft_mode = data[0];
+  if (ft_is_started != nullptr) *ft_is_started = data[1];
+  if (ft_type != nullptr) *ft_type = data[2];
+  if (ft_id != nullptr) *ft_id = data[3];
+  if (ft_freq != nullptr) *ft_freq = bin8_to_16(&data[4]);
+  if (ft_mass != nullptr) *ft_mass = hex_to_fp32(&data[6]);
+  if (ft_dir_bias != nullptr) *ft_dir_bias = hex_to_fp32(&data[10]);
+  if (ft_centroid != nullptr) hex_to_nfp32(&data[14], ft_centroid, 3);
+  if (ft_zero != nullptr) hex_to_nfp32(&data[26], ft_zero, 6);
+  if (imp_coord != nullptr) *imp_coord = data[50];
+  if (imp_c_axis != nullptr) { for(int i = 0; i < 6; i++) imp_c_axis[i] = data[51+i]; };
+  if (M != nullptr) hex_to_nfp32(&data[57], M, 6);
+  if (K != nullptr) hex_to_nfp32(&data[81], K, 6);
+  if (B != nullptr) hex_to_nfp32(&data[105], B, 6);
 
-  if (f_coord != NULL) *f_coord = data[129];
-  if (f_c_axis != NULL) { for(int i = 0; i < 6; i++) f_c_axis[i] = data[130+i]; };
-  if (f_ref != NULL) hex_to_nfp32(&data[136], f_ref, 6);
-  if (f_limits != NULL) hex_to_nfp32(&data[160], f_limits, 6);
-  if (kp != NULL) hex_to_nfp32(&data[184], kp, 6);
-  if (ki != NULL) hex_to_nfp32(&data[208], ki, 6);
-  if (kd != NULL) hex_to_nfp32(&data[232], kd, 6);
-  if (xe_limit != NULL) hex_to_nfp32(&data[256], xe_limit, 6);
+  if (f_coord != nullptr) *f_coord = data[129];
+  if (f_c_axis != nullptr) { for(int i = 0; i < 6; i++) f_c_axis[i] = data[130+i]; };
+  if (f_ref != nullptr) hex_to_nfp32(&data[136], f_ref, 6);
+  if (f_limits != nullptr) hex_to_nfp32(&data[160], f_limits, 6);
+  if (kp != nullptr) hex_to_nfp32(&data[184], kp, 6);
+  if (ki != nullptr) hex_to_nfp32(&data[208], ki, 6);
+  if (kd != nullptr) hex_to_nfp32(&data[232], kd, 6);
+  if (xe_limit != nullptr) hex_to_nfp32(&data[256], xe_limit, 6);
 
   return ret;
 }
 
 int UxbusCmd::ft_sensor_get_error(int *err, bool is_new)
 {
-  unsigned char *txdata = new unsigned char[3]();
+  unsigned char txdata[3] = {0};
   txdata[0] = 8;
   bin16_to_8(0x0010, &txdata[1]);
 
   std::lock_guard<std::mutex> locker(mutex_);
   int ret = _send_modbus_request(UXBUS_RG::SERVO_R16B, txdata, 3);
-  delete[] txdata;
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  unsigned char *rx_data = new unsigned char[4]();
+  unsigned char rx_data[4] = {0};
   ret = _recv_modbus_response(UXBUS_RG::SERVO_R16B, ret, rx_data, 4, G_TOUT_);
   if (ret == 0 || ret == 1 || ret == 2) {
     if (bin8_to_32(rx_data) == 27) {
@@ -1774,27 +1722,25 @@ int UxbusCmd::iden_tcp_load(float result[4], float estimated_mass)
 
 int UxbusCmd::linear_motor_modbus_r16s(int addr, unsigned char *rx_data, int len, unsigned char fcode)
 {
-  unsigned char *txdata = new unsigned char[6]();
+  unsigned char txdata[6] = {0};
   txdata[0] = UXBUS_CONF::LINEAR_MOTOR_ID;
   txdata[1] = fcode;
   bin16_to_8(addr, &txdata[2]);
   bin16_to_8(len, &txdata[4]);
   int ret = tgpio_set_modbus_func(txdata, 6, rx_data, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
-  delete[] txdata;
   return ret;
 }
 
 int UxbusCmd::linear_motor_modbus_w16s(int addr, unsigned char *send_data, int len, unsigned char *rx_data)
 {
-  unsigned char *txdata = new unsigned char[7 + len * 2]();
+  std::vector<unsigned char> txdata(7 + len * 2, 0);
   txdata[0] = UXBUS_CONF::LINEAR_MOTOR_ID;
   txdata[1] = 0x10;
-  bin16_to_8(addr, &txdata[2]);
-  bin16_to_8(len, &txdata[4]);
+  bin16_to_8(addr, txdata.data() + 2);
+  bin16_to_8(len, txdata.data() + 4);
   txdata[6] = len * 2;
-  memcpy(&txdata[7], send_data, len * 2);
-  int ret = tgpio_set_modbus_func(txdata, len * 2 + 7, rx_data, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
-  delete[] txdata;
+  memcpy(txdata.data() + 7, send_data, len * 2);
+  int ret = tgpio_set_modbus_func(txdata.data(), len * 2 + 7, rx_data, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
   return ret;
 }
 
@@ -1829,7 +1775,7 @@ int UxbusCmd::move_line_common(float mvpose[6], float mvvelo, float mvacc, float
     char additional[4] = { (char)coord, (char)is_axis_angle, (char)only_check_type, (char)motion_type };
     ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 4, rx_data, 3, 10000, feedback_key);
   }
-  if (only_check_type > 0 && ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+  if (only_check_type > 0 && ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
   return ret;
 }
 
@@ -1847,7 +1793,7 @@ int UxbusCmd::move_circle_common(float pose1[6], float pose2[6], float mvvelo, f
   char additional[3] = { (char)coord, (char)is_axis_angle, (char)only_check_type };
   unsigned char rx_data[3] = { 0 };
   int ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_CIRCLE, txdata, 16, additional, 3, rx_data, 3, 10000, feedback_key);
-  if (ret == 0 && only_check_result != NULL) *only_check_result = rx_data[2];
+  if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
   return ret;
 }
 
@@ -1867,7 +1813,7 @@ int UxbusCmd::_set_feedback_type_no_lock(unsigned char feedback_type)
   unsigned char send_data[1] = {feedback_type};
   int ret = _send_modbus_request(UXBUS_RG::SET_FEEDBACK_TYPE, send_data, 1);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
-  ret = _recv_modbus_response(UXBUS_RG::SET_FEEDBACK_TYPE, ret, NULL, 0, S_TOUT_);
+  ret = _recv_modbus_response(UXBUS_RG::SET_FEEDBACK_TYPE, ret, nullptr, 0, S_TOUT_);
   return ret;
 }
 
@@ -1883,7 +1829,7 @@ int UxbusCmd::set_feedback_type(unsigned char feedback_type)
 
 int UxbusCmd::check_feedback(std::string feedback_key)
 {
-  return _set_nu8(UXBUS_RG::FEEDBACK_CHECK, (unsigned char *)NULL, 0, feedback_key, FeedbackType::MOTION_FINISH);
+  return _set_nu8(UXBUS_RG::FEEDBACK_CHECK, (unsigned char *)nullptr, 0, feedback_key, FeedbackType::MOTION_FINISH);
 }
 
 int UxbusCmd::set_common_param(unsigned char param_type, int param_val)
@@ -1896,11 +1842,10 @@ int UxbusCmd::set_common_param(unsigned char param_type, int param_val)
 
 int UxbusCmd::set_common_param(unsigned char param_type, int *param_vals, int n)
 {
-  unsigned char *send_data = new unsigned char[n * 4 + 1]();
+  std::vector<unsigned char> send_data(n * 4 + 1, 0);
   send_data[0] = param_type;
-  nint32_to_hex(param_vals, &send_data[1], n);
-  int ret = _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data,  n * 4 + 1);
-  delete[] send_data;
+  nint32_to_hex(param_vals, send_data.data() + 1, n);
+  int ret = _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data.data(),  n * 4 + 1);
   return ret;
 }
 
@@ -1914,11 +1859,10 @@ int UxbusCmd::set_common_param(unsigned char param_type, float param_val)
 
 int UxbusCmd::set_common_param(unsigned char param_type, float *param_vals, int n)
 {
-  unsigned char *send_data = new unsigned char[n * 4 + 1]();
+  std::vector<unsigned char> send_data(n * 4 + 1, 0);
   send_data[0] = param_type;
-  nfp32_to_hex(param_vals, &send_data[1], n);
-  int ret = _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data,  n * 4 + 1);
-  delete[] send_data;
+  nfp32_to_hex(param_vals, send_data.data() + 1, n);
+  int ret = _set_nu8(UXBUS_RG::SET_COMMON_PARAM, send_data.data(),  n * 4 + 1);
   return ret;
 }
 
@@ -1934,10 +1878,9 @@ int UxbusCmd::set_common_param(unsigned char param_type, float *param_vals, int 
 int UxbusCmd::get_common_param(unsigned char param_type, int *param_vals, int n)
 {
   unsigned char send_data[1] = {param_type};
-  unsigned char *rx_data = new unsigned char[n * 4]();
-  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data,  n * 4);
-  bin8_to_n32(rx_data, param_vals, n);
-  delete[] rx_data;
+  std::vector<unsigned char> rx_data(n * 4, 0);
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data.data(),  n * 4);
+  bin8_to_n32(rx_data.data(), param_vals, n);
   return ret;
 }
 
@@ -1953,10 +1896,9 @@ int UxbusCmd::get_common_param(unsigned char param_type, int *param_vals, int n)
 int UxbusCmd::get_common_param(unsigned char param_type, float *param_vals, int n)
 {
   unsigned char send_data[1] = {param_type};
-  unsigned char *rx_data = new unsigned char[n * 4]();
-  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data,  n * 4);
-  hex_to_nfp32(rx_data, param_vals, n);
-  delete[] rx_data;
+  std::vector<unsigned char> rx_data(n * 4, 0);
+  int ret = _getset_nu8(UXBUS_RG::GET_COMMON_PARAM, send_data, 1, rx_data.data(),  n * 4);
+  hex_to_nfp32(rx_data.data(), param_vals, n);
   return ret;
 }
 

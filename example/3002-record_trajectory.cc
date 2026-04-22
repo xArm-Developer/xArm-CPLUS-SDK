@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   }
   std::string port(argv[1]);
 
-  XArmAPI *arm = new XArmAPI(port);
+  auto arm = std::make_shared<XArmAPI>(port);
   sleep_milliseconds(500);
   if (arm->error_code != 0) arm->clean_error();
   if (arm->warn_code != 0) arm->clean_warn();
@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   arm->stop_record_trajectory();
   printf("stop_record_trajectory, ret=%d\n", ret);
   std::string filename("test.traj");
-  arm->save_record_trajectory((char *)filename.data());
+  arm->save_record_trajectory(filename.c_str());
   printf("save_record_trajectory, ret=%d\n", ret);
   sleep_milliseconds(1000);
 

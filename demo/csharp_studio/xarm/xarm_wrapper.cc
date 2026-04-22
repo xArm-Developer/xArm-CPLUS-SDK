@@ -14,7 +14,7 @@
 
 namespace XArmWrapper
 {
-  XArmAPI* arm = NULL;
+  XArmAPI* arm = nullptr;
   int id = 0;
   int active_instance_id = 0;
   std::map<int, XArmAPI*> xarm_map;
@@ -22,7 +22,7 @@ namespace XArmWrapper
   int __stdcall switch_xarm(int instance_id) {
     std::map<int, XArmAPI*>::iterator iter = xarm_map.find(instance_id);
     if (iter != xarm_map.end()) {
-      if (arm != NULL && arm != iter->second) {
+      if (arm != nullptr && arm != iter->second) {
         bool removed = true;
         for (std::map<int, XArmAPI*>::iterator it = xarm_map.begin(); it != xarm_map.end(); ++it) {
           if (it->second == arm) {
@@ -34,18 +34,18 @@ namespace XArmWrapper
           arm->disconnect();
           delete arm;
         }
-        printf("current active instance_id: %d\n", iter->first);
+        XARM_LOG_INFO("current active instance_id: %d\n", iter->first);
       }
       arm = iter->second;
       active_instance_id = iter->first;
       return 0;
     }
-    fprintf(stderr, "[switch failed], instance %d is not exist, ", instance_id);
+    XARM_LOG_ERROR("[switch failed], instance %d is not exist, ", instance_id);
     if (active_instance_id != 0) {
-      printf("current active instance_id: %d\n", active_instance_id);
+      XARM_LOG_INFO("current active instance_id: %d\n", active_instance_id);
     }
     else {
-      printf("no active instance\n");
+      XARM_LOG_WARN("no active instance\n");
     }
     return -1;
   }
@@ -54,7 +54,7 @@ namespace XArmWrapper
     std::map<int, XArmAPI*>::iterator iter = xarm_map.find(instance_id);
     if (iter != xarm_map.end()) {
       if (iter->second == arm) {
-        printf("You removed the instance you are using, and the instance will be disconnected and destroyed when you successfully switch to another instance\n");
+        XARM_LOG_WARN("You removed the instance you are using, and the instance will be disconnected and destroyed when you successfully switch to another instance\n");
       }
       else {
         arm->disconnect();
@@ -74,7 +74,7 @@ namespace XArmWrapper
         return iter->second;
       }
       else {
-        printf("instance %d is not exist, use default instance\n", instance_id);
+        XARM_LOG_WARN("instance %d is not exist, use default instance\n", instance_id);
       }
     }
     return arm;
@@ -334,16 +334,16 @@ namespace XArmWrapper
   int __stdcall start_record_trajectory(int instance_id) {
     return get_instance(instance_id)->start_record_trajectory();
   }
-  int __stdcall stop_record_trajectory(char* filename, int instance_id) {
+  int __stdcall stop_record_trajectory(const char* filename, int instance_id) {
     return get_instance(instance_id)->stop_record_trajectory(filename);
   }
-  int __stdcall save_record_trajectory(char* filename, float timeout, int instance_id) {
+  int __stdcall save_record_trajectory(const char* filename, float timeout, int instance_id) {
     return get_instance(instance_id)->save_record_trajectory(filename, timeout);
   }
-  int __stdcall load_trajectory(char* filename, float timeout, int instance_id) {
+  int __stdcall load_trajectory(const char* filename, float timeout, int instance_id) {
     return get_instance(instance_id)->load_trajectory(filename, timeout);
   }
-  int __stdcall playback_trajectory(int times, char* filename, bool wait, int double_speed, int instance_id) {
+  int __stdcall playback_trajectory(int times, const char* filename, bool wait, int double_speed, int instance_id) {
     return get_instance(instance_id)->playback_trajectory(times, filename, wait, double_speed);
   }
   int __stdcall get_trajectory_rw_status(int *status, int instance_id) {

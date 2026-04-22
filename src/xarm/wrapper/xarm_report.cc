@@ -10,16 +10,6 @@
 
 #include "xarm/wrapper/xarm_api.h"
 
-#define PRINT_HEX_DATA(hex, len, ...)     \
-{                                         \
-  printf(__VA_ARGS__);              \
-  for (int i = 0; i < len; ++i) {   \
-    printf("%02x ", hex[i]);        \
-  }                                 \
-  printf("\n");                     \
-}
-
-
 void XArmAPI::_update_old(unsigned char *rx_data) {
   unsigned char *data_fp = &rx_data[4];
   int sizeof_data = bin8_to_32(rx_data);
@@ -433,7 +423,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
 }
 
 void XArmAPI::_handle_report_data(void) {
-  unsigned char rx_data[REPORT_BUF_SIZE];
+  unsigned char rx_data[REPORT_BUF_SIZE] = {0};
   
   int ret = 0;
   int size = 0;
@@ -448,10 +438,10 @@ void XArmAPI::_handle_report_data(void) {
     if (!is_reported()) {
       if (reported) {
         reported = false;
-        fprintf(stderr, "Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
+        XARM_LOG_ERROR("Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
         _report_connect_changed_callback();
       }
-      // stream_tcp_report_ = connect_tcp_report2((char *)port_.data(), report_type_);
+      // stream_tcp_report_ = connect_tcp_report2(port_.c_str(), report_type_);
       // if (stream_tcp_report_ == nullptr) {
       if (stream_tcp_report_->connect() < 0) {
         connect_fail_count += 1;
@@ -460,7 +450,7 @@ void XArmAPI::_handle_report_data(void) {
         // continue;
 
         if (!is_connected()) {
-          fprintf(stderr, "report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+          XARM_LOG_ERROR("report thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
           break;
         }
         if (connect_fail_count <= max_reconnect_cnts) {
@@ -477,7 +467,7 @@ void XArmAPI::_handle_report_data(void) {
     }
     if (!reported) {
       reported = true;
-      printf("Report[%s] is connected\n", report_type_.c_str());
+      XARM_LOG_INFO("Report[%s] is connected\n", report_type_.c_str());
       _report_connect_changed_callback();
     }
     memset(rx_data, 0, REPORT_BUF_SIZE);
@@ -500,15 +490,15 @@ void XArmAPI::_handle_report_data(void) {
         locker.unlock();
       }
       else {
-        fprintf(stderr, "check report data[%s] failed, ret=%d\n", report_type_.c_str(), ret);
+        XARM_LOG_ERROR("check report data[%s] failed, ret=%d\n", report_type_.c_str(), ret);
       }
     }
   }
-  printf("xarm report2 thread is quit.\n");
+  XARM_LOG_INFO("xarm report2 thread is quit.\n");
 }
 
 void XArmAPI::_handle_report_rich_data(void) {
-  unsigned char rx_data[REPORT_BUF_SIZE];
+  unsigned char rx_data[REPORT_BUF_SIZE] = {0};
   
   int ret = 0;
   int size = 0;
@@ -529,9 +519,9 @@ void XArmAPI::_handle_report_rich_data(void) {
       if (protocol_identifier != 3 && _version_is_ge(1, 8, 6) && core->set_protocol_identifier(3) == 0) protocol_identifier = 3;
       if (protocol_identifier == 3 && curr_ms - last_send_ms > 10000 && curr_ms - core->last_recv_ms > 30000) {
         if (get_state(&state) >= 0) last_send_ms = curr_ms;
-        // printf("send heart beat\n");
+        // XARM_LOG_INFO("send heart beat\n");
         if (curr_ms - core->last_recv_ms > 90000) {
-          fprintf(stderr, "client timeout over 90s, disconnect.\n");
+          XARM_LOG_ERROR("client timeout over 90s, disconnect.\n");
           break;
         }
       }
@@ -544,7 +534,7 @@ void XArmAPI::_handle_report_rich_data(void) {
           _report_connect_changed_callback();
       }
       
-      // stream_tcp_rich_report_ = connect_tcp_report2((char *)port_.data(), "rich");
+      // stream_tcp_rich_report_ = connect_tcp_report2(port_.c_str(), "rich");
       // if (stream_tcp_rich_report_ == nullptr) {
       if (stream_tcp_rich_report_->connect() < 0) {
         connect_fail_count += 1;
@@ -552,13 +542,13 @@ void XArmAPI::_handle_report_rich_data(void) {
         //   sleep_milliseconds(2000);
         // else if (!is_connected() || protocol_identifier == 2)
         // {
-        //   fprintf(stderr, "report rich thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+        //   XARM_LOG_ERROR("report rich thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
         //   break;
         // }
         // continue;
 
         if (!is_connected() || connect_fail_count > max_reconnect_cnts) {
-          fprintf(stderr, "report rich thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
+          XARM_LOG_ERROR("report rich thread is break, connected=%d, failed_cnts=%d\n", is_connected(), connect_fail_count);
           break;
         }
         if (connect_fail_count <= max_reconnect_cnts) {
@@ -595,10 +585,10 @@ void XArmAPI::_handle_report_rich_data(void) {
         _update(rx_data);
       }
       else {
-        fprintf(stderr, "check report data failed, ret=%d\n", ret);
+        XARM_LOG_ERROR("check report data failed, ret=%d\n", ret);
       }
     }
   }
-  printf("xarm report thread is quit.\n");
+  XARM_LOG_INFO("xarm report thread is quit.\n");
   _request_shutdown_from_report_thread();
 }

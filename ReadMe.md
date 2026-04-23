@@ -88,7 +88,7 @@
 - CMake 3.5 or newer
 - A C++11 compiler
 - Linux/macOS: `g++` or `clang++`
-- Windows: Visual Studio 2017/2019/2022 with Desktop development for C++
+- Windows: Visual Studio 2015/2017/2019/2022 with Desktop development for C++
 
 The top-level `CMakeLists.txt` is written against CMake 3.5 features.
 
@@ -252,6 +252,12 @@ Build everything:
 ```bash
 make clean
 make
+```
+
+Run an example with shared library output:
+
+```bash
+LD_LIBRARY_PATH=./build/lib ./build/bin/0002-get_property 192.168.1.221
 ```
 
 Install:

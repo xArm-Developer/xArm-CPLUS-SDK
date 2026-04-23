@@ -264,8 +264,8 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
-CMakeLists.txt
 *.old
 example/0000*
 test.cpp
 example/0000-bug.cc
+build-cmake/

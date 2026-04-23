@@ -13,7 +13,7 @@
 #include "xarm/core/instruction/uxbus_cmd.h"
 #include "xarm/core/instruction/servo3_config.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 static int BAUDRATES[13] = { 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 1500000, 2000000, 2500000 };
 

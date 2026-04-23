@@ -150,7 +150,7 @@ void XArmAPI::_update_old(unsigned char *rx_data) {
     rot_jerk = rot_msg_[0];
     max_rot_acc = rot_msg_[1];
 
-    for (int i = 0; i < 17; i++) sv3msg_[i] = data_fp[171 + i];
+    for (int i = 0; i < 16; i++) sv3msg_[i] = data_fp[171 + i];
   }
 }
 

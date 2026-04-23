@@ -8,8 +8,8 @@
  * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
  */
 
-#ifndef WRAPPER_COMMON_UTILS_H_
-#define WRAPPER_COMMON_UTILS_H_
+#ifndef CORE_UTILS_UTILS_H_
+#define CORE_UTILS_UTILS_H_
 
 #include <iostream>
 #include <vector>
@@ -38,4 +38,4 @@ inline std::vector<std::string> split(const std::string &str, const std::string 
   return resVec;
 }
 
-#endif
+#endif // CORE_UTILS_UTILS_H_

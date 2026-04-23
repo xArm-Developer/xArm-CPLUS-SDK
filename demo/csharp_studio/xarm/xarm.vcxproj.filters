@@ -36,7 +36,7 @@
     <ClInclude Include="..\..\..\include\xarm\core\common\queue_memcpy.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\xarm\core\debug\debug_print.h">
+    <ClInclude Include="..\..\..\include\xarm\core\utils\log.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\xarm\core\instruction\servo3_config.h">
@@ -72,10 +72,10 @@
     <ClInclude Include="..\..\..\include\xarm\core\xarm_config.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\xarm\wrapper\common\timer.h">
+    <ClInclude Include="..\..\..\include\xarm\core\utils\thread_pool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\xarm\wrapper\common\utils.h">
+    <ClInclude Include="..\..\..\include\xarm\core\utils\utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\xarm\wrapper\xarm_api.h">
@@ -110,7 +110,7 @@
     <ClCompile Include="..\..\..\src\xarm\core\common\queue_memcpy.cc">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\xarm\core\debug\debug_print.cc">
+    <ClCompile Include="..\..\..\src\xarm\core\utils\log.cc">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd.cc">

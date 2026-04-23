@@ -33,9 +33,9 @@
 #include "xarm/core/instruction/uxbus_cmd_tcp.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
 #include "xarm/core/instruction/servo3_config.h"
-#include "xarm/core/debug/debug_print.h"
-#include "xarm/wrapper/common/utils.h"
-#include "xarm/wrapper/common/timer.h"
+#include "xarm/core/utils/log.h"
+#include "xarm/core/utils/utils.h"
+#include "xarm/core/utils/thread_pool.h"
 
 #define REPORT_BUF_SIZE 1024
 #define DEFAULT_IS_RADIAN false

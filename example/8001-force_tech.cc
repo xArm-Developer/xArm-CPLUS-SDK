@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   // Attention: for M, smaller value means less effort to drive the arm, but may also be less stable, please be careful. 
   // x/y/z equivalent mass; range: 0.02 ~ 1 kg
   // Rx/Ry/Rz equivalent moment of inertia, range: 1e-4 ~ 0.01 (Kg*m^2)
-  float M[6] = { 0.05, 0.05, 0.05, 0.0005, 0.0005, 0.0005 }; // M => {x, y, z, Rx, Ry, Rz} 
+  float M[6] = { 0.05f, 0.05f, 0.05f, 0.0005f, 0.0005f, 0.0005f }; // M => {x, y, z, Rx, Ry, Rz} 
   // x/y/z linear stiffness coefficient, range: 0 ~ 2000 (N/m)
   // Rx/Ry/Rz rotational stiffness coefficient, range: 0 ~ 20 (Nm/rad)
   float K[6] = { 0 }; // K => {x, y, z, Rx, Ry, Rz}

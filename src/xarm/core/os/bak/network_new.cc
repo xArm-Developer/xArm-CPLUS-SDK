@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "xarm/core/os/network.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 #define DB_FLG "[NetWork] "
 #define PRINT_ERR XARM_LOG_ERROR

@@ -5,16 +5,17 @@
  * 
  * All rights reserved.
  * 
- * @author Zhang <jimy92@163.com>
  * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
  */
 
-#define _CRT_SECURE_NO_WARNINGS
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS 1
+#endif
 
 #include <stdarg.h>
 #include <vector>
 #include <string>
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 #include "xarm/core/common/data_type.h"
 
 static std::string vformat_string(const char *fmt, va_list args) {

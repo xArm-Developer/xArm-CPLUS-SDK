@@ -14,7 +14,7 @@
 #include "xarm/core/instruction/uxbus_cmd_ser.h"
 #include "xarm/core/instruction/uxbus_cmd_tcp.h"
 #include "xarm/core/xarm_config.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 UxbusCmdSer *connect_rs485_control(const char *com) {
   auto arm_port = std::make_shared<SerialPort>(com, XARM_CONF::SERIAL_BAUD, 3, 128);

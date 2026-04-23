@@ -26,7 +26,7 @@
 
 #include "xarm/core/port/ser.h"
 #include "xarm/core/common/crc16.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 void SerialPort::recv_proc(void) {
   unsigned char ch;

@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
   ret = arm->read_input_registers(0x40, 9, regs, true);
   printf("ret=%d, ", ret);
   for (int i = 0; i < 9; i++) {
-    tcp_pose[i] = regs[i] / 10.0;
+    tcp_pose[i] = regs[i] / 10.0f;
   }
   print_nvect("x/y/z/roll/pitch/yaw/rx/ry/rz: ", tcp_pose, 9);
 

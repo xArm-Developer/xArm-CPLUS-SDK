@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 #include "xarm/core/os/network.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 #if !defined(SOL_TCP) && defined(IPPROTO_TCP)
 #define SOL_TCP IPPROTO_TCP

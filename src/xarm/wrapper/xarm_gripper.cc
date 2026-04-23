@@ -92,7 +92,7 @@ int XArmAPI::get_gripper_position(fp32 *pos) {
 int XArmAPI::get_gripper_g2_position(int *pos) {
   int val;
   int ret = get_gripper_position(&val);
-  float p = sin(to_radian(val / 18.28 - 8.33)) * 110.0 + 16;
+  float p = sin(to_radian(val / 18.28f - 8.33f)) * 110.0f + 16;
   *pos = (int)round(p);
   return ret;
 }
@@ -285,7 +285,7 @@ int XArmAPI::set_gripper_g2_position(int pos, int speed, int force, bool wait, f
   speed = speed < 15 ? 15 : speed > 225 ? 225 : speed;
   force = force < 1 ? 1 : force > 100 ? 100 : force;
 
-  pos = (int)((to_degree(asin((pos - 16) / 110.0)) + 8.33) * 18.28);
+  pos = (int)((to_degree(asin((pos - 16) / 110.0f)) + 8.33f) * 18.28f);
   speed = (int)(((speed * 60) / 9.88235 + 140) / 0.4);
 
   unsigned char data_frame[17] = { 0x08, 0x10, 0x0C, 0x00, 0x00, 0x05, 0x0A, 0x00, 0x01 };

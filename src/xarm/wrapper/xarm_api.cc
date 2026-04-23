@@ -8,8 +8,10 @@
  * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
  */
 
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS 1
 // #pragma warning(disable:4996)
+#endif
 
 #include <random>
 #include <algorithm>

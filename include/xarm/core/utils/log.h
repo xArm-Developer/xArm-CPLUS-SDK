@@ -5,12 +5,11 @@
  * 
  * All rights reserved.
  * 
- * @author Zhang <jimy92@163.com>
  * @author Vinman <vinman.wen@ufactory.cc> <vinman.cub@gmail.com>
  */
 
-#ifndef CORE_DEBUG_DEBUG_PRINT_H_
-#define CORE_DEBUG_DEBUG_PRINT_H_
+#ifndef CORE_UTILS_LOG_H_
+#define CORE_UTILS_LOG_H_
 
 #include "xarm/core/common/data_type.h"
 
@@ -32,4 +31,4 @@ void print_nvect(const char *str, const unsigned char vect[], int n);
 void print_nvect(const char *str, const int vect[], int n);
 void print_hex(const char *str, const unsigned char *hex, int len);
 
-#endif
+#endif // CORE_UTILS_LOG_H_

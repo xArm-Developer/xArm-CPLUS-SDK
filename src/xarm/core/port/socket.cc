@@ -14,7 +14,7 @@
 #include "xarm/core/port/socket.h"
 #include "xarm/core/os/network.h"
 #include "xarm/core/xarm_config.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 #ifdef _WIN32
 #include <ws2tcpip.h>

@@ -11,8 +11,9 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
-- > ### 1.18.0
+- > ### 1.18.0 
   - Strengthen the code, fix some hidden bugs, and eliminate security risks.
+  - Supports CMake compilation
 
 - > ### 1.17.0/1.17.1 
   - Change some API names
@@ -80,145 +81,190 @@
 
 - #### [UFACTORY ModbusTCP Manual](doc/UF_ModbusTCP_Manual.md)
 
-## Linux
+## Build
 
-- Get the code:
+### Requirements
 
-  ```
-  git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
-  ```
+- CMake 3.5 or newer
+- A C++11 compiler
+- Linux/macOS: `g++` or `clang++`
+- Windows: Visual Studio 2017/2019/2022 with Desktop development for C++
 
-- Change directory
+The top-level `CMakeLists.txt` is written against CMake 3.5 features.
 
-  ```
-  cd ./xArm-CPLUS-SDK/
-  ```
+### Get the code
 
+```bash
+git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
+cd xArm-CPLUS-SDK
+```
 
-- Build library:
-  ```bash
-  make xarm
-  ```
+### Output layout
 
-- Build all example
+By default, the current CMake build generates:
 
-    ```bash
-    make test
-    ```
+- libraries in `build/lib`
+- executables in `build/bin`
 
-- Build a example
+When building shared libraries, make sure the runtime loader can find `build/lib`.
 
-    ```bash
-    make test-0002-get_property # build example/test-0002-get_property.cc
-    ```
+## Build With CMake
 
-- Build all (build library and build all example)
+### Linux
 
-    ```bash
-    make clean
-    make # make xarm && make test
-    ```
+Configure and build:
 
-- Install
+```bash
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
+```
 
-    ```bash
-    sudo make install
-    ```
+Build static library instead of shared library:
 
-- Uninstall
+```bash
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+make -j
+```
 
-    ```bash
-    sudo make uninstall
-    ```
+Disable examples:
 
-- Run a example
+```bash
+mkdir -p build
+cd build
+cmake .. -DXARM_BUILD_EXAMPLES=OFF
+make -j
+```
 
-    ```bash
-    ./build/example/0002-get_property 192.168.1.221
-    ```
+Run an example with shared library output:
 
+```bash
+LD_LIBRARY_PATH=./build/lib ./build/bin/0002-get_property 192.168.1.221
+```
 
+Install:
 
+```bash
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
+sudo make install
+```
 
-## Windows
+### macOS
 
-- Running environment
+Configure and build:
 
-  ```
-  It is recommended to run the project with visual studio 2015.Make sure your visual studio 2015 has a visual C++ development environment installed before running.
-  ```
-  
-- Get the code:
+```bash
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
+```
 
-  ```
-  git clone https://github.com/xArm-Developer/xArm-CPLUS-SDK.git
-  ```
+Run an example with shared library output:
 
-- Change directory
+```bash
+DYLD_LIBRARY_PATH=./build/lib ./build/bin/0002-get_property 192.168.1.221
+```
 
-  ```
-  Change your directory xArm-CPLUS-SDK/visual_studio
-  ```
+### Windows
 
-- Open project
+Configure with Visual Studio 2015:
 
-  ```
-  If you changed your directory, you can see a visual_studio.sln file. Click this file you will open the project.
-  ```
+```powershell
+mkdir build
+cd build
+cmake .. -G "Visual Studio 14 2015" -A x64
+cmake --build . --config Release
+```
 
+Configure with Visual Studio 2017:
 
-- Check the xarm project properties
+```powershell
+mkdir build
+cd build
+cmake .. -G "Visual Studio 15 2017" -A x64
+cmake --build . --config Release
+```
 
-  ```markdown
-  Open the xarm property pages and make sure your project configuration is the same as the following screenshot configuration.
-  
-  VC++ Directories path 
-  	$(ProjectDir)..\..\include
-  	$(ProjectDir)..\..\src
-  ```
+Configure with Visual Studio 2019:
 
-  ![image-20191217153415733](doc/img/image-20191217153415733.png)
+```powershell
+mkdir build
+cd build
+cmake .. -G "Visual Studio 16 2019" -A x64
+cmake --build . --config Release
+```
 
-  ![image-20191217152542587](doc/img/image-20191217152542587.png)
+If you use Visual Studio 2022:
 
-  
+```powershell
+mkdir build
+cd build
+cmake .. -G "Visual Studio 17 2022" -A x64
+cmake --build . --config Release
+```
 
-- Check the example project properties
+Run an example:
 
-  ```markdown
-  Open the example property pages and make sure your project configuration is the same as the following screenshot configuration.
-  Example project dependencies and xarm projects so references must be added to run.
-  ```
-  ![image-20191217154258804](doc/img/image-20191217154258804.png)
+```powershell
+.\build\bin\Release\0002-get_property.exe 192.168.1.221
+```
 
-  ![image-20191217154111439](doc/img/image-20191217154111439.png)
+Build the optional C# wrapper:
 
+```powershell
+mkdir build
+cd build
+cmake .. -G "Visual Studio 17 2022" -A x64 -DXARM_BUILD_CSHARP_WRAPPER=ON
+cmake --build . --config Release
+```
 
-- Build project
+## Build With Makefile
 
-  ```markdown
-  Right click example project and build the projiect.If the example project bulid successful you will get a .exe file in you project path.
-  
-  .exe path like this C:\Users\ufactory\Desktop\xArm-CPLUS-SDK\visual_studio\x64\Debug\0002-get_property.exe
-  ```
+The repository still keeps the original `Makefile` for Linux-style builds.
 
-  ![image-20191217155932743](doc/img/image-20191217155932743.png)
+Build library:
 
+```bash
+make xarm
+```
 
-- Run project
+Build all examples:
 
-  ```markdown
-  You can use cmd run project.  
-  ```
+```bash
+make test
+```
 
-  ![image-20191217160911893](doc/img/image-20191217160911893.png)
+Build one example:
 
-- New project
+```bash
+make test-0002-get_property
+```
 
-  ```markdown
-  If you want to create a new project, you need to pay attention to the dependent path of your new project. 
-  You must make sure that the configuration of the project you create is the same as that of the example project.
-  ```
+Build everything:
+
+```bash
+make clean
+make
+```
+
+Install:
+
+```bash
+sudo make install
+```
+
+Uninstall:
+
+```bash
+sudo make uninstall
+```
 
 
 

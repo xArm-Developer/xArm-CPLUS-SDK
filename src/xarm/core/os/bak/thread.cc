@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include "xarm/core/os/thread.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 #define PRINT_ERR XARM_LOG_ERROR
 

@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "xarm/core/report_data.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 
 ReportDataDevelop::ReportDataDevelop(void) {
   runing_ = 0;
@@ -214,7 +214,7 @@ int ReportDataRich::flush_data(unsigned char *rx_data) {
   rot_jerk_ = rot_msg_[0];
   rot_accmax_ = rot_msg_[1];
 
-  for (int i = 0; i < 17; i++) { sv3msg_[i] = data_fp[229 + i]; }
+  for (int i = 0; i < 16; i++) { sv3msg_[i] = data_fp[229 + i]; }
 
   return 0;
 }
@@ -455,10 +455,10 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
   rot_jerk = rot_msg_[0];
   rot_accmax = rot_msg_[1];
 
-  for (int i = 0; i < 17; i++) { sv3msg[i] = data_fp[229 + i]; }
+  for (int i = 0; i < 16; i++) { sv3msg[i] = data_fp[229 + i]; }
 
   if (total_num >= 252) {
-    for (int i = 0; i < 17; i++) { temperatures[i] = (char)data_fp[245 + i]; }
+    for (int i = 0; i < 7; i++) { temperatures[i] = (char)data_fp[245 + i]; }
   }
   if (total_num >= 284) {
     float tcp_spd[1];

@@ -10,7 +10,7 @@
 
 #include <string.h>
 #include "xarm/core/instruction/uxbus_cmd_tcp.h"
-#include "xarm/core/debug/debug_print.h"
+#include "xarm/core/utils/log.h"
 #include "xarm/core/instruction/uxbus_cmd_config.h"
 
 const unsigned short STANDARD_MODBUS_TCP_PROTOCOL = 0x00;

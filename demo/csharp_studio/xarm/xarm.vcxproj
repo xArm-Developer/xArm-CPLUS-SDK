@@ -159,7 +159,7 @@
     <ClInclude Include="..\..\..\include\xarm\core\common\data_type.h" />
     <ClInclude Include="..\..\..\include\xarm\core\common\queue_memcpy.h" />
     <ClInclude Include="..\..\..\include\xarm\core\connect.h" />
-    <ClInclude Include="..\..\..\include\xarm\core\debug\debug_print.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\utils\log.h" />
     <ClInclude Include="..\..\..\include\xarm\core\instruction\servo3_config.h" />
     <ClInclude Include="..\..\..\include\xarm\core\instruction\uxbus_cmd.h" />
     <ClInclude Include="..\..\..\include\xarm\core\instruction\uxbus_cmd_config.h" />
@@ -170,8 +170,8 @@
     <ClInclude Include="..\..\..\include\xarm\core\port\socket.h" />
     <ClInclude Include="..\..\..\include\xarm\core\report_data.h" />
     <ClInclude Include="..\..\..\include\xarm\core\xarm_config.h" />
-    <ClInclude Include="..\..\..\include\xarm\wrapper\common\timer.h" />
-    <ClInclude Include="..\..\..\include\xarm\wrapper\common\utils.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\utils\thread_pool.h" />
+    <ClInclude Include="..\..\..\include\xarm\core\utils\utils.h" />
     <ClInclude Include="..\..\..\include\xarm\wrapper\xarm_api.h" />
     <ClInclude Include="xarm_wrapper.h" />
   </ItemGroup>
@@ -185,7 +185,7 @@
     <ClCompile Include="..\..\..\src\xarm\core\common\crc16.cc" />
     <ClCompile Include="..\..\..\src\xarm\core\common\queue_memcpy.cc" />
     <ClCompile Include="..\..\..\src\xarm\core\connect.cc" />
-    <ClCompile Include="..\..\..\src\xarm\core\debug\debug_print.cc" />
+    <ClCompile Include="..\..\..\src\xarm\core\utils\log.cc" />
     <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd.cc" />
     <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd_ser.cc" />
     <ClCompile Include="..\..\..\src\xarm\core\instruction\uxbus_cmd_tcp.cc" />

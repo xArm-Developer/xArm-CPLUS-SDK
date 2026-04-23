@@ -23,49 +23,47 @@ static int close(int fd)
   return closesocket(fd);
 }
 
-static bool is_ignore_errno(int fp, int port)
+static int shutdown_socket(int fd)
+{
+  return shutdown(fd, SD_BOTH);
+}
+
+static bool is_ignore_errno(int sockfd, int port)
 {
   if (WSAGetLastError() == WSAEINTR || WSAGetLastError() == WSAEWOULDBLOCK) {
-    XARM_LOG_ERROR("EINTR occured, port=%d, fp=%d, errno=%d\n", port, fp, WSAGetLastError());
+    XARM_LOG_ERROR("EINTR occured, port=%d, sockfd=%d, errno=%d\n", port, sockfd, WSAGetLastError());
     return true;
   }
-  XARM_LOG_ERROR("socket read failed, port=%d, fp=%d, errno=%d, exit\n", port, fp, WSAGetLastError());
+  XARM_LOG_ERROR("socket read failed, port=%d, sockfd=%d, errno=%d, exit\n", port, sockfd, WSAGetLastError());
   return false;
 }
 #else
 #include <sys/socket.h>
 #include <unistd.h>
-static bool is_ignore_errno(int fp, int port)
+#include <sys/socket.h>
+#include <unistd.h>
+
+static int shutdown_socket(int fd)
+{
+  return shutdown(fd, SHUT_RDWR);
+}
+
+static bool is_ignore_errno(int sockfd, int port)
 {
   if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
-    XARM_LOG_ERROR("EINTR occured, port=%d, fp=%d, errno=%d\n", port, fp, errno);
+    XARM_LOG_ERROR("EINTR occured, port=%d, sockfd=%d, errno=%d\n", port, sockfd, errno);
     return true;
   }
-  XARM_LOG_ERROR("socket read failed, port=%d, fp=%d, errno=%d, exit\n", port, fp, errno);
+  XARM_LOG_ERROR("socket read failed, port=%d, sockfd=%d, errno=%d, exit\n", port, sockfd, errno);
   return false;
 }
 #endif
-
-
-// inline unsigned long long get_ms()
-// {
-// #ifdef _WIN32
-// 	struct timeb t;
-// 	ftime(&t);
-// 	return 1000 * t.time + t.millitm; // milliseconds
-// #else
-// 	struct timespec t;
-// 	clock_gettime(CLOCK_REALTIME, &t);
-// 	return 1000 * t.tv_sec + t.tv_nsec / 1000000; // milliseconds
-// #endif
-// }
 
 void SocketPort::recv_report_proc(void) {
   int ret;
   int size = 0;
   int num = 0, data_num = 0;
   std::vector<unsigned char> recv_data(que_maxlen, 0);
-  // std::vector<unsigned char> tmp_data(que_maxlen, 0);
   bool size_is_not_confirm = false;
 
   unsigned long long recv_prev_ms = 0;
@@ -84,11 +82,13 @@ void SocketPort::recv_report_proc(void) {
 
   bool debug = false; // log the debug msg
 
+  int sockfd = sockfd_;
+
   while (state_ == 0)
   {
     num = recv(sockfd_, (char *)(recv_data.data() + 4 + data_num), (size == 0 ? 4 : size) - data_num, 0);
     if (num <= 0) {
-      if (is_ignore_errno(sockfd_, sin_port_)) {
+      if (is_ignore_errno(sockfd, sin_port_)) {
         continue;
       }
       else {
@@ -182,12 +182,13 @@ void SocketPort::recv_proc(void) {
   int buf_len = 0;
   int buf_offset = 0;
   int buf_size = que_maxlen * 2;
+  int sockfd = sockfd_;
   std::vector<unsigned char> recv_buf(buf_size, 0);
   std::vector<unsigned char> recv_data(que_maxlen, 0);
   while (state_ == 0) {
     num = recv(sockfd_, (char *)(recv_buf.data() + buf_len), buf_size - buf_len, 0);
     if (num <= 0) {
-      if (is_ignore_errno(sockfd_, sin_port_)) {
+      if (is_ignore_errno(sockfd, sin_port_)) {
         continue;
       }
       else {
@@ -227,7 +228,7 @@ void SocketPort::recv_proc(void) {
         }
         if (ret != 0) {
           if (state_ == 0)
-            XARM_LOG_ERROR("socket push data failed, exit, port=%d, fp=%d\n", sin_port_, sockfd_);
+            XARM_LOG_ERROR("socket push data failed, exit, port=%d, sockfd=%d\n", sin_port_, sockfd);
           disconnect();
           break;
         };
@@ -308,11 +309,16 @@ int SocketPort::connect()
 
 void SocketPort::disconnect()
 {
-  std::unique_lock<std::mutex> lock(conn_mutex_);
-  state_.store(-1, std::memory_order_release);
-  if (sockfd_ != -1) {
-    close(sockfd_);
+  int fd = -1;
+  {
+    std::unique_lock<std::mutex> lock(conn_mutex_);
+    state_.store(-1, std::memory_order_release);
+    fd = sockfd_;
     sockfd_ = -1;
+  }
+  if (fd != -1) {
+    shutdown_socket(fd);
+    close(fd);
   }
 }
 

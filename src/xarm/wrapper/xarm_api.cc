@@ -1306,6 +1306,7 @@ void XArmAPI::_handle_feedback_data(void)
     sleep_ms(5);
   }
   delete[] feedback_datas;
+  XARM_LOG_INFO("xarm feedback thread is quit.\n");
 }
 
 int XArmAPI::iden_tcp_load(float result[4], float estimated_mass)

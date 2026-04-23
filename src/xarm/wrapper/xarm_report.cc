@@ -435,12 +435,14 @@ void XArmAPI::_handle_report_data(void) {
   while (!is_shutdown_ && is_connected()) {
     if (ret != 0)
       sleep_milliseconds(1);
+    if (is_shutdown_) break;
     if (!is_reported()) {
       if (reported) {
         reported = false;
         XARM_LOG_ERROR("Report[%s] is disconnected, try reconnect\n", report_type_.c_str());
         _report_connect_changed_callback();
       }
+      if (is_shutdown_) break;
       // stream_tcp_report_ = connect_tcp_report2(port_.c_str(), report_type_);
       // if (stream_tcp_report_ == nullptr) {
       if (stream_tcp_report_->connect() < 0) {
@@ -494,7 +496,7 @@ void XArmAPI::_handle_report_data(void) {
       }
     }
   }
-  XARM_LOG_INFO("xarm report2 thread is quit.\n");
+  XARM_LOG_INFO("xarm report thread is quit.\n");
 }
 
 void XArmAPI::_handle_report_rich_data(void) {
@@ -526,6 +528,7 @@ void XArmAPI::_handle_report_rich_data(void) {
         }
       }
     }
+    if (is_shutdown_) break;
     
     if (!_is_rich_reported()) {
       if (reported) {
@@ -533,6 +536,7 @@ void XArmAPI::_handle_report_rich_data(void) {
         if (report_type_ == "rich")
           _report_connect_changed_callback();
       }
+      if (is_shutdown_) break;
       
       // stream_tcp_rich_report_ = connect_tcp_report2(port_.c_str(), "rich");
       // if (stream_tcp_rich_report_ == nullptr) {
@@ -589,6 +593,6 @@ void XArmAPI::_handle_report_rich_data(void) {
       }
     }
   }
-  XARM_LOG_INFO("xarm report thread is quit.\n");
+  XARM_LOG_INFO("xarm report rich thread is quit.\n");
   _request_shutdown_from_report_thread();
 }

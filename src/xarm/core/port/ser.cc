@@ -169,7 +169,7 @@ int SerialPort::_write_char(unsigned char ch) {
 int SerialPort::write_frame(unsigned char *data, int len) {
   try {
     std::string str_data(reinterpret_cast<const char *>(data), len);
-    int size = ser->write(str_data);
+    size_t size = ser->write(str_data);
     if (size != len) { return -1; }
     return 0;
   }

@@ -77,7 +77,7 @@ public:
   static const unsigned char GET_SAFE_LEVEL = 57;
 
   static const unsigned char SET_REDUCED_JRANGE = 58;
-  static const unsigned char SET_FENSE_ON = 59;
+  static const unsigned char SET_FENCE_ON = 59;
   static const unsigned char SET_COLLIS_REB = 60;
 
   static const unsigned char SET_TRAJ_RECORD = 61;

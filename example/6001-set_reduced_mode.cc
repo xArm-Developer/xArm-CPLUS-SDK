@@ -37,11 +37,11 @@ int main(int argc, char **argv) {
   ret = arm->set_reduced_mode(true);
   printf("set_reduced_mode, ret=%d\n", ret);
 
-  // int reduced_is_on, fense_is_on, rebound_is_on;
+  // int reduced_is_on, fence_is_on, rebound_is_on;
   // int xyz_limit[6];
   // float tcp_speed, joint_speed;
   // float jrange[14];
-  // ret = arm->get_reduced_states(&reduced_is_on, xyz_limit, &tcp_speed, &joint_speed, jrange, &fense_is_on, &rebound_is_on);
+  // ret = arm->get_reduced_states(&reduced_is_on, xyz_limit, &tcp_speed, &joint_speed, jrange, &fence_is_on, &rebound_is_on);
   // printf("get_reduced_states, ret=%d\n", ret);
   // printf("* reduced_is_on: %d\n", reduced_is_on);
   // printf("* max_tcp_speed: %f\n", tcp_speed);

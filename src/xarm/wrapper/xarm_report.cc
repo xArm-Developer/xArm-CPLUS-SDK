@@ -385,10 +385,10 @@ void XArmAPI::_update(unsigned char *rx_data) {
       cgpio_input_digitals[1] = report_rich_data_ptr_->cgpio_input_digitals[1];
       cgpio_output_digitals[0] = report_rich_data_ptr_->cgpio_output_digitals[0];
       cgpio_output_digitals[1] = report_rich_data_ptr_->cgpio_output_digitals[1];
-      cgpio_intput_anglogs[0] = report_rich_data_ptr_->cgpio_input_analogs[0];
-      cgpio_intput_anglogs[1] = report_rich_data_ptr_->cgpio_input_analogs[1];
-      cgpio_output_anglogs[0] = report_rich_data_ptr_->cgpio_output_analogs[0];
-      cgpio_output_anglogs[1] = report_rich_data_ptr_->cgpio_output_analogs[1];
+      cgpio_input_analogs[0] = report_rich_data_ptr_->cgpio_input_analogs[0];
+      cgpio_input_analogs[1] = report_rich_data_ptr_->cgpio_input_analogs[1];
+      cgpio_output_analogs[0] = report_rich_data_ptr_->cgpio_output_analogs[0];
+      cgpio_output_analogs[1] = report_rich_data_ptr_->cgpio_output_analogs[1];
       for (int i = 0; i < 16; i++) {
         cgpio_input_conf[i] = report_rich_data_ptr_->cgpio_input_conf[i];
         cgpio_output_conf[i] = report_rich_data_ptr_->cgpio_output_conf[i];

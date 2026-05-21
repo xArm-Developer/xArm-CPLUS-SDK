@@ -58,7 +58,7 @@
 - 131: (standard modbus tcp)exception of requested data
 
 ## Controller Warn Code
-- 11: uxbux que is full
+- 11: uxbus queue is full
 - 12: parameter error
 - 13: the instruction does not exist
 - 14: command has no solution
@@ -169,7 +169,7 @@
 - 35: Linear Motor type error
 - 36: Linear Motor Driver Type Error
 - 39: Linear Motor over voltage
-- 40: Linear Moter undervoltage
+- 40: Linear Motor undervoltage
 - 49: Linear Motor EEPROM Read and Write Error
   
 ## Six-axis Force Torque Sensor Error Code
@@ -178,7 +178,7 @@
 - 65: The Data Collected by the Six-axis Force Torque Sensor is Abnormal
 - 66: Six-axis Force Torque Sensor X-direction Torque Exceeds Limit
 - 67: Six-axis Force Torque Sensor Y-direction Torque Exceeds Limit
-- 68: Six-axis Force Torque Sensor Z-direction Torque Exceeds Limitrection
+- 68: Six-axis Force Torque Sensor Z-direction Torque Exceeds Limit
 - 69: Six-axis Force Torque Sensor Tx Torque Exceeds Limit
 - 70: Six-axis Force Torque Sensor Ty direction Torque Exceeds Limit
 - 71: Six-axis Force Torque Sensor Tz direction Torque Exceeds Limit

@@ -331,7 +331,7 @@ int UxbusCmd::get_reduced_mode(int *rx_data) {
   return _get_nu8(UXBUS_RG::GET_REDUCED_MODE, rx_data, 1);
 }
 
-int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14], int *fense_is_on, int *collision_rebound_is_on, int length) {
+int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14], int *fence_is_on, int *collision_rebound_is_on, int length) {
   std::vector<unsigned char> rx_data(length, 0);
   int ret = _get_nu8(UXBUS_RG::GET_REDUCED_STATE, rx_data.data(), length);
   *on = rx_data[0];
@@ -340,7 +340,7 @@ int UxbusCmd::get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, flo
   *joint_speed = hex_to_fp32(rx_data.data() + 17);
   if (length == 79) {
     if (jrange_rad != nullptr) { hex_to_nfp32(rx_data.data() + 21, jrange_rad, 14); }
-    if (fense_is_on != nullptr) { *fense_is_on = rx_data[77]; }
+    if (fence_is_on != nullptr) { *fence_is_on = rx_data[77]; }
     if (collision_rebound_is_on != nullptr) { *collision_rebound_is_on = rx_data[78]; }
   }
   return ret;
@@ -366,9 +366,9 @@ int UxbusCmd::set_reduced_jrange(float jrange_rad[14]) {
   return _set_nfp32(UXBUS_RG::SET_REDUCED_JRANGE, jrange_rad, 14);
 }
 
-int UxbusCmd::set_fense_on(int on_off) {
+int UxbusCmd::set_fence_on(int on_off) {
   int txdata[1] = { on_off };
-  return _set_nu8(UXBUS_RG::SET_FENSE_ON, txdata, 1);
+  return _set_nu8(UXBUS_RG::SET_FENCE_ON, txdata, 1);
 }
 
 int UxbusCmd::set_collis_reb(int on_off) {

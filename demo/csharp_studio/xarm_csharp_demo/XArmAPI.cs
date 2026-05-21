@@ -189,13 +189,13 @@ namespace xarm_csharp_demo
         [DllImport("xarm.dll")]
         public static extern int get_reduced_mode(ref int mode, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int get_reduced_states(ref int on, int[] xyz_list, ref float tcp_speed, ref float joint_speed, float[] jrange, ref int fense_is_on, ref int collision_rebound_is_on, int instance_id = -1);
+        public static extern int get_reduced_states(ref int on, int[] xyz_list, ref float tcp_speed, ref float joint_speed, float[] jrange, ref int fence_is_on, ref int collision_rebound_is_on, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_reduced_tcp_boundary(int[] boundary, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_reduced_joint_range(float[] jrange, int instance_id = -1);
         [DllImport("xarm.dll")]
-        public static extern int set_fense_mode(bool on, int instance_id = -1);
+        public static extern int set_fence_mode(bool on, int instance_id = -1);
         [DllImport("xarm.dll")]
         public static extern int set_collision_rebound(bool on, int instance_id = -1);
         [DllImport("xarm.dll")]

@@ -199,8 +199,8 @@ void XArmAPI::_init(void) {
   cgpio_code = 0;
   std::fill(cgpio_input_digitals, cgpio_input_digitals + 2, 0);
   std::fill(cgpio_output_digitals, cgpio_output_digitals + 2, 0);
-  std::fill(cgpio_intput_anglogs, cgpio_intput_anglogs + 2, 0);
-  std::fill(cgpio_output_anglogs, cgpio_output_anglogs + 2, 0);
+  std::fill(cgpio_input_analogs, cgpio_input_analogs + 2, 0);
+  std::fill(cgpio_output_analogs, cgpio_output_analogs + 2, 0);
   std::fill(cgpio_input_conf, cgpio_input_conf + 16, 0);
   std::fill(cgpio_output_conf, cgpio_output_conf + 16, 0);
   cmd_timeout_ = -1;

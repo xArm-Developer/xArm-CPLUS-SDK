@@ -137,9 +137,9 @@ int XArmAPI::get_reduced_mode(int *mode) {
   return core->get_reduced_mode(mode);
 }
 
-int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14], int *fense_is_on, int *collision_rebound_is_on) {
+int XArmAPI::get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14], int *fence_is_on, int *collision_rebound_is_on) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  int ret = core->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fense_is_on, collision_rebound_is_on, _version_is_ge() ? 79 : 21);
+  int ret = core->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fence_is_on, collision_rebound_is_on, _version_is_ge() ? 79 : 21);
   if (!default_is_radian) {
     *joint_speed = to_degree(*joint_speed);
   }
@@ -185,7 +185,7 @@ int XArmAPI::set_reduced_joint_range(float jrange[14]) {
 
 int XArmAPI::set_fence_mode(bool on) {
   if (!is_connected()) return API_CODE::NOT_CONNECTED;
-  return core->set_fense_on(int(on));
+  return core->set_fence_on(int(on));
 }
 
 int XArmAPI::set_collision_rebound(bool on) {

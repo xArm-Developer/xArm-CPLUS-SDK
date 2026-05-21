@@ -11,9 +11,10 @@
 - Protect the arm before unlocking the motor.
 
 ## Update Summary
-- > ### 1.18.0 
+- > ### 1.18.0/1.18.1 
   - Strengthen the code, fix some hidden bugs, and eliminate security risks.
   - Supports CMake compilation
+  - Fix document errors and variable name errors
 
 - > ### 1.17.0/1.17.1 
   - Change some API names
@@ -324,7 +325,7 @@ sudo make uninstall
 
 - ##### [5005-get_cgpio_digital_analog](example/5005-get_cgpio_digital_analog.cc)
 
-- ##### [5006-set_cgpio_dialog_analog](example/5006-set_cgpio_digital_analog.cc)
+- ##### [5006-set_cgpio_digital_analog](example/5006-set_cgpio_digital_analog.cc)
 
 - ##### [5008-get_cgpio_state](example/5008-get_cgpio_state.cc)
 

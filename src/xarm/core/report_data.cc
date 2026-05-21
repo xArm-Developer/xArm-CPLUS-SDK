@@ -338,7 +338,7 @@ XArmReportData::XArmReportData(std::string report_type_)
   memset(reduced_tcp_boundary, 0, sizeof(reduced_tcp_boundary));
   reduced_max_tcp_speed = 0.0f;
   reduced_max_joint_spped = 0.0f;
-  reduced_joint_limits[14];
+  memset(reduced_joint_limits, 0, sizeof(reduced_joint_limits));
   is_fence_mode = false;
   is_collision_rebound = false;
   cgpio_alarm_code = 0;

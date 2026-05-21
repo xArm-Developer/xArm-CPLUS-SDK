@@ -404,9 +404,9 @@ namespace xarm_csharp_demo
             return XArmAPI.get_reduced_mode(ref mode, robot_instance_id);
         }
 
-        public int get_reduced_states(ref int on, int[] xyz_list, ref float tcp_speed, ref float joint_speed, float[] jrange, ref int fense_is_on, ref int collision_rebound_is_on)
+        public int get_reduced_states(ref int on, int[] xyz_list, ref float tcp_speed, ref float joint_speed, float[] jrange, ref int fence_is_on, ref int collision_rebound_is_on)
         {
-            return XArmAPI.get_reduced_states(ref on, xyz_list, ref tcp_speed, ref joint_speed, jrange, ref fense_is_on, ref collision_rebound_is_on, robot_instance_id);
+            return XArmAPI.get_reduced_states(ref on, xyz_list, ref tcp_speed, ref joint_speed, jrange, ref fence_is_on, ref collision_rebound_is_on, robot_instance_id);
         }
 
         public int set_reduced_tcp_boundary(int[] boundary)
@@ -419,9 +419,9 @@ namespace xarm_csharp_demo
             return XArmAPI.set_reduced_joint_range(jrange, robot_instance_id);
         }
 
-        public int set_fense_mode(bool on)
+        public int set_fence_mode(bool on)
         {
-            return XArmAPI.set_fense_mode(on, robot_instance_id);
+            return XArmAPI.set_fence_mode(on, robot_instance_id);
         }
 
         public int set_collision_rebound(bool on)

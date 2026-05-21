@@ -108,7 +108,7 @@ namespace XArmWrapper {
   extern "C" __declspec(dllexport) int __stdcall set_reduced_max_tcp_speed(float speed, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_reduced_max_joint_speed(float speed, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall get_reduced_mode(int *mode, int instance_id = -1);
-  extern "C" __declspec(dllexport) int __stdcall get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14] = nullptr, int *fense_is_on = nullptr, int *collision_rebound_is_on = nullptr, int instance_id = -1);
+  extern "C" __declspec(dllexport) int __stdcall get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14] = nullptr, int *fence_is_on = nullptr, int *collision_rebound_is_on = nullptr, int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_reduced_tcp_boundary(int boundary[6], int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_reduced_joint_range(float jrange[14], int instance_id = -1);
   extern "C" __declspec(dllexport) int __stdcall set_fense_mode(bool on, int instance_id = -1);

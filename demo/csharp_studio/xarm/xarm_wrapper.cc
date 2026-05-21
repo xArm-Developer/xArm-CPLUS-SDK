@@ -310,8 +310,8 @@ namespace XArmWrapper
   int __stdcall get_reduced_mode(int *mode, int instance_id) {
     return get_instance(instance_id)->get_reduced_mode(mode);
   }
-  int __stdcall get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14], int *fense_is_on, int *collision_rebound_is_on, int instance_id) {
-    return get_instance(instance_id)->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fense_is_on, collision_rebound_is_on);
+  int __stdcall get_reduced_states(int *on, int *xyz_list, float *tcp_speed, float *joint_speed, float jrange[14], int *fence_is_on, int *collision_rebound_is_on, int instance_id) {
+    return get_instance(instance_id)->get_reduced_states(on, xyz_list, tcp_speed, joint_speed, jrange, fence_is_on, collision_rebound_is_on);
   }
   int __stdcall set_reduced_tcp_boundary(int boundary[6], int instance_id) {
     return get_instance(instance_id)->set_reduced_tcp_boundary(boundary);
@@ -320,7 +320,7 @@ namespace XArmWrapper
     return get_instance(instance_id)->set_reduced_joint_range(jrange);
   }
   int __stdcall set_fense_mode(bool on, int instance_id) {
-    return get_instance(instance_id)->set_fense_mode(on);
+    return get_instance(instance_id)->set_fence_mode(on);
   }
   int __stdcall set_fence_mode(bool on, int instance_id) {
     return get_instance(instance_id)->set_fence_mode(on);

@@ -104,13 +104,13 @@ public:
   int set_reduced_linespeed(float lspd_mm);
   int set_reduced_jointspeed(float jspd_rad);
   int get_reduced_mode(int *rx_data);
-  int get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14] = nullptr, int *fense_is_on = nullptr, int *collision_rebound_is_on = nullptr, int length = 21);
+  int get_reduced_states(int *on, int xyz_list[6], float *tcp_speed, float *joint_speed, float jrange_rad[14] = nullptr, int *fence_is_on = nullptr, int *collision_rebound_is_on = nullptr, int length = 21);
   int set_xyz_limits(int xyz_list[6]);
   int set_world_offset(float pose_offset[6]);
   int cnter_reset(void);
   int cnter_plus(void);
   int set_reduced_jrange(float jrange_rad[14]);
-  int set_fense_on(int on_off);
+  int set_fence_on(int on_off);
   int set_collis_reb(int on_off);
   int motion_en(int id, int value);
   int set_state(int value);

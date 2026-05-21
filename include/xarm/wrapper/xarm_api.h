@@ -157,11 +157,25 @@ public:
   fp32 realtime_tcp_speed;
   fp32 realtime_joint_speeds[7];
 
+  int reduced_tcp_boundary[6];
+  fp32 reduced_max_tcp_speed;
+  fp32 reduced_max_joint_spped;
+  fp32 reduced_joint_limits[14];
+
   bool is_reduced_mode;
   bool is_fence_mode;
   bool is_report_current;
   bool is_approx_motion;
   bool is_cart_continuous;
+  bool is_collision_rebound;
+  bool ft_sensor_is_enable;
+
+  int cgpio_alarm_code;
+  int monitor_device_type;
+  int monitor_device_state;
+  int monitor_device_pos;
+  int monitor_device_speed;
+  int monitor_device_current;
 
   fp32 world_offset[6]; // fp32[6]{x, y, z, roll, pitch, yaw}
   fp32 temperatures[7];

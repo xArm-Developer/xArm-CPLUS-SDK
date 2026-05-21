@@ -228,11 +228,25 @@ void XArmAPI::_init(void) {
   only_check_result = 0;
   support_feedback_ = false;
 
+  reduced_max_tcp_speed = 0.0f;
+  reduced_max_joint_spped = 0.0f;
+  std::fill(reduced_tcp_boundary, reduced_tcp_boundary + 6, 0);
+  std::fill(reduced_joint_limits, reduced_joint_limits + 14, 0);
+
   is_reduced_mode = false;
   is_fence_mode = false;
   is_report_current = false;
   is_approx_motion = false;
   is_cart_continuous = false;
+  is_collision_rebound = false;
+  ft_sensor_is_enable = false;
+
+  cgpio_alarm_code = 0;
+  monitor_device_type = 0;
+  monitor_device_state = 0;
+  monitor_device_pos = 0;
+  monitor_device_speed = 0;
+  monitor_device_current = 0;
 
   report_rich_data_ptr_ = std::make_shared<XArmReportData>("rich");
   if (report_type_ != "rich") {
@@ -811,7 +825,7 @@ int XArmAPI::get_joint_states(fp32 jposition[7], fp32 velocity[7], fp32 effort[7
     for (int i = 0; i < 7; i++) {
       if (!default_is_radian) {
         jposition[i] = to_degree(jposition[i]);
-        if (num >= 2)
+        if (count >= 2)
           velocity[i] = to_degree(velocity[i]);
       }
     }

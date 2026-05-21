@@ -224,7 +224,21 @@ public:
 
   float pose_aa[6];
 
-  unsigned char switch_status;
+  unsigned char configuration_switch;
+  bool is_reduced_mode;
+  int reduced_tcp_boundary[6];
+  float reduced_max_tcp_speed;
+  float reduced_max_joint_spped;
+  float reduced_joint_limits[14];
+  bool is_fence_mode;
+  bool is_collision_rebound;
+  int cgpio_alarm_code;
+  unsigned char status_switch;
+  unsigned char monitor_device_type;
+  unsigned char monitor_device_state;
+  int monitor_device_pos;
+  int monitor_device_speed;
+  int monitor_device_current;
 
   int debug_size;
   // unsigned char *debug_data;

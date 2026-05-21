@@ -413,11 +413,28 @@ void XArmAPI::_update(unsigned char *rx_data) {
       }
     }
     if (sizeof_data >= 495) {
-      is_reduced_mode = (report_rich_data_ptr_->switch_status & 0x01) != 0;
-      is_fence_mode = ((report_rich_data_ptr_->switch_status >> 1) & 0x01) != 0;
-      is_report_current = ((report_rich_data_ptr_->switch_status >> 2) & 0x01) != 0;
-      is_approx_motion = ((report_rich_data_ptr_->switch_status >> 3) & 0x01) != 0;
-      is_cart_continuous = ((report_rich_data_ptr_->switch_status >> 4) & 0x01) != 0;
+      is_reduced_mode = (report_rich_data_ptr_->configuration_switch & 0x01) != 0;
+      is_fence_mode = ((report_rich_data_ptr_->configuration_switch >> 1) & 0x01) != 0;
+      is_report_current = ((report_rich_data_ptr_->configuration_switch >> 2) & 0x01) != 0;
+      is_approx_motion = ((report_rich_data_ptr_->configuration_switch >> 3) & 0x01) != 0;
+      is_cart_continuous = ((report_rich_data_ptr_->configuration_switch >> 4) & 0x01) != 0;
+    }
+    if (sizeof_data >= 574) {
+      is_reduced_mode = report_rich_data_ptr_->is_reduced_mode;
+      is_fence_mode = report_data_ptr_->is_fence_mode;
+      is_collision_rebound = report_data_ptr_->is_collision_rebound;
+      reduced_max_tcp_speed = report_data_ptr_->reduced_max_tcp_speed;
+      reduced_max_joint_spped = report_data_ptr_->reduced_max_joint_spped;
+      memcpy(reduced_tcp_boundary, report_rich_data_ptr_->reduced_tcp_boundary, sizeof(report_rich_data_ptr_->reduced_tcp_boundary));
+      memcpy(reduced_joint_limits, report_rich_data_ptr_->reduced_joint_limits, sizeof(report_rich_data_ptr_->reduced_joint_limits));
+    }
+    if (sizeof_data >= 587) {
+      cgpio_alarm_code = report_data_ptr_->cgpio_alarm_code;
+      monitor_device_type = report_data_ptr_->monitor_device_type;
+      monitor_device_state = report_data_ptr_->monitor_device_state;
+      monitor_device_pos = report_data_ptr_->monitor_device_pos;
+      monitor_device_speed = report_data_ptr_->monitor_device_speed;
+      monitor_device_current = report_data_ptr_->monitor_device_current;
     }
   }
 }

@@ -333,7 +333,21 @@ XArmReportData::XArmReportData(std::string report_type_)
 
   memset(pose_aa, 0, sizeof(pose_aa));
 
-  switch_status = 0;
+  configuration_switch = 0;
+  is_reduced_mode = false;
+  memset(reduced_tcp_boundary, 0, sizeof(reduced_tcp_boundary));
+  reduced_max_tcp_speed = 0.0f;
+  reduced_max_joint_spped = 0.0f;
+  reduced_joint_limits[14];
+  is_fence_mode = false;
+  is_collision_rebound = false;
+  cgpio_alarm_code = 0;
+  status_switch = 0;
+  monitor_device_type = 0;
+  monitor_device_state = 0;
+  monitor_device_pos = 0;
+  monitor_device_speed = 0;
+  monitor_device_current = 0;
 
   // debug_data = nullptr;
   debug_size = 0;
@@ -519,9 +533,28 @@ int XArmReportData::_flush_rich_data(unsigned char *rx_data)
       hex_to_nfp32(&data_fp[482], pose_aa, 3);
     }
     if (total_num >= 495) {
-      switch_status = data_fp[494];
+      configuration_switch = data_fp[494];
     }
-    __flush_debug_data(495);
+    if (total_num >= 574) {
+      is_reduced_mode = data_fp[495] == 1;
+      bin8_to_ns16(&data_fp[496], reduced_tcp_boundary, 6);
+      reduced_max_tcp_speed = hex_to_fp32(&data_fp[508]);
+      reduced_max_joint_spped = hex_to_fp32(&data_fp[512]);
+      hex_to_nfp32(&data_fp[516], reduced_joint_limits, 14);
+      is_fence_mode = data_fp[572] == 1;
+      is_collision_rebound = data_fp[573] == 1;
+    }
+    if (total_num >= 587) {
+      cgpio_alarm_code = bin8_to_32(&data_fp[574]);
+      status_switch = data_fp[578];
+      monitor_device_type = data_fp[579];
+      monitor_device_state = data_fp[580];
+      monitor_device_pos = bin8_to_s16(&data_fp[581]);
+      monitor_device_speed = bin8_to_s16(&data_fp[583]);
+      monitor_device_current = bin8_to_s16(&data_fp[585]);
+    }
+
+    __flush_debug_data(587);
   }
   return ret;
 }

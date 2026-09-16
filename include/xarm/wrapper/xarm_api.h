@@ -1241,6 +1241,8 @@ public:
    */
   int get_servo_version(unsigned char versions[3], int servo_id = 1);
 
+  int clean_servo_error(int servo_id = 1);
+
   /**
    * @brief Get tool gpio version, only for debug
    * 

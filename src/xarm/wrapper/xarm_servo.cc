@@ -28,3 +28,10 @@ int XArmAPI::get_servo_version(unsigned char versions[3], int servo_id) {
   else { code = ret3; }
   return code;
 }
+
+int XArmAPI::clean_servo_error(int servo_id)
+{
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
+  int ret = core->servo_addr_w16(servo_id, SERVO3_RG::RESET_ERR, 1);
+  return _check_code(ret);
+}

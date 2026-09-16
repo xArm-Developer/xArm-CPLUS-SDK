@@ -25,17 +25,17 @@ int XArmAPI::get_gripper_version(unsigned char versions[3]) {
   ret3 = _check_modbus_code(ret3);
   if (ret1 == 0) { 
     versions[0] = (unsigned char)bin8_to_16(&val1[4]); 
-    xarm_gripper_versions_[0] = version[0];
+    xarm_gripper_versions_[0] = versions[0];
   }
   else { code = ret1; }
   if (ret2 == 0) { 
     versions[1] = (unsigned char)bin8_to_16(&val2[4]);
-    xarm_gripper_versions_[1] = version[1];
+    xarm_gripper_versions_[1] = versions[1];
   }
   else { code = ret2; }
   if (ret3 == 0) { 
     versions[2] = (unsigned char)bin8_to_16(&val3[4]);
-    xarm_gripper_versions_[2] = version[2];
+    xarm_gripper_versions_[2] = versions[2];
   }
   else { code = ret3; }
   return code;

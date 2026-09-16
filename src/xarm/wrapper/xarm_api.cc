@@ -620,6 +620,7 @@ void XArmAPI::_init_threads()
 
 int XArmAPI::connect(const std::string &port) {
   if (is_connected()) return 0;
+  is_shutdown_ = false;  // reset so the report/feedback threads can run after a reconnect
   if (port != "" && port != port_) {
     port_ = port;
   }
@@ -726,9 +727,12 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
   int ret = core->get_robot_sn((unsigned char*)str);
   ret = _check_code(ret);
   if (ret == 0) {
+    str[39] = '\0';  // guarantee NUL-termination even if all 40 bytes are used
     int arm_type = 0;
     int control_type = 0;
-    char *control_box_sn = strchr(str, '\0') + 1;
+    // the SN is two NUL-separated parts: arm SN + control box SN
+    char *sep = strchr(str, '\0');
+    char *control_box_sn = (sep != nullptr && sep - str < 39) ? sep + 1 : str + 39;
     if (strlen(str) >= 6)
       sscanf(std::string(str).substr(2, 4).c_str(), "%d", &arm_type);
     if (strlen(control_box_sn) >= 6)
@@ -736,7 +740,7 @@ int XArmAPI::get_robot_sn(unsigned char robot_sn[40]) {
     arm_type_is_1300_ = arm_type >= 1300;
     control_box_type_is_1300_ = control_type >= 1300;
     memcpy(robot_sn, str, 14);
-    memcpy(sn, robot_sn, 40);
+    memcpy(sn, str, 40);
   }
   return ret;
 }

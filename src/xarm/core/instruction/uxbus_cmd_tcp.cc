@@ -119,10 +119,17 @@ int UxbusCmdTcp::_recv_modbus_response(unsigned char t_unit_id, unsigned short t
     if (prot_id != STANDARD_MODBUS_TCP_PROTOCOL) {
       // Private Modbus TCP Protocol
       code = _check_private_protocol(data);
-      length = bin8_to_16(&data[4]) - 2;
-      for (size_t i = 0; i < length; i++) {
-        if (ret_len >= 0 && i >= ret_len) break;
-        ret_data[i] = data[i + 8];
+      unsigned short mbap_length = bin8_to_16(&data[4]);
+      // guard against unsigned underflow (declared length 0/1)
+      if (mbap_length < 2) { ret = UXBUS_STATE::ERR_LENG; break; }
+      length = mbap_length - 2;
+      // recv_proc guarantees a complete frame, so the payload holds exactly
+      // `length` bytes; ret_len bounds the caller's buffer
+      if (ret_data != nullptr) {
+        for (size_t i = 0; i < length; i++) {
+          if (i >= ret_len) break;
+          ret_data[i] = data[i + 8];
+        }
       }
       ret = code;
       break;
@@ -130,9 +137,11 @@ int UxbusCmdTcp::_recv_modbus_response(unsigned char t_unit_id, unsigned short t
     else {
       // Standard Modbus TCP Protocol
       length = bin8_to_16(&data[4]) + 6;
-      for (size_t i = 0; i < length; i++) {
-        if (ret_len >= 0 && i >= ret_len) break;
-        ret_data[i] = data[i];
+      if (ret_data != nullptr) {
+        for (size_t i = 0; i < length; i++) {
+          if (i >= ret_len) break;
+          ret_data[i] = data[i];
+        }
       }
       ret = code;
       break;

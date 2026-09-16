@@ -182,7 +182,7 @@ public:
 
   int set_modbus_timeout(int value, bool is_transparent_transmission = false);
   int set_modbus_baudrate(int baud);
-  int tgpio_set_modbus(unsigned char *send_data, int length, unsigned char *recv_data, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID, float limit_sec = 0.0, bool is_transparent_transmission = false);
+  int tgpio_set_modbus(unsigned char *send_data, int length, unsigned char *recv_data, int recv_length, unsigned char host_id = UXBUS_CONF::ROBOT_RS485_HOST_ID, float limit_sec = 0.0, bool is_transparent_transmission = false);
   int gripper_modbus_w16s(int addr, int value, int count);
   int gripper_modbus_r16s(int addr, int count, unsigned char *rx_data);
   int gripper_modbus_set_en(int value);
@@ -345,7 +345,7 @@ public:
   bool state_is_ready;
   long long last_recv_ms;
 
-  std::function<int (unsigned char *, int, unsigned char *, unsigned char, float, bool)> tgpio_set_modbus_func;
+  std::function<int (unsigned char *, int, unsigned char *, int, unsigned char, float, bool)> tgpio_set_modbus_func;
 
 protected:
   std::mutex mutex_;

@@ -110,7 +110,7 @@ int XArmAPI::_wait_traj_op(fp32 timeout, int trans_id, std::string filename, std
     if (code == 0) {
       int success_status = op == "Load" ? TRAJ_STATE::LOAD_SUCCESS : TRAJ_STATE::SAVE_SUCCESS; 
       int failure_status = op == "Load" ? TRAJ_STATE::LOAD_FAIL : TRAJ_STATE::SAVE_FAIL;
-      status = feedback_code == FeedbackCode::SUCCESS ? success_status : FeedbackCode::FAILURE ? failure_status : status;
+      status = feedback_code == FeedbackCode::SUCCESS ? success_status : feedback_code == FeedbackCode::FAILURE ? failure_status : status;
     }
     return _check_traj_status(status);
   }

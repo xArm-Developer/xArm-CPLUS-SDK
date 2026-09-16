@@ -16,6 +16,7 @@
 #include <thread>
 #include <memory>
 #include <string>
+#include <vector>
 #include <atomic>
 #include <mutex>
 #include "serial/serial.h"
@@ -70,7 +71,7 @@ private:
 
   int rx_data_idx_;
   int rx_state_;
-  unsigned char rx_buf_[128];
+  std::vector<unsigned char> rx_buf_;  // sized by que_maxlen, see constructor
   int rx_length_;
 };
 

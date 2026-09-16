@@ -61,7 +61,11 @@ int UxbusCmdSer::_recv_modbus_response(unsigned char t_unit_id, unsigned short t
       continue;
     }
     ret = _check_private_protocol(rx_data.data());
-    for (int i = 0; i < ret_len; i++) { ret_data[i] = rx_data[i + 4]; }
+    // rx_data[2] is the frame data length (state byte + payload), clamp the
+    // copy to the payload actually received to avoid overrunning ret_data
+    int avail = rx_data[2] - 1;
+    if (avail < 0) avail = 0;
+    for (int i = 0; i < ret_len && i < avail; i++) { ret_data[i] = rx_data[i + 4]; }
     return ret;
   }
   return UXBUS_STATE::ERR_TOUT;

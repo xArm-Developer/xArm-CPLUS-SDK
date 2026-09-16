@@ -106,7 +106,10 @@ void SocketPort::recv_report_proc(void) {
         disconnect();
         break;
       }
-      if (size == 233) {
+      if (size == 233 && que_maxlen >= 249) {
+        // probe as 245 first (transitional firmware declares 233 but sends 245),
+        // the real size is confirmed when the frame completes; skip the probe
+        // if the buffer cannot hold 245 bytes (4 + 245 <= que_maxlen)
         size_is_not_confirm = true;
         size = 245;
       }
@@ -117,13 +120,29 @@ void SocketPort::recv_report_proc(void) {
       if (data_num < size) continue;
       if (size_is_not_confirm) {
         size_is_not_confirm = false;
-        if (que_maxlen >= 241 && bin8_to_32(recv_data.data() + 237) == 233) {
+        if (bin8_to_32(recv_data.data() + 237) == 233) {
+          // the real frame size is 233 (old firmware): 12 bytes of the next frame
+          // have been read ahead, deliver this frame first, then keep the rest
+          // as the head of the next frame (fixes recv with negative length)
           size = 233;
+          bin32_to_8(size, &recv_data[0]);
+          ret = rx_que_->push(recv_data.data(), true);
+          data_num -= size;
+          memmove(recv_data.data() + 4, recv_data.data() + 4 + size, data_num);
+          size = bin8_to_32(recv_data.data() + 4);
+          if (size <= 0 || size > que_maxlen - 4) {
+            XARM_LOG_ERROR("recv_report_proc: invalid report size %d (max %d), port=%d\n", size, que_maxlen - 4, sin_port_);
+            disconnect();
+            break;
+          }
           continue;
         }
+        // the real frame size is 245 while the declared size stays 233
+        // (transitional firmware), tolerate this combination below
       }
-      if (bin8_to_32(recv_data.data() + 4) != size && !(size_is_not_confirm && size == 245 && bin8_to_32(recv_data.data() + 4) == 233)) {
-        XARM_LOG_ERROR("report data error, disconnect, length=%d, size=%d\n", bin8_to_32(recv_data.data() + 4), size);
+      int declared_size = bin8_to_32(recv_data.data() + 4);
+      if (declared_size != size && !(declared_size == 233 && size == 245)) {
+        XARM_LOG_ERROR("report data error, disconnect, length=%d, size=%d\n", declared_size, size);
         disconnect();
         break;
       }
@@ -202,7 +221,7 @@ void SocketPort::recv_proc(void) {
       if (buf_len < 6) break;
       length = bin8_to_16(recv_buf.data() + buf_offset + 4) + 6;
       if (buf_len < length) break;
-      if (length > que_maxlen) {
+      if (length > que_maxlen - 4) {
         XARM_LOG_ERROR("recv_proc: frame length %d exceeds buffer %d, port=%d\n", length, que_maxlen, sin_port_);
         disconnect();
         break;

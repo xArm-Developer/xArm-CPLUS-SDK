@@ -142,6 +142,7 @@ int XArmAPI::get_cgpio_state(int *state_, int *digit_io, fp32 *analog, int *inpu
 
 
 int XArmAPI::get_vacuum_gripper(int *val, int hardware_version) {
+  if (!is_connected()) return API_CODE::NOT_CONNECTED;
   int tmp = 0;
   int ret = core->tgpio_addr_r16(0x0A18, &tmp);
 
@@ -280,7 +281,7 @@ int XArmAPI::_get_modbus_baudrate(int *baud_inx, unsigned char host_id) {
       }
       ret = (error_code != 100 + host_id) ? 0 : ret;
     }
-    ret = (error_code != 19 && error_code != 28) ? 0 : ret;
+    // ret = (error_code != 19 && error_code != 28) ? 0 : ret;
   }
   if (ret == 0 && *baud_inx >= 0 && *baud_inx < 13) {
     if (host_id == UXBUS_CONF::ROBOT_RS485_HOST_ID) {
@@ -423,13 +424,13 @@ int XArmAPI::set_rs485_use_503_port(bool use_503_port)
 {
   if (use_503_port) {
     if (!_is_connected_503() && _connect_503() != 0) {
-      core->tgpio_set_modbus_func = std::bind(&UxbusCmdTcp::tgpio_set_modbus, core, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+      core->tgpio_set_modbus_func = std::bind(&UxbusCmdTcp::tgpio_set_modbus, core, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
       return API_CODE::RET_IS_INVALID;
     }
-    core->tgpio_set_modbus_func = std::bind(&UxbusCmdTcp::tgpio_set_modbus, core503_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+    core->tgpio_set_modbus_func = std::bind(&UxbusCmdTcp::tgpio_set_modbus, core503_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
   }
   else {
-    core->tgpio_set_modbus_func = std::bind(&UxbusCmdTcp::tgpio_set_modbus, core, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+    core->tgpio_set_modbus_func = std::bind(&UxbusCmdTcp::tgpio_set_modbus, core, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
   }
   return 0;
 }
@@ -442,10 +443,10 @@ int XArmAPI::set_rs485_data(unsigned char *modbus_data, int modbus_length, unsig
     if (!_is_connected_503() && _connect_503() != 0) {
       return API_CODE::NOT_CONNECTED;
     }
-    ret = core503_->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data.data(), host_id, 0.0, is_transparent_transmission);
+    ret = core503_->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data.data(), (int)rx_data.size(), host_id, 0.0, is_transparent_transmission);
   }
   else {
-    ret = core->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data.data(), host_id, 0.0, is_transparent_transmission);
+    ret = core->tgpio_set_modbus_func(modbus_data, modbus_length, rx_data.data(), (int)rx_data.size(), host_id, 0.0, is_transparent_transmission);
   }
   ret = _check_modbus_code(ret, rx_data.data());
   memcpy(ret_data, rx_data.data() + 1, ret_length);

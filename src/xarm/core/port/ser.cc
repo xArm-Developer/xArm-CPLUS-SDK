@@ -58,6 +58,7 @@ SerialPort::SerialPort(const char *port, int baud, int que_num, int que_maxlen_)
   ser_baud_ = baud;
   que_num_ = que_num;
   que_maxlen = que_maxlen_;
+  rx_buf_.resize(que_maxlen_, 0);
   state_ = -1;
   rx_que_ = nullptr;
   UXBUS_PROT_FROMID_ = 0x55;
@@ -102,6 +103,7 @@ void SerialPort::disconnect()
 {
   std::unique_lock<std::mutex> lock(conn_mutex_);
   state_.store(-1, std::memory_order_release);
+  if (ser == nullptr) return;  // connect() may have failed before ser was created
   try {
     ser->close();
   } 
@@ -242,10 +244,10 @@ void SerialPort::_parse_put(unsigned char *data, int len) {
     case UXBUS_STATE_CRC2:
       int crc, crc_r;
       rx_buf_[rx_length_ + 4] = ch;
-      crc = modbus_crc(rx_buf_, rx_length_ + 3);
+      crc = modbus_crc(rx_buf_.data(), rx_length_ + 3);
       crc_r = (rx_buf_[rx_length_ + 4] << 8) + rx_buf_[rx_length_ + 3];
       if (crc == crc_r) {
-        rx_que_->push(rx_buf_);
+        rx_que_->push(rx_buf_.data());
       }
       rx_state_ = UXBUS_START_FROMID;
       break;

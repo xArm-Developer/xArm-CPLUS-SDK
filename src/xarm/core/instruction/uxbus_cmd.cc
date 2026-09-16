@@ -28,7 +28,7 @@ UxbusCmd::UxbusCmd(void) {
   last_recv_ms = get_system_time();
   has_feedback_key_transid_func_ = false;
   feedback_type_ = 0;
-  tgpio_set_modbus_func = std::bind(&UxbusCmd::tgpio_set_modbus, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+  tgpio_set_modbus_func = std::bind(&UxbusCmd::tgpio_set_modbus, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
 }
 
 UxbusCmd::UxbusCmd(std::function<void (std::string, int, unsigned char)> set_feedback_key_transid) {
@@ -38,7 +38,7 @@ UxbusCmd::UxbusCmd(std::function<void (std::string, int, unsigned char)> set_fee
   has_feedback_key_transid_func_ = true;
   set_feedback_key_transid_ = set_feedback_key_transid;
   feedback_type_ = 0;
-  tgpio_set_modbus_func = std::bind(&UxbusCmd::tgpio_set_modbus, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+  tgpio_set_modbus_func = std::bind(&UxbusCmd::tgpio_set_modbus, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
 }
 
 UxbusCmd::~UxbusCmd(void) {}
@@ -481,7 +481,7 @@ int UxbusCmd::move_lineb(float mvpose[6], float mvvelo, float mvacc, float mvtim
     }
     else {
       char additional[2] = { (char)only_check_type, (char)motion_type };
-      ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINE, txdata, 10, additional, 2, rx_data, 3, 10000);
+      ret = _set_nfp32_with_bytes(UXBUS_RG::MOVE_LINEB, txdata, 10, additional, 2, rx_data, 3, 10000);
     }
     if (ret == 0 && only_check_result != nullptr) *only_check_result = rx_data[2];
     return ret;
@@ -700,6 +700,8 @@ int UxbusCmd::get_joint_states(float position[7], float velocity[7], float effor
   float fp_tmp[21] = { 0 };
   unsigned char u8_tmp = num;
   num = num & 0x0F;
+  // fp_tmp holds at most 3 * 7 floats, clamp num to avoid stack overflow
+  num = num < 1 ? 1 : (num > 3 ? 3 : num);
   int ret = _get_nfp32_with_bytes(UXBUS_RG::GET_JOINT_POS, &u8_tmp, 1, fp_tmp, num * 7);
   memcpy(position, fp_tmp, sizeof(float) * 7);
   if (num >= 2 && velocity != nullptr)
@@ -837,7 +839,7 @@ int UxbusCmd::tgpio_addr_w16(int addr, float value, unsigned char host_id, char 
   for (int i = 0; i < add_len; i++) { txdata[7 + i] = add_data[i]; }
 
   std::lock_guard<std::mutex> locker(mutex_);
-  int ret = _send_modbus_request(UXBUS_RG::TGPIO_W16B, txdata.data(), 7);
+  int ret = _send_modbus_request(UXBUS_RG::TGPIO_W16B, txdata.data(), 7 + add_len);
   if (-1 == ret) { return UXBUS_STATE::ERR_NOTTCP; }
   return _recv_modbus_response(UXBUS_RG::TGPIO_W16B, ret, nullptr, 0, S_TOUT_);
 }
@@ -981,7 +983,7 @@ int UxbusCmd::set_modbus_baudrate(int baud) {
   return ret;
 }
 
-int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, unsigned char host_id, float limit_sec, bool is_transparent_transmission) {
+int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char *rx_data, int rx_len, unsigned char host_id, float limit_sec, bool is_transparent_transmission) {
   std::vector<unsigned char> txdata(len_t + 1, 0);
   txdata[0] = host_id;
   for (int i = 0; i < len_t; i++) { txdata[i + 1] = modbus_t[i]; }
@@ -998,7 +1000,7 @@ int UxbusCmd::tgpio_set_modbus(unsigned char *modbus_t, int len_t, unsigned char
     return UXBUS_STATE::ERR_NOTTCP;
   }
 
-  ret = _recv_modbus_response(is_transparent_transmission ? UXBUS_RG::RS485_AGENT : UXBUS_RG::RS485_RTU, ret, rx_data, -1, S_TOUT_);
+  ret = _recv_modbus_response(is_transparent_transmission ? UXBUS_RG::RS485_AGENT : UXBUS_RG::RS485_RTU, ret, rx_data, rx_len, S_TOUT_);
   last_modbus_comm_us_ = get_us();
   return ret;
 }
@@ -1016,7 +1018,7 @@ int UxbusCmd::gripper_modbus_w16s(int addr, int value, int count) {
   else // count == 2
     bin32_to_8(value, &txdata[7]);
   // fp32_to_hex(value, &txdata[7]);
-  int ret = tgpio_set_modbus_func(txdata, count * 2 + 7, rx_data, UXBUS_CONF::ROBOT_RS485_HOST_ID, 0.0, false);
+  int ret = tgpio_set_modbus_func(txdata, count * 2 + 7, rx_data, 254, UXBUS_CONF::ROBOT_RS485_HOST_ID, 0.0, false);
   return ret;
 }
 
@@ -1026,7 +1028,8 @@ int UxbusCmd::gripper_modbus_r16s(int addr, int count, unsigned char *rx_data) {
   txdata[1] = 0x03;
   bin16_to_8(addr, &txdata[2]);
   bin16_to_8(count, &txdata[4]);
-  int ret = tgpio_set_modbus_func(txdata, 6, rx_data, UXBUS_CONF::ROBOT_RS485_HOST_ID, 0.0, false);
+  // response of reading holding registers: unit_id + funcode + byte_count + 2 * count
+  int ret = tgpio_set_modbus_func(txdata, 6, rx_data, 3 + count * 2, UXBUS_CONF::ROBOT_RS485_HOST_ID, 0.0, false);
   return ret;
 }
 
@@ -1242,7 +1245,7 @@ int UxbusCmd::cgpio_set_outfun(int num, int fun) {
  */
 int UxbusCmd::cgpio_get_state(int *state, int *digit_io, float *analog, int *input_conf, int *output_conf, int *input_conf2, int *output_conf2) {
   unsigned char rx_data[50] = {0};
-  int ret = _get_nu8(UXBUS_RG::CGPIO_GET_STATE, rx_data, -1);
+  int ret = _get_nu8(UXBUS_RG::CGPIO_GET_STATE, rx_data, sizeof(rx_data));
 
   state[0] = rx_data[0];
   state[1] = rx_data[1];
@@ -1661,7 +1664,7 @@ int UxbusCmd::ft_sensor_get_config(int *ft_mode, int *ft_is_started, int *ft_typ
   float *ft_mass, float *ft_dir_bias, float ft_centroid[3], float ft_zero[6], int *imp_coord, int imp_c_axis[6], float M[6], float K[6], float B[6],
   int *f_coord, int f_c_axis[6], float f_ref[6], float f_limits[6], float kp[6], float ki[6], float kd[6], float xe_limit[6])
 {
-  unsigned char data[280];
+  unsigned char data[280] = {0};
   int ret = _get_nu8(UXBUS_RG::FTSENSOR_GET_CONFIG, data, 280);
   if (ft_mode != nullptr) *ft_mode = data[0];
   if (ft_is_started != nullptr) *ft_is_started = data[1];
@@ -1727,7 +1730,9 @@ int UxbusCmd::linear_motor_modbus_r16s(int addr, unsigned char *rx_data, int len
   txdata[1] = fcode;
   bin16_to_8(addr, &txdata[2]);
   bin16_to_8(len, &txdata[4]);
-  int ret = tgpio_set_modbus_func(txdata, 6, rx_data, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
+  // response: unit_id + funcode + byte_count + 2 * len for read (0x03/0x04), 6 bytes echo otherwise
+  int rx_cap = (fcode == 0x03 || fcode == 0x04) ? (3 + len * 2) : 6;
+  int ret = tgpio_set_modbus_func(txdata, 6, rx_data, rx_cap, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
   return ret;
 }
 
@@ -1740,7 +1745,8 @@ int UxbusCmd::linear_motor_modbus_w16s(int addr, unsigned char *send_data, int l
   bin16_to_8(len, txdata.data() + 4);
   txdata[6] = len * 2;
   memcpy(txdata.data() + 7, send_data, len * 2);
-  int ret = tgpio_set_modbus_func(txdata.data(), len * 2 + 7, rx_data, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
+  // response of writing multiple registers: unit_id + funcode + addr(2) + count(2)
+  int ret = tgpio_set_modbus_func(txdata.data(), len * 2 + 7, rx_data, 6, UXBUS_CONF::CONTROL_BOX_RS485_HOST_ID, (float)0.001, false);
   return ret;
 }
 
@@ -1955,7 +1961,7 @@ int UxbusCmd::get_c37_error_info(int *id, float *diff_angle)
 int UxbusCmd::get_c23_error_info(int *id, float *angle)
 {
   unsigned char send_data[1] = {103};
-  unsigned char rx_data[5] = {0};
+  unsigned char rx_data[29] = {0};
   int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 29);
   *id = rx_data[0];
   hex_to_nfp32(&rx_data[1], angle, 7);
@@ -1986,7 +1992,7 @@ int UxbusCmd::get_c60_error_info(float *max_velo, float *curr_velo)
 int UxbusCmd::get_c38_error_info(int *id, float *angle)
 {
   unsigned char send_data[1] = {106};
-  unsigned char rx_data[5] = {0};
+  unsigned char rx_data[29] = {0};
   int ret = _getset_nu8(UXBUS_RG::GET_COMMON_INFO, send_data, 1, rx_data, 29);
   *id = rx_data[0];
   hex_to_nfp32(&rx_data[1], angle, 7);

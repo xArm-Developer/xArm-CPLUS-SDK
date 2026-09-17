@@ -565,7 +565,7 @@ void XArmReportData::_print_rich_data(void)
   XARM_LOG_PURE("master_id = 0x%X, slave_id = 0x%X\n", master_id, slave_id);
   XARM_LOG_PURE("motor_tid = 0x%X, motor_fid = 0x%X\n", motor_tid, motor_fid);
 
-  XARM_LOG_PURE("versions = %s\n", versions);
+  XARM_LOG_PURE("versions = %.30s\n", versions);
   
   print_nvect("trs_msg = ", trs_msg_, 5);
   print_nvect("p2p_msg = ", p2p_msg_, 5);
@@ -674,6 +674,11 @@ int XArmReportData::__check_common_data(unsigned char *rx_data)
 {
   if (bin8_to_32(rx_data) < 87) return -1;
   if (bin8_to_32(&rx_data[4]) < 87) return -1;
+  // the self-declared data length must not exceed the actual received frame
+  // length (queue node prefix), otherwise the parser would read stale bytes
+  // of the previous frame. Note: transitional firmware legitimately declares
+  // 233 while the frame is 245, so only "declared > actual" is rejected.
+  if (bin8_to_32(&rx_data[4]) > bin8_to_32(rx_data)) return -1;
   return 0;
 }
 

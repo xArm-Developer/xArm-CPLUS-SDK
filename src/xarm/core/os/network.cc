@@ -129,7 +129,7 @@ int socket_init(const char *local_ip, const int port, int is_server) {
   int keepIdle = 1;      // If there is no data in n seconds, probe
   int keepInterval = 1;  // Detection interval,5 seconds
   int keepCount = 3;     // 3 detection attempts
-  struct timeval timeout = { 2, 0 };
+  DWORD timeout = 2000;  // SO_SNDTIMEO on Windows takes DWORD milliseconds, not struct timeval
 
   int ret =
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
@@ -162,7 +162,7 @@ int socket_init(const char *local_ip, const int port, int is_server) {
   PERRNO(ret, DB_FLG, "error: setsockopt");
   */
   ret = setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
-    sizeof(struct timeval));
+    sizeof(DWORD));
   PERRNO(ret, DB_FLG, "Error: setsockopt[SO_SNDTIMEO]");
 
   if (is_server) {
@@ -229,6 +229,11 @@ int socket_init(const char *local_ip, const int port, int is_server) {
   ret = setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
     sizeof(struct timeval));
   PERRNO(ret, DB_FLG, "Error: setsockopt[SO_SNDTIMEO]");
+#ifdef SO_NOSIGPIPE
+  // macOS has no MSG_NOSIGNAL, disable SIGPIPE at the socket level instead
+  ret = setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&on, sizeof(on));
+  PERRNO(ret, DB_FLG, "Error: setsockopt[SO_NOSIGPIPE]");
+#endif
 
   if (is_server) {
     struct sockaddr_in local_addr;
@@ -255,7 +260,12 @@ int socket_connect_server(int *socket, const char server_ip[], const int server_
 }
 
 int socket_send_data(int client_fp, unsigned char *data, int len) {
+#ifdef MSG_NOSIGNAL
+  // avoid SIGPIPE killing the whole process when the peer has closed
+  int ret = send(client_fp, (void *)data, len, MSG_NOSIGNAL);
+#else
   int ret = send(client_fp, (void *)data, len, 0);
+#endif
   PERRNO(ret, DB_FLG, "Error: socket_send_data");
   return ret;
 }

@@ -772,7 +772,7 @@ int XArmReportData::_flush_rich_data(XArmReportData *report_data_ptr)
   p2p_velomax = report_data_ptr->p2p_velomax;
   rot_jerk = report_data_ptr->rot_jerk;
   rot_accmax = report_data_ptr->rot_accmax;
-  memcpy(sv3msg, report_data_ptr->sv3msg, 16);
+  memcpy(sv3msg, report_data_ptr->sv3msg, sizeof(sv3msg));
 
   memcpy(temperatures, report_data_ptr->temperatures, sizeof(int) * 7);
   rt_tcp_spd = report_data_ptr->rt_tcp_spd;

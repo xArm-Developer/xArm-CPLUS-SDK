@@ -332,7 +332,7 @@ void XArmAPI::_update(unsigned char *rx_data) {
     rot_jerk = report_rich_data_ptr_->rot_jerk;
     max_rot_acc = report_rich_data_ptr_->rot_accmax;
 
-    memcpy(sv3msg_, report_rich_data_ptr_->sv3msg, 17);
+    memcpy(sv3msg_, report_rich_data_ptr_->sv3msg, sizeof(sv3msg_));
 
     if (sizeof_data >= 252) {
       bool isChange = false;
